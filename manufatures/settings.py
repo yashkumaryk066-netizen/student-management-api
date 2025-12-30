@@ -153,7 +153,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'  # Indian Standard Time
 
 USE_I18N = True
 
@@ -196,15 +196,8 @@ SWAGGER_SETTINGS = {
     },
 }
 
-# CORS Configuration for Frontend
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",  # Live Server
-    "http://localhost:5500",
-    "http://127.0.0.1:8080",
-    "http://localhost:8080",
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-]
-
+# CORS Configuration for Frontend (Development only - allow all origins)
+CORS_ALLOW_ALL_ORIGINS = True  # For development - allows file:// and any localhost
 CORS_ALLOW_CREDENTIALS = True
+
 
