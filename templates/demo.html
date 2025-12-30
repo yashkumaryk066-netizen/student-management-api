@@ -4,249 +4,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMS Product Tour - 3D Experience</title>
+    <title>Enterprise ERP Demo | Read-Only View</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/dashboard.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Visuals -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            overflow-x: hidden;
-            background: #0f172a;
-            color: white;
-        }
-
-        .demo-container {
-            max-width: 1200px;
+        /* Specific dense overrides for the demo to look data-heavy */
+        .dash-content {
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 40px 20px;
         }
 
-        .section-title {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 2rem;
-            background: linear-gradient(to right, #6366f1, #a855f7);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-        }
-
-        .mockup-window {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            margin-bottom: 80px;
-            overflow: hidden;
-            transform-style: preserve-3d;
-            transition: transform 0.5s ease;
-        }
-
-        .mockup-window:hover {
-            transform: translateY(-10px) rotateX(2deg);
-        }
-
-        .mockup-header {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .dot-red {
-            background: #ef4444;
-        }
-
-        .dot-yellow {
-            background: #f59e0b;
-        }
-
-        .dot-green {
-            background: #10b981;
-        }
-
-        .mockup-content {
-            padding: 0;
-            position: relative;
-            height: 500px;
-            overflow: hidden;
-        }
-
-        .feature-grid {
+        .grid-2 {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
         }
 
-        .feature-card {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 30px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .card-dense {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
         }
 
-        .feature-card h3 {
-            color: #818cf8;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
         }
 
-        .back-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            padding: 12px 25px;
-            background: #6366f1;
+        .card-title {
+            font-weight: 600;
             color: white;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+            font-size: 0.95rem;
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 5px;
+        }
+
+        .room-box {
+            aspect-ratio: 1;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            cursor: help;
+        }
+
+        .room-box.occupied {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #059669;
+            color: #10b981;
+        }
+
+        .room-box.maintenance {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #dc2626;
+            color: #f87171;
+        }
+
+        .schedule-row {
+            display: flex;
+            border-bottom: 1px solid #334155;
+        }
+
+        .schedule-time {
+            width: 80px;
+            padding: 10px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            border-right: 1px solid #334155;
+        }
+
+        .schedule-event {
+            flex: 1;
+            padding: 5px;
+        }
+
+        .class-block {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 3px solid #3b82f6;
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 2px;
         }
     </style>
 </head>
 
 <body>
-
-    <a href="/" class="back-btn">⚡ Login / Admin Access</a>
-
-    <div class="demo-container">
-
-        <div style="text-align: center; margin: 60px 0;">
-            <h1 style="font-size: 3.5rem; margin-bottom: 20px; color: white;">Experience the Future of EdTech</h1>
-            <p style="font-size: 1.2rem; color: #94a3b8; max-width: 800px; margin: 0 auto;">
-                A fully immersive, 3D-animated Institute Management System showing how modern glassmorphism and smooth
-                interactions create a premium user experience.
-            </p>
-        </div>
-
-        <h2 class="section-title">1. Central Command (Admin)</h2>
-        <div class="mockup-window">
-            <div class="mockup-header">
-                <div class="dot dot-red"></div>
-                <div class="dot dot-yellow"></div>
-                <div class="dot dot-green"></div>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="dash-sidebar">
+            <div class="dash-brand">
+                <span>🎓</span> NEXTGEN ERP
             </div>
-            <div class="mockup-content" style="background: #0f172a;">
-                <div style="display: flex; height: 100%;">
-                    <div
-                        style="width: 250px; background: rgba(30, 41, 59, 0.5); border-right: 1px solid rgba(255,255,255,0.1); padding: 20px;">
-                        <div style="margin-bottom: 30px; font-weight: bold; font-size: 1.2rem; color: white;">🎓 IMS
-                            Admin</div>
-                        <div
-                            style="color:#94a3b8; padding: 10px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; color: #818cf8;">
-                            📊 Dashboard</div>
-                        <div style="color:#94a3b8; padding: 10px; margin-top: 5px;">👥 Students</div>
-                        <div style="color:#94a3b8; padding: 10px;">💰 Finance</div>
-                    </div>
-                    <div style="flex: 1; padding: 30px;">
-                        <div
-                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2)); padding: 20px; border-radius: 12px; margin-bottom: 30px;">
-                            <h2 style="color: white; margin: 0;">Saraswati Institute of Technology</h2>
-                            <p style="color: #94a3b8; margin: 5px 0 0 0;">Administration Panel</p>
-                        </div>
 
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-                            <div
-                                style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                                <h3 style="color: #818cf8; font-size: 2rem; margin: 0;">1,250</h3>
-                                <p style="color: #94a3b8; margin: 5px 0 0 0;">Total Students</p>
-                            </div>
-                            <div
-                                style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                                <h3 style="color: #4ade80; font-size: 2rem; margin: 0;">₹45L</h3>
-                                <p style="color: #94a3b8; margin: 5px 0 0 0;">Revenue YTD</p>
-                            </div>
-                            <div
-                                style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                                <h3 style="color: #fbbf24; font-size: 2rem; margin: 0;">98%</h3>
-                                <p style="color: #94a3b8; margin: 5px 0 0 0;">Attendance</p>
-                            </div>
-                        </div>
+            <div class="dash-nav">
+                <a href="#" class="dash-item active">📊 Dashboard</a>
+
+                <div class="dash-category">ACADEMICS (SCHOOL/K-12)</div>
+                <a href="#" class="dash-item">👨‍🎓 Students (2,450)</a>
+                <a href="#" class="dash-item">🏫 Classes (1-12)</a>
+                <a href="#" class="dash-item">📝 Examinations</a>
+                <a href="#" class="dash-item">📅 Timetables</a>
+
+                <div class="dash-category">HIGHER ED (COLLEGE)</div>
+                <a href="#" class="dash-item">🏛️ Departments</a>
+                <a href="#" class="dash-item">🎓 Courses (B.Tech/MBA)</a>
+                <a href="#" class="dash-item">🔬 Lab Management</a>
+
+                <div class="dash-category">RESIDENTIAL</div>
+                <a href="#" class="dash-item">🏢 Hostels (Boys/Girls)</a>
+                <a href="#" class="dash-item">🍛 Mess & Dining</a>
+
+                <div class="dash-category">ADMINISTRATION</div>
+                <a href="#" class="dash-item">💰 Finance & Fees</a>
+                <a href="#" class="dash-item">🚌 Transport (GPS)</a>
+                <a href="#" class="dash-item">👥 HR & Payroll</a>
+            </div>
+
+            <div
+                style="margin-top: auto; padding: 15px; background: rgba(59,130,246,0.1); border-radius: 8px; border: 1px solid rgba(59,130,246,0.2);">
+                <div style="color: #60a5fa; font-size: 0.75rem; font-weight: 700;">DEMO MODE</div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Data is read-only.</div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dash-main">
+            <header class="dash-header">
+                <h2 style="font-size: 1.2rem; color: white;">Executive Overview</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div style="text-align: right;">
+                        <div style="color: white; font-weight: 600; font-size: 0.9rem;">Dr. Robert Admin</div>
+                        <div style="color: #94a3b8; font-size: 0.8rem;">Super Administrator</div>
+                    </div>
+                    <div
+                        style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                        RA</div>
+                </div>
+            </header>
+
+            <div class="dash-content">
+                <!-- KPI Row -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Students</div>
+                        <div class="kpi-value">2,845</div>
+                        <div class="kpi-trend up">↑ 12 Admissions this week</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Fee Collection (Today)</div>
+                        <div class="kpi-value">₹ 4,50,000</div>
+                        <div class="kpi-trend up">98% of daily target</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Staff Attendance</div>
+                        <div class="kpi-value">96.5%</div>
+                        <div class="kpi-trend down">↓ 2% from yesterday</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Library Issued</div>
+                        <div class="kpi-value">142</div>
+                        <div class="kpi-label">Books active today</div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <h2 class="section-title">2. Student Portal with 3D Stats</h2>
-        <div class="mockup-window">
-            <div class="mockup-header">
-                <div class="dot dot-red"></div>
-                <div class="dot dot-yellow"></div>
-                <div class="dot dot-green"></div>
-            </div>
-            <div class="mockup-content"
-                style="background: #0f172a; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; max-width: 800px; padding: 20px;">
-                    <div
-                        style="background: linear-gradient(135deg, #FF6B6B 0%, #EE5D5D 100%); padding: 20px; border-radius: 12px; margin-bottom: 40px; transform: perspective(1000px) rotateX(2deg);">
-                        <h2 style="color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Saraswati Institute
-                            of Technology</h2>
-                        <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0;">Student Portal</p>
-                    </div>
+                <div class="grid-2">
+                    <!-- Left Column -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
 
-                    <div style="display: flex; justify-content: center; gap: 40px;">
-                        <div
-                            style="width: 220px; text-align: center; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
-                            <div
-                                style="width: 120px; height: 120px; margin: 0 auto 20px; border-radius: 50%; background: conic-gradient(#4ade80 85%, #334155 0); display: flex; align-items: center; justify-content: center;">
-                                <div
-                                    style="width: 100px; height: 100px; background: #0f172a; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <span style="font-size: 2rem; font-weight: bold; color: white;">85%</span>
+                        <!-- Fee Status Table -->
+                        <div class="card-dense">
+                            <div class="card-header">
+                                <div class="card-title">Recent Fee Transactions</div>
+                                <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">View
+                                    All</button>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#TX99</td>
+                                        <td>Rahul Sharma</td>
+                                        <td>B.Tech CS-II</td>
+                                        <td>₹ 45,000</td>
+                                        <td><span class="status-badge status-success">PAID</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#TX98</td>
+                                        <td>Priya Singh</td>
+                                        <td>Class 10-A</td>
+                                        <td>₹ 12,500</td>
+                                        <td><span class="status-badge status-success">PAID</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#TX97</td>
+                                        <td>Amit Kumar</td>
+                                        <td>MBA Sem-1</td>
+                                        <td>₹ 60,000</td>
+                                        <td><span class="status-badge status-warning">PENDING</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#TX96</td>
+                                        <td>Sneha Gupta</td>
+                                        <td>Class 12-B</td>
+                                        <td>₹ 5,000</td>
+                                        <td><span class="status-badge status-error">FAILED</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Class Schedule Visualization -->
+                        <div class="card-dense">
+                            <div class="card-header">
+                                <div class="card-title">Live Class Schedule (Block A)</div>
+                            </div>
+                            <div>
+                                <div class="schedule-row">
+                                    <div class="schedule-time">09:00 AM</div>
+                                    <div class="schedule-event">
+                                        <div class="class-block">Class 10-A (Maths) - Room 101</div>
+                                        <div class="class-block">B.Tech CS (Data Structures) - Lab 2</div>
+                                    </div>
+                                </div>
+                                <div class="schedule-row">
+                                    <div class="schedule-time">10:00 AM</div>
+                                    <div class="schedule-event">
+                                        <div class="class-block">Class 12-B (Physics) - Lab 1</div>
+                                        <div class="class-block">MBA (Marketing) - Hall B</div>
+                                    </div>
+                                </div>
+                                <div class="schedule-row">
+                                    <div class="schedule-time">11:00 AM</div>
+                                    <div class="schedule-event">
+                                        <div class="class-block">Break / Recess</div>
+                                    </div>
                                 </div>
                             </div>
-                            <h3 style="color: #4ade80; margin: 0 0 5px 0;">Attendance</h3>
-                            <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Consistent & Regular</p>
                         </div>
 
-                        <div
-                            style="width: 220px; text-align: center; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
-                            <div style="font-size: 4rem; margin-bottom: 10px;">🏆</div>
-                            <h3 style="color: #fbbf24; margin: 0 0 5px 0;">Grade A+</h3>
-                            <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Top Performer</p>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+                        <!-- Hostel Occupancy -->
+                        <div class="card-dense">
+                            <div class="card-header">
+                                <div class="card-title">Hostel Occupancy (Boys Block A)</div>
+                            </div>
+                            <div class="room-grid" id="hostelGrid">
+                                <!-- JS will populate dots -->
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: 10px; font-size: 0.8rem; color: #94a3b8;">
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <div
+                                        style="width:10px; height:10px; background: rgba(16,185,129,0.2); border: 1px solid #059669;">
+                                    </div> Occupied
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <div
+                                        style="width:10px; height:10px; background: #0f172a; border: 1px solid #334155;">
+                                    </div> Vacant
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Transport Map Placeholder -->
+                        <div class="card-dense">
+                            <div class="card-header">
+                                <div class="card-title">Live Transport Tracking</div>
+                            </div>
+                            <div
+                                style="height: 200px; background: #0f172a; border-radius: 4px; position: relative; overflow: hidden;">
+                                <!-- Simulated Map -->
+                                <div
+                                    style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0.3; background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;">
+                                </div>
+                                <div class="bus-dot" style="position: absolute; top: 30%; left: 40%;">🚌</div>
+                                <div class="bus-dot" style="position: absolute; top: 60%; left: 70%;">🚌</div>
+                                <div class="bus-dot" style="position: absolute; top: 20%; left: 80%;">🚌</div>
+                                <style>
+                                    @keyframes moveMap {
+                                        0% {
+                                            transform: translate(0, 0);
+                                        }
+
+                                        50% {
+                                            transform: translate(10px, 10px);
+                                        }
+
+                                        100% {
+                                            transform: translate(0, 0);
+                                        }
+                                    }
+
+                                    .bus-dot {
+                                        animation: moveMap 5s infinite ease-in-out;
+                                        font-size: 1.2rem;
+                                    }
+                                </style>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <h2 class="section-title">3. Technical Highlights</h2>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <h3>🎨 Glassmorphism UI</h3>
-                <p style="color: #94a3b8;">Modern design using backdrop-filters, translucency, and vibrant gradients to
-                    create depth.</p>
             </div>
-            <div class="feature-card">
-                <h3>🔮 3D Interactive Elements</h3>
-                <p style="color: #94a3b8;">Cards and headers respond to hover states with 3D transforms, making the
-                    interface feel alive.</p>
-            </div>
-            <div class="feature-card">
-                <h3>🔐 Role-Based Access</h3>
-                <p style="color: #94a3b8;">Secure, separate portals for Admins, Teachers, Students, and Parents with
-                    unique color themes.</p>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 50px;">
-            <p style="margin-bottom: 20px; font-size: 1.2rem; color: white;">Ready to see the real thing?</p>
-            <a href="/"
-                style="padding: 15px 40px; font-size: 1.2rem; text-decoration: none; display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border-radius: 8px; font-weight: 600;">
-                Get Started
-            </a>
-        </div>
-
+        </main>
     </div>
 
+    <script>
+        // Populate Demo Hostel Grid
+        const grid = document.getElementById('hostelGrid');
+        for (let i = 101; i <= 130; i++) {
+            const div = document.createElement('div');
+            div.className = 'room-box';
+            div.textContent = i;
+            // Random occupancy
+            if (Math.random() > 0.3) div.classList.add('occupied');
+            else if (Math.random() > 0.95) div.classList.add('maintenance');
+            grid.appendChild(div);
+        }
+    </script>
 </body>
 
 </html>
