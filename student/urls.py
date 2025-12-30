@@ -56,3 +56,6 @@ urlpatterns = [
     path("notifications/<int:id>/read/", NotificationMarkReadView.as_view(), name="notification-read"),
     path("notifications/create/", NotificationCreateView.as_view(), name="notification-create"),
 ]
+
+# Demo Request
+path('demo-request/', DemoRequestView.as_view(), name='demo-request'),

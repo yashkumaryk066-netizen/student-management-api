@@ -277,3 +277,54 @@ class EventParticipant(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.event.name}"
 
+
+# ==================== DEMO REQUEST ====================
+
+class DemoRequest(models.Model):
+    """Demo request submissions from potential customers"""
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('CONTACTED', 'Contacted'),
+        ('DEMO_GIVEN', 'Demo Given'),
+        ('CONVERTED', 'Converted'),
+        ('DECLINED', 'Declined'),
+    ]
+    
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=15)
+    email = models.EmailField()
+    institution_name = models.CharField(max_length=200, blank=True)
+    institution_type = models.CharField(max_length=50, blank=True, 
+                                       help_text="School, College, University, Coaching")
+    message = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    contacted_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, help_text="Admin notes")
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.phone} ({self.status})"
+    
+    def send_notifications(self):
+        """Send WhatsApp and SMS notifications to admin"""
+        from notifications import whatsapp_service, sms_service
+        
+        # Send WhatsApp to admin
+        whatsapp_result = whatsapp_service.send_demo_request_notification(
+            requester_name=self.name,
+            requester_phone=self.phone,
+            requester_email=self.email,
+            institution_name=self.institution_name
+        )
+        
+        # Send SMS as backup
+        sms_message = f"New Demo Request: {self.name} ({self.phone}) from {self.institution_name or 'Unknown'}. Check WhatsApp for details."
+        sms_result = sms_service.send_message('+918356926231', sms_message)
+        
+        return {
+            'whatsapp': whatsapp_result,
+            'sms': sms_result
+        }

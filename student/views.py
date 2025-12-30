@@ -585,3 +585,35 @@ class DemoPageView(TemplateView):
 class ParentDashboardTemplateView(TemplateView):
     template_name = "dashboard/parent.html"
 
+
+
+# ==================== DEMO REQUEST VIEW ====================
+
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from .demo_serializers import DemoRequestSerializer
+from .models import DemoRequest
+
+
+class DemoRequestView(generics.CreateAPIView):
+    """
+    API endpoint for submitting demo requests
+    Public endpoint (no authentication required)
+    Automatically sends WhatsApp and SMS notifications to admin
+    """
+    queryset = DemoRequest.objects.all()
+    serializer_class = DemoRequestSerializer
+    permission_classes = [AllowAny]
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response({
+            'success': True,
+            'message': 'Thank you for your interest! We will contact you shortly.',
+            'data': serializer.data
+        }, status=status.HTTP_201_CREATED, headers=headers)
