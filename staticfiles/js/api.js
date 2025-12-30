@@ -1,5 +1,6 @@
 // API Helper Functions
-const API_BASE_URL = 'https://yashamishra.pythonanywhere.com/api';
+// API Helper Functions
+const API_BASE_URL = '/api';
 
 // Generic API call function
 async function apiCall(endpoint, options = {}) {
