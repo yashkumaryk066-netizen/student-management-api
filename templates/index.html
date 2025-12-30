@@ -18,150 +18,61 @@
     <div id="scene-container"></div>
 
     <!-- Main Container -->
-    <div class="container">
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1>🎓 Institute Management ERP</h1>
-                <p>Complete School, College & Institute Management Solution with AI-Powered Features</p>
+    <div class="container"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; position: relative; z-index: 10;">
 
-                <!-- Free Demo Button with Call -->
-                <div class="demo-btn-container">
-                    <a href="tel:+918356926231" class="demo-btn">
-                        <span class="phone-icon">📞</span>
-                        Request Free Demo - Call Now!
-                    </a>
+        <!-- Top 'Go to Demo' Bar -->
+        <div style="position: absolute; top: 20px; right: 20px;">
+            <a href="/demo/" class="demo-btn"
+                style="text-decoration: none; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; transition: all 0.3s;">
+                🚀 View Feature Demo
+            </a>
+        </div>
+
+        <!-- Login Glass Card -->
+        <div class="login-content"
+            style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+            <div class="login-header" style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: white; font-size: 2rem; margin-bottom: 10px;">🎓 IMS Login</h1>
+                <p style="color: rgba(255,255,255,0.7);">Saraswati Institute of Technology</p>
+            </div>
+
+            <!-- Login Form (Reused Logic) -->
+            <form id="loginForm">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 8px;">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter username" required
+                        style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
                 </div>
 
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 15px;">
-                    Or click below to explore demo mode instantly
-                </p>
-                <button onclick="enterDemoMode()"
-                    style="margin-top: 15px; padding: 12px 30px; background: rgba(99, 102, 241, 0.2); border: 2px solid var(--primary); color: var(--primary); border-radius: 30px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                    🚀 Try Demo Mode
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 8px;">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter password" required
+                        style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                </div>
+
+                <!-- Error & Loader Placeholders (Hooked to auth.js) -->
+                <div id="errorAlert" style="display:none; color: #ff6b6b; margin-bottom: 15px; text-align: center;">
+                    <span id="errorMessage"></span>
+                </div>
+
+                <button type="submit" id="loginBtn" class="btn-primary"
+                    style="width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s;">
+                    <span id="loginText">Sign In</span>
+                    <span id="loginLoader" style="display: none;">⌛</span>
                 </button>
-            </div>
-        </section>
+            </form>
 
-        <!-- Pricing Section -->
-        <section class="pricing-section">
-            <h2 class="section-title">Choose Your Perfect Plan</h2>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem;">
-                Affordable pricing for institutions of all sizes. Pay in Indian Rupees
+            <div style="margin-top: 25px; text-align: center;">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">
+                    Don't have an account? <a href="/demo/" style="color: #818cf8;">Contact Admin</a>
+                </p>
+            </div>
+
+            <p style="text-align: center; margin-top: 20px; color: rgba(255,255,255,0.3); font-size: 0.8rem;">
+                Demo: admin / admin123
             </p>
-
-            <div class="pricing-grid">
-                <!-- Basic Plan -->
-                <div class="pricing-card">
-                    <div class="plan-name">🌟 Basic</div>
-                    <div class="plan-price">
-                        ₹5,000<span>/month</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Up to 100 Students</li>
-                        <li>Student Management</li>
-                        <li>Attendance Tracking</li>
-                        <li>Basic Reporting</li>
-                        <li>2 Admin Users</li>
-                        <li>Email Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="openLoginModal()">Get Started</button>
-                </div>
-
-                <!-- Standard Plan -->
-                <div class="pricing-card featured">
-                    <div class="plan-name">💎 Standard</div>
-                    <div class="plan-price">
-                        ₹10,000<span>/month</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Up to 500 Students</li>
-                        <li>All Basic Features</li>
-                        <li>Library Management</li>
-                        <li>Transport Management</li>
-                        <li>Fee Management</li>
-                        <li>5 Admin Users</li>
-                        <li>Phone Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="window.location.href='/login.html'">Get Started</button>
-                </div>
-
-                <!-- Premium Plan -->
-                <div class="pricing-card">
-                    <div class="plan-name">🏆 Premium</div>
-                    <div class="plan-price">
-                        ₹25,000<span>/month</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Up to 2000 Students</li>
-                        <li>All Standard Features</li>
-                        <li>Hostel Management</li>
-                        <li>Examination System</li>
-                        <li>HR & Payroll</li>
-                        <li>SMS Integration</li>
-                        <li>15 Admin Users</li>
-                        <li>Priority Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="window.location.href='/login.html'">Get Started</button>
-                </div>
-
-                <!-- Enterprise Plan -->
-                <div class="pricing-card">
-                    <div class="plan-name">🚀 Enterprise</div>
-                    <div class="plan-price">
-                        Custom<span> pricing</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Unlimited Students</li>
-                        <li>All Premium Features</li>
-                        <li>Multi-Branch Support</li>
-                        <li>Custom Integrations</li>
-                        <li>Dedicated Support</li>
-                        <li>On-Premise Option</li>
-                        <li>Custom Training</li>
-                        <li>24/7 Priority Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="contactSales()">Contact Sales</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Preview -->
-        <section class="pricing-section">
-            <h2 class="section-title">Complete Institute Management</h2>
-            <div class="pricing-grid">
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">📚</div>
-                    <div class="plan-name">Library System</div>
-                    <p style="color: var(--text-muted);">Book issue/return, fines, catalog management</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">🚌</div>
-                    <div class="plan-name">Transport</div>
-                    <p style="color: var(--text-muted);">Bus routes, driver management, GPS tracking</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">🏠</div>
-                    <div class="plan-name">Hostel</div>
-                    <p style="color: var(--text-muted);">Room allocation, mess, visitor logs</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">📝</div>
-                    <div class="plan-name">Examinations</div>
-                    <p style="color: var(--text-muted);">Mark entry, report cards, rank calculation</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">👥</div>
-                    <div class="plan-name">HR & Payroll</div>
-                    <p style="color: var(--text-muted);">Staff management, attendance, salary processing</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">💰</div>
-                    <div class="plan-name">Accounting</div>
-                    <p style="color: var(--text-muted);">Income/expense, budget, financial reports</p>
-                </div>
-            </div>
-        </section>
+        </div>
     </div>
 
     <!-- Login Modal -->

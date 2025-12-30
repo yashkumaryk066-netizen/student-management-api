@@ -579,6 +579,9 @@ class TeacherDashboardTemplateView(TemplateView):
 class StudentDashboardTemplateView(TemplateView):
     template_name = "dashboard/student.html"
 
+class DemoPageView(TemplateView):
+    template_name = "demo.html"
+
 class ParentDashboardTemplateView(TemplateView):
     template_name = "dashboard/parent.html"
 

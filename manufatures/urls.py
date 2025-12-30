@@ -23,6 +23,7 @@ from drf_spectacular.views import (
 from student.views import (
     LandingPageView,
     LoginPageView,
+    DemoPageView,
     AdminDashboardTemplateView,
     TeacherDashboardTemplateView,
     StudentDashboardTemplateView,
@@ -32,6 +33,7 @@ from student.views import (
 urlpatterns = [
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),
+    path('demo/', DemoPageView.as_view(), name='demo-page'),
     path('login.html', LoginPageView.as_view(), name='login-page'),
     path('dashboard/admin.html', AdminDashboardTemplateView.as_view(), name='admin-dashboard-page'),
     path('dashboard/teacher.html', TeacherDashboardTemplateView.as_view(), name='teacher-dashboard-page'),
