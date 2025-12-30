@@ -4,164 +4,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Institute Management System - Professional ERP Solution</title>
+    <title>IMS Product Tour - 3D Experience</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css"> <!-- Reuse dashboard styles for previews -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Specific Demo Styles */
+        body {
+            overflow-x: hidden;
+            background: #0f172a;
+            color: white;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Mockup Containers */
+        .mockup-window {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 80px;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .mockup-window:hover {
+            transform: translateY(-10px) rotateX(2deg);
+        }
+
+        .mockup-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background: #ef4444;
+        }
+
+        .dot-yellow {
+            background: #f59e0b;
+        }
+
+        .dot-green {
+            background: #10b981;
+        }
+
+        .mockup-content {
+            padding: 0;
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-card h3 {
+            color: #818cf8;
+            margin-bottom: 15px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Animated Background -->
-    <div class="animated-bg"></div>
-    <canvas id="particles" class="particles"></canvas>
+    <div class="demo-btn-container">
+        <a href="tel:+918356926231" class="demo-btn">
+            <span class="phone-icon">📞</span>
+            Request Free Demo - Call Now!
+        </a>
+    </div>
 
-    <!-- 3D Scene Container for Three.js -->
-    <div id="scene-container"></div>
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 15px;">
+        Or click below to explore demo mode instantly
+    </p>
+    <button onclick="enterDemoMode()"
+        style="margin-top: 15px; padding: 12px 30px; background: rgba(99, 102, 241, 0.2); border: 2px solid var(--primary); color: var(--primary); border-radius: 30px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+        🚀 Try Demo Mode
+    </button>
+    </div>
+    </section>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1>🎓 Institute Management ERP</h1>
-                <p>Complete School, College & Institute Management Solution with AI-Powered Features</p>
+    <!-- Pricing Section -->
+    <section class="pricing-section">
+        <h2 class="section-title">Choose Your Perfect Plan</h2>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem;">
+            Affordable pricing for institutions of all sizes. Pay in Indian Rupees
+        </p>
 
-                <!-- Free Demo Button with Call -->
-                <div class="demo-btn-container">
-                    <a href="tel:+918356926231" class="demo-btn">
-                        <span class="phone-icon">📞</span>
-                        Request Free Demo - Call Now!
-                    </a>
+        <div class="pricing-grid">
+            <!-- Basic Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">🌟 Basic</div>
+                <div class="plan-price">
+                    ₹5,000<span>/month</span>
                 </div>
-
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 15px;">
-                    Or click below to explore demo mode instantly
-                </p>
-                <button onclick="enterDemoMode()"
-                    style="margin-top: 15px; padding: 12px 30px; background: rgba(99, 102, 241, 0.2); border: 2px solid var(--primary); color: var(--primary); border-radius: 30px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                    🚀 Try Demo Mode
-                </button>
+                <ul class="plan-features">
+                    <li>Up to 100 Students</li>
+                    <li>Student Management</li>
+                    <li>Attendance Tracking</li>
+                    <li>Basic Reporting</li>
+                    <li>2 Admin Users</li>
+                    <li>Email Support</li>
+                </ul>
+                <button class="plan-btn" onclick="openLoginModal()">Get Started</button>
             </div>
-        </section>
 
-        <!-- Pricing Section -->
-        <section class="pricing-section">
-            <h2 class="section-title">Choose Your Perfect Plan</h2>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem;">
-                Affordable pricing for institutions of all sizes. Pay in Indian Rupees
-            </p>
-
-            <div class="pricing-grid">
-                <!-- Basic Plan -->
-                <div class="pricing-card">
-                    <div class="plan-name">🌟 Basic</div>
-                    <div class="plan-price">
-                        ₹5,000<span>/month</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Up to 100 Students</li>
-                        <li>Student Management</li>
-                        <li>Attendance Tracking</li>
-                        <li>Basic Reporting</li>
-                        <li>2 Admin Users</li>
-                        <li>Email Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="openLoginModal()">Get Started</button>
+            <!-- Standard Plan -->
+            <div class="pricing-card featured">
+                <div class="plan-name">💎 Standard</div>
+                <div class="plan-price">
+                    ₹10,000<span>/month</span>
                 </div>
-
-                <!-- Standard Plan -->
-                <div class="pricing-card featured">
-                    <div class="plan-name">💎 Standard</div>
-                    <div class="plan-price">
-                        ₹10,000<span>/month</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Up to 500 Students</li>
-                        <li>All Basic Features</li>
-                        <li>Library Management</li>
-                        <li>Transport Management</li>
-                        <li>Fee Management</li>
-                        <li>5 Admin Users</li>
-                        <li>Phone Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="window.location.href='/login.html'">Get Started</button>
-                </div>
-
-                <!-- Premium Plan -->
-                <div class="pricing-card">
-                    <div class="plan-name">🏆 Premium</div>
-                    <div class="plan-price">
-                        ₹25,000<span>/month</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Up to 2000 Students</li>
-                        <li>All Standard Features</li>
-                        <li>Hostel Management</li>
-                        <li>Examination System</li>
-                        <li>HR & Payroll</li>
-                        <li>SMS Integration</li>
-                        <li>15 Admin Users</li>
-                        <li>Priority Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="window.location.href='/login.html'">Get Started</button>
-                </div>
-
-                <!-- Enterprise Plan -->
-                <div class="pricing-card">
-                    <div class="plan-name">🚀 Enterprise</div>
-                    <div class="plan-price">
-                        Custom<span> pricing</span>
-                    </div>
-                    <ul class="plan-features">
-                        <li>Unlimited Students</li>
-                        <li>All Premium Features</li>
-                        <li>Multi-Branch Support</li>
-                        <li>Custom Integrations</li>
-                        <li>Dedicated Support</li>
-                        <li>On-Premise Option</li>
-                        <li>Custom Training</li>
-                        <li>24/7 Priority Support</li>
-                    </ul>
-                    <button class="plan-btn" onclick="contactSales()">Contact Sales</button>
-                </div>
+                <ul class="plan-features">
+                    <li>Up to 500 Students</li>
+                    <li>All Basic Features</li>
+                    <li>Library Management</li>
+                    <li>Transport Management</li>
+                    <li>Fee Management</li>
+                    <li>5 Admin Users</li>
+                    <li>Phone Support</li>
+                </ul>
+                <button class="plan-btn" onclick="window.location.href='/login.html'">Get Started</button>
             </div>
-        </section>
 
-        <!-- Features Preview -->
-        <section class="pricing-section">
-            <h2 class="section-title">Complete Institute Management</h2>
-            <div class="pricing-grid">
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">📚</div>
-                    <div class="plan-name">Library System</div>
-                    <p style="color: var(--text-muted);">Book issue/return, fines, catalog management</p>
+            <!-- Premium Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">🏆 Premium</div>
+                <div class="plan-price">
+                    ₹25,000<span>/month</span>
                 </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">🚌</div>
-                    <div class="plan-name">Transport</div>
-                    <p style="color: var(--text-muted);">Bus routes, driver management, GPS tracking</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">🏠</div>
-                    <div class="plan-name">Hostel</div>
-                    <p style="color: var(--text-muted);">Room allocation, mess, visitor logs</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">📝</div>
-                    <div class="plan-name">Examinations</div>
-                    <p style="color: var(--text-muted);">Mark entry, report cards, rank calculation</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">👥</div>
-                    <div class="plan-name">HR & Payroll</div>
-                    <p style="color: var(--text-muted);">Staff management, attendance, salary processing</p>
-                </div>
-                <div class="pricing-card" style="cursor: default;">
-                    <div class="role-icon">💰</div>
-                    <div class="plan-name">Accounting</div>
-                    <p style="color: var(--text-muted);">Income/expense, budget, financial reports</p>
-                </div>
+                <ul class="plan-features">
+                    <li>Up to 2000 Students</li>
+                    <li>All Standard Features</li>
+                    <li>Hostel Management</li>
+                    <li>Examination System</li>
+                    <li>HR & Payroll</li>
+                    <li>SMS Integration</li>
+                    <li>15 Admin Users</li>
+                    <li>Priority Support</li>
+                </ul>
+                <button class="plan-btn" onclick="window.location.href='/login.html'">Get Started</button>
             </div>
-        </section>
+
+            <!-- Enterprise Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">🚀 Enterprise</div>
+                <div class="plan-price">
+                    Custom<span> pricing</span>
+                </div>
+                <ul class="plan-features">
+                    <li>Unlimited Students</li>
+                    <li>All Premium Features</li>
+                    <li>Multi-Branch Support</li>
+                    <li>Custom Integrations</li>
+                    <li>Dedicated Support</li>
+                    <li>On-Premise Option</li>
+                    <li>Custom Training</li>
+                    <li>24/7 Priority Support</li>
+                </ul>
+                <button class="plan-btn" onclick="contactSales()">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Preview -->
+    <section class="pricing-section">
+        <h2 class="section-title">Complete Institute Management</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card" style="cursor: default;">
+                <div class="role-icon">📚</div>
+                <div class="plan-name">Library System</div>
+                <p style="color: var(--text-muted);">Book issue/return, fines, catalog management</p>
+            </div>
+            <div class="pricing-card" style="cursor: default;">
+                <div class="role-icon">🚌</div>
+                <div class="plan-name">Transport</div>
+                <p style="color: var(--text-muted);">Bus routes, driver management, GPS tracking</p>
+            </div>
+            <div class="pricing-card" style="cursor: default;">
+                <div class="role-icon">🏠</div>
+                <div class="plan-name">Hostel</div>
+                <p style="color: var(--text-muted);">Room allocation, mess, visitor logs</p>
+            </div>
+            <div class="pricing-card" style="cursor: default;">
+                <div class="role-icon">📝</div>
+                <div class="plan-name">Examinations</div>
+                <p style="color: var(--text-muted);">Mark entry, report cards, rank calculation</p>
+            </div>
+            <div class="pricing-card" style="cursor: default;">
+                <div class="role-icon">👥</div>
+                <div class="plan-name">HR & Payroll</div>
+                <p style="color: var(--text-muted);">Staff management, attendance, salary processing</p>
+            </div>
+            <div class="pricing-card" style="cursor: default;">
+                <div class="role-icon">💰</div>
+                <div class="plan-name">Accounting</div>
+                <p style="color: var(--text-muted);">Income/expense, budget, financial reports</p>
+            </div>
+        </div>
+    </section>
     </div>
 
     <!-- Login Modal -->
