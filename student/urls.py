@@ -20,6 +20,7 @@ from .views import (
     TeacherDashboardTemplateView,
     StudentDashboardTemplateView,
     ParentDashboardTemplateView,
+    DemoRequestView,  # Added for demo request functionality
 )
 
 from rest_framework_simplejwt.views import (
@@ -55,7 +56,7 @@ urlpatterns = [
     path("notifications/", NotificationListView.as_view(), name="notification-list"),
     path("notifications/<int:id>/read/", NotificationMarkReadView.as_view(), name="notification-read"),
     path("notifications/create/", NotificationCreateView.as_view(), name="notification-create"),
+    
+    # DEMO REQUEST
+    path('demo-request/', DemoRequestView.as_view(), name='demo-request'),
 ]
-
-# Demo Request
-path('demo-request/', DemoRequestView.as_view(), name='demo-request'),
