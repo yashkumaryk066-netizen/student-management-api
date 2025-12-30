@@ -1,5 +1,5 @@
 // Update API URL for production
-const API_BASE_URL = 'https://yourbackend.railway.app/api'; // Update this when backend is deployed
+const API_BASE_URL = 'https://yashamishra.pythonanywhere.com/api'; // Connected to live PythonAnywhere backend
 let authToken = localStorage.getItem('token');
 let selectedRole = '';
 
