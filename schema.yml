@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Student Management API
+  version: 1.0.0
+  description: API for managing students and their attendance records
+paths:
+  /api/attendence/:
+    get:
+      operationId: listAttendance
+      description: Retrieve all attendance records
+      summary: List all attendance records
+      tags:
+      - Attendance
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: markAttendance
+      description: Mark attendance for a student. Prevents duplicate entries for the
+        same date.
+      summary: Mark attendance
+      tags:
+      - Attendance
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/attendence/{id}/:
+    get:
+      operationId: getAttendance
+      description: Retrieve details of a specific attendance record by ID
+      summary: Get attendance details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Attendance
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: updateAttendance
+      description: Update an existing attendance record
+      summary: Update attendance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Attendance
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: deleteAttendance
+      description: Delete an attendance record
+      summary: Delete attendance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Attendance
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/login/:
+    post:
+      operationId: api_auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/token-login/:
+    post:
+      operationId: login
+      description: Authenticate user with username and password to get an auth token
+      summary: User login
+      tags:
+      - Authentication
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/token/refresh/:
+    post:
+      operationId: api_auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/profile/:
+    get:
+      operationId: getProfile
+      description: Get the authenticated user profile information
+      summary: Get user profile
+      tags:
+      - Profile
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: getProfilePost
+      description: Get the authenticated user profile information via POST
+      summary: Get user profile (POST)
+      tags:
+      - Profile
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/students/:
+    get:
+      operationId: listStudents
+      description: Retrieve a list of all students with optional search by name or
+        gender
+      summary: List all students
+      parameters:
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search students by name or gender
+      tags:
+      - Student
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: createStudent
+      description: Create a new student record
+      summary: Create a new student
+      tags:
+      - Student
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/students/{id}/:
+    get:
+      operationId: getStudent
+      description: Retrieve details of a specific student by ID
+      summary: Get student details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Student
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: updateStudent
+      description: Update an existing student record
+      summary: Update student
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Student
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: deleteStudent
+      description: Delete a student record
+      summary: Delete student
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Student
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/students/today/:
+    get:
+      operationId: getTodayAttendance
+      description: Get attendance summary for today including present and absent students
+      summary: Get today's attendance summary
+      tags:
+      - Student
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
+tags:
+- name: Student
+  description: Student management operations
+- name: Attendance
+  description: Attendance tracking operations
+- name: Authentication
+  description: User authentication endpoints
+- name: Profile
+  description: User profile operations
