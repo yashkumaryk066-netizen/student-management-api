@@ -44,10 +44,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'corsheaders',
-    'cars',
     'manufatures',
-    'library',
     'student',
+    'academics',
+    'library_system',
+    'finance',
     'drf_spectacular',
 ]
 
@@ -98,17 +99,28 @@ if config('DATABASE_URL', default=None):
         )
     }
 else:
-    # Local development database
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'mydb',
-            'USER': 'postgres',
-            'PASSWORD': '123456',
-            'HOST': 'localhost',
-            'PORT': '5432',
+    # Check if we should use PostgreSQL via individual params
+    db_name = config('DB_NAME', default='db.sqlite3')
+    
+    if db_name.endswith('.sqlite3'):
+         DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / db_name,
+            }
         }
-    }
+    else:
+        # PostgreSQL local
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': config('DB_NAME', default='mydb'),
+                'USER': config('DB_USER', default='postgres'),
+                'PASSWORD': config('DB_PASSWORD', default='password'),
+                'HOST': config('DB_HOST', default='localhost'),
+                'PORT': config('DB_PORT', default='5432'),
+            }
+        }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

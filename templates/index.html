@@ -4,135 +4,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Institute Management System - Professional ERP Solution</title>
+    <title>NextGen Institute ERP | The Future of Education</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
 </head>
 
 <body>
-    <!-- Animated Background -->
+    <!-- Backgrounds -->
     <div class="animated-bg"></div>
-    <canvas id="particles" class="particles"></canvas>
+    <canvas id="particles"></canvas>
 
-    <!-- 3D Scene Container for Three.js -->
-    <div id="scene-container"></div>
-
-    <!-- Main Container -->
-    <div class="container"
-        style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; position: relative; z-index: 10;">
-
-        <!-- Top 'Go to Demo' Bar -->
-        <div style="position: absolute; top: 20px; right: 20px;">
-            <a href="/demo/" class="demo-btn"
-                style="text-decoration: none; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; transition: all 0.3s;">
-                🚀 View Feature Demo
-            </a>
-        </div>
-
-        <!-- Login Glass Card -->
-        <div class="login-content"
-            style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-            <div class="login-header" style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: white; font-size: 2rem; margin-bottom: 10px;">🎓 IMS Login</h1>
-                <p style="color: rgba(255,255,255,0.7);">Saraswati Institute of Technology</p>
+    <!-- Sci-Fi Preloader -->
+    <div id="preloader"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #0f172a; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 1s ease;">
+        <div style="text-align: center;">
+            <div class="loader-circle"
+                style="width: 80px; height: 80px; border: 4px solid transparent; border-top: 4px solid #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;">
             </div>
-
-            <!-- Login Form (Reused Logic) -->
-            <form id="loginForm">
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 8px;">Username</label>
-                    <input type="text" id="username" class="form-control" placeholder="Enter username" required
-                        style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 25px;">
-                    <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 8px;">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter password" required
-                        style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
-                </div>
-
-                <!-- Error & Loader Placeholders (Hooked to auth.js) -->
-                <div id="errorAlert" style="display:none; color: #ff6b6b; margin-bottom: 15px; text-align: center;">
-                    <span id="errorMessage"></span>
-                </div>
-
-                <button type="submit" id="loginBtn" class="btn-primary"
-                    style="width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s;">
-                    <span id="loginText">Sign In</span>
-                    <span id="loginLoader" style="display: none;">⌛</span>
-                </button>
-            </form>
-
-            <div style="margin-top: 25px; text-align: center;">
-                <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">
-                    Don't have an account? <a href="/demo/" style="color: #818cf8;">Contact Admin</a>
-                </p>
+            <h2 style="font-family: 'Courier New', monospace; color: #6366f1; letter-spacing: 2px;">INITIALIZING
+                SYSTEM...</h2>
+            <div
+                style="margin-top: 10px; width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin: 10px auto;">
+                <div style="width: 100%; height: 100%; background: #ec4899; animation: progress 2s ease-in-out;"></div>
             </div>
-
-            <p style="text-align: center; margin-top: 20px; color: rgba(255,255,255,0.3); font-size: 0.8rem;">
-                Demo: admin / admin123
-            </p>
         </div>
     </div>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="login-modal">
-        <div class="login-content">
-            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
-            <div class="login-header">
-                <h2>Welcome Back!</h2>
-                <p style="color: var(--text-muted);">Select your role to continue</p>
+    <style>
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes progress {
+            0% {
+                width: 0;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('preloader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('preloader').remove();
+                }, 1000);
+            }, 1000);
+        });
+    </script>
+
+
+    <!-- Navigation -->
+    <nav class="navbar glass-card" style="padding: 15px 30px;">
+        <a href="#" class="logo">
+            <span style="font-size: 2rem;">🎓</span>
+            <span>NextGen ERP</span>
+        </a>
+        <div class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#pricing" class="nav-link">Pricing</a>
+            <a href="#modules" class="nav-link">Modules</a>
+            <a href="#" class="nav-link" onclick="openLoginModal()">Login</a>
+        </div>
+        <button class="btn-3d" onclick="openLoginModal()" style="padding: 10px 20px;">Get Started</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">The Future of <br>Education Management</h1>
+            <p>A complete, enterprise-grade ERP solution for modern institutions. <br>Powered by AI, designed for
+                humans.</p>
+
+            <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px;">
+                <button class="btn-3d" onclick="openLoginModal()" style="font-size: 1.2rem; padding: 16px 40px;">
+                    🚀 Launch Dashboard
+                </button>
+                <button class="btn-3d" onclick="enterDemoMode()"
+                    style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1);">
+                    ▶ Watch Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Modules Section -->
+    <section id="modules" class="container" style="padding: 100px 20px;">
+        <h2 style="text-align: center; font-size: 3rem; margin-bottom: 60px;">Enterprise Modules</h2>
+
+        <div class="features-grid">
+            <!-- Academics -->
+            <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
+                <div class="feature-icon-wrapper">��</div>
+                <h3 class="feature-title">Academics & Exams</h3>
+                <p class="feature-description">Complete examination management, grading systems, automated report cards
+                    (GPA/CGPA), and timetable scheduling.</p>
             </div>
 
-            <!-- Role Selector -->
+            <!-- Finance -->
+            <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
+                <div class="feature-icon-wrapper">💰</div>
+                <h3 class="feature-title">Finance & Payroll</h3>
+                <p class="feature-description">Fee collection, automated receipts, staff payroll processing, expense
+                    tracking, and financial auditing reports.</p>
+            </div>
+
+            <!-- Library -->
+            <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
+                <div class="feature-icon-wrapper">📖</div>
+                <h3 class="feature-title">Digital Library</h3>
+                <p class="feature-description">LMS for book issue/returns, digital catalog, fine calculation, and ebook
+                    management support.</p>
+            </div>
+
+            <!-- HR -->
+            <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
+                <div class="feature-icon-wrapper">👥</div>
+                <h3 class="feature-title">HR Management</h3>
+                <p class="feature-description">Staff attendance, leave management, recruitment portal, and performance
+                    appraisal systems.</p>
+            </div>
+
+            <!-- Transport -->
+            <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
+                <div class="feature-icon-wrapper">🚌</div>
+                <h3 class="feature-title">Transport & GPS</h3>
+                <p class="feature-description">Real-time bus tracking, route optimization, driver management, and parent
+                    alerts.</p>
+            </div>
+
+            <!-- Hostel -->
+            <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
+                <div class="feature-icon-wrapper">🏨</div>
+                <h3 class="feature-title">Smart Hostel</h3>
+                <p class="feature-description">Room allocation, mess management, gate pass system, and biometric
+                    attendance integration.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-content glass-card">
+            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 10px;">Welcome Back</h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 30px;">Select your role to continue
+            </p>
+
             <div class="role-selector">
                 <div class="role-btn" onclick="selectRole('STUDENT')">
-                    <div class="role-icon">🎓</div>
+                    <div style="font-size: 2rem;">🎓</div>
                     <div>Student</div>
                 </div>
                 <div class="role-btn" onclick="selectRole('TEACHER')">
-                    <div class="role-icon">👨‍🏫</div>
+                    <div style="font-size: 2rem;">👨‍🏫</div>
                     <div>Teacher</div>
                 </div>
                 <div class="role-btn" onclick="selectRole('PARENT')">
-                    <div class="role-icon">👪</div>
+                    <div style="font-size: 2rem;">👨‍👩‍👦</div>
                     <div>Parent</div>
                 </div>
                 <div class="role-btn" onclick="selectRole('ADMIN')">
-                    <div class="role-icon">⚙️</div>
+                    <div style="font-size: 2rem;">⚙️</div>
                     <div>Admin</div>
                 </div>
             </div>
 
-            <!-- Login Form -->
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <input type="hidden" id="selectedRole" value="">
-
                 <div class="form-group">
                     <label>Username</label>
-                    <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+                    <input type="text" id="username" class="form-control" required>
                 </div>
-
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter your password"
-                        required>
+                    <input type="password" id="password" class="form-control" required>
                 </div>
-
-                <button type="submit" class="btn-primary">Sign In</button>
+                <button type="submit" class="btn-3d" style="width: 100%; margin-top: 10px;">Sign In</button>
             </form>
-
-            <p style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">
-                Demo credentials: admin / admin123
-            </p>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="/static/js/particles.js"></script>
-    <script src="/static/js/3d-scene.js"></script>
     <script src="/static/js/app.js"></script>
+    <script>
+        // Init Tilt
+        VanillaTilt.init(document.querySelectorAll(".feature-card"), {
+            max: 5,
+            speed: 400,
+            glare: true,
+            "max-glare": 0.2,
+        });
+    </script>
 </body>
 
 </html>
