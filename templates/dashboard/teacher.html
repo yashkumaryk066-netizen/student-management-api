@@ -4,191 +4,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard - Institute Management</title>
-    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <title>Teacher Dashboard | NextGen ERP</title>
+    <link rel="stylesheet" href="/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo-section">
-                <h2>🎓 IMS</h2>
-                <p>Teacher Panel</p>
+        <aside class="dash-sidebar">
+            <div class="dash-brand">
+                <span>👨‍🏫</span> TEACHER
             </div>
 
-            <nav class="nav-menu">
-                <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">
-                    <span>📊</span> Dashboard
-                </a>
-                <a href="#attendance" class="nav-item" onclick="showSection('attendance')">
-                    <span>📝</span> Mark Attendance
-                </a>
-                <a href="#students" class="nav-item" onclick="showSection('students')">
-                    <span>👨‍🎓</span> My Students
-                </a>
-                <a href="#schedule" class="nav-item" onclick="showSection('schedule')">
-                    <span>📅</span> Schedule
-                </a>
-                <a href="#notifications" class="nav-item" onclick="showSection('notifications')">
-                    <span>📢</span> Notifications
-                </a>
-            </nav>
+            <div class="dash-nav">
+                <a href="#" class="dash-item active">📊 Overview</a>
+                <a href="#" class="dash-item">📝 Take Attendance</a>
+                <a href="#" class="dash-item">👥 My Students</a>
+                <a href="#" class="dash-item">📅 Class Schedule</a>
+                <a href="#" class="dash-item">📢 Announcements</a>
 
-            <div class="sidebar-footer">
-                <button onclick="logout()" class="logout-btn">
-                    🚪 Logout
-                </button>
+                <div style="margin-top: auto;">
+                    <button onclick="logout()" class="dash-item" style="width: 100%; text-align: left; color: #f87171;">
+                        🚪 Logout
+                    </button>
+                </div>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
-            <!-- 3D Institute Header -->
-            <div class="institute-header">
-                <div class="institute-branding">
-                    <h1>Saraswati Institute of Technology</h1>
-                    <p>Excellence in Education | Est. 1995</p>
+        <main class="dash-main">
+            <header class="dash-header">
+                <h2 style="font-size: 1.2rem; color: white;">Faculty Portal</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div style="text-align: right;">
+                        <div id="teacherName" style="color: white; font-weight: 600; font-size: 0.9rem;">Faculty Member
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.8rem;">Department of Science</div>
+                    </div>
                 </div>
-                <div class="user-info">
-                    <span id="userName" style="color: rgba(255,255,255,0.9);">Teacher</span>
-                    <div class="avatar" style="border: 2px solid rgba(255,255,255,0.5);">T</div>
+            </header>
+
+            <div class="dash-content">
+                <!-- KPI Grid -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Students</div>
+                        <div class="kpi-value" id="countStudents">...</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Present Today</div>
+                        <div class="kpi-value" id="countPresent">...</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Absent</div>
+                        <div class="kpi-value" id="countAbsent">...</div>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+
+                    <!-- Main Action Area -->
+                    <div>
+                        <div
+                            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;">
+                            <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📝 Quick Attendance</h3>
+                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                <input type="date" id="attendanceDate" class="form-control"
+                                    style="background: #0f172a; border: 1px solid #334155; color: white; padding: 8px; border-radius: 4px;">
+                                <button onclick="loadAttendanceClass()" class="btn-primary"
+                                    style="padding: 8px 15px;">Load Class</button>
+                                <button onclick="submitAttendance()" class="btn-secondary"
+                                    style="margin-left: auto; background: var(--success); border-color: transparent;">Save</button>
+                            </div>
+
+                            <div id="attendanceGrid"
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-height: 400px; overflow-y: auto;">
+                                <!-- Populated by JS -->
+                                <p style="color: #94a3b8; grid-column: 1/-1;">Select a date to load students.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div
+                            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
+                            <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📢 Post Homework / Notice
+                            </h3>
+                            <form onsubmit="postNotice(event)">
+                                <input type="text" placeholder="Title" class="form-control"
+                                    style="width: 100%; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px;"
+                                    required>
+                                <textarea rows="3" placeholder="Message to class..." class="form-control"
+                                    style="width: 100%; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px;"
+                                    required></textarea>
+                                <button type="submit" class="btn-primary" style="width: 100%;">Send to Students</button>
+                            </form>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
-            <section id="dashboard-section" class="content-section active">
-                <!-- 3D Float Elements -->
-                <div class="float-element" style="top: 100px; right: 50px; animation-delay: 0s;">📚</div>
-                <div class="float-element" style="top: 200px; right: 150px; animation-delay: 2s;">✏️</div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="transform: translateZ(20px);">👥</div>
-                        <div class="stat-content" style="transform: translateZ(10px);">
-                            <h3 id="classStrength">0</h3>
-                            <p>Class Strength</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-content">
-                            <h3 id="presentToday">0</h3>
-                            <p>Present Today</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📅</div>
-                        <div class="stat-content">
-                            <h3 id="classesToday">0</h3>
-                            <p>Classes Today</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📩</div>
-                        <div class="stat-content">
-                            <h3 id="unreadNotifs">0</h3>
-                            <p>New Notices</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-widgets">
-                    <div class="widget">
-                        <h3>Today's Schedule</h3>
-                        <div id="todayScheduleList" class="activity-list">
-                            <p class="text-muted">Loading schedule...</p>
-                        </div>
-                    </div>
-                    <div class="widget">
-                        <h3>Recent Notifications</h3>
-                        <div id="recentNotifsList" class="activity-list">
-                            <p class="text-muted">Loading...</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Attendance Section -->
-            <section id="attendance-section" class="content-section">
-                <div class="section-header">
-                    <h2>Mark Class Attendance</h2>
-                    <input type="date" id="attendanceDate" class="date-input">
-                </div>
-
-                <div class="attendance-grid" id="attendanceGrid">
-                    <p class="text-muted">Loading students...</p>
-                </div>
-
-                <button onclick="submitAttendance()" class="btn btn-primary" style="margin-top: 20px;">
-                    Submit Attendance
-                </button>
-            </section>
-
-            <!-- Students Section -->
-            <section id="students-section" class="content-section">
-                <h2>Class List</h2>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Roll No</th>
-                                <th>Name</th>
-                                <th>Gender</th>
-                                <th>Performance</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentsTableBody">
-                            <tr>
-                                <td colspan="5" class="text-center">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Schedule Section -->
-            <section id="schedule-section" class="content-section">
-                <h2>My Weekly Schedule</h2>
-                <div class="schedule-container" id="weekSchedule">
-                    <p class="text-muted">Schedule integration coming soon...</p>
-                </div>
-            </section>
-
-            <!-- Notifications Section -->
-            <section id="notifications-section" class="content-section">
-                <div class="section-header">
-                    <h2>Broadcast Message</h2>
-                </div>
-                <div class="notification-form-container">
-                    <form id="notificationForm" onsubmit="handleSendNotification(event)">
-                        <div class="form-group">
-                            <label>To</label>
-                            <select name="target_role" required>
-                                <option value="STUDENT">My Students</option>
-                                <option value="PARENT">Parents</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Message</label>
-                            <textarea name="message" rows="4" required placeholder="Write your message..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Send Message</button>
-                    </form>
-                </div>
-                <div class="recent-notifications">
-                    <h3>History</h3>
-                    <div id="notificationsList"></div>
-                </div>
-            </section>
-
         </main>
     </div>
 
     <script src="/static/js/api.js"></script>
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/dashboard/teacher.js"></script>
+    <script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+        document.getElementById('attendanceDate').valueAsDate = new Date();
+    </script>
 </body>
 
 </html>
