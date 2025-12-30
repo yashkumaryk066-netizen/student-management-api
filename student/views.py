@@ -565,7 +565,7 @@ class NotificationCreateView(APIView):
 # ==================== FRONTEND VIEWS ====================
 
 class LandingPageView(TemplateView):
-    template_name = "index.html"
+    template_name = "home_login.html"
 
 class LoginPageView(TemplateView):
     template_name = "login.html"
