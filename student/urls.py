@@ -13,7 +13,13 @@ from .views import (
     PaymentDetailsView,
     NotificationListView,
     NotificationMarkReadView,
-    NotificationCreateView
+    NotificationCreateView,
+    LandingPageView,
+    LoginPageView,
+    AdminDashboardTemplateView,
+    TeacherDashboardTemplateView,
+    StudentDashboardTemplateView,
+    ParentDashboardTemplateView,
 )
 
 from rest_framework_simplejwt.views import (

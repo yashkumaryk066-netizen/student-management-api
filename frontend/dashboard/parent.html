@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal - Institute Management</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <h2>🎓 IMS</h2>
+                <p>Parent Access</p>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">
+                    <span>🏠</span> Overview
+                </a>
+                <a href="#children" class="nav-item" onclick="showSection('children')">
+                    <span>👶</span> My Children
+                </a>
+                <a href="#fees" class="nav-item" onclick="showSection('fees')">
+                    <span>💳</span> Fees
+                </a>
+                <a href="#messages" class="nav-item" onclick="showSection('messages')">
+                    <span>💬</span> Messages
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="logout-btn">
+                    🚪 Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 id="pageTitle">Parent Overview</h1>
+                <div class="user-info">
+                    <span id="userName">Parent</span>
+                    <div class="avatar">P</div>
+                </div>
+            </header>
+
+            <section id="dashboard-section" class="content-section active">
+                <div id="childrenOverviewContainer">
+                    <!-- Cards will be injected here -->
+                    <p>Loading children data...</p>
+                </div>
+
+                <div class="recent-activity" style="margin-top: 30px;">
+                    <h3>Recent Notices</h3>
+                    <div id="noticesList"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/dashboard/parent.js"></script>
+</body>
+
+</html>

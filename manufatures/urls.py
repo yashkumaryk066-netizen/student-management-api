@@ -20,8 +20,25 @@ from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
 )
+from student.views import (
+    LandingPageView,
+    LoginPageView,
+    AdminDashboardTemplateView,
+    TeacherDashboardTemplateView,
+    StudentDashboardTemplateView,
+    ParentDashboardTemplateView,
+)
 
 urlpatterns = [
+    # Frontend Pages
+    path('', LandingPageView.as_view(), name='landing-page'),
+    path('login.html', LoginPageView.as_view(), name='login-page'),
+    path('dashboard/admin.html', AdminDashboardTemplateView.as_view(), name='admin-dashboard-page'),
+    path('dashboard/teacher.html', TeacherDashboardTemplateView.as_view(), name='teacher-dashboard-page'),
+    path('dashboard/student.html', StudentDashboardTemplateView.as_view(), name='student-dashboard-page'),
+    path('dashboard/parent.html', ParentDashboardTemplateView.as_view(), name='parent-dashboard-page'),
+
+    # API
     path('api/', include('student.urls')),
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),

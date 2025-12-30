@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from django.views.generic import TemplateView
 from django.db.models import Q
 from django.contrib.auth import authenticate
 from django.utils import timezone
@@ -560,3 +561,24 @@ class NotificationCreateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# ==================== FRONTEND VIEWS ====================
+
+class LandingPageView(TemplateView):
+    template_name = "index.html"
+
+class LoginPageView(TemplateView):
+    template_name = "login.html"
+
+class AdminDashboardTemplateView(TemplateView):
+    template_name = "dashboard/admin.html"
+
+class TeacherDashboardTemplateView(TemplateView):
+    template_name = "dashboard/teacher.html"
+
+class StudentDashboardTemplateView(TemplateView):
+    template_name = "dashboard/student.html"
+
+class ParentDashboardTemplateView(TemplateView):
+    template_name = "dashboard/parent.html"
+
