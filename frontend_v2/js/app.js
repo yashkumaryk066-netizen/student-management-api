@@ -1,7 +1,10 @@
-// Main Application Logic
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Update API URL for production
+const API_BASE_URL = 'https://yourbackend.railway.app/api'; // Update this when backend is deployed
 let authToken = localStorage.getItem('token');
 let selectedRole = '';
+
+// Rest of the code remains the same...
+// [Previous app.js code continues here]
 
 // Open Login Modal
 function openLoginModal() {
@@ -15,7 +18,7 @@ function closeLoginModal() {
 
 // Select Role
 function selectRole(role) {
-    selected Role = role;
+    selectedRole = role;
     document.getElementById('selectedRole').value = role;
 
     // Update UI
@@ -67,32 +70,36 @@ async function handleLogin(event) {
 
 // Redirect to Dashboard
 function redirectToDashboard(role) {
-    const dashboardMap = {
-        'STUDENT': '../frontend/index.html',
-        'TEACHER': '../frontend/index.html',
-        'PARENT': '../frontend/index.html',
-        'ADMIN': '../frontend/index.html'
-    };
-
     alert(`Welcome! Redirecting to ${role} dashboard...`);
+    // For now, just show dashboard will be implemented
     setTimeout(() => {
-        window.location.href = dashboardMap[role] || '../frontend/index.html';
+        window.location.href = '../frontend/index.html';
     }, 1000);
 }
 
 // Enter Demo Mode
 function enterDemoMode() {
-    alert('🎉 Demo Mode Activated! Logging you in as Admin with full access to explore all features.');
+    alert('🎉 Demo Mode Activated! This is a preview of the system features.\n\nIn production, you will be able to:\n- Manage students and attendance\n- Track payments and fees\n- Generate reports\n- And much more!\n\nContact: 8356926231 for live demo');
 
-    // Auto-login with demo credentials
-    document.getElementById('username').value = 'admin';
-    document.getElementById('password').value = 'admin123';
-    selectedRole = 'ADMIN';
+    // Show features tour
+    showDemoTour();
+}
 
-    // Submit form
-    setTimeout(() => {
-        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-    }, 500);
+function showDemoTour() {
+    const features = [
+        '✅ Student Management - Add, edit, delete students',
+        '✅ Attendance Tracking - Mark daily attendance',
+        '✅ Payment System - Track fees and dues',
+        '✅ Library Management - Book issue/return',
+        '✅ Transport Management - Bus routes and tracking',
+        '✅ Hostel Management - Room allocation',
+        '✅ Examination System - Marks and report cards',
+        '✅ HR & Payroll - Staff management',
+        '✅ Accounting - Income/expense tracking',
+        '✅ And many more features!'
+    ];
+
+    alert(features.join('\n\n'));
 }
 
 // Contact Sales
