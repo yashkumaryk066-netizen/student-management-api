@@ -39,6 +39,8 @@ from datetime import date, timedelta
     ),
 )
 class StudentListCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+    
     def get(self, request):
         search = request.query_params.get("search","").strip()
         students = Student.objects.all()
@@ -89,6 +91,8 @@ class StudentListCreateView(APIView):
     ),
 )
 class StudentDetailsView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+    
     def get(self, request, id):
         student = Student.objects.filter(id=id).first()
         if not student:
@@ -180,6 +184,8 @@ class StudentTodayView(APIView):
     ),
 )
 class AttendenceCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+    
     def get(self, request):
         attendence = Attendence.objects.all()
         serializer = AttendenceSerializer(attendence, many=True)
@@ -227,6 +233,8 @@ class AttendenceCreateView(APIView):
     ),
 )
 class AttendenceDetailsView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+    
     def get(self, request, id):
         attendence = Attendence.objects.filter(id=id).first()
         if not attendence:
@@ -454,8 +462,9 @@ class PaymentListCreateView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        # Only admin and teachers can create payments
-        if not hasattr(request.user, 'profile') or request.user.profile.role not in ['ADMIN', 'TEACHER']:
+        # Only admin and teachers can create payments - enforced via decorator
+        user_role = request.user.profile.role if hasattr(request.user, 'profile') else None
+        if user_role not in ['ADMIN', 'TEACHER']:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = PaymentSerializer(data=request.data)
