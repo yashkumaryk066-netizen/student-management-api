@@ -35,6 +35,7 @@ urlpatterns = [
     # Django Admin Panel
     path('admin/', admin.site.urls),
     
+    # Trigger reload to force update to front-end assets (V5.1)
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),
     path('demo/', DemoPageView.as_view(), name='demo-page'),

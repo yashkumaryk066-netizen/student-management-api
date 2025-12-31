@@ -195,11 +195,75 @@ function hideLoading(button, text) {
 
 // Helper function to show toast notifications
 function showToast(message, type = 'success') {
-    // You can implement a toast notification library here
-    // For now, just use alert
-    if (type === 'error') {
-        alert('Error: ' + message);
-    } else {
-        alert(message);
+    // Check if toast container exists, if not create it
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        `;
+        document.body.appendChild(toastContainer);
     }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    // Icon based on type
+    let icon = '✅';
+    let bgColor = 'rgba(16, 185, 129, 0.9)'; // success
+    if (type === 'error') {
+        icon = '❌';
+        bgColor = 'rgba(239, 68, 68, 0.9)';
+    } else if (type === 'warning') {
+        icon = '⚠️';
+        bgColor = 'rgba(245, 158, 11, 0.9)';
+    } else if (type === 'info') {
+        icon = 'ℹ️';
+        bgColor = 'rgba(59, 130, 246, 0.9)';
+    }
+
+    toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+        transform: translateX(120%);
+        transition: transform 0.3s ease-out;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+    `;
+
+    toast.innerHTML = `
+        <span style="font-size: 1.2rem;">${icon}</span>
+        <span>${message}</span>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(0)';
+    });
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
 }

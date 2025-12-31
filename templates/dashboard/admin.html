@@ -111,6 +111,9 @@
         </nav>
     </aside>
 
+    <!-- API Helper -->
+    <script src="/static/js/api.js"></script>
+
     <!-- Main Content -->
     <main class="main-content">
         <!-- Top Header -->
@@ -124,6 +127,13 @@
             </div>
 
             <div class="header-actions">
+                <div
+                    style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <span
+                        style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
+                    LIVE SERVER
+                </div>
+
                 <button class="header-btn">
                     🔔
                     <span class="notification-badge"></span>
@@ -137,7 +147,7 @@
                     <div class="user-avatar">YM</div>
                     <div class="user-info">
                         <div class="user-name">Yash A Mishra</div>
-                        <div class="user-role">Administrator</div>
+                        <div class="user-role">Super Admin</div>
                     </div>
                 </div>
             </div>
@@ -386,11 +396,8 @@
             });
         });
 
-        function navigateTo(section) {
-            console.log('Navigating to:', section);
-            // Add navigation logic here
-            // For now, you can redirect to different URLs or load content dynamically
-        }
+        // navigateTo function is now handled by /static/js/dashboard/admin.js
+        // which provides full SPA functionality
 
         // Add smooth scroll for better UX
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -406,6 +413,9 @@
             });
         });
     </script>
+
+    <!-- Dashboard SPA System -->
+    <script src="/static/js/dashboard/admin.js"></script>
 </body>
 
 </html>

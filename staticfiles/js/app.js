@@ -1,10 +1,7 @@
 // Update API URL for production
-const API_BASE_URL = 'https://yashamishra.pythonanywhere.com/api'; // Connected to live PythonAnywhere backend
+// API_BASE_URL is now defined in api.js
 let authToken = localStorage.getItem('token');
 let selectedRole = '';
-
-// Rest of the code remains the same...
-// [Previous app.js code continues here]
 
 // Open Login Modal
 function openLoginModal() {
@@ -29,6 +26,7 @@ function selectRole(role) {
 }
 
 // Handle Login
+// Handle Login
 async function handleLogin(event) {
     event.preventDefault();
 
@@ -36,44 +34,43 @@ async function handleLogin(event) {
     const password = document.getElementById('password').value;
 
     if (!selectedRole) {
-        alert('Please select your role first!');
+        showToast('Please select your role first!', 'warning');
         return;
     }
 
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+    showLoading(submitBtn);
+
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/login/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password })
-        });
+        const response = await AuthAPI.login(username, password);
 
-        const data = await response.json();
+        // Store tokens
+        localStorage.setItem('token', response.access);
+        localStorage.setItem('authToken', response.access); // For api.js compatibility
+        localStorage.setItem('username', username);
+        localStorage.setItem('role', selectedRole);
+        localStorage.setItem('userRole', selectedRole.toLowerCase());
 
-        if (response.ok) {
-            authToken = data.access;
-            localStorage.setItem('token', authToken);
-            localStorage.setItem('username', username);
-            localStorage.setItem('role', selectedRole);
+        showToast('Login successful! Redirecting...', 'success');
 
-            // Redirect based on role
-            redirectToDashboard(selectedRole);
-        } else {
-            alert('Invalid username or password');
-        }
+        // Redirect based on role
+        redirectToDashboard(selectedRole);
+
     } catch (error) {
-        alert('Connection error. Please check if the server is running.');
-        console.error(error);
+        showToast(error.message || 'Invalid username or password', 'error');
+        hideLoading(submitBtn, originalText);
     }
 }
 
 // Redirect to Dashboard
+// Redirect to Dashboard
 function redirectToDashboard(role) {
-    alert(`Welcome! Redirecting to ${role} dashboard...`);
-    // For now, just show dashboard will be implemented
+    // Redirect to correct dashboard page
+
+    const roleLower = role.toLowerCase();
     setTimeout(() => {
-        window.location.href = '../frontend/index.html';
+        window.location.href = '/dashboard/' + roleLower + '/';
     }, 1000);
 }
 
@@ -106,12 +103,12 @@ function showDemoTour() {
 function contactSales() {
     const phone = '8356926231';
     const message = 'Hi! I am interested in the Enterprise Plan for Institute Management System.';
-    const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = 'https://wa.me/91' + phone + '?text=' + encodeURIComponent(message);
 
     if (confirm('Contact us for Enterprise plan?\n\n📞 Call: ' + phone + '\n💬 WhatsApp\n\nClick OK for WhatsApp, Cancel to call')) {
         window.open(whatsappUrl, '_blank');
     } else {
-        window.location.href = `tel:+91${phone}`;
+        window.location.href = 'tel:+91' + phone;
     }
 }
 

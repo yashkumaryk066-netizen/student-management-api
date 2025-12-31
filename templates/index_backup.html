@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen Enterprise ERP | USA Standard Education Management</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=5.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+</head>
+
+<body>
+    <!-- Particle Background -->
+    <div id="particles-container" class="particles-bg"></div>
+
+    <!-- Professional Grid Background -->
+    <div class="grid-bg"></div>
+    <div class="glow-spot"></div>
+
+    <!-- Preloader -->
+    <div id="preloader"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #020617; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
+        <div style="text-align: center;">
+            <div
+                style="width: 50px; height: 50px; border: 3px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;">
+            </div>
+            <div style="font-family: monospace; color: #94a3b8; letter-spacing: 2px;">INITIALIZING SYSTEM V4.0...</div>
+        </div>
+    </div>
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script>window.onload = () => setTimeout(() => document.getElementById('preloader').style.display = 'none', 1500);</script>
+
+    <!-- Dense Navbar -->
+    <nav class="navbar">
+        <a href="#" class="logo" style="flex-direction: column; align-items: flex-start; gap: 0;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span>🎓</span>
+                <span>NEXTGEN ERP <span
+                        style="font-size: 0.8em; color: #94a3b8; font-weight: 400;">ENTERPRISE</span></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; margin-left: 45px;">
+                <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;">by Yash A
+                    Mishra</span>
+                <img src="/static/images/author.jpg"
+                    onerror="this.src='https://ui-avatars.com/api/?name=Yash+Mishra&background=0D8ABC&color=fff&rounded=true&bold=true'"
+                    style="width: 18px; height: 18px; border-radius: 50%; border: 1px solid #3b82f6;" alt="YM">
+            </div>
+        </a>
+        <div class="nav-links">
+            <a href="#features" class="nav-link">Modules</a>
+            <a href="#about" class="nav-link">Architecture</a>
+            <a href="#pricing" class="nav-link">Pricing</a>
+
+            <!-- Login Agent / Pointer -->
+            <div class="login-guide-wrapper">
+                <div class="login-pointer">
+                    <span class="pointer-text">Secure Access Portal</span>
+                    <div class="pointer-arrow"></div>
+                </div>
+                <button class="btn-primary" onclick="openLoginModal()"
+                    style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
+                        </path>
+                    </svg>
+                    LOGIN
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Advanced 3D Holographic Hero Section -->
+    <section class="container hero-section"
+        style="perspective: 1500px; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: visible;">
+
+        <!-- Background Holographic Grid (Floor) -->
+        <div class="holo-floor"></div>
+
+        <div class="hero-content-wrapper"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; width: 100%; align-items: center; z-index: 10;">
+            <!-- Left: Text Content with Glitch Effect -->
+            <div class="hero-left" data-tilt data-tilt-max="5">
+                <div class="holo-badge">
+                    <span class="pulse-dot"></span> SYSTEM ONLINE
+                </div>
+                <h1 class="glitch-text" data-text="The Complete Operating System for Education">The Complete Operating
+                    System for Education</h1>
+                <p class="hero-desc">
+                    <span class="bracket">[</span> <span class="typing-text">Initializing Advanced Educational
+                        Protocol...</span> <span class="bracket">]</span>
+                </p>
+                <div class="hero-actions">
+                    <button onclick="openLoginModal()" class="btn-cyber btn-glitch">
+                        <span class="cybr-btn__glitch">Initialize_Login</span>
+                        <span class="cybr-btn__tag">R25</span>
+                        <span class="btn-text">ACCESS PORTAL</span>
+                    </button>
+                    <a href="/demo/" class="btn-holo">
+                        <span class="btn-text">LIVE DEMO</span>
+                        <div class="scan-line"></div>
+                    </a>
+                </div>
+
+                <div class="hero-stats-3d">
+                    <div class="stat-cube">
+                        <div class="face front">50+<br><span>MODULES</span></div>
+                        <div class="face back">50+</div>
+                        <div class="face right"></div>
+                        <div class="face left"></div>
+                        <div class="face top"></div>
+                        <div class="face bottom"></div>
+                    </div>
+                    <div class="stat-cube" style="animation-delay: 1s;">
+                        <div class="face front">99.9%<br><span>UPTIME</span></div>
+                        <div class="face back">99.9%</div>
+                        <div class="face right"></div>
+                        <div class="face left"></div>
+                        <div class="face top"></div>
+                        <div class="face bottom"></div>
+                    </div>
+                    <div class="stat-cube" style="animation-delay: 2s;">
+                        <div class="face front">24/7<br><span>SUPPORT</span></div>
+                        <div class="face back">24/7</div>
+                        <div class="face right"></div>
+                        <div class="face left"></div>
+                        <div class="face top"></div>
+                        <div class="face bottom"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: 3D Holographic Core -->
+            <div class="hero-right"
+                style="position: relative; height: 600px; display: flex; align-items: center; justify-content: center;">
+                <div class="holo-container">
+                    <!-- Spinning Rings -->
+                    <div class="ring ring-outer"></div>
+                    <div class="ring ring-middle"></div>
+                    <div class="ring ring-inner"></div>
+
+                    <!-- Central Core -->
+                    <div class="core-sphere"></div>
+
+                    <!-- Floating Data Points -->
+                    <div class="data-point p1">Students: 1542</div>
+                    <div class="data-point p2">Staff: 120</div>
+                    <div class="data-point p3">Revenue: +12%</div>
+
+                    <!-- Scanning Beam -->
+                    <div class="scanner-beam"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dense Module Grid (Bento) -->
+    <section id="features" class="container features-section">
+        <div class="section-header">
+            <div style="color: var(--primary); letter-spacing: 2px; font-weight: 700; margin-bottom: 10px;">FULL STACK
+                ERP
+            </div>
+            <h2>Comprehensive Modules</h2>
+            <p style="color: #94a3b8;">Everything you need to run a modern educational institution.</p>
+        </div>
+
+        <div class="bento-grid">
+            <!-- Academics -->
+            <div class="bento-card large">
+                <div>
+                    <div class="card-icon">📚</div>
+                    <h3>Academic Management</h3>
+                    <p>Class & Section management, Subject allocation, Lesson planning, Timetables, and Syllabus
+                        tracking. Supports K-12 to University levels.</p>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 8px;">
+                    <span
+                        style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px;">Exams</span>
+                    <span
+                        style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px;">Grades</span>
+                    <span
+                        style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px;">GPA/CGPA</span>
+                </div>
+            </div>
+
+            <!-- Finance -->
+            <div class="bento-card">
+                <div class="card-icon">💵</div>
+                <h3>Finance & Payroll</h3>
+                <p>Fee collection, Staff payroll, Expense tracking & Auditing.</p>
+            </div>
+
+            <!-- Hostel -->
+            <div class="bento-card tall">
+                <div class="card-icon">🏢</div>
+                <h3>Hostel & Residential</h3>
+                <p>Complete room allocation, Mess management, Gate pass system, and Inventory.</p>
+                <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.85em; color: #94a3b8; margin-bottom: 8px;">Hostel Types</div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 0.8em;">• Boys Hostel</span>
+                        <span style="font-size: 0.8em;">• Girls Hostel</span>
+                        <span style="font-size: 0.8em;">• Staff Quarters</span>
+                        <span style="font-size: 0.8em;">• Guest House</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transport -->
+            <div class="bento-card">
+                <div class="card-icon">🚌</div>
+                <h3>Transport</h3>
+                <p>Fleet management, Route planning, GPS tracking & Driver logs.</p>
+            </div>
+
+            <!-- Library -->
+            <div class="bento-card">
+                <div class="card-icon">📖</div>
+                <h3>Digital Library</h3>
+                <p>Book issue/return, RFID integration, and OPAC system.</p>
+            </div>
+
+            <!-- HR -->
+            <div class="bento-card">
+                <div class="card-icon">👥</div>
+                <h3>Human Resources</h3>
+                <p>Recruitment, Leave management, Biometric attendance.</p>
+            </div>
+
+            <!-- Communication -->
+            <div class="bento-card large">
+                <div>
+                    <div class="card-icon">📢</div>
+                    <h3>Communication Hub</h3>
+                    <p>SMS, Email & App Notifications. Circulars, Event management and Parent-Teacher communication
+                        portal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="container" style="padding: 100px 24px;">
+        <div class="section-header">
+            <div style="color: var(--primary); letter-spacing: 2px; font-weight: 700; margin-bottom: 10px;">FLEXIBLE
+                PLANS
+            </div>
+            <h2>Choose Your Plan</h2>
+            <p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">Transparent pricing for institutions of all
+                sizes. All plans include free updates and 24/7 support.</p>
+        </div>
+
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 60px;">
+
+            <!-- Starter Plan -->
+            <div class="pricing-card"
+                style="background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 40px; position: relative; overflow: hidden; transition: 0.3s;">
+                <div
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent); border-radius: 50%;">
+                </div>
+
+                <h3 style="font-size: 1.5rem; color: white; margin-bottom: 8px;">Starter</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 24px;">Perfect for small coaching centers
+                </p>
+
+                <div style="margin-bottom: 32px;">
+                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                        <span style="font-size: 3rem; font-weight: 800; color: white;">₹12,999</span>
+                        <span style="color: #94a3b8; font-size: 0.9rem;">/year</span>
+                    </div>
+                    <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;">+ ₹199/student/month</p>
+                </div>
+
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; margin-bottom: 32px;">
+                    <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px; font-weight: 600;">INCLUDES:
+                    </div>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px;">
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Up to 200 Students
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Student & Attendance Management
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Fee Collection & Reports
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            SMS Notifications (500/month)
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Mobile App Access
+                        </li>
+                    </ul>
+                </div>
+
+                <button
+                    onclick="window.open('https://wa.me/918356926231?text=I%20want%20to%20subscribe%20to%20the%20Starter%20Plan', '_blank')"
+                    class="btn-secondary" style="width: 100%; padding: 14px;">
+                    Get Started
+                </button>
+            </div>
+
+            <!-- Professional Plan (Most Popular) -->
+            <div class="pricing-card"
+                style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.15)); border: 2px solid var(--primary); border-radius: 16px; padding: 40px; position: relative; overflow: hidden; transition: 0.3s; transform: scale(1.05);">
+                <div
+                    style="position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;">
+                    MOST POPULAR
+                </div>
+
+                <h3 style="font-size: 1.5rem; color: white; margin-bottom: 8px; margin-top: 20px;">Professional</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 24px;">Ideal for schools & colleges</p>
+
+                <div style="margin-bottom: 32px;">
+                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                        <span style="font-size: 3rem; font-weight: 800; color: white;">₹49,999</span>
+                        <span style="color: #94a3b8; font-size: 0.9rem;">/year</span>
+                    </div>
+                    <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;">+ ₹149/student/month</p>
+                </div>
+
+                <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 24px; margin-bottom: 32px;">
+                    <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px; font-weight: 600;">EVERYTHING
+                        IN STARTER, PLUS:</div>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px;">
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Up to 1000 Students
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Library Management
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Hostel & Transport Management
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            WhatsApp Notifications (Unlimited)
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Parent Portal Access
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Priority Support
+                        </li>
+                    </ul>
+                </div>
+
+                <button
+                    onclick="window.open('https://wa.me/918356926231?text=I%20want%20to%20subscribe%20to%20the%20Professional%20Plan', '_blank')"
+                    class="btn-primary"
+                    style="width: 100%; padding: 14px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);">
+                    Get Started
+                </button>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="pricing-card"
+                style="background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 40px; position: relative; overflow: hidden; transition: 0.3s;">
+                <div
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(180, 83, 9, 0.1), transparent); border-radius: 50%;">
+                </div>
+
+                <h3 style="font-size: 1.5rem; color: white; margin-bottom: 8px;">Enterprise</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 24px;">For universities & large institutions
+                </p>
+
+                <div style="margin-bottom: 32px;">
+                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                        <span style="font-size: 2.5rem; font-weight: 800; color: white;">Custom</span>
+                    </div>
+                    <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;">Tailored to your needs</p>
+                </div>
+
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; margin-bottom: 32px;">
+                    <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px; font-weight: 600;">EVERYTHING
+                        IN PROFESSIONAL, PLUS:</div>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px;">
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Unlimited Students
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            HR & Payroll Management
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Multi-Campus Support
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Custom Integrations & API
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            Dedicated Account Manager
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px; color: #cbd5e1;">
+                            <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                            On-Premise Deployment Option
+                        </li>
+                    </ul>
+                </div>
+
+                <button
+                    onclick="window.open('https://wa.me/918356926231?text=I%20want%20to%20know%20more%20about%20the%20Enterprise%20Plan', '_blank')"
+                    class="btn-secondary" style="width: 100%; padding: 14px;">
+                    Contact Sales
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Additional Info -->
+        <div
+            style="text-align: center; margin-top: 60px; padding: 30px; background: rgba(59, 130, 246, 0.05); border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+            <p style="color: #cbd5e1; font-size: 1.1rem; margin-bottom: 16px;">
+                <strong style="color: white;">All plans include:</strong> Free software updates, Cloud backup, Data
+                security compliance, Migration support
+            </p>
+            <p style="color: #94a3b8; font-size: 0.9rem;">
+                💰 Save 20% with annual billing | 🎓 Special discounts for government institutions | 📞 Call 8356926231
+                for custom quotes
+            </p>
+        </div>
+    </section>
+
+    <!-- Request Demo CTA Section -->
+    <section class="container" style="padding: 100px 24px; text-align: center;">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <h2 class="text-3d" style="font-size: 3rem; margin-bottom: 24px; color: white;">Ready to Transform Your
+                Institution?</h2>
+            <p style="color: #94a3b8; font-size: 1.2rem; margin-bottom: 40px;">Schedule a personalized demo and see how
+                NextGen ERP can revolutionize your educational management.</p>
+
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <a href="https://wa.me/918356926231?text=Hi!%20I%20want%20to%20request%20a%20demo%20of%20NextGen%20ERP"
+                    target="_blank" class="btn-demo">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                    WhatsApp Demo Request
+                </a>
+
+                <a href="tel:+918356926231" class="btn-primary" style="font-size: 1rem; padding: 14px 32px;">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                    </svg>
+                    Call Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Footer -->
+    <footer class="contact-footer">
+        <div class="footer-grid">
+            <!-- Brand & About -->
+            <div class="footer-brand">
+                <h2>
+                    <span style="font-size: 2rem;">🎓</span>
+                    <div>
+                        NextGen ERP
+                        <div
+                            style="font-size: 0.8rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                            by Yash A Mishra
+                            <img src="/static/images/author.jpg"
+                                onerror="this.src='https://ui-avatars.com/api/?name=Yash+Mishra&background=0D8ABC&color=fff&rounded=true&bold=true'"
+                                style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid #3b82f6;"
+                                alt="YM">
+                        </div>
+                    </div>
+                </h2>
+                <p>The most comprehensive education management system designed for modern institutions. Built with
+                    cutting-edge technology to streamline academic, administrative, and financial operations.</p>
+
+                <div class="social-icons">
+                    <a href="https://wa.me/918356926231" target="_blank" class="social-icon" title="WhatsApp">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                    </a>
+                    <a href="mailto:yashkumaryk066@gmail.com" target="_blank" class="social-icon" title="Email">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="footer-section">
+                <h3>Platform</h3>
+                <div class="footer-links">
+                    <a href="#features" class="footer-link">Features</a>
+                    <a href="/demo/" class="footer-link">Live Demo</a>
+                    <a href="/admin/" class="footer-link">Admin Panel</a>
+                    <a href="/swagger/" class="footer-link">API Docs</a>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="footer-section">
+                <h3>Get in Touch</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <a href="tel:+918356926231" class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <div style="font-weight: 600; color: white;">Call Us</div>
+                            <div>+91 8356926231</div>
+                        </div>
+                    </a>
+
+                    <a href="mailto:yashkumaryk066@gmail.com" class="contact-item">
+                        <div class="contact-icon">✉️</div>
+                        <div>
+                            <div style="font-weight: 600; color: white;">Email</div>
+                            <div>yashkumaryk066@gmail.com</div>
+                        </div>
+                    </a>
+
+                    <a href="https://wa.me/918356926231?text=Hi!%20I%20want%20to%20know%20more%20about%20NextGen%20ERP"
+                        target="_blank" class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div>
+                            <div style="font-weight: 600; color: white;">WhatsApp</div>
+                            <div>Chat with us</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 NextGen Enterprise ERP. All rights reserved. | Built for Educational Excellence</p>
+            <p style="margin-top: 8px; font-size: 0.8rem;">Serving Schools, Colleges, Universities & Coaching Institutes
+                Worldwide</p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-content">
+            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Portal Access</h2>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Select your role to continue to the dashboard.</p>
+            </div>
+
+            <div class="role-selector">
+                <div class="role-btn" onclick="selectRole('STUDENT')">
+                    <div style="font-size: 1.5rem; margin-bottom: 5px;">🎓</div>
+                    <div style="font-size: 0.9rem; font-weight: 500;">Student</div>
+                </div>
+                <div class="role-btn" onclick="selectRole('TEACHER')">
+                    <div style="font-size: 1.5rem; margin-bottom: 5px;">👨‍🏫</div>
+                    <div style="font-size: 0.9rem; font-weight: 500;">Teacher</div>
+                </div>
+                <div class="role-btn" onclick="selectRole('PARENT')">
+                    <div style="font-size: 1.5rem; margin-bottom: 5px;">👪</div>
+                    <div style="font-size: 0.9rem; font-weight: 500;">Parent</div>
+                </div>
+                <div class="role-btn" onclick="selectRole('ADMIN')">
+                    <div style="font-size: 1.5rem; margin-bottom: 5px;">🔐</div>
+                    <div style="font-size: 0.9rem; font-weight: 500;">Admin</div>
+                </div>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <input type="hidden" id="selectedRole" value="">
+                <div class="form-group">
+                    <label>Username / ID</label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter your ID" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Secure Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Init 3D Tilt
+        if (window.VanillaTilt) {
+            VanillaTilt.init(document.querySelector(".dashboard-mockup"), {
+                max: 10,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.2
+            });
+        }
+    </script>
+    <!-- Falling Name Effect (Yash A Mishra) -->
+    <div id="rain-container"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -3; pointer-events: none; overflow: hidden;">
+    </div>
+    <style>
+        .falling-name {
+            position: absolute;
+            top: -50px;
+            color: rgba(59, 130, 246, 0.15);
+            /* Very subtle blue */
+            font-weight: 800;
+            font-family: 'monospace';
+            text-transform: uppercase;
+            white-space: nowrap;
+            user-select: none;
+            writing-mode: vertical-rl;
+            /* Vertical Text like Matrix? Or just falling? User said "UPER SE NICHE CHALTE RHE". Usually falling text. */
+            /* User probably means falling down. vertical-rl makes the text vertical. */
+            /* I'll stick to horizontal text falling down. "Chalte rhe" implies motion. */
+            animation: fall linear forwards;
+        }
+
+        /* Let's make it vertical text for style? "Matrix" style. */
+        /* But user name "Yash A Mishra" is long. Horizontal is better. */
+        @keyframes fall {
+            to {
+                transform: translateY(120vh);
+                opacity: 0;
+            }
+        }
+    </style>
+    <script>
+        function createRainDrop() {
+            const container = document.getElementById('rain-container');
+            if (!container) return;
+            const drop = document.createElement('div');
+            drop.innerText = 'YASH A MISHRA';
+            drop.className = 'falling-name';
+            drop.style.left = Math.random() * 100 + 'vw';
+            const duration = Math.random() * 15 + 10; // Slow fall
+            drop.style.animationDuration = duration + 's';
+            drop.style.fontSize = (Math.random() * 14 + 10) + 'px';
+            drop.style.opacity = Math.random() * 0.2 + 0.05;
+            container.appendChild(drop);
+            setTimeout(() => drop.remove(), duration * 1000);
+        }
+        setInterval(createRainDrop, 500); 
+    </script>
+
+    <!--  Welcome Popup -->
+    <div id="welcome-popup" class="welcome-popup" style="display: none;">
+        <div class="welcome-header">
+            <div class="welcome-icon">🎓</div>
+            <div class="welcome-text">
+                <h3>Welcome to NextGen ERP!</h3>
+                <p>Your Institution, Simplified.</p>
+            </div>
+        </div>
+        <div class="welcome-body">
+            <p>Experience the most comprehensive education management system designed for modern institutions.</p>
+            <ul>
+                <li>Manage 1000+ students effortlessly</li>
+                <li>99.9% uptime guarantee</li>
+                <li>24/7 dedicated support</li>
+                <li>USA standard compliance</li>
+            </ul>
+        </div>
+        <div class="welcome-actions">
+            <button class="welcome-btn welcome-btn-primary" onclick="openLoginModal(); closeWelcomePopup();">
+                Get Started
+            </button>
+            <button class="welcome-btn welcome-btn-secondary" onclick="closeWelcomePopup();">
+                Explore First
+            </button>
+        </div>
+    </div>
+
+    <!-- Load Animation Scripts -->
+    <link rel="stylesheet" href="/static/css/animations.css?v=3.1">
+    <script src="/static/js/animations.js"></script>
+</body>
+
+</html>

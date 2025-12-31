@@ -1,401 +1,623 @@
-// Admin Dashboard JavaScript
-let studentsData = [];
-let attendanceData = [];
-let paymentsData = [];
+// Dashboard SPA System - Main Application Logic
+const DashboardApp = {
+    currentModule: 'dashboard',
+    apiBaseUrl: '/api',
 
-// Initialize dashboard
-document.addEventListener('DOMContentLoaded', async () => {
-    // Check authentication
-    checkAuth();
+    init() {
+        this.setupNavigation();
+        this.setupLogout();
+        this.loadInitialView();
+    },
 
-    // Set user info
-    const user = getCurrentUser();
-    document.getElementById('userName').textContent = user.fullName || user.username;
-    document.getElementById('userName').nextElementSibling.textContent = user.fullName ? user.fullName[0].toUpperCase() : 'A';
+    setupNavigation() {
+        // Handle all nav-link clicks
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
 
-    // Set today's date for attendance
-    document.getElementById('attendanceDate').valueAsDate = new Date();
+                // Update active state
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
 
-    // Load initial data
-    await loadDashboardData();
-});
+                // Get module name from href (#students -> students)
+                const module = link.getAttribute('href').substring(1);
+                this.loadModule(module);
 
-// Show/Hide Sections
-function showSection(sectionName) {
-    // Remove active class from all nav items
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                // Close sidebar on mobile
+                if (window.innerWidth <= 1024) {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+            });
+        });
 
-    // Add active class to clicked nav item
-    event.target.classList.add('active');
+        // Handle module card clicks
+        document.querySelectorAll('.module-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const onclick = card.getAttribute('onclick');
+                if (onclick) {
+                    const module = onclick.match(/navigateTo\('(.+)'\)/)[1];
+                    this.loadModule(module);
+                }
+            });
+        });
+    },
 
-    // Hide all sections
-    document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+    setupLogout() {
+        // Add logout button to settings
+        const settingsLink = document.querySelector('a[href="#settings"]');
+        if (settingsLink) {
+            settingsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showSettings();
+            });
+        }
+    },
 
-    // Show selected section
-    document.getElementById(`${sectionName}-section`).classList.add('active');
+    loadInitialView() {
+        // Check URL hash
+        const hash = window.location.hash.substring(1);
+        if (hash && hash !== 'dashboard') {
+            this.loadModule(hash);
+        }
+    },
 
-    // Update page title
-    const titles = {
-        'dashboard': 'Dashboard',
-        'students': 'Student Management',
-        'attendance': 'Attendance',
-        'payments': 'Payments',
-        'notifications': 'Notifications',
-        'reports': 'Reports'
-    };
-    document.getElementById('pageTitle').textContent = titles[sectionName];
+    loadModule(moduleName) {
+        console.log('Loading module:', moduleName);
+        this.currentModule = moduleName;
+        window.location.hash = moduleName;
 
-    // Load section data
-    switch (sectionName) {
-        case 'dashboard':
-            loadDashboardData();
-            break;
-        case 'students':
-            loadStudents();
-            break;
-        case 'attendance':
-            loadAttendanceGrid();
-            break;
-        case 'payments':
-            loadPayments();
-            break;
-        case 'notifications':
-            loadNotifications();
-            break;
-    }
-}
+        // Get the dashboard content container
+        const container = document.getElementById('dashboardView');
+        if (!container) return;
 
-// Load Dashboard Data
-async function loadDashboardData() {
-    try {
-        // Load students
-        const students = await StudentAPI.getAll();
-        studentsData = students;
+        // Show loading state
+        container.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
-        // Update stats
-        document.getElementById('totalStudents').textContent = students.length;
+        // Load appropriate module content
+        switch (moduleName) {
+            case 'dashboard':
+                this.loadDashboardHome();
+                break;
+            case 'students':
+                this.loadStudentManagement();
+                break;
+            case 'attendance':
+                this.loadAttendanceSystem();
+                break;
+            case 'finance':
+                this.loadFinanceManagement();
+                break;
+            case 'library':
+                this.loadLibraryManagement();
+                break;
+            case 'hostel':
+                this.loadHostelManagement();
+                break;
+            case 'transport':
+                this.loadTransportManagement();
+                break;
+            case 'hr':
+                this.loadHRManagement();
+                break;
+            case 'exams':
+                this.loadExamManagement();
+                break;
+            case 'events':
+                this.loadEventManagement();
+                break;
+            case 'reports':
+                this.loadReportsAnalytics();
+                break;
+            case 'settings':
+                this.showSettings();
+                break;
+            default:
+                this.loadDashboardHome();
+        }
+    },
 
-        // Load attendance for today
-        const attendance = await AttendanceAPI.getAll();
-        const today = new Date().toISOString().split('T')[0];
-        const todayAttendance = attendance.filter(a => a.date === today && a.status === 'P');
-        document.getElementById('presentToday').textContent = todayAttendance.length;
+    loadDashboardHome() {
+        // This is the existing dashboard HTML - keep it as is
+        window.location.reload(); // Reload to show original dashboard
+    },
 
-        // Load payments
-        const payments = await PaymentAPI.getAll();
-        const totalRevenue = payments
-            .filter(p => p.status === 'PAID')
-            .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-        document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
-
-        const pendingPayments = payments.filter(p => p.status === 'PENDING' || p.status === 'OVERDUE').length;
-        document.getElementById('pendingPayments').textContent = pendingPayments;
-
-        // Load recent activity
-        displayRecentActivity(attendance, students);
-
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        document.getElementById('recentActivityList').innerHTML = '<p class="text-danger">Error loading data</p>';
-    }
-}
-
-function displayRecentActivity(attendance, students) {
-    const activityList = document.getElementById('recentActivityList');
-    const recentAttendance = attendance.slice(0, 10);
-
-    if (recentAttendance.length === 0) {
-        activityList.innerHTML = '<p class="text-muted">No recent activity</p>';
-        return;
-    }
-
-    const html = recentAttendance.map(att => {
-        const student = students.find(s => s.id === att.student);
-        const studentName = student ? `${student.first_name} ${student.last_name}` : 'Unknown';
-        const statusColor = att.status === 'P' ? 'success' : 'danger';
-        const statusText = att.status === 'P' ? 'Present' : 'Absent';
-
-        return `
-            <div style="padding: 12px; border-bottom: 1px solid var(--border);">
-                <strong>${studentName}</strong> marked <span class="badge badge-${statusColor}">${statusText}</span>
-                <br><small class="text-muted">${new Date(att.date).toLocaleDateString()}</small>
+    loadStudentManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">👥 Student Management</h1>
+                <button class="btn-primary" onclick="DashboardApp.showAddStudentForm()">
+                    + Add New Student
+                </button>
+            </div>
+            
+            <div class="filter-bar">
+                <input type="text" id="studentSearch" placeholder="Search students..." class="search-input">
+                <select class="filter-select">
+                    <option value="">All Classes</option>
+                    <option value="9">Class 9</option>
+                    <option value="10">Class 10</option>
+                    <option value="11">Class 11</option>
+                    <option value="12">Class 12</option>
+                </select>
+                <select class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Parent</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <tr><td colspan="7" class="text-center">Loading students...</td></tr>
+                    </tbody>
+                </table>
             </div>
         `;
-    }).join('');
 
-    activityList.innerHTML = html;
-}
+        this.fetchStudents();
+    },
 
-// Students Management
-async function loadStudents() {
-    try {
-        const students = await StudentAPI.getAll();
-        studentsData = students;
-        displayStudents(students);
-    } catch (error) {
-        console.error('Error loading students:', error);
-        document.getElementById('studentsTableBody').innerHTML =
-            '<tr><td colspan="6" class="text-center text-danger">Error loading students</td></tr>';
-    }
-}
+    fetchStudents() {
+        // Fetch from API
+        fetch(`${this.apiBaseUrl}/students/`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                this.renderStudents(data.results || data);
+            })
+            .catch(err => {
+                console.error('Error fetching students:', err);
+                document.getElementById('studentsTableBody').innerHTML =
+                    '<tr><td colspan="7" class="text-center text-danger">Error loading students. <a href="/admin/student/student/">Use Admin Panel</a></td></tr>';
+            });
+    },
 
-function displayStudents(students) {
-    const tbody = document.getElementById('studentsTableBody');
-
-    if (students.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No students found</td></tr>';
-        return;
-    }
-
-    const html = students.map(student => `
-        <tr>
-            <td>${student.id}</td>
-            <td>${student.first_name} ${student.last_name}</td>
-            <td>${student.email || '-'}</td>
-            <td>${student.phone || '-'}</td>
-            <td>${student.gender}</td>
-            <td>
-                <button onclick="editStudent(${student.id})" class="btn btn-secondary" style="padding: 5px 10px; margin-right: 5px;">Edit</button>
-                <button onclick="deleteStudent(${student.id})" class="btn" style="padding: 5px 10px; background: var(--danger); color: white;">Delete</button>
-            </td>
-        </tr>
-    `).join('');
-
-    tbody.innerHTML = html;
-}
-
-// Search students
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('studentSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = studentsData.filter(s =>
-                `${s.first_name} ${s.last_name}`.toLowerCase().includes(query) ||
-                (s.email && s.email.toLowerCase().includes(query))
-            );
-            displayStudents(filtered);
-        });
-    }
-});
-
-function showAddStudentForm() {
-    document.getElementById('addStudentForm').style.display = 'flex';
-}
-
-function hideAddStudentForm() {
-    document.getElementById('addStudentForm').style.display = 'none';
-    document.getElementById('studentForm').reset();
-}
-
-async function handleAddStudent(event) {
-    event.preventDefault();
-
-    const form = event.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-
-    try {
-        await StudentAPI.create(data);
-        alert('Student added successfully!');
-        hideAddStudentForm();
-        loadStudents();
-    } catch (error) {
-        alert('Error adding student: ' + error.message);
-    }
-}
-
-async function deleteStudent(id) {
-    if (!confirm('Are you sure you want to delete this student?')) return;
-
-    try {
-        await StudentAPI.delete(id);
-        alert('Student deleted successfully!');
-        loadStudents();
-    } catch (error) {
-        alert('Error deleting student: ' + error.message);
-    }
-}
-
-// Attendance Management
-async function loadAttendanceGrid() {
-    try {
-        const students = await StudentAPI.getAll();
-        const grid = document.getElementById('attendanceGrid');
-
-        if (students.length === 0) {
-            grid.innerHTML = '<p class="text-muted">No students found</p>';
+    renderStudents(students) {
+        const tbody = document.getElementById('studentsTableBody');
+        if (!students || students.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No students found</td></tr>';
             return;
         }
 
-        const html = students.map(student => `
-            <div class="attendance-card" data-student-id="${student.id}">
-                <div>
-                    <strong>${student.first_name} ${student.last_name}</strong>
-                    <br><small class="text-muted">ID: ${student.id}</small>
-                </div>
-                <div>
-                    <button onclick="markPresent(${student.id})" class="btn btn-secondary" style="padding: 8px 15px; margin-right: 10px; background: var(--success); color: white;">
-                        ✓ Present
-                    </button>
-                    <button onclick="markAbsent(${student.id})" class="btn btn-secondary" style="padding: 8px 15px; background: var(--danger); color: white;">
-                        ✗ Absent
-                    </button>
-                </div>
-            </div>
-        `).join('');
-
-        grid.innerHTML = `<div style="display: grid; gap: 15px;">${html}</div>`;
-    } catch (error) {
-        console.error('Error loading attendance grid:', error);
-    }
-}
-
-const attendanceMarks = {};
-
-function markPresent(studentId) {
-    attendanceMarks[studentId] = 'P';
-    const card = document.querySelector(`[data-student-id="${studentId}"]`);
-    card.style.background = '#d1fae5';
-    card.style.border = '2px solid var(--success)';
-}
-
-function markAbsent(studentId) {
-    attendanceMarks[studentId] = 'A';
-    const card = document.querySelector(`[data-student-id="${studentId}"]`);
-    card.style.background = '#fee2e2';
-    card.style.border = '2px solid var(--danger)';
-}
-
-async function submitAttendance() {
-    const date = document.getElementById('attendanceDate').value;
-
-    if (Object.keys(attendanceMarks).length === 0) {
-        alert('Please mark attendance for at least one student');
-        return;
-    }
-
-    try {
-        for (const [studentId, status] of Object.entries(attendanceMarks)) {
-            await AttendanceAPI.mark({
-                student: parseInt(studentId),
-                date: date,
-                status: status
-            });
-        }
-
-        alert('Attendance saved successfully!');
-        // Clear marks
-        Object.keys(attendanceMarks).forEach(key => delete attendanceMarks[key]);
-        loadAttendanceGrid();
-    } catch (error) {
-        alert('Error saving attendance: ' + error.message);
-    }
-}
-
-// Payments Management
-async function loadPayments() {
-    try {
-        const payments = await PaymentAPI.getAll();
-        const students = await StudentAPI.getAll();
-        displayPayments(payments, students);
-    } catch (error) {
-        console.error('Error loading payments:', error);
-        document.getElementById('paymentsTableBody').innerHTML =
-            '<tr><td colspan="5" class="text-center text-danger">Error loading payments</td></tr>';
-    }
-}
-
-function displayPayments(payments, students) {
-    const tbody = document.getElementById('paymentsTableBody');
-
-    if (payments.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No payments found</td></tr>';
-        return;
-    }
-
-    const html = payments.map(payment => {
-        const student = students.find(s => s.id === payment.student);
-        const studentName = student ? `${student.first_name} ${student.last_name}` : 'Unknown';
-
-        let statusBadge = '';
-        if (payment.status === 'PAID') statusBadge = 'badge-success';
-        else if (payment.status === 'PENDING') statusBadge = 'badge-warning';
-        else statusBadge = 'badge-danger';
-
-        return `
+        tbody.innerHTML = students.map(student => `
             <tr>
-                <td>${studentName}</td>
-                <td>₹${parseFloat(payment.amount || 0).toLocaleString()}</td>
-                <td><span class="badge ${statusBadge}">${payment.status}</span></td>
-                <td>${new Date(payment.due_date).toLocaleDateString()}</td>
+                <td>#${student.id}</td>
+                <td>${student.name}</td>
+                <td>Class ${student.grade}</td>
+                <td>${student.age}</td>
+                <td>${student.gender}</td>
+                <td>${student.relation || 'N/A'}</td>
                 <td>
-                    ${payment.status !== 'PAID' ?
-                `<button onclick="markPaid(${payment.id})" class="btn btn-secondary" style="padding: 5px 10px;">Mark Paid</button>` :
-                '<span class="text-success">✓ Paid</span>'
-            }
+                    <button class="btn-action" onclick="DashboardApp.editStudent(${student.id})">Edit</button>
+                    <button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(${student.id})">Delete</button>
                 </td>
             </tr>
-        `;
-    }).join('');
+        `).join('');
+    },
 
-    tbody.innerHTML = html;
-}
-
-async function markPaid(paymentId) {
-    try {
-        await PaymentAPI.updateStatus(paymentId, 'PAID');
-        alert('Payment marked as paid!');
-        loadPayments();
-    } catch (error) {
-        alert('Error updating payment: ' + error.message);
-    }
-}
-
-// Notifications
-async function loadNotifications() {
-    try {
-        const notifications = await NotificationAPI.getAll();
-        displayNotifications(notifications);
-    } catch (error) {
-        console.error('Error loading notifications:', error);
-    }
-}
-
-function displayNotifications(notifications) {
-    const list = document.getElementById('notificationsList');
-
-    if (notifications.length === 0) {
-        list.innerHTML = '<p class="text-muted">No notifications sent yet</p>';
-        return;
-    }
-
-    const html = notifications.slice(0, 10).map(notif => `
-        <div style="padding: 15px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <strong>To: ${notif.target_role}</strong>
-                <small class="text-muted">${new Date(notif.created_at).toLocaleString()}</small>
+    loadAttendanceSystem() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">✅ Attendance System</h1>
+                <button class="btn-primary" onclick="DashboardApp.markAttendance()">
+                    Mark Today's Attendance
+                </button>
             </div>
-            <p style="margin: 0;">${notif.message}</p>
-        </div>
-    `).join('');
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">94.2%</div>
+                    <div class="stat-mini-label">Today's Attendance</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">91.8%</div>
+                    <div class="stat-mini-label">This Month</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">1,164</div>
+                    <div class="stat-mini-label">Present Today</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">70</div>
+                    <div class="stat-mini-label">Absent Today</div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>Attendance Reports</h3>
+                <p>View detailed attendance reports in the <a href="/admin/student/attendence/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
 
-    list.innerHTML = html;
-}
+    loadFinanceManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">💰 Finance & Payments</h1>
+                <button class="btn-primary" onclick="DashboardApp.addPayment()">
+                    + Create Fee Record
+                </button>
+            </div>
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">₹12.4L</div>
+                    <div class="stat-mini-label">Collected This Month</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">₹4.8L</div>
+                    <div class="stat-mini-label">Pending Fees</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">₹1.2L</div>
+                    <div class="stat-mini-label">Overdue</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">47</div>
+                    <div class="stat-mini-label">Pending Records</div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>Payment Management</h3>
+                <p>Manage all payments and fee collection in the <a href="/admin/student/payment/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
 
-async function handleSendNotification(event) {
-    event.preventDefault();
+    loadLibraryManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">📚 Library Management</h1>
+                <button class="btn-primary" onclick="DashboardApp.addBook()">
+                    + Add New Book
+                </button>
+            </div>
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">2,850</div>
+                    <div class="stat-mini-label">Total Books</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">412</div>
+                    <div class="stat-mini-label">Books Issued</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">2,438</div>
+                    <div class="stat-mini-label">Available</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">23</div>
+                    <div class="stat-mini-label">Overdue</div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>Library System</h3>
+                <p>Manage books and issue/return operations in the <a href="/admin/student/librarybook/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
 
-    const form = event.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
+    loadHostelManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">🏢 Hostel Management</h1>
+                <button class="btn-primary">+ Allocate Room</button>
+            </div>
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">456</div>
+                    <div class="stat-mini-label">Total Residents</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">120</div>
+                    <div class="stat-mini-label">Total Rooms</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">32</div>
+                    <div class="stat-mini-label">Vacant Rooms</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">88</div>
+                    <div class="stat-mini-label">Occupancy %</div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>Hostel Operations</h3>
+                <p>Manage rooms and allocations in the <a href="/admin/student/hostel/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
 
-    try {
-        await NotificationAPI.send(data);
-        alert('Notification sent successfully!');
-        form.reset();
-        loadNotifications();
-    } catch (error) {
-        alert('Error sending notification: ' + error.message);
+    loadTransportManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">🚌 Transportation</h1>
+                <button class="btn-primary">+ Add Vehicle</button>
+            </div>
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">18</div>
+                    <div class="stat-mini-label">Total Buses</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">12</div>
+                    <div class="stat-mini-label">Active Routes</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">650</div>
+                    <div class="stat-mini-label">Students Using</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">24</div>
+                    <div class="stat-mini-label">Drivers</div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>Transport System</h3>
+                <p>Manage vehicles and routes in the <a href="/admin/student/vehicle/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
+
+    loadHRManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">👔 HR & Payroll</h1>
+                <button class="btn-primary">+ Add Staff Member</button>
+            </div>
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">87</div>
+                    <div class="stat-mini-label">Total Staff</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">₹2.1L</div>
+                    <div class="stat-mini-label">Payroll This Month</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">12</div>
+                    <div class="stat-mini-label">On Leave</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">5</div>
+                    <div class="stat-mini-label">Pending Approvals</div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>HR System</h3>
+                <p>Manage staff and payroll in the <a href="/admin/student/employee/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
+
+    loadExamManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">📝 Exams & Grading</h1>
+                <button class="btn-primary">+ Create Exam</button>
+            </div>
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">8</div>
+                    <div class="stat-mini-label">Upcoming Exams</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">3.8</div>
+                    <div class="stat-mini-label">Average GPA</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">245</div>
+                    <div class="stat-mini-label">Results Pending</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value">92%</div>
+                    <div class="stat-mini-label">Pass Rate</div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>Examination System</h3>
+                <p>Manage exams and grades in the <a href="/admin/student/exam/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
+
+    loadEventManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">📅 Events & Calendar</h1>
+                <button class="btn-primary">+ Create Event</button>
+            </div>
+            
+            <div class="content-card">
+                <h3>Event Management</h3>
+                <p>Manage events and calendar in the <a href="/admin/student/event/" target="_blank">Admin Panel</a></p>
+            </div>
+        `;
+    },
+
+    loadReportsAnalytics() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">📈 Reports & Analytics</h1>
+                <button class="btn-primary">Generate Report</button>
+            </div>
+            
+            <div class="content-card">
+                <h3>Analytics Dashboard</h3>
+                <p>View detailed reports and analytics in the system</p>
+            </div>
+        `;
+    },
+
+    showSettings() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <h1 class="page-title">⚙️ Settings</h1>
+            </div>
+            
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <h3>👤 Profile Settings</h3>
+                    <p>Update your profile information</p>
+                    <button class="btn-secondary">Edit Profile</button>
+                </div>
+                
+                <div class="settings-card">
+                    <h3>🔒 Change Password</h3>
+                    <p>Update your account password</p>
+                    <button class="btn-secondary">Change Password</button>
+                </div>
+                
+                <div class="settings-card">
+                    <h3>🔔 Notifications</h3>
+                    <p>Manage notification preferences</p>
+                    <button class="btn-secondary">Configure</button>
+                </div>
+                
+                <div class="settings-card">
+                    <h3>🏢 Institute Settings</h3>
+                    <p>Manage institute information</p>
+                    <button class="btn-secondary">Settings</button>
+                </div>
+                
+                <div class="settings-card danger">
+                    <h3>🚪 Logout</h3>
+                    <p>Sign out of your account</p>
+                    <button class="btn-danger" onclick="DashboardApp.logout()">Logout</button>
+                </div>
+            </div>
+        `;
+    },
+
+    logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('token');
+            sessionStorage.clear();
+            window.location.href = '/';
+        }
+    },
+
+    // Placeholder functions for actions
+    showAddStudentForm() {
+        showToast('Processing Request: Open Add Student Form...', 'info');
+        setTimeout(() => {
+            window.open('/admin/student/student/add/', '_blank');
+        }, 800);
+    },
+
+    editStudent(id) {
+        showToast('Opening Student Editor...', 'info');
+        setTimeout(() => {
+            window.open(`/admin/student/student/${id}/change/`, '_blank');
+        }, 500);
+    },
+
+    deleteStudent(id) {
+        if (confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
+            showToast('Request sent to Admin Panel for deletion approval', 'warning');
+            setTimeout(() => {
+                window.open(`/admin/student/student/${id}/delete/`, '_blank');
+            }, 1000);
+        }
+    },
+
+    markAttendance() {
+        showToast('Initializing Attendance Module...', 'success');
+        setTimeout(() => {
+            window.open('/admin/student/attendence/add/', '_blank');
+        }, 800);
+    },
+
+    addPayment() {
+        showToast('Opening Secure Payment Gateway...', 'success');
+        setTimeout(() => {
+            window.open('/admin/student/payment/add/', '_blank');
+        }, 800);
+    },
+
+    addBook() {
+        showToast('Accessing Library Database...', 'info');
+        setTimeout(() => {
+            window.open('/admin/student/librarybook/add/', '_blank');
+        }, 800);
     }
+};
+
+// Add Pulse Animation Style for Live Badge
+const style = document.createElement('style');
+style.innerHTML = `
+    @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+        color: var(--primary);
+        font-size: 1.2rem;
+        gap: 10px;
+    }
+    .loading-spinner::after {
+        content: '';
+        width: 30px;
+        height: 30px;
+        border: 3px solid var(--primary);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+`;
+document.head.appendChild(style);
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+
+    document.addEventListener('DOMContentLoaded', () => DashboardApp.init());
+} else {
+    DashboardApp.init();
 }
+
+// Make it globally accessible
+window.DashboardApp = DashboardApp;
+window.navigateTo = (module) => DashboardApp.loadModule(module);
