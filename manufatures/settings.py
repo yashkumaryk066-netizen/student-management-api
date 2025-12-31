@@ -13,8 +13,19 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
-import dj_database_url
-from decouple import config
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
+try:
+    from decouple import config
+except ImportError:
+    def config(key, default=None, cast=None):
+        import os
+        val = os.environ.get(key, default)
+        if cast == bool and isinstance(val, str):
+             return val.lower() in ('true', '1', 'yes')
+        return cast(val) if cast and val is not None else val
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -90,7 +101,7 @@ WSGI_APPLICATION = 'manufatures.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Database - use Railway PostgreSQL URL in production
-if config('DATABASE_URL', default=None):
+if dj_database_url and config('DATABASE_URL', default=None):
     DATABASES = {
         'default': dj_database_url.config(
             default=config('DATABASE_URL'),

@@ -232,3 +232,67 @@ class BookIssueAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+# ==================== TRANSPORT ====================
+
+from .models import Vehicle, Route, TransportAllocation
+
+@admin.register(Vehicle)
+class VehicleAdmin(admin.ModelAdmin):
+    list_display = ['registration_number', 'vehicle_type', 'capacity', 'driver_name', 'driver_phone', 'is_active']
+    list_filter = ['vehicle_type', 'is_active']
+    search_fields = ['registration_number', 'driver_name']
+    ordering = ['registration_number']
+
+@admin.register(Route)
+class RouteAdmin(admin.ModelAdmin):
+    list_display = ['route_name', 'start_point', 'end_point', 'vehicle', 'pickup_time', 'monthly_fare']
+    list_filter = ['vehicle']
+    search_fields = ['route_name', 'stops']
+    ordering = ['route_name']
+
+@admin.register(TransportAllocation)
+class TransportAllocationAdmin(admin.ModelAdmin):
+    list_display = ['student', 'route', 'pickup_stop', 'start_date', 'end_date', 'is_active']
+    list_filter = ['route', 'is_active', 'start_date']
+    search_fields = ['student__name', 'route__route_name']
+    list_editable = ['is_active']
+
+
+# ==================== HR & PAYROLL ====================
+
+from .models import Department, Designation, Employee, LeaveRequest, Payroll
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'head_of_department']
+    search_fields = ['name']
+
+@admin.register(Designation)
+class DesignationAdmin(admin.ModelAdmin):
+    list_display = ['title']
+    search_fields = ['title']
+
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ['user', 'department', 'designation', 'joining_date', 'contract_type', 'is_active']
+    list_filter = ['department', 'designation', 'contract_type', 'is_active', 'joining_date']
+    search_fields = ['user__username', 'user__email', 'user__first_name']
+    date_hierarchy = 'joining_date'
+    list_editable = ['is_active']
+
+@admin.register(LeaveRequest)
+class LeaveRequestAdmin(admin.ModelAdmin):
+    list_display = ['employee', 'leave_type', 'start_date', 'end_date', 'status', 'approved_by']
+    list_filter = ['status', 'leave_type', 'start_date']
+    search_fields = ['employee__user__username']
+    list_editable = ['status']
+    date_hierarchy = 'start_date'
+
+@admin.register(Payroll)
+class PayrollAdmin(admin.ModelAdmin):
+    list_display = ['employee', 'month', 'year', 'basic_salary', 'net_salary', 'status', 'payment_date']
+    list_filter = ['status', 'month', 'year']
+    search_fields = ['employee__user__username', 'transaction_id']
+    list_editable = ['status']
+    ordering = ['-year', '-month']
