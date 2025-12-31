@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 class Student(models.Model):
         name = models.CharField(max_length=20)
@@ -196,11 +197,11 @@ class Room(models.Model):
     
     @property
     def is_full(self):
-        return self.current_occupancy >= self.capacity
+        return self.allocations.filter(status='ACTIVE').count() >= self.capacity
     
     @property
     def available_beds(self):
-        return self.capacity - self.current_occupancy
+        return self.capacity - self.allocations.filter(status='ACTIVE').count()
 
 
 class HostelAllocation(models.Model):
@@ -223,6 +224,10 @@ class HostelAllocation(models.Model):
     
     def __str__(self):
         return f"{self.student.name} - {self.room}"
+
+    def clean(self):
+        if self.pk is None and self.room.is_full:
+            raise ValidationError(f"Room {self.room.room_number} is already full!")
 
 
 # ==================== EVENTS MANAGEMENT ====================
@@ -428,6 +433,8 @@ class LibraryBook(models.Model):
         ('REFERENCE', 'Reference'),
         ('MAGAZINE', 'Magazine'),
         ('JOURNAL', 'Journal'),
+        ('EQUIPMENT', 'Lab Equipment'),
+        ('ASSET', 'Other Asset'),
     ]
     
     isbn = models.CharField(max_length=13, unique=True, help_text="ISBN-10 or ISBN-13")
