@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -31,18 +32,24 @@ from student.views import (
 )
 
 urlpatterns = [
+    # Django Admin Panel
+    path('admin/', admin.site.urls),
+    
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),
     path('demo/', DemoPageView.as_view(), name='demo-page'),
-    path('login.html', LoginPageView.as_view(), name='login-page'),
-    path('dashboard/admin.html', AdminDashboardTemplateView.as_view(), name='admin-dashboard-page'),
-    path('dashboard/teacher.html', TeacherDashboardTemplateView.as_view(), name='teacher-dashboard-page'),
-    path('dashboard/student.html', StudentDashboardTemplateView.as_view(), name='student-dashboard-page'),
-    path('dashboard/parent.html', ParentDashboardTemplateView.as_view(), name='parent-dashboard-page'),
+    path('login/', LoginPageView.as_view(), name='login-page'),
+    
+    # Dashboard Pages (after login)
+    path('dashboard/admin/', AdminDashboardTemplateView.as_view(), name='admin-dashboard'),
+    path('dashboard/teacher/', TeacherDashboardTemplateView.as_view(), name='teacher-dashboard'),
+    path('dashboard/student/', StudentDashboardTemplateView.as_view(), name='student-dashboard'),
+    path('dashboard/parent/', ParentDashboardTemplateView.as_view(), name='parent-dashboard'),
 
-    # API
+    # API Endpoints
     path('api/', include('student.urls')),
 
+    # API Documentation  
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
 ]
