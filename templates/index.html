@@ -600,6 +600,54 @@
             });
         }
     </script>
+    <!-- Falling Name Effect (Yash A Mishra) -->
+    <div id="rain-container"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -3; pointer-events: none; overflow: hidden;">
+    </div>
+    <style>
+        .falling-name {
+            position: absolute;
+            top: -50px;
+            color: rgba(59, 130, 246, 0.15);
+            /* Very subtle blue */
+            font-weight: 800;
+            font-family: 'monospace';
+            text-transform: uppercase;
+            white-space: nowrap;
+            user-select: none;
+            writing-mode: vertical-rl;
+            /* Vertical Text like Matrix? Or just falling? User said "UPER SE NICHE CHALTE RHE". Usually falling text. */
+            /* User probably means falling down. vertical-rl makes the text vertical. */
+            /* I'll stick to horizontal text falling down. "Chalte rhe" implies motion. */
+            animation: fall linear forwards;
+        }
+
+        /* Let's make it vertical text for style? "Matrix" style. */
+        /* But user name "Yash A Mishra" is long. Horizontal is better. */
+        @keyframes fall {
+            to {
+                transform: translateY(120vh);
+                opacity: 0;
+            }
+        }
+    </style>
+    <script>
+        function createRainDrop() {
+            const container = document.getElementById('rain-container');
+            if (!container) return;
+            const drop = document.createElement('div');
+            drop.innerText = 'YASH A MISHRA';
+            drop.className = 'falling-name';
+            drop.style.left = Math.random() * 100 + 'vw';
+            const duration = Math.random() * 15 + 10; // Slow fall
+            drop.style.animationDuration = duration + 's';
+            drop.style.fontSize = (Math.random() * 14 + 10) + 'px';
+            drop.style.opacity = Math.random() * 0.2 + 0.05;
+            container.appendChild(drop);
+            setTimeout(() => drop.remove(), duration * 1000);
+        }
+        setInterval(createRainDrop, 500); 
+    </script>
 </body>
 
 </html>
