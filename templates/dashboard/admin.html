@@ -115,7 +115,7 @@
     <main class="main-content">
         <!-- Top Header -->
         <header class="top-header">
-            <button class="menu-toggle" id="menuToggle">
+            <button class="menu-toggle" id="menuToggle" title="Toggle Menu">
                 ☰
             </button>
 
@@ -345,12 +345,27 @@
     </main>
 
     <script>
-        // Sidebar Toggle
+        // Sidebar Toggle - Works for both mobile and desktop
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menuToggle');
 
         menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
+            // On desktop: collapse/expand
+            // On mobile: show/hide
+            if (window.innerWidth > 1024) {
+                sidebar.classList.toggle('collapsed');
+            } else {
+                sidebar.classList.toggle('open');
+            }
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 1024) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            }
         });
 
         // Navigation
@@ -363,6 +378,11 @@
 
                 const target = link.getAttribute('href').substring(1);
                 navigateTo(target);
+
+                // Close sidebar on mobile after navigation
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.remove('open');
+                }
             });
         });
 
@@ -385,15 +405,6 @@
                 }
             });
         });
-
-        // Mobile menu close on link click
-        if (window.innerWidth <= 1024) {
-            navLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    sidebar.classList.remove('open');
-                });
-            });
-        }
     </script>
 </body>
 

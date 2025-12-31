@@ -98,6 +98,8 @@ body {
     z-index: 1000;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+    /* Always visible on desktop by default */
+    transform: translateX(0);
 }
 
 .sidebar.collapsed {
@@ -236,19 +238,22 @@ body {
 }
 
 .menu-toggle {
-    background: none;
-    border: none;
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.3);
     color: var(--text);
     font-size: 1.5rem;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
     transition: all 0.3s;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .menu-toggle:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: rotate(90deg);
+    background: rgba(99, 102, 241, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
 
 .header-search {
@@ -589,6 +594,12 @@ body {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    /* Make menu toggle more visible on mobile */
+    .menu-toggle {
+        background: rgba(99, 102, 241, 0.3);
+        border: 2px solid rgba(99, 102, 241, 0.5);
+    }
 }
 
 @media (max-width: 640px) {
@@ -606,5 +617,10 @@ body {
 
     .top-header {
         padding: 0 15px;
+    }
+
+    .header-search {
+        display: none;
+        /* Hide search on very small screens */
     }
 }
