@@ -53,3 +53,8 @@ urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
 ]
+
+# Admin Panel Customization
+admin.site.site_header = "NextGen ERP Administration"
+admin.site.site_title = "NextGen ERP Portal"
+admin.site.index_title = "Institute Management Dashboard"
