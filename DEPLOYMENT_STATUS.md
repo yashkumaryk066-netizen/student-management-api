@@ -38,7 +38,9 @@
 | **Fees & Finance** | ✅ | Admin Panel / API |
 | **Exam & Grades** | ✅ | Admin Panel |
 | **Library System** | ✅ | Admin Panel |
-| **Hostel & Transport** | ✅ | Admin Panel |
+| **Hostel Management** | ✅ | Admin Panel |
+| **Transport System** | ✅ (Added) | Admin Panel |
+| **HR & Payroll** | ✅ (Added) | Admin Panel |
 | **WhatsApp/SMS** | ✅ | Automated Backend |
 
 ---
