@@ -8,3 +8,5 @@ drf-spectacular
 whitenoise
 psycopg2-binary
 gunicorn
+twilio
+requests
