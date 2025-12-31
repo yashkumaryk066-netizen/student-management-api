@@ -6,7 +6,7 @@ function checkAuth() {
     const currentPage = window.location.pathname;
 
     // If user is logged in and on login page, redirect to dashboard
-    if (token && currentPage.includes('login.html')) {
+    if (token && (currentPage.includes('/login/') || currentPage === '/login')) {
         const role = localStorage.getItem('userRole');
         redirectToDashboard(role);
         return;
@@ -14,7 +14,7 @@ function checkAuth() {
 
     // If user is NOT logged in and on dashboard page, redirect to login
     if (!token && currentPage.includes('dashboard')) {
-        window.location.href = '/login.html';
+        window.location.href = '/login/';
         return;
     }
 }
@@ -22,13 +22,13 @@ function checkAuth() {
 // Redirect to appropriate dashboard based on role
 function redirectToDashboard(role) {
     const dashboards = {
-        'admin': '/dashboard/admin.html',
-        'teacher': '/dashboard/teacher.html',
-        'parent': '/dashboard/parent.html',
-        'student': '/dashboard/student.html',
+        'admin': '/dashboard/admin/',
+        'teacher': '/dashboard/teacher/',
+        'parent': '/dashboard/parent/',
+        'student': '/dashboard/student/',
     };
 
-    const dashboardUrl = dashboards[role] || '/dashboard/student.html';
+    const dashboardUrl = dashboards[role] || '/dashboard/student/';
     window.location.href = dashboardUrl;
 }
 
@@ -114,7 +114,7 @@ if (document.getElementById('loginForm')) {
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
         localStorage.clear();
-        window.location.href = '/login.html';
+        window.location.href = '/login/';
     }
 }
 

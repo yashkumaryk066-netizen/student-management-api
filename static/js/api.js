@@ -28,7 +28,7 @@ async function apiCall(endpoint, options = {}) {
         // Handle 401 - Unauthorized
         if (response.status === 401) {
             localStorage.clear();
-            window.location.href = '/login.html';
+            window.location.href = '/login/';
             throw new Error('Unauthorized - Please login again');
         }
 
@@ -63,7 +63,7 @@ const AuthAPI = {
     // Logout (client-side)
     logout() {
         localStorage.clear();
-        window.location.href = '/login.html';
+        window.location.href = '/login/';
     },
 };
 
@@ -107,12 +107,12 @@ const StudentAPI = {
 const AttendanceAPI = {
     // Get all attendance
     async getAll() {
-        return apiCall('/attendance/');
+        return apiCall('/attendence/');
     },
 
     // Mark attendance
     async mark(data) {
-        return apiCall('/attendance/', {
+        return apiCall('/attendence/', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -120,7 +120,7 @@ const AttendanceAPI = {
 
     // Get student attendance
     async getByStudent(studentId) {
-        return apiCall(`/attendance/?student=${studentId}`);
+        return apiCall(`/attendence/?student=${studentId}`);
     },
 };
 
