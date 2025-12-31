@@ -53,7 +53,7 @@ async function handleLogin(event) {
             localStorage.setItem('token', authToken);
             localStorage.setItem('username', username);
             localStorage.setItem('role', selectedRole);
-            
+
             // Also store what auth.js expects
             localStorage.setItem('authToken', authToken);
             localStorage.setItem('userRole', selectedRole.toLowerCase());
@@ -75,7 +75,7 @@ function redirectToDashboard(role) {
     // Redirect to correct dashboard page
     const roleLower = role.toLowerCase();
     setTimeout(() => {
-        window.location.href = '/dashboard/' + roleLower + '.html';
+        window.location.href = '/dashboard/' + roleLower + '/';
     }, 1000);
 }
 
