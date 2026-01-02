@@ -174,7 +174,7 @@ const DashboardApp = {
         // Fetch from API
         fetch(`${this.apiBaseUrl}/students/`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
         })
             .then(res => res.json())
@@ -528,7 +528,7 @@ const DashboardApp = {
 
     logout() {
         if (confirm('Are you sure you want to logout?')) {
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             sessionStorage.clear();
             window.location.href = '/';
         }
