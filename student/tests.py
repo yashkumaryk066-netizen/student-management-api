@@ -151,6 +151,7 @@ class StudentAPITestCase(APITestCase):
         self.admin = User.objects.create_user(username='admin', password='Admin123!')
         self.admin.is_staff = True
         self.admin.save()
+        UserProfile.objects.create(user=self.admin, role='ADMIN')
         
         # Create test students
         self.student1 = Student.objects.create(
@@ -221,6 +222,7 @@ class AttendanceAPITestCase(APITestCase):
     
     def setUp(self):
         self.teacher = User.objects.create_user(username='teacher1', password='teach123')
+        UserProfile.objects.create(user=self.teacher, role='TEACHER')
         self.student = Student.objects.create(
             name='Student Test',
             age=15,
@@ -259,6 +261,7 @@ class PaymentAPITestCase(APITestCase):
     
     def setUp(self):
         self.admin = User.objects.create_user(username='admin', password='Admin123!')
+        UserProfile.objects.create(user=self.admin, role='ADMIN')
         self.student = Student.objects.create(
             name='Payment Test Student',
             age=16,

@@ -620,7 +620,12 @@
             <span>🎓</span>
             <div>
                 <div>NEXTGEN ERP</div>
-                <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 400;">by Yash A Mishra</div>
+                <a href="/api/developer/"
+                    style="font-size: 0.75rem; color: var(--primary); font-weight: 700; text-decoration: none; letter-spacing: 1px; display: block; margin-top: 2px; transition: all 0.3s;"
+                    onmouseover="this.style.textShadow='0 0 10px var(--primary)'"
+                    onmouseout="this.style.textShadow='none'">
+                    BY YASH A MISHRA <span style="font-size: 0.8em;">↗</span>
+                </a>
             </div>
         </a>
         <div class="nav-links">
@@ -649,8 +654,10 @@
                     <button class="btn-primary" onclick="window.location.href='/login/'">
                         GET STARTED
                     </button>
-                    <button class="btn-secondary" onclick="window.location.href='/demo/'">
-                        LIVE DEMO
+                    <button class="btn-secondary" onclick="window.location.href='/api/developer/'">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            MEET THE DEVELOPER <span style="font-size: 1.2em;">👨‍💻</span>
+                        </span>
                     </button>
                 </div>
                 <div class="stats">
@@ -677,6 +684,81 @@
                     <div class="data-point dp-1">Students: 1542</div>
                     <div class="data-point dp-2">Revenue: +12%</div>
                     <div class="data-point dp-3">Staff: 120</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" style="padding: 100px 60px; background: #02040a;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 80px;">
+                <div class="badge">
+                    <span class="pulse-dot"></span>
+                    FLEXIBLE PLANS
+                </div>
+                <h2 style="font-size: 3rem; margin-bottom: 20px;">Simple, Transparent Pricing</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+                    Choose the perfect plan for your institution. No hidden fees, no surprises.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+                <!-- Starter Plan -->
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Starter</h3>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                        ₹15,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/year</span>
+                    </div>
+                    <ul style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
+                        <li>✓ Up to 500 Students</li>
+                        <li>✓ 50 GB Storage</li>
+                        <li>✓ Basic Features</li>
+                        <li>✓ Email Support</li>
+                        <li>✓ Community Access</li>
+                    </ul>
+                    <button class="btn-secondary" style="width: 100%;"
+                        onclick="window.location.href='/api/demo-request/'">CHOOSE STARTER</button>
+                </div>
+
+                <!-- Professional Plan -->
+                <div
+                    style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1)); border: 1px solid var(--primary); border-radius: 20px; padding: 40px; transform: scale(1.05); position: relative;">
+                    <div
+                        style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                        MOST POPULAR</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Professional</h3>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                        ₹35,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/year</span>
+                    </div>
+                    <ul style="list-style: none; color: white; line-height: 2; margin-bottom: 40px;">
+                        <li>✓ Up to 2,000 Students</li>
+                        <li>✓ 200 GB Storage</li>
+                        <li>✓ <strong>All Core Features</strong></li>
+                        <li>✓ Priority Support</li>
+                        <li>✓ Custom Branding</li>
+                    </ul>
+                    <button class="btn-primary" style="width: 100%;"
+                        onclick="window.location.href='/api/demo-request/'">CHOOSE PRO</button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Enterprise</h3>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                        ₹75,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/year</span>
+                    </div>
+                    <ul style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
+                        <li>✓ <strong>Unlimited Students</strong></li>
+                        <li>✓ 1 TB Storage</li>
+                        <li>✓ All Features + Custom Modules</li>
+                        <li>✓ 24/7 Dedicated Support</li>
+                        <li>✓ White-label Solution</li>
+                    </ul>
+                    <button class="btn-secondary" style="width: 100%;"
+                        onclick="window.location.href='/api/demo-request/'">CONTACT SALES</button>
                 </div>
             </div>
         </div>

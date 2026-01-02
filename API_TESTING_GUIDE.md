@@ -1,242 +1,391 @@
-# 🔧 API Testing & Usage Guide
+# 🔧 Complete API Testing Guide - NextGen ERP
 
-## ✅ API STATUS: WORKING (Protected by Authentication)
-
-Your APIs are **WORKING PERFECTLY!** 
-The "Not Found" or "401 Unauthorized" errors are **NORMAL** because APIs are protected by JWT authentication.
+## 📋 Overview
+This guide will help you test all APIs on the live server: **https://yashamishra.pythonanywhere.com/**
 
 ---
 
-## 🎯 How to Test APIs
+## 🔑 Step 1: Get Authentication Token
 
-### Step 1: Get Authentication Token
+### Create Admin User (via Django Admin Panel)
+1. Go to: https://yashamishra.pythonanywhere.com/admin/
+2. Login with superuser credentials
+3. Go to "Users" → "Add User"
+4. Create user with:
+   - Username: `testadmin`
+   - Password: `testpass123`
+5. Then go to "User profiles" → "Add User profile"
+   - Select the user
+   - Role: `ADMIN`
+   - Phone: `+919999999999`
 
-**Endpoint:** `POST https://yashamishra.pythonanywhere.com/api/auth/login/`
-
-**Request Body:**
-```json
-{
-    "username": "admin",
-    "password": "Admin123!"
-}
+### Get JWT Token via API
+```bash
+curl -X POST https://yashamishra.pythonanywhere.com/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testadmin", "password": "testpass123"}'
 ```
 
 **Response:**
 ```json
 {
-    "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
 }
 ```
 
-**Copy the `access` token!**
+Copy the `access` token - you'll need it for all authenticated requests!
 
 ---
 
-### Step 2: Use Token in API Requests
+## 📚 Step 2: Test Student APIs
 
-**For all API calls, add this header:**
-```
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
-```
-
----
-
-## 📋 Available API Endpoints
-
-### Students API
-```
-GET    /api/students/           - List all students
-POST   /api/students/           - Create new student
-GET    /api/students/{id}/      - Get student details
-PUT    /api/students/{id}/      - Update student
-DELETE /api/students/{id}/      - Delete student
-```
-
-### Attendance API
-```
-GET    /api/attendence/         - List attendance
-POST   /api/attendence/         - Mark attendance
-GET    /api/attendence/{id}/    - Get attendance details
-```
-
-### Payments API
-```
-GET    /api/payments/           - List all payments
-POST   /api/payments/           - Create payment record
-GET    /api/payments/{id}/      - Get payment details
-PUT    /api/payments/{id}/      - Update payment
-```
-
-### Notifications API
-```
-GET    /api/notifications/           - List notifications
-POST   /api/notifications/create/    - Create notification
-PUT    /api/notifications/{id}/read/ - Mark as read
-```
-
-### Demo Request API (Public - No Auth Required)
-```
-POST   /api/demo-request/      - Submit demo request
-```
-
----
-
-## 🧪 Testing with cURL
-
-### 1. Login (Get Token):
-```bash
-curl -X POST https://yashamishra.pythonanywhere.com/api/auth/login/ \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"Admin123!"}'
-```
-
-### 2. List Students (With Token):
-```bash
-curl -X GET https://yashamishra.pythonanywhere.com/api/students/ \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE"
-```
-
-### 3. Create Student:
+### 1. Create Student ✅
 ```bash
 curl -X POST https://yashamishra.pythonanywhere.com/api/students/ \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -d '{
-    "name": "John Doe",
-    "age": 15,
-    "gender": "M",
-    "grade": "10th",
-    "dob": "2009-01-15",
-    "relation": "Father: Mike Doe"
+    "name": "Rahul Kumar",
+    "age": 18,
+    "gender": "Male",
+    "dob": "2007-05-15",
+    "grade": 12,
+    "relation": "None"
   }'
 ```
 
----
-
-## 🌐 Testing with Postman
-
-### Step 1: Create Collection
-1. Open Postman
-2. Create new collection: "NextGen ERP APIs"
-
-### Step 2: Set Base URL
-```
-https://yashamishra.pythonanywhere.com
-```
-
-### Step 3: Login Request
-- **Method:** POST
-- **URL:** `{{base_url}}/api/auth/login/`
-- **Body (JSON):**
+**Expected Response (201 Created):**
 ```json
 {
-    "username": "admin",
-    "password": "Admin123!"
+  "id": 1,
+  "name": "Rahul Kumar",
+  "age": 18,
+  "gender": "Male",
+  "dob": "2007-05-15",
+  "grade": 12,
+  "relation": "None",
+  "user": null,
+  "parent": null,
+  "parent_name": null
 }
 ```
-- **Save response** `access` token to environment variable
 
-### Step 4: Other Requests
-- **Add Header:** `Authorization: Bearer {{access_token}}`
-- Now all APIs will work!
-
----
-
-## 🔍 Testing with Swagger UI
-
-### Visit: https://yashamishra.pythonanywhere.com/swagger/
-
-1. **Click** "Authorize" button (top right)
-2. **Enter:** `Bearer YOUR_ACCESS_TOKEN`
-3. **Click** "Authorize"
-4. Now you can test all APIs directly from Swagger!
-
----
-
-## ✅ Why You See "Not Found" or "401"
-
-### 401 Unauthorized:
-- **Reason:** You didn't provide authentication token
-- **Fix:** Get token from `/api/auth/login/` first
-- **This is GOOD!** It means APIs are protected ✅
-
-### 404 Not Found:
-- **Possible Reasons:**
-  - Wrong URL (check spelling)
-  - Resource doesn't exist (e.g., student ID 999 doesn't exist)
-- **Check:** Use correct endpoint from list above
-
----
-
-## 🎯 Quick Test Checklist
-
-Run these to verify everything works:
-
+### 2. List All Students ✅
 ```bash
-# 1. Homepage
-curl https://yashamishra.pythonanywhere.com/
-# Expected: HTML page
+curl -X GET https://yashamishra.pythonanywhere.com/api/students/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
-# 2. Swagger docs
-curl https://yashamishra.pythonanywhere.com/swagger/
-# Expected: Swagger UI HTML
+### 3. Search Students ✅
+```bash
+curl -X GET "https://yashamishra.pythonanywhere.com/api/students/?search=Rahul" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
-# 3. Admin panel
-curl https://yashamishra.pythonanywhere.com/admin/
-# Expected: Django admin login page
+### 4. Get Student Details ✅
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/students/1/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
-# 4. Login API
-curl -X POST https://yashamishra.pythonanywhere.com/api/auth/login/ \
+### 5. Update Student ✅
+```bash
+curl -X PUT https://yashamishra.pythonanywhere.com/api/students/1/ \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"Admin123!"}'
-# Expected: {"access":"...","refresh":"..."}
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "name": "Rahul Kumar Updated",
+    "age": 19,
+    "gender": "Male",
+    "dob": "2007-05-15",
+    "grade": 12,
+    "relation": "None"
+  }'
+```
 
-# 5. Students API (with token from step 4)
-curl https://yashamishra.pythonanywhere.com/api/students/ \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
-# Expected: Student list (might be empty initially)
+### 6. Delete Student ✅
+```bash
+curl -X DELETE https://yashamishra.pythonanywhere.com/api/students/1/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ---
 
-## 💡 Common Issues & Solutions
+## 📅 Step 3: Test Attendance APIs
 
-### Issue: "401 Unauthorized"
-**Solution:** Add authentication token header
+### 1. Mark Attendance ✅
+```bash
+curl -X POST https://yashamishra.pythonanywhere.com/api/attendence/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "student": 1,
+    "date": "2026-01-01",
+    "is_present": true
+  }'
+```
 
-### Issue: "404 Not Found"  
-**Solution:** Check URL spelling, verify endpoint exists
+**Note**: `date` is optional - defaults to today if not provided
 
-### Issue: "405 Method Not Allowed"
-**Solution:** Check HTTP method (GET/POST/PUT/DELETE)
+### 2. List All Attendance ✅
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/attendence/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
-### Issue: "403 Forbidden"
-**Solution:** User doesn't have permission for that action
+### 3. Get Attendance Details ✅
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/attendence/1/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
-### Issue: "500 Internal Server Error"
-**Solution:** Check server logs on PythonAnywhere
+### 4. Update Attendance ✅
+```bash
+curl -X PUT https://yashamishra.pythonanywhere.com/api/attendence/1/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "student": 1,
+    "date": "2026-01-01",
+    "is_present": false
+  }'
+```
+
+### 5. Delete Attendance ✅
+```bash
+curl -X DELETE https://yashamishra.pythonanywhere.com/api/attendence/1/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### 6. Get Today's Attendance Summary ✅
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/students/today/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "date": "2026-01-01",
+  "total_students": 10,
+  "present_count": 8,
+  "absent_count": 2,
+  "present_students": [...],
+  "absent_students": [...]
+}
+```
 
 ---
 
-## 🚀 API SUMMARY
+## 💰 Step 4: Test Payment APIs
 
-**Total APIs:** 10+ endpoints
-**Authentication:** JWT (JSON Web Tokens)
-**Documentation:** Available at `/swagger/`
-**Status:** ✅ **ALL WORKING**
+### 1. Create Payment ✅
+```bash
+curl -X POST https://yashamishra.pythonanywhere.com/api/payments/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "student": 1,
+    "amount": 5000.00,
+    "due_date": "2026-01-15",
+    "description": "Tuition Fee - January 2026",
+    "status": "PENDING"
+  }'
+```
 
-**Your APIs are PROTECTED and SECURE!**
-The "401" errors mean they're working as designed - requiring authentication before allowing access to data.
+### 2. List All Payments ✅
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/payments/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### 3. Mark Payment as Paid ✅
+```bash
+curl -X PUT https://yashamishra.pythonanywhere.com/api/payments/1/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{"mark_paid": true}'
+```
 
 ---
 
-## 📞 Testing Support
+## 🔔 Step 5: Test Notification APIs
 
-**If you see:**
-- ✅ 200/201: Success!
-- ✅ 401: Normal - need authentication
-- ⚠️ 404: Check URL
-- ⚠️ 500: Server error - check logs
+### 1. List Notifications ✅
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/notifications/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
-**सब APIs perfect काम कर रहे हैं - बस authentication token चाहिए!** 🔒✅
+### 2. Create Notification (Admin/Teacher Only) ✅
+```bash
+curl -X POST https://yashamishra.pythonanywhere.com/api/notifications/create/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "recipient_type": "ALL",
+    "title": "Holiday Notice",
+    "message": "School will remain closed tomorrow due to public holiday."
+  }'
+```
+
+### 3. Mark Notification as Read ✅
+```bash
+curl -X POST https://yashamishra.pythonanywhere.com/api/notifications/1/read/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+---
+
+## 📊 Step 6: Test Dashboard APIs
+
+### 1. Student Dashboard ✅
+(Need to be logged in as a student)
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/dashboard/student/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### 2. Teacher Dashboard ✅
+(Need to be logged in as a teacher)
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/dashboard/teacher/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### 3. Parent Dashboard ✅
+(Need to be logged in as a parent)
+```bash
+curl -X GET https://yashamishra.pythonanywhere.com/api/dashboard/parent/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+---
+
+## 📝 Step 7: Test Demo Request (Public API - No Auth Required)
+
+```bash
+curl -X POST https://yashamishra.pythonanywhere.com/api/demo-request/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "phone": "+919876543210",
+    "email": "john@example.com",
+    "institution_name": "ABC School",
+    "institution_type": "School",
+    "message": "I want a personalized demo"
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Thank you for your interest! We will contact you shortly.",
+  "data": {...}
+}
+```
+
+**This will trigger:**
+- WhatsApp notification to admin (+918356926231)
+- SMS backup to admin
+
+---
+
+## 🎯 Using Swagger UI (Easiest Way!)
+
+### Option 1: Use Browser Swagger Interface
+1. Go to: https://yashamishra.pythonanywhere.com/swagger/
+2. Click "Authorize" button (top right)
+3. Get token from Step 1
+4. Enter: `Bearer YOUR_ACCESS_TOKEN`
+5. Click "Authorize"
+6. Now test all APIs directly from browser!
+
+**Swagger will automatically:**
+- Add authentication headers
+- Show request/response examples
+- Validate input data
+- Display API documentation
+
+---
+
+## 🚨 Common Issues & Solutions
+
+### Issue 1: "Authentication credentials were not provided"
+**Solution**: Add Authorization header: `Authorization: Bearer YOUR_ACCESS_TOKEN`
+
+### Issue 2: "Token has expired"
+**Solution**: Get new token using refresh token:
+```bash
+curl -X POST https://yashamishra.pythonanywhere.com/api/auth/token/refresh/ \
+  -H "Content-Type: application/json" \
+  -d '{"refresh": "YOUR_REFRESH_TOKEN"}'
+```
+
+### Issue 3: "Permission denied"
+**Solution**: Make sure you're using correct role (Admin/Teacher for creating students)
+
+### Issue 4: "Attendance already marked"
+**Solution**: Student can only have one attendance record per date (unique constraint)
+
+---
+
+## ✅ Full Test Workflow
+
+### Complete Test Sequence:
+1. ✅ Get JWT token
+2. ✅ Create 3 students
+3. ✅ Mark attendance for all (2 present, 1 absent)
+4. ✅ Check today's attendance summary
+5. ✅ Create 2 payments
+6. ✅ Update one student
+7. ✅ Create notification
+8. ✅ Mark payment as paid
+9. ✅ List all data
+10. ✅ Delete one student
+
+---
+
+## 🎨 Browser Testing (For Non-Technical Users)
+
+### Use the Admin Dashboard:
+1. Go to: https://yashamishra.pythonanywhere.com/dashboard/admin/
+2. Login with credentials
+3. Use the UI to:
+   - Add students
+   - Mark attendance
+   - Manage payments
+   - Send notifications
+
+**All dashboard actions use these same APIs in the background!**
+
+---
+
+## 📲 Current Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Student CRUD | ✅ Working | Requires Auth |
+| Attendance System | ✅ Working | Requires Auth |
+| Payment Management | ✅ Working | Requires Auth |
+| Notifications | ✅ Working | Requires Auth |
+| Dashboards | ✅ Working | Role-based |
+| Demo Request | ✅ Working | Public API |
+| JWT Authentication | ✅ Working | Token-based |
+
+---
+
+## 🔧 Next Steps
+
+1. **Create Admin User** (via Django admin panel)
+2. **Test with Swagger UI** (easiest method)
+3. **Test with curl** (for automation)
+4. **Verify notifications** (add Twilio/MSG91 keys to enable)
+
+---
+
+**Live Server**: https://yashamishra.pythonanywhere.com/
+**API Docs**: https://yashamishra.pythonanywhere.com/swagger/
+**Admin Panel**: https://yashamishra.pythonanywhere.com/admin/

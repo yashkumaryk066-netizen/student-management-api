@@ -21,6 +21,7 @@ from .views import (
     StudentDashboardTemplateView,
     ParentDashboardTemplateView,
     DemoRequestView,  # Added for demo request functionality
+    DeveloperProfileView,
 )
 
 from rest_framework_simplejwt.views import (
@@ -59,4 +60,7 @@ urlpatterns = [
     
     # DEMO REQUEST
     path('demo-request/', DemoRequestView.as_view(), name='demo-request'),
+    
+    # DEVELOPER PROFILE
+    path('developer/', DeveloperProfileView.as_view(), name='developer-profile'),
 ]

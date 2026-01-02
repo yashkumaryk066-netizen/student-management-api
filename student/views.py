@@ -489,6 +489,21 @@ class PaymentDetailsView(APIView):
     """View and update specific payment"""
     permission_classes = [IsAuthenticated]
     
+    def get(self, request, id):
+        try:
+            payment = Payment.objects.get(id=id)
+            return Response(PaymentSerializer(payment).data, status=status.HTTP_200_OK)
+        except Payment.DoesNotExist:
+            return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, id):
+        try:
+            payment = Payment.objects.get(id=id)
+            payment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Payment.DoesNotExist:
+            return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+    
     def put(self, request, id):
         try:
             payment = Payment.objects.get(id=id)
@@ -584,6 +599,9 @@ class DemoPageView(TemplateView):
 
 class ParentDashboardTemplateView(TemplateView):
     template_name = "dashboard/parent.html"
+
+class DeveloperProfileView(TemplateView):
+    template_name = "developer.html"
 
 
 

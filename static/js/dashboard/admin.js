@@ -536,14 +536,14 @@ const DashboardApp = {
 
     // Placeholder functions for actions
     showAddStudentForm() {
-        showToast('Processing Request: Open Add Student Form...', 'info');
+        showToast('Opening Secure Admin Panel... Please log in if prompted.', 'info');
         setTimeout(() => {
             window.open('/admin/student/student/add/', '_blank');
         }, 800);
     },
 
     editStudent(id) {
-        showToast('Opening Student Editor...', 'info');
+        showToast('Redirecting to Secure Editor...', 'info');
         setTimeout(() => {
             window.open(`/admin/student/student/${id}/change/`, '_blank');
         }, 500);
@@ -551,7 +551,7 @@ const DashboardApp = {
 
     deleteStudent(id) {
         if (confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-            showToast('Request sent to Admin Panel for deletion approval', 'warning');
+            showToast('Requesting secure deletion approval...', 'warning');
             setTimeout(() => {
                 window.open(`/admin/student/student/${id}/delete/`, '_blank');
             }, 1000);
@@ -559,21 +559,21 @@ const DashboardApp = {
     },
 
     markAttendance() {
-        showToast('Initializing Attendance Module...', 'success');
+        showToast('Opening Attendance Register...', 'success');
         setTimeout(() => {
             window.open('/admin/student/attendence/add/', '_blank');
         }, 800);
     },
 
     addPayment() {
-        showToast('Opening Secure Payment Gateway...', 'success');
+        showToast('Accessing Secure Payment Gateway...', 'success');
         setTimeout(() => {
             window.open('/admin/student/payment/add/', '_blank');
         }, 800);
     },
 
     addBook() {
-        showToast('Accessing Library Database...', 'info');
+        showToast('Opening Library Database...', 'info');
         setTimeout(() => {
             window.open('/admin/student/librarybook/add/', '_blank');
         }, 800);
