@@ -30,7 +30,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'email', 'role', 'phone', 'created_at']
+        fields = ['id', 'username', 'email', 'role', 'phone', 'institution_type', 'created_at']
         read_only_fields = ['created_at']
 
 class PaymentSerializer(serializers.ModelSerializer):

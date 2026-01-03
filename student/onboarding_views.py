@@ -23,40 +23,80 @@ class OnboardingPaymentView(APIView):
         if not phone or not email or not plan_type:
             return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Verify Payment (Mock Logic for now)
-        # In real world, verify signature from Payment Gateway
+        # 1. Verify Payment (Mock Logic)
         is_payment_verified = True 
         
         if is_payment_verified:
-            # 2. Create User Credentials
+            # 2. Generate Credentials
             username = email.split('@')[0]
-            password = phone[-6:] # Simple password logic: last 6 digits of phone
+            # Ensure unique username
+            if User.objects.filter(username=username).exists():
+                username = f"{username}_{phone[-4:]}"
+                
+            password = phone[-6:] # Simple password: last 6 digits
             
             try:
-                if User.objects.filter(username=username).exists():
-                    user = User.objects.get(username=username)
-                    # Update existing user role/plan if upgrading
-                else:
-                    user = User.objects.create_user(username=username, email=email, password=password)
+                # Create or Get User
+                user, created = User.objects.get_or_create(
+                    email=email,
+                    defaults={'username': username}
+                )
+                if created:
+                    user.set_password(password)
+                    user.save()
                 
-                # Update Profile
-                profile, created = UserProfile.objects.get_or_create(user=user)
-                profile.role = 'ADMIN'
+                # Update Profile Permissions
+                # They get 'ADMIN' role for their specific Institution Type
+                profile, p_created = UserProfile.objects.get_or_create(user=user)
+                profile.role = 'ADMIN' 
                 profile.phone = phone
                 profile.institution_type = plan_type.upper()
                 profile.save()
                 
-                # 3. Simulate WhatsApp Notification to Admin (8356926231)
-                admin_msg = f"💰 New Payment Received!\nUser: {email}\nPhone: {phone}\nPlan: {plan_type}\nAmount: ₹{amount}\nStatus: Active"
-                self.send_whatsapp_mock('8356926231', admin_msg)
+                # 3. Notification Content
+                login_url = "https://yashamishra.pythonanywhere.com/login/"
                 
-                # 4. Simulate WhatsApp Credentials to User
-                user_msg = f"✅ Account Activated!\nWelcome to IMS.\nUsername: {username}\nPassword: {password}\nLogin here: https://yashamishra.pythonanywhere.com/login/"
-                self.send_whatsapp_mock(phone, user_msg)
+                client_msg = (
+                    f"🎉 *Welcome to IMS Premium!*\n\n"
+                    f"Your *{plan_type} Management System* is ready.\n"
+                    f"👤 *ID:* {username}\n"
+                    f"🔑 *Pass:* {password}\n"
+                    f"🔗 *Login:* {login_url}\n\n"
+                    f"Please keep this confidential."
+                )
                 
+                super_admin_msg = (
+                    f"💰 *New Subscription Sold!*\n"
+                    f"📦 *Plan:* {plan_type}\n"
+                    f"💵 *Amount:* ₹{amount}\n"
+                    f"👤 *Client:* {username} ({phone})\n"
+                    f"📧 *Email:* {email}\n"
+                    f"🔑 *Generated Creds:* {username} / {password}"
+                )
+                
+                # 4. Send Notifications
+                
+                # A) WhatsApp
+                self.send_whatsapp_mock(phone, client_msg, "CLIENT")
+                self.send_whatsapp_mock('8356926231', super_admin_msg, "SUPER_ADMIN")
+                
+                # B) Email (Console Backend usually on Dev, but trying to send)
+                from django.core.mail import send_mail
+                try:
+                    send_mail(
+                        subject=f"Welcome to IMS - Your {plan_type} Dashboard Ready!",
+                        message=client_msg.replace('*', ''), # Remove Markdown for plain text email
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=True
+                    )
+                    logger.info(f"📧 [EMAIL Sent] to {email}")
+                except Exception as mail_err:
+                    logger.warning(f"📧 [EMAIL Failed]: {mail_err}")
+
                 return Response({
-                    'message': 'Account created successfully! Credentials sent to WhatsApp.',
-                    'credentials': {'username': username, 'password': password}, # Returning for demo purposes
+                    'message': 'Account created successfully! Credentials sent to Email & WhatsApp.',
+                    'credentials': {'username': username, 'password': password},
                     'redirect_url': '/login/'
                 }, status=status.HTTP_201_CREATED)
 
@@ -66,10 +106,10 @@ class OnboardingPaymentView(APIView):
 
         return Response({'error': 'Payment Verification Failed'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def send_whatsapp_mock(self, number, message):
+    def send_whatsapp_mock(self, number, message, recipient_type="USER"):
         """
         Mock function to simulate sending WhatsApp message.
-        In production, replace with Twilio or similar API.
         """
-        logger.info(f"🚀 [WHATSAPP to {number}]: {message}")
-        print(f"🚀 [WHATSAPP to {number}]: {message}")
+        log_msg = f"🚀 [WHATSAPP to {recipient_type} - {number}]:\n{message}\n{'-'*30}"
+        logger.info(log_msg)
+        print(log_msg) # Print to console so it appears in server logs for User to see

@@ -3,10 +3,37 @@ const DashboardApp = {
     currentModule: 'dashboard',
     apiBaseUrl: 'https://yashamishra.pythonanywhere.com/api',
 
+    currentUser: null, // Store user profile here
+
     init() {
-        this.setupNavigation();
-        this.setupLogout();
-        this.loadInitialView();
+        this.fetchCurrentUser().then(() => {
+            this.setupNavigation();
+            this.setupLogout();
+            this.loadInitialView();
+            this.applyPermissions(); // Hide/Show things based on role
+        });
+    },
+
+    async fetchCurrentUser() {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/profile/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            if (res.ok) {
+                this.currentUser = await res.json();
+                console.log("Logged in as:", this.currentUser.role, this.currentUser.institution_type);
+            }
+        } catch (e) {
+            console.error("Failed to fetch profile", e);
+        }
+    },
+
+    applyPermissions() {
+        if (!this.currentUser) return;
+
+        // Example: Only show relevant tabs in sidebars if we were rendering sidebar dynamically
+        // Since sidebar is static HTML, we might hide/show items here if needed.
+        // But mainly we want to control the 'inner' views like Students/Attendance.
     },
 
     setupNavigation() {
@@ -140,10 +167,10 @@ const DashboardApp = {
         <div class="filter-bar">
             <!-- Tabs for Institution Type -->
             <div class="tab-group" style="display:flex; gap:10px; margin-right:auto;">
-                <button class="filter-tab active" onclick="DashboardApp.filterStudents(this, '')">All</button>
-                <button class="filter-tab" onclick="DashboardApp.filterStudents(this, 'SCHOOL')">School</button>
-                <button class="filter-tab" onclick="DashboardApp.filterStudents(this, 'COACHING')">Coaching</button>
-                <button class="filter-tab" onclick="DashboardApp.filterStudents(this, 'INSTITUTE')">Institute</button>
+                <button class="filter-tab active" id="tab-ALL" onclick="DashboardApp.filterStudents(this, '')">All</button>
+                <button class="filter-tab" id="tab-SCHOOL" onclick="DashboardApp.filterStudents(this, 'SCHOOL')">School</button>
+                <button class="filter-tab" id="tab-COACHING" onclick="DashboardApp.filterStudents(this, 'COACHING')">Coaching</button>
+                <button class="filter-tab" id="tab-INSTITUTE" onclick="DashboardApp.filterStudents(this, 'INSTITUTE')">Institute</button>
             </div>
 
             <input type="text" id="studentSearch" onkeyup="DashboardApp.fetchStudents()" placeholder="🔍 Search..." class="search-input">
@@ -172,7 +199,33 @@ const DashboardApp = {
         </div>
     `;
 
-        this.currentInstitutionType = ''; // Default all
+        // Default to user's institution type if not generic ADMIN
+        let defaultType = '';
+        if (this.currentUser && this.currentUser.institution_type) {
+            defaultType = this.currentUser.institution_type;
+            // If user is locked to a type, hide other tabs or auto-select
+            // For now, let's auto-select and hide "ALL" if they are specific.
+            if (defaultType !== 'SCHOOL' && defaultType !== 'COACHING' && defaultType !== 'INSTITUTE') {
+                defaultType = ''; // Super Admin or undefined
+            }
+        }
+
+        this.currentInstitutionType = defaultType;
+
+        // Update UI Tabs to reflect permission
+        if (defaultType) {
+            // Hide All tabs first
+            document.querySelectorAll('.filter-tab').forEach(t => t.style.display = 'none');
+            // Show only relevant tab
+            const tab = document.getElementById(`tab-${defaultType}`);
+            if (tab) {
+                tab.style.display = 'inline-block';
+                tab.click(); // Trigger click to set active logic
+            }
+        } else {
+            // Super admin sees all, do nothing special
+        }
+
         this.fetchStudents();
     },
 
@@ -861,9 +914,9 @@ const DashboardApp = {
 
         <div class="filter-bar">
             <div class="tab-group" style="display:flex; gap:10px;">
-                <button class="filter-tab active" onclick="DashboardApp.loadExamView('SCHOOL', this)">School (Classes)</button>
-                <button class="filter-tab" onclick="DashboardApp.loadExamView('COACHING', this)">Coaching (Batches)</button>
-                <button class="filter-tab" onclick="DashboardApp.loadExamView('INSTITUTE', this)">Institute (Dept)</button>
+                <button class="filter-tab active" id="exam-tab-SCHOOL" onclick="DashboardApp.loadExamView('SCHOOL', this)">School (Classes)</button>
+                <button class="filter-tab" id="exam-tab-COACHING" onclick="DashboardApp.loadExamView('COACHING', this)">Coaching (Batches)</button>
+                <button class="filter-tab" id="exam-tab-INSTITUTE" onclick="DashboardApp.loadExamView('INSTITUTE', this)">Institute (Dept)</button>
             </div>
         </div>
 
@@ -872,8 +925,28 @@ const DashboardApp = {
         </div>
     `;
 
-        // Default load School view
-        this.loadExamView('SCHOOL', null);
+        // Permission Logic
+        let defaultType = 'SCHOOL';
+        if (this.currentUser && this.currentUser.institution_type) {
+            const userType = this.currentUser.institution_type;
+            if (['SCHOOL', 'COACHING', 'INSTITUTE'].includes(userType)) {
+                defaultType = userType;
+            }
+        }
+
+        if (this.currentUser && this.currentUser.institution_type && ['SCHOOL', 'COACHING', 'INSTITUTE'].includes(this.currentUser.institution_type)) {
+            // Hide others
+            document.querySelectorAll('.filter-tab').forEach(t => t.style.display = 'none');
+            const tab = document.getElementById(`exam-tab-${this.currentUser.institution_type}`);
+            if (tab) {
+                tab.style.display = 'inline-block';
+                tab.onclick();
+                return; // Stop here, onclick handles loading
+            }
+        }
+
+        // Default load
+        this.loadExamView(defaultType, document.getElementById(`exam-tab-${defaultType}`));
     },
 
     loadExamView(type, btn) {
