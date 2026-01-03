@@ -158,9 +158,17 @@ if (document.getElementById('loginForm')) {
 
 // Logout function
 function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.clear();
-        window.location.href = '/login/';
+    if (typeof DashboardApp !== 'undefined' && DashboardApp.showConfirm) {
+        DashboardApp.showConfirm("Logout?", "Are you sure you want to log out securely?", () => {
+            localStorage.clear();
+            window.location.href = '/login/';
+        });
+    } else {
+        // Fallback for non-dashboard pages
+        if (confirm('Are you sure you want to logout?')) {
+            localStorage.clear();
+            window.location.href = '/login/';
+        }
     }
 }
 
