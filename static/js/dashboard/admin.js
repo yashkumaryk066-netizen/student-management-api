@@ -1235,13 +1235,13 @@ const DashboardApp = {
     loadEventManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
-                <div>
-                     <h1 class="page-title">📅 Events & Calendar</h1>
-                     <p class="page-subtitle">Organize cultural, sports, and academic events.</p>
-                </div>
-                <button class="btn-action" onclick="DashboardApp.createEvent()">+ Create Event</button>
-            </div >
+        <div class="module-header">
+            <div>
+                 <h1 class="page-title">📅 Events & Calendar</h1>
+                 <p class="page-subtitle">Organize cultural, sports, and academic events.</p>
+            </div>
+            <button class="btn-action" onclick="DashboardApp.createEvent()">+ Create Event</button>
+        </div>
 
     <div class="data-table-container">
         <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
@@ -1275,16 +1275,138 @@ const DashboardApp = {
     loadReportsAnalytics() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
-                <h1 class="page-title">📈 Reports & Analytics</h1>
-                <button class="btn-primary">Generate Report</button>
-            </div >
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">📈 Analytics & Insight</h1>
+                <p class="page-subtitle">Real-time performance metrics and detailed reports.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" onclick="alert('Exporting PDF...')">📥 Export PDF</button>
+                <button class="btn-primary" onclick="alert('Generating Report...')">⚡ Generate Report</button>
+            </div>
+        </div>
 
-    <div class="content-card">
-        <h3>Analytics Dashboard</h3>
-        <p>View detailed reports and analytics in the system</p>
-    </div>
-`;
+        <!-- Premium Stats Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.2); color: var(--primary);">💰</div>
+                <div class="stat-value">₹12.5L</div>
+                <div class="stat-label">Total Revenue (This Year)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: var(--success);">👥</div>
+                <div class="stat-value">1,240</div>
+                <div class="stat-label">Active Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">🎓</div>
+                <div class="stat-value">98.2%</div>
+                <div class="stat-label">Pass Percentage</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.2); color: var(--danger);">📉</div>
+                <div class="stat-value">4.5%</div>
+                <div class="stat-label">Dropout Rate</div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="cards-grid" style="grid-template-columns: 2fr 1fr; margin-bottom: 30px;">
+            <!-- Revenue Chart Placeholder -->
+            <div class="module-card">
+                <h3 class="module-title">Revenue Growth</h3>
+                <p class="module-description">Monthly revenue comparison (2023 vs 2024)</p>
+                
+                <div class="chart-container">
+                    <!-- CSS Bar Chart Simulation -->
+                    <div class="chart-bar" style="height: 40%; background: var(--primary);"></div>
+                    <div class="chart-bar" style="height: 60%; background: var(--secondary);"></div>
+                    <div class="chart-bar" style="height: 45%; background: var(--primary);"></div>
+                    <div class="chart-bar" style="height: 70%; background: var(--secondary);"></div>
+                    <div class="chart-bar" style="height: 55%; background: var(--primary);"></div>
+                    <div class="chart-bar" style="height: 85%; background: var(--secondary);"></div>
+                    <div class="chart-bar" style="height: 65%; background: var(--primary);"></div>
+                    <div class="chart-bar" style="height: 90%; background: var(--secondary);"></div>
+                    <div class="chart-bar" style="height: 75%; background: var(--primary);"></div>
+                    <div class="chart-bar" style="height: 95%; background: var(--success);"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px; color:var(--text-muted); font-size:0.8rem;">
+                    <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span>
+                </div>
+            </div>
+
+            <!-- Attendance Pie Placeholder -->
+            <div class="module-card">
+                <h3 class="module-title">Attendance Overview</h3>
+                <p class="module-description">Today's breakdown</p>
+                <div style="display:flex; justify-content:center; align-items:center; height:250px; position:relative;">
+                    <div style="width:200px; height:200px; border-radius:50%; background: conic-gradient(var(--success) 0% 75%, var(--danger) 75% 85%, var(--warning) 85% 100%); position:relative; box-shadow: 0 0 20px rgba(0,0,0,0.3);">
+                        <div style="position:absolute; top:20%; left:20%; width:60%; height:60%; background: rgba(30, 41, 59, 1); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                            <span style="font-size:1.5rem; font-weight:bold;">75%</span>
+                            <span style="font-size:0.7rem; color:var(--text-muted);">Present</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--success)">● Present</span> <span>75%</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--danger)">● Absent</span> <span>10%</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--warning)">● Late/Leave</span> <span>15%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Reports Table -->
+        <div class="data-table-container">
+            <div style="padding: 20px; border-bottom: 1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color: white; margin:0;">Recent Generated Reports</h3>
+                <input type="text" placeholder="Search reports..." class="search-input" style="width:200px; padding:8px 15px;">
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Report Name</th>
+                        <th>Type</th>
+                        <th>Generated By</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Financial Statement</td>
+                        <td>Finance</td>
+                        <td>Admin</td>
+                        <td>2024-03-31</td>
+                        <td><span class="status-badge status-active">Ready</span></td>
+                        <td><button class="btn-action" style="padding:4px 10px; font-size:0.8rem;">Download</button></td>
+                    </tr>
+                    <tr>
+                        <td>Q1 Student Performance</td>
+                        <td>Academic</td>
+                        <td>Principal</td>
+                        <td>2024-03-30</td>
+                        <td><span class="status-badge status-active">Ready</span></td>
+                        <td><button class="btn-action" style="padding:4px 10px; font-size:0.8rem;">Download</button></td>
+                    </tr>
+                    <tr>
+                        <td>Staff Attendance Log</td>
+                        <td>HR</td>
+                        <td>HR Manager</td>
+                        <td>2024-03-28</td>
+                        <td><span class="status-badge status-pending">Processing</span></td>
+                        <td><button class="btn-action" style="padding:4px 10px; font-size:0.8rem;" disabled>Wait</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    `;
     },
 
     loadSettings() {
