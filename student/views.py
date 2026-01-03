@@ -51,18 +51,19 @@ class StudentListCreateView(APIView):
     
     def get(self, request):
         search = request.query_params.get("search","").strip()
+        batch_id = request.query_params.get("batch_id")
+        
         students = Student.objects.all()
+        
+        if batch_id:
+            students = students.filter(enrollments__batch_id=batch_id, enrollments__status='ACTIVE')
+            
         if search:
             students= students.filter(
                 Q(name__icontains=search)|
                 Q(gender__icontains=search)
             )
-        if not students.exists():
-            return Response(
-                {"message": "Student does not exist"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
- 
+            
         serializer = StudentSerializer(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -200,20 +201,47 @@ class AttendenceCreateView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        student_id = request.data.get("student")
-        date = request.data.get("date")
-        if not date:
-            date = timezone.now().date()
-        if Attendence.objects.filter(student_id=student_id, date=date).exists():
-            return Response(
-                {"message": "Attendance already marked"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        serializer = AttendenceSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if isinstance(request.data, list):
+            # Bulk Create
+            created_records = []
+            errors = []
+            
+            for item in request.data:
+                student_id = item.get("student")
+                date = item.get("date")
+                if not date:
+                    date = timezone.now().date()
+                    item['date'] = date
+                    
+                # Skip duplicate
+                if Attendence.objects.filter(student_id=student_id, date=date).exists():
+                    continue
+                    
+                serializer = AttendenceSerializer(data=item)
+                if serializer.is_valid():
+                    serializer.save()
+                    created_records.append(serializer.data)
+                else:
+                    errors.append(serializer.errors)
+            
+            return Response(created_records, status=status.HTTP_201_CREATED)
+            
+        else:
+            # Single Create
+            student_id = request.data.get("student")
+            date = request.data.get("date")
+            if not date:
+                date = timezone.now().date()
+            if Attendence.objects.filter(student_id=student_id, date=date).exists():
+                return Response(
+                    {"message": "Attendance already marked"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            serializer = AttendenceSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema_view(
