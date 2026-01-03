@@ -16,9 +16,9 @@ class SubscriptionPurchaseView(APIView):
     permission_classes = [permissions.AllowAny] 
 
     PRICING = {
-        'SCHOOL': 4999.00,
-        'COACHING': 9999.00,
-        'INSTITUTE': 14999.00
+        'SCHOOL': 1000.00,
+        'COACHING': 500.00,
+        'INSTITUTE': 1500.00
     }
 
     def post(self, request):
@@ -86,9 +86,9 @@ class SubscriptionSuccessView(APIView):
     permission_classes = [permissions.AllowAny]
 
     PRICING = {
-        'SCHOOL': 4999.00,
-        'COACHING': 9999.00,
-        'INSTITUTE': 14999.00
+        'SCHOOL': 1000.00,
+        'COACHING': 500.00,
+        'INSTITUTE': 1500.00
     }
 
     def get(self, request):
