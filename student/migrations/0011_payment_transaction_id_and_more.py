@@ -15,10 +15,6 @@ class Migration(migrations.Migration):
             name='transaction_id',
             field=models.CharField(blank=True, max_length=100, null=True, unique=True),
         ),
-        migrations.AddField(
-            model_name='userprofile',
-            name='subscription_expiry',
-            field=models.DateField(blank=True, null=True),
-        ),
+
 
     ]
