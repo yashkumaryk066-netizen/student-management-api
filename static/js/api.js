@@ -164,6 +164,62 @@ const NotificationAPI = {
     },
 };
 
+// --- NEW MODULES ---
+
+// Library APIs
+const LibraryAPI = {
+    async getBooks() { return apiCall('/library/books/'); },
+    async getBook(id) { return apiCall(`/library/books/${id}/`); },
+    async createBook(data) { return apiCall('/library/books/', { method: 'POST', body: JSON.stringify(data) }); },
+    async updateBook(id, data) { return apiCall(`/library/books/${id}/`, { method: 'PUT', body: JSON.stringify(data) }); },
+    async deleteBook(id) { return apiCall(`/library/books/${id}/`, { method: 'DELETE' }); },
+    async getIssues() { return apiCall('/library/issues/'); },
+    async issueBook(data) { return apiCall('/library/issues/', { method: 'POST', body: JSON.stringify(data) }); }
+};
+
+// Hostel APIs
+const HostelAPI = {
+    async getHostels() { return apiCall('/hostel/'); },
+    async createHostel(data) { return apiCall('/hostel/', { method: 'POST', body: JSON.stringify(data) }); },
+    async getRooms() { return apiCall('/hostel/rooms/'); },
+    async createRoom(data) { return apiCall('/hostel/rooms/', { method: 'POST', body: JSON.stringify(data) }); },
+    async getAllocations() { return apiCall('/hostel/allocations/'); },
+    async allocateRoom(data) { return apiCall('/hostel/allocations/', { method: 'POST', body: JSON.stringify(data) }); }
+};
+
+// Transport APIs
+const TransportAPI = {
+    async getVehicles() { return apiCall('/transport/vehicles/'); },
+    async createVehicle(data) { return apiCall('/transport/vehicles/', { method: 'POST', body: JSON.stringify(data) }); },
+    async getRoutes() { return apiCall('/transport/routes/'); },
+    async createRoute(data) { return apiCall('/transport/routes/', { method: 'POST', body: JSON.stringify(data) }); }
+};
+
+// HR APIs
+const HrAPI = {
+    async getEmployees() { return apiCall('/hr/employees/'); },
+    async createEmployee(data) { return apiCall('/hr/employees/', { method: 'POST', body: JSON.stringify(data) }); },
+    async getLeaves() { return apiCall('/hr/leaves/'); },
+    async requestLeave(data) { return apiCall('/hr/leaves/', { method: 'POST', body: JSON.stringify(data) }); }
+};
+
+// Exam APIs
+const ExamAPI = {
+    async getExams() { return apiCall('/exams/'); },
+    async createExam(data) { return apiCall('/exams/', { method: 'POST', body: JSON.stringify(data) }); }
+};
+
+// Event APIs
+const EventAPI = {
+    async getEvents() { return apiCall('/events/'); },
+    async createEvent(data) { return apiCall('/events/', { method: 'POST', body: JSON.stringify(data) }); }
+};
+
+const CourseAPI = {
+    async getCourses() { return apiCall('/courses/'); },
+    async getBatches() { return apiCall('/batches/'); }
+};
+
 // Dashboard APIs
 const DashboardAPI = {
     // Student dashboard
