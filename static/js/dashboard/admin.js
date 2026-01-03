@@ -1,7 +1,7 @@
 // Dashboard SPA System - Main Application Logic
 const DashboardApp = {
     currentModule: 'dashboard',
-    apiBaseUrl: '/api',
+    apiBaseUrl: 'https://yashamishra.pythonanywhere.com/api',
 
     init() {
         this.setupNavigation();
