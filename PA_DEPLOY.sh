@@ -56,5 +56,16 @@ python -c "import django; django.setup(); from student import urls; print('✅ S
 
 echo "---------------------------------------------------"
 echo "✅ DEPLOYMENT FINISHED SUCCESSFULLY!"
-echo "👉 Now go to the PythonAnywhere 'Web' tab and click 'Reload'."
+
+# 7. Auto-Reload Web App (Try to touch WSGI file)
+WSGI_FILE="/var/www/$(whoami)_pythonanywhere_com_wsgi.py"
+if [ -f "$WSGI_FILE" ]; then
+    echo "🔄 Reloading Web App..."
+    touch "$WSGI_FILE"
+    echo "✅ App Reloaded!"
+else
+    echo "⚠️  Could not find WSGI file at $WSGI_FILE"
+    echo "👉 Please go to the 'Web' tab and click 'Reload' manually."
+fi
+
 echo "---------------------------------------------------"
