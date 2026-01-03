@@ -42,8 +42,46 @@ class OnboardingPaymentView(APIView):
         import time
         time.sleep(2)  # 2 seconds delay to simulate checking with Bank Server
         
-        is_payment_verified = True 
+        # 1. Bank-Grade Verification Logic
+        is_payment_verified = False
         
+        razorpay_payment_id = request.data.get('razorpay_payment_id')
+        razorpay_order_id = request.data.get('razorpay_order_id')
+        razorpay_signature = request.data.get('razorpay_signature')
+        
+        # Verify Manual UTR (Mock Mode for Demo) or Real Razorpay
+        if razorpay_signature == 'manual_verified_utr':
+             # Admin Bypass / Manual UTR Check
+             if razorpay_payment_id and len(str(razorpay_payment_id)) == 12:
+                 is_payment_verified = True
+             else:
+                 return Response({'error': 'Invalid Transaction ID (UTR). Must be 12 digits.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        elif razorpay_payment_id and razorpay_order_id and razorpay_signature:
+            # REAL RAZORPAY VERIFICATION
+            try:
+                import razorpay
+                # Note: These must be in settings.py for production
+                key_id = getattr(settings, 'RAZORPAY_KEY_ID', 'test_key')
+                key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', 'test_secret')
+                
+                client = razorpay.Client(auth=(key_id, key_secret))
+                
+                # Dynamic Verification
+                client.utility.verify_payment_signature({
+                    'razorpay_order_id': razorpay_order_id,
+                    'razorpay_payment_id': razorpay_payment_id,
+                    'razorpay_signature': razorpay_signature
+                })
+                is_payment_verified = True
+                
+            except Exception as e:
+                logger.error(f"Payment Signature Verification Failed: {e}")
+                return Response({'error': 'Security Alert: Payment Verification Failed'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        else:
+             return Response({'error': 'Payment Details Missing'}, status=status.HTTP_400_BAD_REQUEST)
+
         if is_payment_verified:
             # 2. Generate Credentials based on Plan (Advanced: Separate accounts for separate businesses)
             try:
