@@ -9,29 +9,28 @@ from .settings import *
 DEBUG = False
 
 # Update with YOUR PythonAnywhere username
-ALLOWED_HOSTS = ['YOUR_USERNAME.pythonanywhere.com']
+ALLOWED_HOSTS = ['yashamishra.pythonanywhere.com']
 
 # MySQL Database (PythonAnywhere provides MySQL for free)
+# Note: User must manually configure this in secret settings if using MySQL, 
+# otherwise it might break if password not set. 
+# For now, let's stick to SQLite if not configured, OR use the correct username pattern.
+# SAFEST OPTION: Use SQLite by default unless env var set, or minimal config.
+# But since this file is explicitly for PA, let's fix the HOSTS at least.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YOUR_USERNAME$mydb',  # Replace YOUR_USERNAME
-        'USER': 'YOUR_USERNAME',  # Replace YOUR_USERNAME
-        'PASSWORD': 'GET_FROM_DATABASES_TAB',  # Get from PythonAnywhere Databases tab
-        'HOST': 'YOUR_USERNAME.mysql.pythonanywhere-services.com',  # Replace YOUR_USERNAME
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 # Static files
-STATIC_ROOT = '/home/YOUR_USERNAME/student-management-api/staticfiles'
+STATIC_ROOT = '/home/yashamishra/student-management-api/staticfiles'
 STATIC_URL = '/static/'
 
 # CORS - Update with your frontend URL
 CORS_ALLOWED_ORIGINS = [
-    'https://YOUR_USERNAME.pythonanywhere.com',
+    'https://yashamishra.pythonanywhere.com',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
