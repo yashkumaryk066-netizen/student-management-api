@@ -54,6 +54,7 @@ class UserProfile(models.Model):
     ]
     institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL')
     phone = models.CharField(max_length=15, blank=True)
+    subscription_expiry = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

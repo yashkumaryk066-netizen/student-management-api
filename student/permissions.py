@@ -16,11 +16,22 @@ class IsParent(permissions.BasePermission):
         return hasattr(request.user, 'profile') and request.user.profile.role == 'PARENT'
 
 class IsAdminRole(permissions.BasePermission):
-    """Allow only users with ADMIN role"""
+    """Allow only users with ADMIN role AND valid subscription"""
     def has_permission(self, request, view):
-        if request.user.is_staff or request.user.is_superuser:
+        # 1. Superuser always allow (Lifetime Access)
+        if request.user.is_superuser:
             return True
-        return hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN'
+            
+        # 2. Check Role
+        if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
+            # 3. Check Subscription Validity
+            from django.utils import timezone
+            profile = request.user.profile
+            if profile.subscription_expiry and profile.subscription_expiry < timezone.now().date():
+                return False # Subscription Expired
+            return True
+            
+        return False
 
 class IsTeacherOrAdmin(permissions.BasePermission):
     """Allow users with TEACHER or ADMIN role"""

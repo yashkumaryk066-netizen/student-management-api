@@ -46,44 +46,70 @@ class OnboardingPaymentView(APIView):
         
         if is_payment_verified:
             # 2. Generate Credentials based on Plan (Advanced: Separate accounts for separate businesses)
-            import random
-            import string
+            # 2. Manage Subscription (Create or Renew)
+            from datetime import timedelta
+            from django.utils import timezone
             
             email_prefix = email.split('@')[0]
-            # e.g. "yash" + "_sch" (school) or "_chg" (coaching)
             plan_suffix = plan_type[:3].lower() 
+            target_username = f"{email_prefix}_{plan_suffix}"
             
-            # Base username
-            base_username = f"{email_prefix}_{plan_suffix}"
-            username = base_username
+            password = phone[-6:] 
             
-            # Ensure global uniqueness
-            while User.objects.filter(username=username).exists():
-                random_digits = ''.join(random.choices(string.digits, k=3))
-                username = f"{base_username}{random_digits}"
+            # Check if this user already exists for this plan
+            user = User.objects.filter(username=target_username).first()
+            
+            is_renewal = False
+            
+            if user:
+                # RE-ACTIVATE / RENEW EXISTING ACCOUNT
+                is_renewal = True
+                user.set_password(password)
+                user.is_active = True # Ensure active
+                user.save()
                 
-            password = phone[-6:] # Simple password: last 6 digits
-            
-            try:
-                # Create NEW User for this specific plan (Allowing same email for multiple plans)
+                # Update Profile Expiry
+                profile = UserProfile.objects.get(user=user)
+                
+                # If valid, extend. If expired, reset from today.
+                if profile.subscription_expiry and profile.subscription_expiry > timezone.now().date():
+                    profile.subscription_expiry += timedelta(days=30)
+                else:
+                    profile.subscription_expiry = timezone.now().date() + timedelta(days=30)
+                
+                profile.institution_type = plan_type.upper() # Ensure consistent
+                profile.save()
+                
+                username = target_username
+                logger.info(f"Renewed Subscription for: {username}")
+                
+            else:
+                # CREATE NEW ACCOUNT
+                username = target_username
+                
+                # Check collision with other email using same prefix (edge case)
+                import random, string
+                while User.objects.filter(username=username).exists():
+                     random_digits = ''.join(random.choices(string.digits, k=3))
+                     username = f"{target_username}{random_digits}"
+                
                 user = User.objects.create_user(
                     username=username,
                     email=email,
                     password=password
                 )
-                
                 user.is_active = True
                 user.save()
                 
-                logger.info(f"Created new Plan-Specific User: {username} for {plan_type}")
-
-                # Create Profile
+                # Create Profile with 30 Day Expiry
                 profile = UserProfile.objects.create(
                     user=user,
                     role='ADMIN',
                     phone=phone,
-                    institution_type=plan_type.upper()
+                    institution_type=plan_type.upper(),
+                    subscription_expiry=timezone.now().date() + timedelta(days=30)
                 )
+                logger.info(f"Created New Subscription for: {username}")
                 
                 # 3. Notification Content
                 
