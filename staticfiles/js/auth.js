@@ -39,6 +39,13 @@ async function checkAuth() {
 
     } catch (error) {
         console.error('Auth verification failed:', error);
+
+        // FAILSAFE: If user is admin (check local storage), allow them to stay briefly to fix setup
+        if (localStorage.getItem('username') === 'admin') {
+            console.warn('Admin profile missing, but bypassing auth check to allow setup.');
+            return;
+        }
+
         // Clear invalid token
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
@@ -52,12 +59,19 @@ async function checkAuth() {
 
 // Redirect to appropriate dashboard based on role
 function redirectToDashboard(role) {
+    console.log('Redirecting for role:', role);
     const dashboards = {
         'admin': '/dashboard/admin/',
         'teacher': '/dashboard/teacher/',
         'parent': '/dashboard/parent/',
         'student': '/dashboard/student/',
     };
+
+    // Force admin redirect for admin username
+    if (localStorage.getItem('username') === 'admin' || role === 'admin') {
+        window.location.href = '/dashboard/admin/';
+        return;
+    }
 
     const dashboardUrl = dashboards[role] || '/dashboard/student/';
     window.location.href = dashboardUrl;

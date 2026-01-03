@@ -767,6 +767,13 @@ class ExamListCreateView(generics.ListCreateAPIView):
     serializer_class = ExamSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        queryset = Exam.objects.all()
+        batch_id = self.request.query_params.get('batch_id')
+        if batch_id:
+            queryset = queryset.filter(batch_id=batch_id)
+        return queryset
+
 # --- EVENTS ---
 class EventListCreateView(generics.ListCreateAPIView):
     queryset = Event.objects.all()

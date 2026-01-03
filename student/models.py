@@ -348,8 +348,9 @@ class Exam(models.Model):
     
     name = models.CharField(max_length=200)
     exam_type = models.CharField(max_length=20, choices=EXAM_TYPES)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='exams')
-    grade_class = models.CharField(max_length=50, help_text="Class 10, BSc-I, etc.")
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='exams', null=True, blank=True)
+    grade_class = models.CharField(max_length=50, help_text="Class 10, BSc-I, etc.", blank=True)
+    batch = models.ForeignKey('Batch', on_delete=models.SET_NULL, null=True, blank=True, related_name='exams')
     total_marks = models.IntegerField()
     passing_marks = models.IntegerField()
     exam_date = models.DateField()
@@ -361,7 +362,8 @@ class Exam(models.Model):
         ordering = ['-exam_date']
     
     def __str__(self):
-        return f"{self.name} - {self.subject.name} ({self.grade_class})"
+        batch_info = f" ({self.batch.name})" if self.batch else f" ({self.grade_class})"
+        return f"{self.name} - {self.subject.name if self.subject else 'General'}{batch_info}"
 
 
 class Grade(models.Model):

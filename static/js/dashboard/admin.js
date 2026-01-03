@@ -750,62 +750,211 @@ const DashboardApp = {
     },
 
     loadExamManagement() {
+        // Fetch Batches to display selection first
+        this.fetchExamBatches();
+    },
+
+    async fetchExamBatches() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
+            <div class="module-header">
                 <div>
-                     <h1 class="page-title">📝 Exams & Grading</h1>
-                     <p class="page-subtitle">Schedule exams, manage marks and result cards.</p>
+                    <h1 class="page-title">📝 Exams & Grading</h1>
+                    <p class="page-subtitle">Select a batch to manage exams and results.</p>
                 </div>
-                <button class="btn-action" onclick="DashboardApp.createExam()">+ Create Exam</button>
-            </div >
-            
-            <div class="stats-mini-grid">
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">8</div>
-                    <div class="stat-mini-label">Upcoming Exams</div>
-                </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #34d399;">3.8</div>
-                    <div class="stat-mini-label">Average GPA</div>
-                </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #60a5fa;">245</div>
-                    <div class="stat-mini-label">Results Published</div>
-                </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">92%</div>
-                    <div class="stat-mini-label">Pass Rate</div>
-                </div>
+                <button class="btn-action" onclick="DashboardApp.openCreateExamModal()">
+                    + Schedule New Exam
+                </button>
             </div>
             
-             <div class="data-table-container">
-                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
-                     <h3 style="color: white; margin-bottom: 5px;">Upcoming Examinations</h3>
+            <div id="examBatchList" class="cards-grid" style="margin-top: 20px;">
+                <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
+                    <div class="loading-spinner"></div> Loading Batches...
                 </div>
-                 <table class="data-table">
-                     <thead>
+            </div>
+        `;
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/batches/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const batches = await res.json();
+
+            const list = document.getElementById('examBatchList');
+            if (batches.length === 0) {
+                list.innerHTML = `<div style="grid-column: 1/-1; padding:40px; text-align:center; color:white;">No active batches found. Please create a batch first.</div>`;
+                return;
+            }
+
+            list.innerHTML = batches.map(batch => `
+                <div class="module-card" onclick="DashboardApp.openBatchExams(${batch.id}, '${batch.name}')">
+                    <div class="module-icon" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa;">🎓</div>
+                    <h3 class="module-title">${batch.name}</h3>
+                    <p class="module-description">
+                        Course: ${batch.course_name}<br>
+                        Students: ${batch.student_count || 0}
+                    </p>
+                    <div class="module-stats">
+                        <button class="btn-action" style="width:100%; margin-top:10px;">View Exams</button>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error('Failed to load batches:', error);
+            document.getElementById('examBatchList').innerHTML = '<div style="color:red; text-align:center;">Failed to load batches.</div>';
+        }
+    },
+
+    async openBatchExams(batchId, batchName) {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <div>
+                     <a href="#" class="nav-link" onclick="DashboardApp.loadExamManagement(); return false;" style="font-size: 0.9rem; color: var(--primary); display:block; margin-bottom:5px;">← Back to Batches</a>
+                     <h1 class="page-title">Exams for ${batchName}</h1>
+                </div>
+                 <button class="btn-action" onclick="DashboardApp.openCreateExamModal(${batchId})">+ Schedule Exam for this Batch</button>
+            </div>
+            
+            <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Scheduled Examinations</h3>
+                </div>
+                <table class="data-table">
+                    <thead>
                         <tr>
                             <th>Exam Name</th>
                             <th>Subject</th>
                             <th>Date</th>
-                            <th>Time</th>
+                            <th>Total Marks</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                         <!-- Dummy Data -->
-                         <tr>
-                            <td>Mid-Term Physics</td>
-                            <td>Physics (PHY-101)</td>
-                            <td>2024-04-10</td>
-                            <td>10:00 AM</td>
-                            <td><span class="status-badge status-pending">Scheduled</span></td>
-                        </tr>
+                    <tbody id="examListBody">
+                        <tr><td colspan="6" class="text-center"><div class="loading-spinner"></div> Loading exams...</td></tr>
                     </tbody>
                 </table>
             </div>
-`;
+        `;
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/exams/?batch_id=${batchId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const exams = await res.json();
+
+            const tbody = document.getElementById('examListBody');
+            if (exams.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No exams scheduled for this batch.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = exams.map(exam => `
+                <tr>
+                    <td style="font-weight:600; color:white;">${exam.name}</td>
+                    <td>${exam.subject_name || 'General'}</td>
+                    <td>${exam.exam_date}</td>
+                    <td>${exam.total_marks}</td>
+                    <td><span class="status-badge status-active">Scheduled</span></td>
+                    <td>
+                        <button class="btn-sm" style="background:#10b981; margin-right:5px;">Enter Marks</button>
+                    </td>
+                </tr>
+            `).join('');
+
+        } catch (error) {
+            console.error(error);
+            alert('Failed to load exams.');
+        }
+    },
+
+    openCreateExamModal(preselectedBatchId = null) {
+        // Simple create modal
+        const modalHtml = `
+            <div class="modal-overlay" id="createExamModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Schedule New Exam</h2>
+                        <button class="close-modal" onclick="document.getElementById('createExamModal').remove()">×</button>
+                    </div>
+                    <form onsubmit="event.preventDefault(); DashboardApp.submitCreateExam();">
+                        <div class="form-group">
+                            <label>Batch</label>
+                            <select id="examBatchSelect" class="form-input" required>
+                                <option value="">Loading batches...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Exam Name</label>
+                            <input type="text" id="examName" class="form-input" placeholder="e.g. Mid-Term Physics" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="examDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                <div>
+                                    <label>Total Marks</label>
+                                    <input type="number" id="examTotalMarks" class="form-input" value="100">
+                                </div>
+                                <div>
+                                    <label>Passing Marks</label>
+                                    <input type="number" id="examPassingMarks" class="form-input" value="33">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width:100%;">Schedule Exam</button>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Populate batches in select
+        fetch(`${this.apiBaseUrl}/batches/`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        }).then(res => res.json()).then(batches => {
+            const select = document.getElementById('examBatchSelect');
+            select.innerHTML = batches.map(b => `<option value="${b.id}" ${preselectedBatchId == b.id ? 'selected' : ''}>${b.name}</option>`).join('');
+        });
+    },
+
+    async submitCreateExam() {
+        const data = {
+            batch: document.getElementById('examBatchSelect').value,
+            name: document.getElementById('examName').value,
+            exam_date: document.getElementById('examDate').value,
+            total_marks: document.getElementById('examTotalMarks').value,
+            passing_marks: document.getElementById('examPassingMarks').value,
+            exam_type: 'THEORY', // Default
+            subject: null, // Optional for now
+            duration_minutes: 180
+        };
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/exams/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert('Exam scheduled successfully!');
+                document.getElementById('createExamModal').remove();
+                this.loadExamManagement();
+            } else {
+                alert('Failed to create exam');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error creating exam');
+        }
     },
 
     loadEventManagement() {

@@ -140,6 +140,7 @@ class LeaveRequestSerializer(serializers.ModelSerializer):
 
 class ExamSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source='subject.name', read_only=True)
+    batch_name = serializers.CharField(source='batch.name', read_only=True)
     class Meta:
         model = Exam
         fields = '__all__'

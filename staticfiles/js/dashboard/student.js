@@ -1,70 +1,86 @@
 // Student Dashboard JS
-
 document.addEventListener('DOMContentLoaded', async () => {
     checkAuth();
 
-    // Set UI 
+    // Initial basic user info from local storage
     const user = getCurrentUser();
-    document.getElementById('userName').textContent = user.fullName || 'Student';
+    document.getElementById('studentName').textContent = user.fullName || 'Student';
+    document.getElementById('profileName').textContent = user.fullName || 'Student';
 
     await loadStudentData();
 });
-
-function showSection(id) {
-    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-    document.getElementById(`${id}-section`).classList.add('active');
-
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-}
 
 async function loadStudentData() {
     try {
         const data = await DashboardAPI.getStudentDashboard();
 
-        // Update Attendance
-        const attPct = data.attendance.attendance_percentage || 0;
-        document.getElementById('attendanceVal').textContent = `${attPct}%`;
-        document.getElementById('attendanceCircle').style.background = `conic-gradient(var(--primary) 0%, var(--primary) ${attPct}%, #eee ${attPct}%, #eee 100%)`;
-        document.getElementById('daysPresent').textContent = data.attendance.present_days;
+        // 1. Profile Info
+        const student = data.student || {};
+        document.getElementById('studentName').textContent = student.name || student.first_name || 'Student';
+        document.getElementById('profileName').textContent = student.name || 'Student';
+        document.getElementById('profileId').textContent = `ID: ${student.id || 'N/A'}`;
+        document.getElementById('rollNo').textContent = student.id || 'N/A'; // Using ID as roll if not present
+        document.getElementById('studentGrade').textContent = `Class ${student.grade || 'N/A'}`;
+        document.getElementById('className').textContent = student.grade || 'N/A';
+        document.getElementById('dob').textContent = student.dob || 'N/A';
+        document.getElementById('contact').textContent = student.phone || 'N/A';
 
-        // Update Fees
-        document.getElementById('feeDue').textContent = `₹${data.payments.total_due}`;
+        // 2. Attendance
+        const att = data.attendance || {};
+        const attPct = att.attendance_percentage || 0;
+        document.getElementById('attendancePercent').textContent = `${attPct}%`;
+        document.getElementById('attendanceBar').style.width = `${attPct}%`;
 
-        // Notifications
-        if (data.notifications && data.notifications.length > 0) {
-            document.getElementById('latestNotice').textContent = data.notifications[0].message;
-        }
-
-        // Pending Payments Render
-        const paymentsList = document.getElementById('pendingPaymentsList');
-        if (data.payments.payments && data.payments.payments.length > 0) {
-            paymentsList.innerHTML = data.payments.payments.map(p => `
-                <div class="payment-card" style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid ${p.status === 'OVERDUE' ? 'red' : 'orange'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3>${p.description}</h3>
-                            <div class="text-muted">Due: ${new Date(p.due_date).toLocaleDateString()}</div>
-                        </div>
-                        <div class="text-right">
-                            <h3 style="color: var(--primary);">₹${p.amount}</h3>
-                            <button class="btn btn-primary" onclick="alert('Payment Gateway Integration Pending')">Pay Now</button>
-                        </div>
-                    </div>
+        // 3. Notifications
+        const notices = data.notifications || [];
+        const noticeList = document.getElementById('notificationList');
+        if (notices.length > 0) {
+            noticeList.innerHTML = notices.map(n => `
+                <div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="color: white; font-weight: 500;">${n.title}</div>
+                    <div style="color: #94a3b8; font-size: 0.9rem;">${n.message}</div>
+                    <div style="color: #64748b; font-size: 0.75rem; margin-top: 4px;">${new Date(n.created_at).toLocaleDateString()}</div>
                 </div>
             `).join('');
         } else {
-            paymentsList.innerHTML = '<div class="alert alert-success">No pending dues! 🎉</div>';
+            noticeList.innerHTML = '<p class="text-muted">No new notifications.</p>';
         }
 
-        // Profile Data
-        if (data.student) {
-            document.getElementById('profileName').textContent = data.student.name || data.student.first_name;
-            document.getElementById('profileEmail').textContent = data.student.email || 'N/A';
-            document.getElementById('profileDob').textContent = data.student.dob || 'N/A';
+        // 4. Fee Status
+        const payments = data.payments || { total_due: 0, payments: [] };
+        const dueBadge = document.getElementById('totalDueBadge');
+        if (payments.total_due > 0) {
+            dueBadge.textContent = `Due: ₹${payments.total_due}`;
+            dueBadge.className = 'status-badge status-warning'; // create CSS class if needed or use inline
+            dueBadge.style.background = '#f59e0b';
+            dueBadge.style.color = 'black';
+        } else {
+            dueBadge.textContent = 'No Dues';
+            dueBadge.style.background = '#10b981';
+            dueBadge.style.color = 'white';
+        }
+
+        const feeTable = document.getElementById('feeTableBody');
+        if (payments.payments && payments.payments.length > 0) {
+            feeTable.innerHTML = payments.payments.map(p => `
+                <tr>
+                    <td>${p.description}</td>
+                    <td>${new Date(p.due_date).toLocaleDateString()}</td>
+                    <td>₹${p.amount}</td>
+                    <td><span class="status-badge ${p.status === 'PAID' ? 'status-success' : 'status-pending'}">${p.status}</span></td>
+                </tr>
+            `).join('');
+        } else {
+            feeTable.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8;">No records found</td></tr>';
         }
 
     } catch (e) {
         console.error('Failed to load student dashboard', e);
+        // Show silent error in console, keep UI as partial load
     }
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = '/login/';
 }
