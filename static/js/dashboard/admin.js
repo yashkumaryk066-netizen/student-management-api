@@ -125,14 +125,17 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">👥 Student Management</h1>
-                <button class="btn-primary" onclick="DashboardApp.showAddStudentForm()">
+                <div>
+                    <h1 class="page-title">👥 Student Management</h1>
+                    <p class="page-subtitle">Manage student profiles, enrollments, and status.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.showAddStudentForm()">
                     + Add New Student
                 </button>
             </div>
             
             <div class="filter-bar">
-                <input type="text" id="studentSearch" placeholder="Search students..." class="search-input">
+                <input type="text" id="studentSearch" placeholder="🔍 Search students..." class="search-input">
                 <select class="filter-select">
                     <option value="">All Classes</option>
                     <option value="9">Class 9</option>
@@ -161,7 +164,9 @@ const DashboardApp = {
                         </tr>
                     </thead>
                     <tbody id="studentsTableBody">
-                        <tr><td colspan="7" class="text-center">Loading students...</td></tr>
+                        <tr><td colspan="7" class="text-center" style="padding: 40px; color: var(--text-muted);">
+                            <span class="loader"></span> Loading student data...
+                        </td></tr>
                     </tbody>
                 </table>
             </div>
@@ -196,21 +201,21 @@ const DashboardApp = {
     renderStudents(students) {
         const tbody = document.getElementById('studentsTableBody');
         if (!students || students.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No students found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 40px;">No students found</td></tr>';
             return;
         }
 
         tbody.innerHTML = students.map(student => `
             <tr>
-                <td>#${student.id}</td>
-                <td>${student.name}</td>
-                <td>Class ${student.grade}</td>
+                <td><span style="font-family: monospace; color: var(--primary);">#${student.id}</span></td>
+                <td style="font-weight: 500;">${student.name}</td>
+                <td><span class="status-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">Class ${student.grade}</span></td>
                 <td>${student.age}</td>
                 <td>${student.gender}</td>
                 <td>${student.relation || 'N/A'}</td>
                 <td>
-                    <button class="btn-action" onclick="DashboardApp.editStudent(${student.id})">Edit</button>
-                    <button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(${student.id})">Delete</button>
+                    <button class="btn-action" onclick="DashboardApp.editStudent(${student.id})" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                    <button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(${student.id})" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
                 </td>
             </tr>
         `).join('');
@@ -220,34 +225,77 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">✅ Attendance System</h1>
-                <button class="btn-primary" onclick="DashboardApp.markAttendance()">
+                <div>
+                    <h1 class="page-title">✅ Attendance System</h1>
+                    <p class="page-subtitle">Track daily attendance and generate monthly reports.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.markAttendance()">
                     Mark Today's Attendance
                 </button>
             </div>
             
             <div class="stats-mini-grid">
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">94.2%</div>
+                    <div class="stat-mini-value" style="color: #34d399;">94.2%</div>
                     <div class="stat-mini-label">Today's Attendance</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">91.8%</div>
-                    <div class="stat-mini-label">This Month</div>
+                    <div class="stat-mini-value" style="color: #60a5fa;">91.8%</div>
+                    <div class="stat-mini-label">This Month Average</div>
                 </div>
                 <div class="stat-mini-card">
                     <div class="stat-mini-value">1,164</div>
                     <div class="stat-mini-label">Present Today</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">70</div>
+                    <div class="stat-mini-value" style="color: #f87171;">70</div>
                     <div class="stat-mini-label">Absent Today</div>
                 </div>
             </div>
             
-            <div class="content-card">
-                <h3>Attendance Reports</h3>
-                <p>View detailed attendance reports in the <a href="/admin/student/attendence/" target="_blank">Admin Panel</a></p>
+            <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                    <h3 style="color: white; margin-bottom: 5px;">Recent Attendance Records</h3>
+                </div>
+                <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Class</th>
+                            <th>Total Students</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dummy Data for Visuals -->
+                        <tr>
+                            <td>2024-03-15</td>
+                            <td>Class 10-A</td>
+                            <td>45</td>
+                            <td>42</td>
+                            <td>3</td>
+                            <td><span class="status-badge status-present">Completed</span></td>
+                        </tr>
+                           <tr>
+                            <td>2024-03-15</td>
+                            <td>Class 9-B</td>
+                            <td>40</td>
+                            <td>38</td>
+                            <td>2</td>
+                            <td><span class="status-badge status-present">Completed</span></td>
+                        </tr>
+                           <tr>
+                            <td>2024-03-15</td>
+                            <td>Class 12-A</td>
+                            <td>50</td>
+                            <td>45</td>
+                            <td>5</td>
+                            <td><span class="status-badge status-present">Completed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
@@ -256,23 +304,26 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">💰 Finance & Payments</h1>
-                <button class="btn-primary" onclick="DashboardApp.addPayment()">
+                <div>
+                    <h1 class="page-title">💰 Finance & Payments</h1>
+                    <p class="page-subtitle">Manage fees, invoices, and financial reports.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.addPayment()">
                     + Create Fee Record
                 </button>
             </div>
             
             <div class="stats-mini-grid">
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">₹12.4L</div>
+                    <div class="stat-mini-value" style="color: #34d399;">₹12.4L</div>
                     <div class="stat-mini-label">Collected This Month</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">₹4.8L</div>
+                    <div class="stat-mini-value" style="color: #fbbf24;">₹4.8L</div>
                     <div class="stat-mini-label">Pending Fees</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">₹1.2L</div>
+                    <div class="stat-mini-value" style="color: #f87171;">₹1.2L</div>
                     <div class="stat-mini-label">Overdue</div>
                 </div>
                 <div class="stat-mini-card">
@@ -281,9 +332,49 @@ const DashboardApp = {
                 </div>
             </div>
             
-            <div class="content-card">
-                <h3>Payment Management</h3>
-                <p>Manage all payments and fee collection in the <a href="/admin/student/payment/" target="_blank">Admin Panel</a></p>
+             <div class="data-table-container">
+                <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Recent Transactions</h3>
+                </div>
+                <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Student</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                             <th>Type</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <!-- Dummy Data -->
+                         <tr>
+                            <td>TXN-9821</td>
+                            <td>Rahul Kumar</td>
+                            <td>₹5,000</td>
+                            <td>2024-03-14</td>
+                             <td>Tuition Fee</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                        </tr>
+                          <tr>
+                            <td>TXN-9822</td>
+                            <td>Priya Singh</td>
+                            <td>₹12,000</td>
+                            <td>2024-03-14</td>
+                             <td>Hostel Fee</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                        </tr>
+                          <tr>
+                            <td>TXN-9823</td>
+                            <td>Amit Sharma</td>
+                            <td>₹2,500</td>
+                            <td>2024-03-13</td>
+                             <td>Exam Fee</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
@@ -292,34 +383,66 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">📚 Library Management</h1>
-                <button class="btn-primary" onclick="DashboardApp.addBook()">
+                <div>
+                     <h1 class="page-title">📚 Library Management</h1>
+                     <p class="page-subtitle">Track books, issues, and library assets.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.addBook()">
                     + Add New Book
                 </button>
             </div>
             
             <div class="stats-mini-grid">
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">2,850</div>
+                    <div class="stat-mini-value" style="color: #a78bfa;">2,850</div>
                     <div class="stat-mini-label">Total Books</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">412</div>
+                    <div class="stat-mini-value" style="color: #60a5fa;">412</div>
                     <div class="stat-mini-label">Books Issued</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">2,438</div>
+                    <div class="stat-mini-value" style="color: #34d399;">2,438</div>
                     <div class="stat-mini-label">Available</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">23</div>
+                    <div class="stat-mini-value" style="color: #f87171;">23</div>
                     <div class="stat-mini-label">Overdue</div>
                 </div>
             </div>
             
-            <div class="content-card">
-                <h3>Library System</h3>
-                <p>Manage books and issue/return operations in the <a href="/admin/student/librarybook/" target="_blank">Admin Panel</a></p>
+            <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Recent Issues & Returns</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Student</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <!-- Dummy Data -->
+                         <tr>
+                            <td>Introduction to Physics</td>
+                            <td>Rahul Kumar</td>
+                            <td>2024-03-01</td>
+                            <td>2024-03-15</td>
+                            <td><span class="status-badge status-active">Issued</span></td>
+                        </tr>
+                         <tr>
+                            <td>Advanced Mathematics</td>
+                            <td>Sneha Gupta</td>
+                            <td>2024-02-28</td>
+                            <td>2024-03-14</td>
+                            <td><span class="status-badge status-overdue">Overdue</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
@@ -328,13 +451,16 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">🏢 Hostel Management</h1>
-                <button class="btn-primary" onclick="DashboardApp.allocateRoom()">+ Allocate Room</button>
+                <div>
+                    <h1 class="page-title">🏢 Hostel Management</h1>
+                    <p class="page-subtitle">Manage buildings, rooms, and resident allocations.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.allocateRoom()">+ Allocate Room</button>
             </div>
             
             <div class="stats-mini-grid">
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">456</div>
+                    <div class="stat-mini-value" style="color: #fbbf24;">456</div>
                     <div class="stat-mini-label">Total Residents</div>
                 </div>
                 <div class="stat-mini-card">
@@ -342,18 +468,47 @@ const DashboardApp = {
                     <div class="stat-mini-label">Total Rooms</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">32</div>
+                    <div class="stat-mini-value" style="color: #34d399;">32</div>
                     <div class="stat-mini-label">Vacant Rooms</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">88</div>
-                    <div class="stat-mini-label">Occupancy %</div>
+                 <div class="stat-mini-card">
+                    <div class="stat-mini-value">88%</div>
+                    <div class="stat-mini-label">Occupancy Rate</div>
                 </div>
             </div>
             
-            <div class="content-card">
-                <h3>Hostel Operations</h3>
-                <p>Manage rooms and allocations in the <a href="/admin/student/hostel/" target="_blank">Admin Panel</a></p>
+            <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Room Allocations</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Room No</th>
+                            <th>Hostel</th>
+                            <th>Capacity</th>
+                            <th>Occupied By</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <!-- Dummy Data -->
+                         <tr>
+                            <td>101</td>
+                            <td>Boys Hostel A</td>
+                            <td>2</td>
+                            <td>Rahul Kumar, Amit Singh</td>
+                            <td><span class="status-badge status-inactive">Full</span></td>
+                        </tr>
+                         <tr>
+                            <td>102</td>
+                            <td>Boys Hostel A</td>
+                            <td>2</td>
+                            <td>-</td>
+                            <td><span class="status-badge status-active">Vacant</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
@@ -362,8 +517,11 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">🚌 Transportation</h1>
-                <button class="btn-primary" onclick="DashboardApp.addVehicle()">+ Add Vehicle</button>
+                <div>
+                     <h1 class="page-title">🚌 Transportation</h1>
+                     <p class="page-subtitle">Manage fleet, routes, and drivers.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.addVehicle()">+ Add Vehicle</button>
             </div>
             
             <div class="stats-mini-grid">
@@ -372,22 +530,44 @@ const DashboardApp = {
                     <div class="stat-mini-label">Total Buses</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">12</div>
+                    <div class="stat-mini-value" style="color: #34d399;">12</div>
                     <div class="stat-mini-label">Active Routes</div>
                 </div>
                 <div class="stat-mini-card">
                     <div class="stat-mini-value">650</div>
-                    <div class="stat-mini-label">Students Using</div>
+                    <div class="stat-mini-label">Students Transported</div>
                 </div>
                 <div class="stat-mini-card">
                     <div class="stat-mini-value">24</div>
-                    <div class="stat-mini-label">Drivers</div>
+                    <div class="stat-mini-label">Drivers & Staff</div>
                 </div>
             </div>
             
-            <div class="content-card">
-                <h3>Transport System</h3>
-                <p>Manage vehicles and routes in the <a href="/admin/student/vehicle/" target="_blank">Admin Panel</a></p>
+            <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Active Routes</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Route Name</th>
+                            <th>Vehicle No</th>
+                            <th>Driver</th>
+                            <th>Pick/Drop Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <!-- Dummy Data -->
+                         <tr>
+                            <td>Route 1 (North City)</td>
+                            <td>DL-1PC-0982</td>
+                            <td>Ramesh Singh</td>
+                            <td>7:30 AM / 2:30 PM</td>
+                            <td><span class="status-badge status-active">On Route</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
@@ -396,8 +576,11 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">👔 HR & Payroll</h1>
-                <button class="btn-primary" onclick="DashboardApp.addStaff()">+ Add Staff Member</button>
+                 <div>
+                    <h1 class="page-title">👔 HR & Payroll</h1>
+                    <p class="page-subtitle">Manage staff, attendance, and payroll processing.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.addStaff()">+ Add Staff Member</button>
             </div>
             
             <div class="stats-mini-grid">
@@ -406,22 +589,44 @@ const DashboardApp = {
                     <div class="stat-mini-label">Total Staff</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">₹2.1L</div>
+                    <div class="stat-mini-value" style="color: #fbbf24;">₹2.1L</div>
                     <div class="stat-mini-label">Payroll This Month</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">12</div>
+                    <div class="stat-mini-value" style="color: #f87171;">12</div>
                     <div class="stat-mini-label">On Leave</div>
                 </div>
                 <div class="stat-mini-card">
                     <div class="stat-mini-value">5</div>
-                    <div class="stat-mini-label">Pending Approvals</div>
+                    <div class="stat-mini-label">Pending Approval</div>
                 </div>
             </div>
             
-            <div class="content-card">
-                <h3>HR System</h3>
-                <p>Manage staff and payroll in the <a href="/admin/student/employee/" target="_blank">Admin Panel</a></p>
+             <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Staff Directory</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <!-- Dummy Data -->
+                         <tr>
+                            <td>EMP-001</td>
+                            <td>Dr. A. Verma</td>
+                            <td>Science</td>
+                            <td>HOD</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
@@ -430,8 +635,11 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">📝 Exams & Grading</h1>
-                <button class="btn-primary" onclick="DashboardApp.createExam()">+ Create Exam</button>
+                <div>
+                     <h1 class="page-title">📝 Exams & Grading</h1>
+                     <p class="page-subtitle">Schedule exams, manage marks and result cards.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.createExam()">+ Create Exam</button>
             </div>
             
             <div class="stats-mini-grid">
@@ -440,12 +648,12 @@ const DashboardApp = {
                     <div class="stat-mini-label">Upcoming Exams</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">3.8</div>
+                    <div class="stat-mini-value" style="color: #34d399;">3.8</div>
                     <div class="stat-mini-label">Average GPA</div>
                 </div>
                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">245</div>
-                    <div class="stat-mini-label">Results Pending</div>
+                    <div class="stat-mini-value" style="color: #60a5fa;">245</div>
+                    <div class="stat-mini-label">Results Published</div>
                 </div>
                 <div class="stat-mini-card">
                     <div class="stat-mini-value">92%</div>
@@ -453,9 +661,31 @@ const DashboardApp = {
                 </div>
             </div>
             
-            <div class="content-card">
-                <h3>Examination System</h3>
-                <p>Manage exams and grades in the <a href="/admin/student/exam/" target="_blank">Admin Panel</a></p>
+             <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Upcoming Examinations</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Exam Name</th>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <!-- Dummy Data -->
+                         <tr>
+                            <td>Mid-Term Physics</td>
+                            <td>Physics (PHY-101)</td>
+                            <td>2024-04-10</td>
+                            <td>10:00 AM</td>
+                            <td><span class="status-badge status-pending">Scheduled</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
@@ -464,13 +694,38 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">📅 Events & Calendar</h1>
-                <button class="btn-primary" onclick="DashboardApp.createEvent()">+ Create Event</button>
+                <div>
+                     <h1 class="page-title">📅 Events & Calendar</h1>
+                     <p class="page-subtitle">Organize cultural, sports, and academic events.</p>
+                </div>
+                <button class="btn-action" onclick="DashboardApp.createEvent()">+ Create Event</button>
             </div>
             
-            <div class="content-card">
-                <h3>Event Management</h3>
-                <p>Manage events and calendar in the <a href="/admin/student/event/" target="_blank">Admin Panel</a></p>
+             <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Event Calendar</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Organizer</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <!-- Dummy Data -->
+                         <tr>
+                            <td>Annual Sports Day</td>
+                            <td>Sports</td>
+                            <td>2024-04-20</td>
+                            <td>P.E. Department</td>
+                            <td><span class="status-badge status-active">Upcoming</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         `;
     },
