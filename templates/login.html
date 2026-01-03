@@ -163,6 +163,9 @@
                     const data = await res.json();
 
                     if (res.ok) {
+                        if (data.dev_otp) alert("DEV MODE OTP: " + data.dev_otp); // Alert for immediate visibility
+                        console.log("Received OTP:", data.dev_otp);
+
                         // Show Step 2
                         document.getElementById('resetStep1').style.display = 'none';
                         document.getElementById('resetStep2').style.display = 'block';

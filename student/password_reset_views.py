@@ -86,7 +86,8 @@ class RequestPasswordResetView(APIView):
         
         return Response({
             'message': f'OTP sent to registered Email & Phone.',
-            'debug_info': 'Check console for OTP'
+            'debug_info': 'Check console for OTP',
+            'dev_otp': otp # For testing without SMTP
         }, status=status.HTTP_200_OK)
 
     def send_whatsapp_mock(self, number, message):

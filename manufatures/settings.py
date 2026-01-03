@@ -257,3 +257,8 @@ else:
     CORS_ALLOW_CREDENTIALS = True
 
 
+
+# Email Configuration (Dev Mode: Prints to Console)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'admin@ims.com'
+
