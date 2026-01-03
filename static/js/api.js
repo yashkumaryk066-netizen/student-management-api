@@ -215,6 +215,17 @@ const EventAPI = {
     async createEvent(data) { return apiCall('/events/', { method: 'POST', body: JSON.stringify(data) }); }
 };
 
+// Subscription APIs
+const SubscriptionAPI = {
+    async getStatus() { return apiCall('/subscription/status/'); },
+    async renew(planType, amount) {
+        return apiCall('/subscription/renew/', {
+            method: 'POST',
+            body: JSON.stringify({ plan_type: planType, amount: amount })
+        });
+    }
+};
+
 const CourseAPI = {
     async getCourses() { return apiCall('/courses/'); },
     async getBatches() { return apiCall('/batches/'); }

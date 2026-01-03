@@ -1633,77 +1633,266 @@ const DashboardApp = {
         container.innerHTML = '<div class="loading-spinner"></div>';
 
         try {
-            // Fetch Status
-            const res = await fetch(`${this.apiBaseUrl}/subscription/status/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const sub = await res.json();
+            // Fetch Real Status from API
+            const sub = await SubscriptionAPI.getStatus();
 
             if (sub.status === 'NO_SUBSCRIPTION') {
-                container.innerHTML = `<h1>No Active Subscription</h1><p>Please contact support or purchase a plan.</p>`;
+                container.innerHTML = `
+                    <div class="module-header">
+                        <h1 class="page-title">💳 Plan & Subscription</h1>
+                        <p class="page-subtitle">No active subscription found</p>
+                    </div>
+                    <div class="module-card" style="text-align: center; padding: 60px;">
+                        <h2 style="margin-bottom: 20px;">Get Started Today!</h2>
+                        <p style="color: var(--text-muted); margin-bottom: 30px;">Choose a plan to unlock all features</p>
+                        <a href="/#pricing" class="btn-primary">View Plans</a>
+                    </div>
+                `;
                 return;
             }
 
-            const daysColor = sub.days_left < 7 ? 'var(--danger)' : 'var(--success)';
+            // Calculate progress percentage
+            const totalDays = 30; // Assuming 30-day plan
+            const progressPercent = Math.min((sub.days_left / totalDays) * 100, 100);
+            const daysColor = sub.days_left < 7 ? '#ef4444' : sub.days_left < 15 ? '#f59e0b' : '#10b981';
+
+            // Plan icons
+            const planIcons = {
+                'SCHOOL': '🏫',
+                'COACHING': '🎓',
+                'INSTITUTE': '🏛️'
+            };
+            const planIcon = planIcons[sub.plan_type] || '💼';
+
+            // Format dates
+            const formatDate = (dateStr) => {
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            };
 
             container.innerHTML = `
-                <div class="module-header">
-                    <div>
-                        <h1 class="page-title">💳 Plan & Subscription</h1>
-                        <p class="page-subtitle">Manage your billing and renewal details.</p>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+                    
+                    .subscription-container {
+                        font-family: 'Inter', sans-serif;
+                    }
+                    
+                    .premium-card {
+                        background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+                        border: 1px solid rgba(148, 163, 184, 0.1);
+                        border-radius: 24px;
+                        padding: 40px;
+                        position: relative;
+                        overflow: hidden;
+                        backdrop-filter: blur(10px);
+                    }
+                    
+                    .premium-card::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -50%;
+                        width: 200%;
+                        height: 200%;
+                        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+                        animation: rotate 20s linear infinite;
+                    }
+                    
+                    @keyframes rotate {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                    
+                    .plan-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 32px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    
+                    .plan-icon {
+                        font-size: 64px;
+                        filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.3));
+                    }
+                    
+                    .plan-title {
+                        font-family: 'Outfit', sans-serif;
+                        font-size: 2.25rem;
+                        font-weight: 800;
+                        background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        margin: 0 0 8px 0;
+                    }
+                    
+                    .days-remaining {
+                        font-family: 'Outfit', sans-serif;
+                        font-size: 4rem;
+                        font-weight: 900;
+                        line-height: 1;
+                        background: linear-gradient(135deg, ${daysColor} 0%, ${daysColor}dd 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        text-shadow: 0 0 30px ${daysColor}50;
+                    }
+                    
+                    .progress-bar-container {
+                        width: 100%;
+                        height: 12px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 999px;
+                        overflow: hidden;
+                        position: relative;
+                        margin: 24px 0;
+                    }
+                    
+                    .progress-bar-fill {
+                        height: 100%;
+                        background: linear-gradient(90deg, ${daysColor} 0%, ${daysColor}cc 100%);
+                        border-radius: 999px;
+                        transition: width 1s ease;
+                        box-shadow: 0 0 20px ${daysColor}80;
+                    }
+                    
+                    .renew-btn {
+                        width: 100%;
+                        padding: 18px 32px;
+                        font-size: 1.1rem;
+                        font-weight: 700;
+                        font-family: 'Outfit', sans-serif;
+                        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+                        border: none;
+                        border-radius: 16px;
+                        color: white;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        position: relative;
+                        overflow: hidden;
+                        z-index: 1;
+                    }
+                    
+                    .renew-btn::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: -100%;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                        transition: left 0.5s;
+                    }
+                    
+                    .renew-btn:hover::before {
+                        left: 100%;
+                    }
+                    
+                    .renew-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 20px 40px rgba(139, 92, 246, 0.4);
+                    }
+                    
+                    .info-row {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 16px;
+                        background: rgba(255, 255, 255, 0.05);
+                        border-radius: 12px;
+                        margin-bottom: 12px;
+                        backdrop-filter: blur(5px);
+                    }
+                    
+                    .billing-card {
+                        background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+                        border: 1px solid rgba(148, 163, 184, 0.1);
+                        border-radius: 20px;
+                        padding: 32px;
+                    }
+                </style>
+                
+                <div class="subscription-container">
+                    <div class="module-header">
+                        <div>
+                            <h1 class="page-title" style="font-family: 'Outfit', sans-serif;">💳 My Subscription</h1>
+                            <p class="page-subtitle">Manage your plan and billing</p>
+                        </div>
+                    </div>
+
+                    <div class="cards-grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+                        <!-- Main Plan Card -->
+                        <div class="premium-card">
+                            <div class="plan-header">
+                                <div>
+                                    <h2 class="plan-title">${sub.plan_type} Plan</h2>
+                                    <span class="status-badge status-${sub.status === 'ACTIVE' ? 'active' : 'inactive'}" style="font-size: 0.9rem;">
+                                        ${sub.status === 'ACTIVE' ? '● Active' : '○ Inactive'}
+                                    </span>
+                                </div>
+                                <div class="plan-icon">${planIcon}</div>
+                            </div>
+                            
+                            <div style="text-align: center; margin: 32px 0; position: relative; z-index: 1;">
+                                <div style="color: var(--text-muted); font-size: 1rem; margin-bottom: 8px; font-weight: 600;">DAYS REMAINING</div>
+                                <div class="days-remaining">${sub.days_left}</div>
+                                <div style="color: var(--text-muted); font-size: 1rem; margin-top: 8px;">out of 30 days</div>
+                            </div>
+                            
+                            <div class="progress-bar-container" style="position: relative; z-index: 1;">
+                                <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+                            </div>
+                            
+                            <div class="info-row" style="position: relative; z-index: 1;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Expires On</span>
+                                <span style="font-weight: 700; font-size: 1.1rem; color: white;">${formatDate(sub.end_date)}</span>
+                            </div>
+                            
+                            <div class="info-row" style="position: relative; z-index: 1;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Amount Paid</span>
+                                <span style="font-weight: 700; font-size: 1.1rem; color: #10b981;">₹${sub.amount_paid}</span>
+                            </div>
+                            
+                            <button class="renew-btn" onclick="DashboardApp.renewSubscription('${sub.plan_type}')">
+                                🔄 Renew for 30 Days
+                            </button>
+                        </div>
+
+                        <!-- Billing History -->
+                        <div class="billing-card">
+                            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 24px;">Billing History</h3>
+                            
+                            <div style="padding: 16px; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; border-radius: 8px; margin-bottom: 16px;">
+                                <div style="font-weight: 600; margin-bottom: 6px;">Current Plan</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">${formatDate(sub.start_date)}</div>
+                                    <div style="font-weight: 700; color: #10b981;">₹${sub.amount_paid}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 16px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                                <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                                    More transactions will appear here
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="cards-grid" style="grid-template-columns: 1fr 1fr;">
-                    <div class="module-card">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                            <div>
-                                <h2 style="font-size:2rem; margin-bottom:5px;">${sub.plan_type} Plan</h2>
-                                <span class="status-badge status-${sub.status === 'ACTIVE' ? 'active' : 'inactive'}">${sub.status}</span>
-                            </div>
-                            <div style="font-size:3rem;">💎</div>
-                        </div>
-                        
-                        <div style="margin-bottom:20px;">
-                            <div style="color:var(--text-muted); font-size:0.9rem;">Valid Until</div>
-                            <div style="font-size:1.2rem; font-weight:600;">${sub.end_date}</div>
-                        </div>
-
-                         <div style="margin-bottom:20px;">
-                            <div style="color:var(--text-muted); font-size:0.9rem;">Days Remaining</div>
-                            <div style="font-size:2.5rem; font-weight:800; color:${daysColor}">${sub.days_left} Days</div>
-                        </div>
-                        
-                        <button class="btn-primary" style="width:100%;" onclick="DashboardApp.renewSubscription('${sub.plan_type}')">
-                            🔄 Renew Plan Now
-                        </button>
-                    </div>
-
-                    <div class="module-card">
-                        <h3>Billing History</h3>
-                        <p style="color:var(--text-muted); margin-bottom:20px;">Recent transactions</p>
-                        
-                        <div style="padding:15px; background:rgba(255,255,255,0.05); border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-weight:600;">Subscription Renewal</div>
-                                <div style="font-size:0.8rem; color:var(--text-muted);">${sub.start_date}</div>
-                            </div>
-                            <div style="font-weight:bold; color:var(--success);">Paid ₹${sub.amount_paid}</div>
-                        </div>
-                         <div style="padding:15px; background:rgba(255,255,255,0.05); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-weight:600;">Platform Setup Fee</div>
-                                <div style="font-size:0.8rem; color:var(--text-muted);">2024-01-01</div>
-                            </div>
-                            <div style="font-weight:bold; color:var(--success);">Paid ₹0.00 (Waived)</div>
-                        </div>
-                    </div>
-                </div>
-             `;
+            `;
 
         } catch (error) {
             console.error(error);
-            container.innerHTML = '<p>Failed to load subscription details.</p>';
+            container.innerHTML = `
+                <div class="module-header">
+                    <h1 class="page-title">⚠️ Error Loading Subscription</h1>
+                    <p class="page-subtitle">Failed to fetch subscription details</p>
+                </div>
+                <div class="module-card" style="text-align: center; padding: 40px;">
+                    <p style="color: var(--text-muted);">${error.message || 'Unknown error occurred'}</p>
+                    <button class="btn-primary" onclick="DashboardApp.loadSubscriptionManagement()" style="margin-top: 20px;">Try Again</button>
+                </div>
+            `;
         }
     },
 
@@ -1724,49 +1913,41 @@ const DashboardApp = {
 
         this.showConfirm(
             "Renew Subscription?",
-            `Are you sure you want to renew your ${planType} plan for ₹${amount}?`,
+            `Renew your ${planType} plan for 30 days at ₹${amount}?`,
             () => {
                 this._processRenewal(planType, amount);
             }
         );
     },
 
-    _processRenewal(planType, amount) {
-        const email = document.getElementById('profileEmail') ? document.getElementById('profileEmail').value : null;
+    async _processRenewal(planType, amount) {
+        try {
+            // Show loading alert
+            this.showAlert("Processing...", "Renewing your subscription", "info");
 
-        if (!email) {
-            this.showAlert("Error", "Could not identify user email. Please update profile.", "error");
-            return;
+            // Call renewal API
+            const result = await SubscriptionAPI.renew(planType, amount);
+
+            // Show success with premium styling
+            this.showAlert(
+                "✅ Renewal Successful!",
+                `Your ${planType} Plan has been renewed for 30 days. New expiry: ${new Date(result.subscription.end_date).toLocaleDateString('en-IN')}`,
+                "success"
+            );
+
+            // Reload subscription view to show updated data
+            setTimeout(() => {
+                this.loadSubscriptionManagement();
+            }, 2000);
+
+        } catch (error) {
+            console.error('Renewal failed:', error);
+            this.showAlert(
+                "❌ Renewal Failed",
+                error.message || "Could not process renewal. Please try again or contact support.",
+                "error"
+            );
         }
-
-        this.showAlert("Creating Link...", "Initiating secure payment...", "success");
-
-        // Real Backend Call
-        fetch(`${this.apiBaseUrl}/subscription/buy/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // 'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Assuming endpoints are public or auth handled
-            },
-            body: JSON.stringify({
-                email: email,
-                plan_type: planType,
-                amount: amount
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'INITIATED' && data.payment_url) {
-                    // Redirect to verification/payment URL
-                    window.location.href = data.payment_url;
-                } else {
-                    this.showAlert("Renewal Failed", data.error || data.message || "Unknown error", "error");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                this.showAlert("Connection Error", "Failed to reach server.", "error");
-            });
     },
 
     loadSettings() {

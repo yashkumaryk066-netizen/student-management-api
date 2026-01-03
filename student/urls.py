@@ -34,7 +34,7 @@ from .views import (
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
 
-from .subscription_views import SubscriptionPurchaseView, SubscriptionSuccessView, SubscriptionStatusView
+from .subscription_views import SubscriptionPurchaseView, SubscriptionSuccessView, SubscriptionStatusView, SubscriptionRenewView
 from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
@@ -132,6 +132,7 @@ urlpatterns = [
     path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),
     path('subscription/success/', SubscriptionSuccessView.as_view(), name='subscription-success'),
     path('subscription/status/', SubscriptionStatusView.as_view(), name='subscription-status'),
+    path('subscription/renew/', SubscriptionRenewView.as_view(), name='subscription-renew'),
 
     # REPORTS
     path('reports/', ReportListView.as_view(), name='report-list'),

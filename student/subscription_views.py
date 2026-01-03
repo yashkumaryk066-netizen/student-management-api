@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.contrib.auth.models import User
 from .models import ClientSubscription, UserProfile
-from datetime import date
+from datetime import date, timedelta
 import random
 import string
 import logging
@@ -178,4 +178,84 @@ class SubscriptionStatusView(APIView):
             "days_left": days_left if days_left > 0 else 0,
             "amount_paid": sub.amount_paid,
             "is_expired": days_left <= 0
+        })
+
+
+class SubscriptionRenewView(APIView):
+    """
+    Renew an existing subscription for 30 days.
+    Requires authentication and valid payment.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    PRICING = {
+        'SCHOOL': Decimal('1000.00'),
+        'COACHING': Decimal('500.00'),
+        'INSTITUTE': Decimal('1500.00')
+    }
+
+    def post(self, request):
+        # Check if user has a subscription
+        if not hasattr(request.user, 'subscription'):
+            return Response({
+                "error": "No existing subscription found",
+                "message": "Please purchase a plan first"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        sub = request.user.subscription
+        
+        # Get plan type (from request or use current plan)
+        plan_type = request.data.get('plan_type', sub.plan_type)
+        
+        # Get payment amount
+        try:
+            amount = Decimal(str(request.data.get('amount', 0)))
+        except:
+            amount = Decimal('0.00')
+
+        # Verify pricing
+        expected_price = self.PRICING.get(plan_type)
+        if not expected_price:
+            return Response({"error": "Invalid Plan Type"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # STRICT PRICING CHECK
+        if amount < expected_price:
+            return Response({
+                "error": "Payment Verification Failed",
+                "required": str(expected_price),
+                "received": str(amount),
+                "message": "Full payment required for renewal"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # RENEWAL LOGIC
+        today = date.today()
+        
+        # If subscription is active, extend from end_date
+        # If expired, start from today
+        if sub.end_date and sub.end_date > today:
+            new_end_date = sub.end_date + timedelta(days=30)
+        else:
+            sub.start_date = today
+            new_end_date = today + timedelta(days=30)
+
+        sub.end_date = new_end_date
+        sub.status = 'ACTIVE'
+        sub.plan_type = plan_type
+        sub.amount_paid = amount
+        sub.save()
+
+        # Calculate new days left
+        days_left = (new_end_date - today).days
+
+        return Response({
+            "status": "SUCCESS",
+            "message": f"{plan_type} Plan renewed successfully for 30 days!",
+            "subscription": {
+                "plan_type": sub.plan_type,
+                "status": sub.status,
+                "start_date": sub.start_date,
+                "end_date": sub.end_date,
+                "days_left": days_left,
+                "amount_paid": str(sub.amount_paid)
+            }
         })
