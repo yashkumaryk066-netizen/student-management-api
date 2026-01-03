@@ -66,14 +66,24 @@ echo "---------------------------------------------------"
 echo "✅ DEPLOYMENT FINISHED SUCCESSFULLY!"
 
 # 7. Auto-Reload Web App (Try to touch WSGI file)
-WSGI_FILE="/var/www/$(whoami)_pythonanywhere_com_wsgi.py"
-if [ -f "$WSGI_FILE" ]; then
-    echo "🔄 Reloading Web App..."
+# 7. Auto-Reload Web App (Try to touch WSGI file)
+# Search for ANY wsgi file in /var/www that belongs to this user/project
+WSGI_FILE=$(find /var/www -maxdepth 1 -name "*pythonanywhere_com_wsgi.py" -print -quit 2>/dev/null)
+
+if [ -n "$WSGI_FILE" ]; then
+    echo "🔄 Reloading Web App: $WSGI_FILE"
     touch "$WSGI_FILE"
     echo "✅ App Reloaded!"
 else
-    echo "⚠️  Could not find WSGI file at $WSGI_FILE"
-    echo "👉 Please go to the 'Web' tab and click 'Reload' manually."
+    # Fallback guess
+    GUESS_FILE="/var/www/$(whoami)_pythonanywhere_com_wsgi.py"
+    if [ -f "$GUESS_FILE" ]; then
+        touch "$GUESS_FILE"
+        echo "✅ App Reloaded (Guessed Path)!"
+    else
+        echo "⚠️  Could not find WSGI file automatically."
+        echo "👉 Please go to the 'Web' tab and click 'Reload' manually."
+    fi
 fi
 
 echo "---------------------------------------------------"
