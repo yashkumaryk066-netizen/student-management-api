@@ -1018,9 +1018,17 @@
             selectedPlan = plan;
             selectedAmount = amount;
             document.getElementById('planAmountDisplay').innerText = '₹' + amount.toLocaleString('en-IN');
+
+            // Reset modal state
             document.getElementById('paymentModalOverlay').style.display = 'flex';
             document.getElementById('step1').style.display = 'block';
             document.getElementById('step2').style.display = 'none';
+            document.getElementById('confirmPaymentBtn').disabled = false;
+            document.getElementById('confirmPaymentBtn').style.opacity = '1';
+            document.getElementById('confirmPaymentBtn').innerText = 'I Have Paid';
+            document.getElementById('paymentProcessing').style.display = 'none';
+            document.getElementById('paymentProcessing').style.color = "var(--primary)";
+            document.getElementById('paymentProcessing').innerHTML = `<span class="pulse-dot"></span> Verifying Payment & Creating Account...`;
         }
 
         function closePaymentModal() {
@@ -1035,10 +1043,74 @@
                 alert('Please enter both Email and Phone Number');
                 return;
             }
+            if (phone.length < 10) {
+                alert('Please enter a valid phone number (10 digits)');
+                return;
+            }
 
             // Proceed to Step 2
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
+        }
+
+        async function confirmPayment() {
+            const email = document.getElementById('userEmail').value;
+            const phone = document.getElementById('userPhone').value;
+            const btn = document.getElementById('confirmPaymentBtn');
+            const processing = document.getElementById('paymentProcessing');
+
+            // UI Feedback: Disable button and show processing
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.innerText = "Processing...";
+            processing.style.display = 'block';
+
+            // Determine correct plan type enum for backend
+            let planTypeEnum = 'SCHOOL'; // default
+            if (selectedPlan.toLowerCase().includes('coaching')) planTypeEnum = 'COACHING';
+            if (selectedPlan.toLowerCase().includes('institute')) planTypeEnum = 'INSTITUTE';
+
+            try {
+                const response = await fetch('/api/onboarding/pay/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        phone: phone,
+                        plan_type: planTypeEnum,
+                        amount: selectedAmount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success UI
+                    processing.style.color = "#10b981"; // Success Green
+                    processing.innerHTML = `
+                        <div style="font-size:1.2rem; margin-bottom:5px;">✅ Payment Successful!</div>
+                        <div style="font-size:0.9rem; color:var(--text-muted);">Account Created. Redirecting...</div>
+                    `;
+                    btn.innerText = "Redirecting...";
+
+                    // Delay slightly so user reads the message, then redirect
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/login/';
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || 'Verification Failed');
+                }
+
+            } catch (error) {
+                console.error(error);
+                processing.style.color = "#ef4444"; // Error Red
+                processing.innerHTML = `❌ Error: ${error.message}`;
+
+                // Re-enable button to try again
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.innerText = "Retry Payment Verification";
+            }
         }
     </script>
 

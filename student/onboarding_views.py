@@ -23,7 +23,22 @@ class OnboardingPaymentView(APIView):
         if not phone or not email or not plan_type:
             return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Verify Payment (Mock Logic)
+        # 1. Verify Payment & Amount
+        PRICING = {
+            'COACHING': 500,
+            'SCHOOL': 10000,
+            'INSTITUTE': 15000
+        }
+        
+        expected_amount = PRICING.get(plan_type.upper(), 0)
+        
+        # In a real scenario, 'amount' comes from the Payment Gateway callback or verification
+        # Here we trust the frontend request but we validating it matches our pricing
+        if int(amount) < expected_amount:
+             return Response({
+                 'error': f'Payment Amount Mismatch. Expected ₹{expected_amount} for {plan_type} plan, but received ₹{amount}.'
+             }, status=status.HTTP_400_BAD_REQUEST)
+        
         is_payment_verified = True 
         
         if is_payment_verified:
