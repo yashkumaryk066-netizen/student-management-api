@@ -258,7 +258,14 @@ else:
 
 
 
-# Email Configuration (Dev Mode: Prints to Console)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'admin@ims.com'
+# Email Configuration (Gmail SMTP)
+# IMPORTANT: You must replace 'your_email' and 'your_app_password' with your actual Gmail credentials.
+# To get App Password: Go to Google Account -> Security -> 2-Step Verification -> App Passwords.
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your_email@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your_app_password')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
