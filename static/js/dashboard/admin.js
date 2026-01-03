@@ -738,7 +738,47 @@ const DashboardApp = {
                     </tbody>
                 </table>
             </div>
-`;
+            </div>
+            `;
+        this.fetchPayments();
+    },
+
+    async fetchPayments() {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/payments/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const data = await res.json();
+
+            // Calculate Stats (Basic client-side calc)
+            const totalCollected = data.filter(p => p.status === 'PAID').reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            const pending = data.filter(p => p.status === 'PENDING').reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            const overdue = data.filter(p => p.status === 'OVERDUE').reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+            // Update stats if elements exist (simple number formatting)
+            const fmt = (n) => '₹' + n.toLocaleString();
+
+            // Render Table
+            const tbody = document.querySelector('.data-table tbody');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No transactions found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(p => `
+                 <tr>
+                    <td>${p.transaction_id || '-'}</td>
+                    <td>${p.student_name}</td>
+                    <td>₹${p.amount}</td>
+                    <td>${p.due_date}</td>
+                    <td>${p.description}</td>
+                    <td><span class="status-badge status-${p.status.toLowerCase()}">${p.status}</span></td>
+                </tr>
+            `).join('');
+
+        } catch (e) {
+            console.error(e);
+        }
     },
 
     loadLibraryManagement() {
@@ -806,7 +846,40 @@ const DashboardApp = {
                     </tbody>
                 </table>
             </div>
+            </div>
 `;
+        this.fetchLibraryBooks();
+    },
+
+    async fetchLibraryBooks() {
+        const tbody = document.querySelector('.data-table tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading books...</td></tr>';
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/library/books/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const books = await res.json();
+
+            if (books.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No books in library.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = books.map(b => `
+                <tr>
+                    <td style="font-weight:600;">${b.title}</td>
+                    <td>${b.author}</td>
+                    <td>${b.category}</td>
+                    <td>${b.available_copies} / ${b.total_copies}</td>
+                    <td>
+                        <span class="status-badge status-${b.available_copies > 0 ? 'active' : 'inactive'}">
+                            ${b.available_copies > 0 ? 'Available' : 'Out of Stock'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5">Error loading library</td></tr>'; }
     },
 
     loadHostelManagement() {
@@ -872,7 +945,36 @@ const DashboardApp = {
                     </tbody>
                 </table>
             </div>
+            </div>
 `;
+        this.fetchHostelAllocations();
+    },
+
+    async fetchHostelAllocations() {
+        const tbody = document.querySelector('.data-table tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading allocations...</td></tr>';
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/hostel/allocations/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const data = await res.json();
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No room allocations found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(a => `
+                 <tr>
+                     <td>${a.room.room_number || a.room}</td>
+                     <td>${a.room.hostel || 'Main Hostel'}</td>
+                     <td>${a.student_name}</td>
+                     <td>${a.check_in_date}</td>
+                     <td><span class="status-badge status-${a.status === 'ACTIVE' ? 'active' : 'inactive'}">${a.status}</span></td>
+                 </tr>
+             `).join('');
+        } catch (e) { console.error(e); }
     },
 
     loadTransportManagement() {
@@ -931,7 +1033,36 @@ const DashboardApp = {
                     </tbody>
                 </table>
             </div>
+            </div>
 `;
+        this.fetchTransportRoutes();
+    },
+
+    async fetchTransportRoutes() {
+        const tbody = document.querySelector('.data-table tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading routes...</td></tr>';
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/transport/routes/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const data = await res.json();
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No active routes.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(r => `
+                 <tr>
+                     <td style="font-weight:600;">${r.route_name}</td>
+                     <td>${r.vehicle || 'Unassigned'}</td>
+                     <td>${r.start_point} - ${r.end_point}</td>
+                     <td>${r.pickup_time} / ${r.drop_time}</td>
+                     <td><span class="status-badge status-active">Active</span></td>
+                 </tr>
+             `).join('');
+        } catch (e) { console.error(e); }
     },
 
     loadHRManagement() {
@@ -990,7 +1121,36 @@ const DashboardApp = {
                     </tbody>
                 </table>
             </div>
+            </div>
 `;
+        this.fetchEmployees();
+    },
+
+    async fetchEmployees() {
+        const tbody = document.querySelector('.data-table tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading staff...</td></tr>';
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/hr/employees/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const data = await res.json();
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No staff records found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(e => `
+                 <tr>
+                     <td>#${e.id}</td>
+                     <td style="font-weight:600;">${e.user_name || 'Staff Member'}</td>
+                     <td>${e.department || 'General'}</td>
+                     <td>${e.designation || 'Staff'}</td>
+                     <td><span class="status-badge status-${e.is_active ? 'active' : 'inactive'}">${e.is_active ? 'Active' : 'Inactive'}</span></td>
+                 </tr>
+             `).join('');
+        } catch (e) { console.error(e); }
     },
 
     loadExamManagement() {
@@ -2439,7 +2599,36 @@ const DashboardApp = {
             btn.disabled = false;
         }
     },
-};
+    deleteStudent(id, name) {
+        this.showConfirm(
+            "Delete Student?",
+            `Are you sure you want to permanently delete student "${name}" (ID: ${id})? This action cannot be undone.`,
+            () => {
+                this._processDeleteStudent(id);
+            }
+        );
+    },
+
+    async _processDeleteStudent(id) {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            if (res.ok) {
+                this.showAlert('Deleted!', 'Student record has been successfully deleted.', 'success');
+                this.fetchStudents(); // Refresh list
+            } else {
+                this.showAlert('Error', 'Failed to delete student.', 'error');
+            }
+        } catch (e) {
+            this.showAlert('Error', 'Network error occurred.', 'error');
+        }
+    }
+}; // End DashboardApp
 
 // Add Pulse Animation Style for Live Badge
 const style = document.createElement('style');
@@ -2482,34 +2671,3 @@ if (document.readyState === 'loading') {
 // Make it globally accessible
 window.DashboardApp = DashboardApp;
 window.navigateTo = (module) => DashboardApp.loadModule(module);
-
-deleteStudent(id, name) {
-    this.showConfirm(
-        "Delete Student?",
-        `Are you sure you want to permanently delete student "${name}" (ID: ${id})? This action cannot be undone.`,
-        () => {
-            this._processDeleteStudent(id);
-        }
-    );
-},
-
-    async _processDeleteStudent(id) {
-    try {
-        const res = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-            }
-        });
-
-        if (res.ok) {
-            this.showAlert('Deleted!', 'Student record has been successfully deleted.', 'success');
-            this.fetchStudents(); // Refresh list
-        } else {
-            this.showAlert('Error', 'Failed to delete student.', 'error');
-        }
-    } catch (e) {
-        this.showAlert('Error', 'Network error occurred.', 'error');
-    }
-},
-}; // End DashboardApp
