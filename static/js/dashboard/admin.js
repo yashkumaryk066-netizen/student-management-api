@@ -23,18 +23,34 @@ const DashboardApp = {
                 this.currentUser = await res.json();
                 console.log("Logged in as:", this.currentUser.role, this.currentUser.institution_type);
 
-                // --- UPDATE UI FOR CLIENT ROLE ---
+                // --- UPDATE UI FOR ALL ROLES ---
                 const roleEl = document.querySelector('.user-role');
+                const nameEl = document.querySelector('.user-name');
+                const avatarEl = document.querySelector('.user-avatar');
                 const welcomeEl = document.querySelector('.page-title');
 
-                if (this.currentUser.role === 'CLIENT') {
-                    if (roleEl) roleEl.textContent = "Institute Admin"; // Or "Client"
-                    if (welcomeEl && welcomeEl.textContent.includes('Admin')) {
-                        welcomeEl.textContent = `Welcome Back, ${this.currentUser.institution_type || 'Client'}! 👋`;
+                // Update Name & Role
+                if (nameEl) nameEl.textContent = this.currentUser.user_full_name || this.currentUser.username || 'User';
+                if (roleEl) {
+                    if (this.currentUser.role === 'CLIENT') {
+                        roleEl.textContent = `${this.currentUser.institution_type} Admin`;
+                    } else if (this.currentUser.role === 'ADMIN' && this.currentUser.is_superuser) {
+                        roleEl.textContent = "Super Admin";
+                    } else {
+                        roleEl.textContent = this.currentUser.role || 'Admin';
                     }
+                }
 
-                    // Hide any Super Admin-only elements (if any exist in future)
-                    // e.g. document.querySelector('.super-admin-only').style.display = 'none';
+                // Update Avatar
+                if (avatarEl) {
+                    const initial = (this.currentUser.username || 'U').charAt(0).toUpperCase();
+                    avatarEl.textContent = initial;
+                }
+
+                // Update Welcome Message
+                if (welcomeEl) {
+                    const title = this.currentUser.role === 'CLIENT' ? this.currentUser.institution_type : 'Institute';
+                    welcomeEl.textContent = `Welcome Back, ${title} Admin! 👋`;
                 }
             }
         } catch (e) {
