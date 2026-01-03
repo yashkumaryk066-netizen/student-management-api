@@ -32,7 +32,10 @@ echo "📦 Installing dependencies..."
 pip install -r requirements.txt
 
 # Apply Migrations
+# Apply Migrations
 echo "🗄️ Applying database migrations..."
+# Attempt to merge any conflicting migrations
+echo "yes" | python manage.py makemigrations --merge
 python manage.py makemigrations
 python manage.py migrate
 
