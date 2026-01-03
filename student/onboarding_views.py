@@ -87,7 +87,28 @@ class OnboardingPaymentView(APIView):
                 
                 # 3. Notification Content
                 
-                # 3. Notification Content
+                # 3. Create Internal Notifications (Fixing "Notification System")
+                from .models import Notification
+                
+                # A) For the New Client
+                Notification.objects.create(
+                    recipient=user,
+                    recipient_type='ADMIN', # They are Admin of their institute
+                    title='Welcome to IMS Premium!',
+                    message=f'Your {plan_type} plan is active. Use the menu to manage your institution. Your credentials: {username} / {password} '
+                )
+                
+                # B) For the Super Admin (You)
+                super_admin = User.objects.filter(is_superuser=True).first()
+                if super_admin:
+                    Notification.objects.create(
+                        recipient=super_admin,
+                        recipient_type='ADMIN',
+                        title='New Subscription Sold! 💰',
+                        message=f'Plan: {plan_type}, Amount: ₹{amount}, Client: {username} ({phone}).'
+                    )
+                
+                # 4. External Notification Content (WhatsApp/Email)
                 login_url = "https://yashamishra.pythonanywhere.com/login/"
                 
                 client_msg = (
