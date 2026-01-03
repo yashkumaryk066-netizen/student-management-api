@@ -85,7 +85,7 @@ class OnboardingPaymentView(APIView):
                     profile.save()
                     
                     username = target_username
-                    logger.info(f"Renewed Subscription for: {username}")
+                    logger.info(f"Renewed Subscription for: {username} - Preserving all existing data.")
                     
                 else:
                     # CREATE NEW ACCOUNT
