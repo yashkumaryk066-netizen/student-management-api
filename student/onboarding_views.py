@@ -50,6 +50,8 @@ class OnboardingPaymentView(APIView):
                 # 2. Manage Subscription (Create or Renew)
                 from datetime import timedelta
                 from django.utils import timezone
+                from .models import Notification
+                from django.core.mail import send_mail
                 
                 email_prefix = email.split('@')[0]
                 plan_suffix = plan_type[:3].lower() 
@@ -111,76 +113,69 @@ class OnboardingPaymentView(APIView):
                         subscription_expiry=timezone.now().date() + timedelta(days=30)
                     )
                     logger.info(f"Created New Subscription for: {username}")
-                    
-                    # 3. Notification Content
-                    
-                    # 3. Create Internal Notifications (Fixing "Notification System")
-                    from .models import Notification
-                    
-                    # A) For the New Client
+                
+                # --- COMMON LOGIC FOR BOTH NEW AND RENEWAL ---
+                
+                # 3. Create Internal Notifications
+                # A) For the Client
+                Notification.objects.create(
+                    recipient=user,
+                    recipient_type='ADMIN',
+                    title='Welcome to IMS Premium!',
+                    message=f'Your {plan_type} plan is active (Valid for 30 Days). Credentials: {username} / {password} '
+                )
+                
+                # B) For the Super Admin
+                super_admin = User.objects.filter(is_superuser=True).first()
+                if super_admin:
                     Notification.objects.create(
-                        recipient=user,
-                        recipient_type='ADMIN', # They are Admin of their institute
-                        title='Welcome to IMS Premium!',
-                        message=f'Your {plan_type} plan is active. Use the menu to manage your institution. Your credentials: {username} / {password} '
+                        recipient=super_admin,
+                        recipient_type='ADMIN',
+                        title='Subscription Active 💰',
+                        message=f'Type: {plan_type} {"(Renewed)" if is_renewal else "(New)"}, Amount: ₹{amount}, Client: {username}.'
                     )
-                    
-                    # B) For the Super Admin (You)
-                    super_admin = User.objects.filter(is_superuser=True).first()
-                    if super_admin:
-                        Notification.objects.create(
-                            recipient=super_admin,
-                            recipient_type='ADMIN',
-                            title='New Subscription Sold! 💰',
-                            message=f'Plan: {plan_type}, Amount: ₹{amount}, Client: {username} ({phone}).'
-                        )
-                    
-                    # 4. External Notification Content (WhatsApp/Email)
-                    login_url = "https://yashamishra.pythonanywhere.com/login/"
-                    
-                    client_msg = (
-                        f"🎉 *Welcome to IMS Premium!*\n\n"
-                        f"Your *{plan_type} Management System* is ready.\n"
-                        f"👤 *ID:* {username}\n"
-                        f"🔑 *Pass:* {password}\n"
-                        f"🔗 *Login:* {login_url}\n\n"
-                        f"Please keep this confidential."
+                
+                # 4. External Notifications
+                login_url = "https://yashamishra.pythonanywhere.com/login/"
+                
+                client_msg = (
+                    f"🎉 *IMS Premium Activated!*\n\n"
+                    f"Plan: *{plan_type}*\n"
+                    f"Status: *Active (30 Days)*\n"
+                    f"👤 *ID:* {username}\n"
+                    f"🔑 *Pass:* {password}\n"
+                    f"🔗 *Login:* {login_url}\n"
+                )
+                
+                super_admin_msg = (
+                    f"💰 *Subscription Sold!*\n"
+                    f"📦 *Type:* {plan_type} {'(Renewed)' if is_renewal else '(New)'}\n"
+                    f"💵 *Amount:* ₹{amount}\n"
+                    f"👤 *Client:* {username} ({phone})\n"
+                )
+                
+                # Send WhatsApp (Mock)
+                self.send_whatsapp_mock(phone, client_msg, "CLIENT")
+                self.send_whatsapp_mock('8356926231', super_admin_msg, "SUPER_ADMIN")
+                
+                # Send Email (Real SMTP)
+                try:
+                    send_mail(
+                        subject=f"IMS Premium Activated - {plan_type}",
+                        message=client_msg.replace('*', ''),
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False # We want to know if it fails
                     )
-                    
-                    super_admin_msg = (
-                        f"💰 *New Subscription Sold!*\n"
-                        f"📦 *Plan:* {plan_type}\n"
-                        f"💵 *Amount:* ₹{amount}\n"
-                        f"👤 *Client:* {username} ({phone})\n"
-                        f"📧 *Email:* {email}\n"
-                        f"🔑 *Generated Creds:* {username} / {password}"
-                    )
-                    
-                    # 4. Send Notifications
-                    
-                    # A) WhatsApp
-                    self.send_whatsapp_mock(phone, client_msg, "CLIENT")
-                    self.send_whatsapp_mock('8356926231', super_admin_msg, "SUPER_ADMIN")
-                    
-                    # B) Email (Console Backend usually on Dev, but trying to send)
-                    from django.core.mail import send_mail
-                    try:
-                        send_mail(
-                            subject=f"Welcome to IMS - Your {plan_type} Dashboard Ready!",
-                            message=client_msg.replace('*', ''), # Remove Markdown for plain text email
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            recipient_list=[email],
-                            fail_silently=True
-                        )
-                        logger.info(f"📧 [EMAIL Sent] to {email}")
-                    except Exception as mail_err:
-                        logger.warning(f"📧 [EMAIL Failed]: {mail_err}")
-    
-                    return Response({
-                        'message': 'Account created successfully! Credentials sent to Email & WhatsApp.',
-                        'display_credentials': {'username': username, 'password': password}, # Explicitly for Frontend Display
-                        'redirect_url': '/login/'
-                    }, status=status.HTTP_201_CREATED)
+                    logger.info(f"📧 [EMAIL Sent] to {email}")
+                except Exception as mail_err:
+                    logger.error(f"📧 [EMAIL Failed]: {mail_err}")
+
+                return Response({
+                    'message': 'Subscription Activated Successfully!',
+                    'display_credentials': {'username': username, 'password': password},
+                    'redirect_url': '/login/'
+                }, status=status.HTTP_201_CREATED)
 
             except Exception as e:
                 logger.error(f"Onboarding Error: {str(e)}")
