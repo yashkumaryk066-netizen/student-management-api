@@ -84,15 +84,30 @@ class StudentListCreateView(APIView):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
             # Auto-assign Institution Type based on Admin's Profile (if not superuser)
-            institution_type = 'SCHOOL' # Default
-            if hasattr(request.user, 'profile') and request.user.profile.institution_type:
-                institution_type = request.user.profile.institution_type
+            institution_type = serializer.validated_data.get('institution_type', 'SCHOOL')
             
-            # Superadmin can override (if provided in data)? 
-            # Ideally, serializer.validated_data might have it if provided.
-            # But let's enforce:
             if not request.user.is_superuser:
-                 serializer.save(institution_type=institution_type)
+                 if hasattr(request.user, 'profile'):
+                      user_plan = request.user.profile.institution_type
+                      
+                      # Strict Plan Enforcement
+                      if user_plan == 'COACHING':
+                          institution_type = 'COACHING' # Lock to Coaching
+                      elif user_plan == 'SCHOOL':
+                           # User said: "school mai coaching or school dono"
+                           # So if they try to create COACHING or SCHOOL, allow it. But default to SCHOOL.
+                           if institution_type not in ['SCHOOL', 'COACHING']:
+                               institution_type = 'SCHOOL' 
+                      elif user_plan == 'INSTITUTE':
+                           # Institute usually can spawn Departments, but if they spawn "Student", allow all?
+                           # Keep whatever they sent, or default to INSTITUTE
+                           pass
+                      
+                      # Force the correctly determined type
+                      serializer.save(institution_type=institution_type)
+                 else:
+                      # No profile? Fallback safe
+                      serializer.save(institution_type='SCHOOL')
             else:
                  # Superuser can specify, or fallback to default
                  serializer.save()

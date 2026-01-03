@@ -64,6 +64,14 @@ class IsTeacherOrAdmin(permissions.BasePermission):
             
         if hasattr(request.user, 'profile'):
              role = request.user.profile.role
-             return role in ['TEACHER', 'CLIENT'] 
+             
+             # Allow Access if role is TEACHER, CLIENT, or ADMIN (Legacy)
+             if role in ['TEACHER', 'CLIENT', 'ADMIN']:
+                 # CRITICAL: For CLIENT, check Expiry!
+                 if role == 'CLIENT':
+                     from django.utils import timezone
+                     if request.user.profile.subscription_expiry and request.user.profile.subscription_expiry < timezone.now().date():
+                         return False # Expired
+                 return True
         
         return False
