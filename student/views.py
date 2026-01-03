@@ -57,10 +57,25 @@ class StudentListCreateView(APIView):
         
         students = Student.objects.all()
         
+        # --- SAAS DATA ISOLATION ---
+        if not request.user.is_superuser:
+            if hasattr(request.user, 'profile') and request.user.profile.role == 'CLIENT':
+                 # Client sees only their students
+                 students = students.filter(created_by=request.user)
+            elif hasattr(request.user, 'employee_profile') and request.user.employee_profile.created_by:
+                 # Staff sees students created by their Employer (Client)
+                 students = students.filter(created_by=request.user.employee_profile.created_by)
+            elif hasattr(request.user, 'profile') and request.user.profile.role == 'STUDENT':
+                 # Student sees only themselves? (Or disabled here)
+                 # Usually separate view, but allowed for filtering own record?
+                 pass 
+        # ---------------------------
+
         if not request.user.is_superuser and hasattr(request.user, 'profile'):
-             # ENFORCE: Only show students for the user's institution type
-             institution_type = request.user.profile.institution_type
-             students = students.filter(institution_type=institution_type)
+             # ENFORCE: Only show students for the user's institution type (redundant if isolation valid, but safety net)
+             if request.user.profile.role != 'CLIENT' and not hasattr(request.user, 'employee_profile'):
+                 institution_type = request.user.profile.institution_type
+                 students = students.filter(institution_type=institution_type)
         elif institution_type:
             # For Superadmin, allow filtering via param
             students = students.filter(institution_type=institution_type)
@@ -85,8 +100,15 @@ class StudentListCreateView(APIView):
         if serializer.is_valid():
             # Auto-assign Institution Type based on Admin's Profile (if not superuser)
             institution_type = serializer.validated_data.get('institution_type', 'SCHOOL')
-            
+            owner = None
+
             if not request.user.is_superuser:
+                 # Determine Owner (Client)
+                 if hasattr(request.user, 'profile') and request.user.profile.role == 'CLIENT':
+                      owner = request.user
+                 elif hasattr(request.user, 'employee_profile'):
+                      owner = request.user.employee_profile.created_by
+
                  if hasattr(request.user, 'profile'):
                       user_plan = request.user.profile.institution_type
                       
@@ -94,23 +116,16 @@ class StudentListCreateView(APIView):
                       if user_plan == 'COACHING':
                           institution_type = 'COACHING' # Lock to Coaching
                       elif user_plan == 'SCHOOL':
-                           # User said: "school mai coaching or school dono"
-                           # So if they try to create COACHING or SCHOOL, allow it. But default to SCHOOL.
                            if institution_type not in ['SCHOOL', 'COACHING']:
                                institution_type = 'SCHOOL' 
                       elif user_plan == 'INSTITUTE':
-                           # Institute usually can spawn Departments, but if they spawn "Student", allow all?
-                           # Keep whatever they sent, or default to INSTITUTE
                            pass
-                      
-                      # Force the correctly determined type
-                      serializer.save(institution_type=institution_type)
-                 else:
-                      # No profile? Fallback safe
-                      serializer.save(institution_type='SCHOOL')
-            else:
-                 # Superuser can specify, or fallback to default
-                 serializer.save()
+              
+            save_kwargs = {'institution_type': institution_type}
+            if owner:
+                save_kwargs['created_by'] = owner
+            
+            serializer.save(**save_kwargs)
                  
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -797,6 +812,31 @@ class EmployeeListCreateView(generics.ListCreateAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Employee.objects.all()
+        if not self.request.user.is_superuser:
+            if hasattr(self.request.user, 'profile') and self.request.user.profile.role == 'CLIENT':
+                qs = qs.filter(created_by=self.request.user)
+            elif hasattr(self.request.user, 'employee_profile') and self.request.user.employee_profile.created_by:
+                qs = qs.filter(created_by=self.request.user.employee_profile.created_by)
+            else:
+                 return Employee.objects.none()
+        return qs
+
+    def perform_create(self, serializer):
+        owner = None
+        user = self.request.user
+        if not user.is_superuser:
+             if hasattr(user, 'profile') and user.profile.role == 'CLIENT':
+                  owner = user
+             elif hasattr(user, 'employee_profile'):
+                  owner = user.employee_profile.created_by
+        
+        if owner:
+            serializer.save(created_by=owner)
+        else:
+            serializer.save()
 
 class LeaveRequestListCreateView(generics.ListCreateAPIView):
     queryset = LeaveRequest.objects.all()

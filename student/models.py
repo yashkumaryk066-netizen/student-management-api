@@ -65,6 +65,7 @@ class ClientSubscription(models.Model):
             self.user.profile.save()
 
 class Student(models.Model):
+        created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_students', null=True, blank=True)
         name = models.CharField(max_length=20)
         age = models.PositiveBigIntegerField()
         gender = models.CharField(max_length=10)
@@ -83,6 +84,9 @@ class Student(models.Model):
         
         def __str__(self):
             return self.name
+
+
+
         
         
 class Attendence(models.Model):
@@ -654,7 +658,7 @@ class TransportAllocation(models.Model):
 
 # ==================== HR & PAYROLL MANAGEMENT ====================
 
-class Department(models.Model):
+class HRDepartment(models.Model):
     """Organization departments"""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -675,8 +679,9 @@ class Designation(models.Model):
 
 class Employee(models.Model):
     """Staff and faculty records"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_employees', null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey(HRDepartment, on_delete=models.SET_NULL, null=True, blank=True)
     designation = models.ForeignKey(Designation, on_delete=models.SET_NULL, null=True, blank=True)
     joining_date = models.DateField()
     basic_salary = models.DecimalField(max_digits=10, decimal_places=2)
