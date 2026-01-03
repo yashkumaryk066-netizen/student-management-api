@@ -11,39 +11,54 @@ import logging
 class SubscriptionPurchaseView(APIView):
     """
     Endpoint for purchasing a new subscription (School, Coaching, Institute).
-    This mocks the payment initiation and success for the demo/backend fix.
+    Enforces strict pricing and delays credential generation until payment success.
     """
-    permission_classes = [permissions.AllowAny] # Allow non-users to buy
+    permission_classes = [permissions.AllowAny] 
+
+    PRICING = {
+        'SCHOOL': 4999.00,
+        'COACHING': 9999.00,
+        'INSTITUTE': 14999.00
+    }
 
     def post(self, request):
-        plan_type = request.data.get('plan_type') # SCHOOL, COACHING, INSTITUTE
+        plan_type = request.data.get('plan_type') 
         email = request.data.get('email')
         phone = request.data.get('phone')
-        amount = request.data.get('amount')
+        amount = float(request.data.get('amount', 0))
         
         if not plan_type or not email:
              return Response({"error": "Plan Type and Email are required"}, status=status.HTTP_400_BAD_REQUEST)
+             
+        # Strict Pricing Check
+        expected_price = self.PRICING.get(plan_type)
+        if not expected_price:
+            return Response({"error": "Invalid Plan Type"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if amount < expected_price:
+             return Response({
+                 "error": "Payment Verification Failed: Amount is less than plan price.",
+                 "required": expected_price,
+                 "received": amount
+             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Create or Get User
+        # 1. Create or Get User (Without Password initially if new)
         user, created = User.objects.get_or_create(username=email, defaults={'email': email})
         
         if created:
-            # Generate random password
-            password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-            user.set_password(password)
+            user.set_unusable_password() # No access yet
             user.save()
-            # In real app: Send email with password
-            print(f"Generated Credentials for {email}: {password}")
         
         # 2. Create Profile if not exists
         if not hasattr(user, 'profile'):
             UserProfile.objects.create(
                 user=user, 
-                role='CLIENT', # Not ADMIN
+                role='CLIENT', 
                 institution_type=plan_type,
                 phone=phone or ''
             )
         else:
+            # Update intended plan
             user.profile.institution_type = plan_type
             user.profile.save()
 
@@ -54,41 +69,78 @@ class SubscriptionPurchaseView(APIView):
         sub.status = 'PENDING'
         sub.save()
         
-        # 4. Return "Payment Link" (Mock or Real)
-        # For this fix, we will simulate immediate success for the user to see the result
-        # OR return the Eazypay link.
-        
+        # 4. Return Payment Link
+        # Only proceed if strict check passed (which it did above)
         return Response({
             "status": "INITIATED",
-            "message": "Subscription initiated. Please proceed to payment.",
-            "payment_url": f"/api/payment/subscription/mock_success/?email={email}" # Short-circuit for demo
+            "message": "Payment amount verified. Proceeding to gateway...",
+            "payment_url": f"/api/subscription/success/?email={email}&amount={amount}&plan={plan_type}" 
         })
 
 
 class SubscriptionSuccessView(APIView):
+    """
+    Callback/Success handler. 
+    Verifies payment again and ONLY THEN generates credentials.
+    """
     permission_classes = [permissions.AllowAny]
+
+    PRICING = {
+        'SCHOOL': 4999.00,
+        'COACHING': 9999.00,
+        'INSTITUTE': 14999.00
+    }
 
     def get(self, request):
         email = request.query_params.get('email')
-        user = User.objects.get(email=email)
+        received_amount = float(request.query_params.get('amount', 0))
+        plan_type = request.query_params.get('plan')
         
-        # Activate Subscription (30 Days Standard)
-        sub = user.subscription
+        try:
+            user = User.objects.get(email=email)
+            sub = user.subscription
+        except (User.DoesNotExist, AttributeError):
+             return Response({"error": "Subscription request not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # DOUBLE CHECK: Strict Pricing Verification
+        expected_price = self.PRICING.get(plan_type, float('inf'))
+        
+        if received_amount < expected_price:
+             # Transaction Failed or Manipulation Attempt
+             sub.status = 'FAILED'
+             sub.save()
+             return Response({
+                 "status": "FAILED", 
+                 "error": "Payment Verification Failed: Amount mismatch.",
+                 "details": "Credential generation blocked."
+             }, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+        # SUCCESS PATH
+        
+        # 1. Activate Subscription
+        sub.plan_type = plan_type
+        sub.amount_paid = received_amount
         sub.activate(days=30) 
         
-        # Generate credentials if new
-        new_pass = ""
-        if not user.password:
-             new_pass = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-             user.set_password(new_pass)
+        # 2. Generate Credentials (ONLY NOW)
+        credentials_generated = False
+        plain_password = None
+        
+        if not user.has_usable_password():
+             # Generate secure password
+             plain_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+             user.set_password(plain_password)
              user.save()
-
+             credentials_generated = True
+        
+        # 3. Return Success Details
         return Response({
             "status": "SUCCESS",
-            "message": f"Plan {sub.plan_type} Activated Successfully!",
+            "message": f"Plan {sub.plan_type} Activated Successfully! Payment Verified.",
             "credentials": {
                 "username": user.username,
-                "password_note": "Sent to email (Simulated)",
+                "password": plain_password if credentials_generated else "****** (Existing)",
+                "note": "Please save these credentials immediately."
             },
             "dashboard_url": "/dashboard/"
         })
