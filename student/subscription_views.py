@@ -8,6 +8,8 @@ import random
 import string
 import logging
 
+from decimal import Decimal
+
 class SubscriptionPurchaseView(APIView):
     """
     Endpoint for purchasing a new subscription (School, Coaching, Institute).
@@ -16,16 +18,19 @@ class SubscriptionPurchaseView(APIView):
     permission_classes = [permissions.AllowAny] 
 
     PRICING = {
-        'SCHOOL': 1000.00,
-        'COACHING': 500.00,
-        'INSTITUTE': 1500.00
+        'SCHOOL': Decimal('1000.00'),
+        'COACHING': Decimal('500.00'),
+        'INSTITUTE': Decimal('1500.00')
     }
 
     def post(self, request):
         plan_type = request.data.get('plan_type') 
         email = request.data.get('email')
         phone = request.data.get('phone')
-        amount = float(request.data.get('amount', 0))
+        try:
+            amount = Decimal(str(request.data.get('amount', 0)))
+        except:
+            amount = Decimal('0.00')
         
         if not plan_type or not email:
              return Response({"error": "Plan Type and Email are required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -35,11 +40,13 @@ class SubscriptionPurchaseView(APIView):
         if not expected_price:
             return Response({"error": "Invalid Plan Type"}, status=status.HTTP_400_BAD_REQUEST)
             
+        # STRICT VERIFICATION: If amount is LESS than price (even by 1 rupee), REJECT.
         if amount < expected_price:
              return Response({
-                 "error": "Payment Verification Failed: Amount is less than plan price.",
-                 "required": expected_price,
-                 "received": amount
+                 "error": "Payment Verification Failed: Amount is less than required plan price.",
+                 "required": str(expected_price),
+                 "received": str(amount),
+                 "message": "Full payment required. Username/Password will NOT be issued."
              }, status=status.HTTP_400_BAD_REQUEST)
 
         # 1. Create or Get User (Without Password initially if new)
@@ -70,7 +77,6 @@ class SubscriptionPurchaseView(APIView):
         sub.save()
         
         # 4. Return Payment Link
-        # Only proceed if strict check passed (which it did above)
         return Response({
             "status": "INITIATED",
             "message": "Payment amount verified. Proceeding to gateway...",
@@ -86,14 +92,18 @@ class SubscriptionSuccessView(APIView):
     permission_classes = [permissions.AllowAny]
 
     PRICING = {
-        'SCHOOL': 1000.00,
-        'COACHING': 500.00,
-        'INSTITUTE': 1500.00
+        'SCHOOL': Decimal('1000.00'),
+        'COACHING': Decimal('500.00'),
+        'INSTITUTE': Decimal('1500.00')
     }
 
     def get(self, request):
         email = request.query_params.get('email')
-        received_amount = float(request.query_params.get('amount', 0))
+        try:
+            received_amount = Decimal(str(request.query_params.get('amount', 0)))
+        except:
+             received_amount = Decimal('0.00')
+             
         plan_type = request.query_params.get('plan')
         
         try:
@@ -103,16 +113,18 @@ class SubscriptionSuccessView(APIView):
              return Response({"error": "Subscription request not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # DOUBLE CHECK: Strict Pricing Verification
-        expected_price = self.PRICING.get(plan_type, float('inf'))
+        expected_price = self.PRICING.get(plan_type, Decimal('999999.00')) # Default high to fail if unknown
         
+        # CRITICAL SECURITY CHECK
+        # If amount is less than expected price, DO NOT ISSUE CREDENTIALS.
         if received_amount < expected_price:
              # Transaction Failed or Manipulation Attempt
              sub.status = 'FAILED'
              sub.save()
              return Response({
                  "status": "FAILED", 
-                 "error": "Payment Verification Failed: Amount mismatch.",
-                 "details": "Credential generation blocked."
+                 "error": "Strict Pricing Check Failed: Talk to Admin.",
+                 "details": "Credential generation blocked due to insufficient payment."
              }, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         # SUCCESS PATH
