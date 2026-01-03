@@ -1226,6 +1226,14 @@
                 if (response.ok) {
                     // DISPLAY CREDENTIALS TO USER ON SCREEN
                     const creds = data.display_credentials;
+
+                    // SAVE TOKENS FOR AUTO LOGIN
+                    if (data.tokens) {
+                        localStorage.setItem('accessToken', data.tokens.access);
+                        localStorage.setItem('refreshToken', data.tokens.refresh);
+                        console.log("Auto Login Tokens Saved");
+                    }
+
                     document.getElementById('step2').innerHTML = `
                         <div style="padding:20px; text-align:center;">
                             <div style="font-size:3rem; margin-bottom:10px;">✅</div>
@@ -1240,8 +1248,8 @@
                                 <div style="color:#aaa; font-size:0.8rem;">(Also sent to Email & WhatsApp)</div>
                             </div>
 
-                            <button onclick="window.location.href='${data.redirect_url}'" class="btn-primary" style="width:100%;">
-                                Login to Dashboard
+                            <button onclick="window.location.href='${data.redirect_url}'" class="btn-primary" style="width:100%; background:#10b981; border:none;">
+                                Go to Dashboard (Auto Login) 🚀
                             </button>
                         </div>
                     `;

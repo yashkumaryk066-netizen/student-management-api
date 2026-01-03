@@ -171,10 +171,19 @@ class OnboardingPaymentView(APIView):
                 except Exception as mail_err:
                     logger.error(f"📧 [EMAIL Failed]: {mail_err}")
 
+                # 5. Generate JWT Tokens for Auto-Login (Advance Feature)
+                from rest_framework_simplejwt.tokens import RefreshToken
+                refresh = RefreshToken.for_user(user)
+                tokens = {
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh)
+                }
+    
                 return Response({
                     'message': 'Subscription Activated Successfully!',
                     'display_credentials': {'username': username, 'password': password},
-                    'redirect_url': '/login/'
+                    'tokens': tokens, # Auto-login tokens
+                    'redirect_url': '/dashboard/student/' # Or admin dashboard
                 }, status=status.HTTP_201_CREATED)
 
             except Exception as e:
