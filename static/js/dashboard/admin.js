@@ -856,10 +856,7 @@ const DashboardApp = {
         tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading books...</td></tr>';
 
         try {
-            const res = await fetch(`${this.apiBaseUrl}/library/books/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const books = await res.json();
+            const books = await LibraryAPI.getBooks();
 
             if (books.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center">No books in library.</td></tr>';
@@ -955,26 +952,27 @@ const DashboardApp = {
         tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading allocations...</td></tr>';
 
         try {
-            const res = await fetch(`${this.apiBaseUrl}/hostel/allocations/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const data = await res.json();
+            const allocations = await HostelAPI.getAllocations();
 
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No room allocations found.</td></tr>';
+            if (allocations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No allocations found.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.map(a => `
-                 <tr>
-                     <td>${a.room.room_number || a.room}</td>
-                     <td>${a.room.hostel || 'Main Hostel'}</td>
-                     <td>${a.student_name}</td>
-                     <td>${a.check_in_date}</td>
-                     <td><span class="status-badge status-${a.status === 'ACTIVE' ? 'active' : 'inactive'}">${a.status}</span></td>
-                 </tr>
-             `).join('');
-        } catch (e) { console.error(e); }
+            tbody.innerHTML = allocations.map(a => `
+                <tr>
+                    <td style="font-weight:600;">${a.student_name || a.student}</td>
+                    <td>${a.room_number || 'N/A'}</td>
+                    <td>${a.check_in_date}</td>
+                    <td>₹${a.monthly_fee || 0}</td>
+                    <td>
+                        <span class="status-badge status-${a.status === 'ACTIVE' ? 'active' : 'inactive'}">
+                            ${a.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5">Error loading hostel data</td></tr>'; }
     },
 
     loadTransportManagement() {
@@ -1043,26 +1041,23 @@ const DashboardApp = {
         tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading routes...</td></tr>';
 
         try {
-            const res = await fetch(`${this.apiBaseUrl}/transport/routes/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const data = await res.json();
+            const routes = await TransportAPI.getRoutes();
 
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No active routes.</td></tr>';
+            if (routes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No routes available.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.map(r => `
-                 <tr>
-                     <td style="font-weight:600;">${r.route_name}</td>
-                     <td>${r.vehicle || 'Unassigned'}</td>
-                     <td>${r.start_point} - ${r.end_point}</td>
-                     <td>${r.pickup_time} / ${r.drop_time}</td>
-                     <td><span class="status-badge status-active">Active</span></td>
-                 </tr>
-             `).join('');
-        } catch (e) { console.error(e); }
+            tbody.innerHTML = routes.map(r => `
+                <tr>
+                    <td style="font-weight:600;">${r.route_name}</td>
+                    <td>${r.start_point} → ${r.end_point}</td>
+                    <td>${r.vehicle_registration || 'N/A'}</td>
+                    <td>${r.pickup_time} - ${r.drop_time}</td>
+                    <td>₹${r.monthly_fare}</td>
+                </tr>
+            `).join('');
+        } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5">Error loading transport data</td></tr>'; }
     },
 
     loadHRManagement() {
@@ -1128,29 +1123,30 @@ const DashboardApp = {
 
     async fetchEmployees() {
         const tbody = document.querySelector('.data-table tbody');
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading staff...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading employees...</td></tr>';
 
         try {
-            const res = await fetch(`${this.apiBaseUrl}/hr/employees/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const data = await res.json();
+            const employees = await HrAPI.getEmployees();
 
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No staff records found.</td></tr>';
+            if (employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No employees found.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.map(e => `
-                 <tr>
-                     <td>#${e.id}</td>
-                     <td style="font-weight:600;">${e.user_name || 'Staff Member'}</td>
-                     <td>${e.department || 'General'}</td>
-                     <td>${e.designation || 'Staff'}</td>
-                     <td><span class="status-badge status-${e.is_active ? 'active' : 'inactive'}">${e.is_active ? 'Active' : 'Inactive'}</span></td>
-                 </tr>
-             `).join('');
-        } catch (e) { console.error(e); }
+            tbody.innerHTML = employees.map(e => `
+                <tr>
+                    <td style="font-weight:600;">${e.user_name || e.user || 'N/A'}</td>
+                    <td>${e.designation_name || e.designation || 'N/A'}</td>
+                    <td>${e.department_name || e.department || 'N/A'}</td>
+                    <td>${e.joining_date || 'N/A'}</td>
+                    <td>
+                        <span class="status-badge status-${e.is_active ? 'active' : 'inactive'}">
+                            ${e.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5">Error loading HR data</td></tr>'; }
     },
 
     loadExamManagement() {
@@ -1492,10 +1488,7 @@ const DashboardApp = {
 
     async fetchEvents() {
         try {
-            const res = await fetch(`${this.apiBaseUrl}/events/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const events = await res.json();
+            const events = await EventAPI.getEvents();
             const tbody = document.getElementById('eventTableBody');
 
             if (events.length === 0) {
@@ -1507,8 +1500,8 @@ const DashboardApp = {
                 <tr>
                     <td style="font-weight:600; color:white;">${e.name}</td>
                     <td>${e.description || '-'}</td>
-                    <td>${e.date}</td>
-                    <td>${e.location || 'On Campus'}</td>
+                    <td>${e.date || e.start_date}</td>
+                    <td>${e.location || e.venue || 'On Campus'}</td>
                     <td><span class="status-badge status-active">Active</span></td>
                 </tr>
             `).join('');
