@@ -799,3 +799,22 @@ class PasswordResetOTP(models.Model):
 
     def __str__(self):
         return f"OTP for {self.user.username} ({self.otp_code})"
+
+
+class GeneratedReport(models.Model):
+    REPORT_TYPES = [
+        ('FINANCE', 'Financial Statement'),
+        ('ACADEMIC', 'Academic Performance'),
+        ('ATTENDANCE', 'Attendance Log'),
+        ('HR', 'HR & Payroll'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    report_type = models.CharField(max_length=50, choices=REPORT_TYPES)
+    generated_at = models.DateTimeField(auto_now_add=True)
+    file_url = models.CharField(max_length=500, blank=True, null=True)
+    status = models.CharField(max_length=20, default='READY')
+
+    def __str__(self):
+        return f"{self.name} ({self.status})"

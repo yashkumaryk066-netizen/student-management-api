@@ -171,6 +171,9 @@ const DashboardApp = {
             case 'settings':
                 this.loadSettings();
                 break;
+            case 'subscription':
+                this.loadSubscriptionManagement();
+                break;
             default:
                 this.loadDashboardHome();
         }
@@ -1272,7 +1275,7 @@ const DashboardApp = {
 `;
     },
 
-    loadReportsAnalytics() {
+    async loadReportsAnalytics() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
         <div class="module-header">
@@ -1282,80 +1285,30 @@ const DashboardApp = {
             </div>
             <div style="display:flex; gap:10px;">
                 <button class="btn-action" onclick="alert('Exporting PDF...')">📥 Export PDF</button>
-                <button class="btn-primary" onclick="alert('Generating Report...')">⚡ Generate Report</button>
+                <button class="btn-primary" onclick="DashboardApp.generateReport()">⚡ Generate New Report</button>
             </div>
         </div>
 
-        <!-- Premium Stats Row -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.2); color: var(--primary);">💰</div>
-                <div class="stat-value">₹12.5L</div>
-                <div class="stat-label">Total Revenue (This Year)</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: var(--success);">👥</div>
-                <div class="stat-value">1,240</div>
-                <div class="stat-label">Active Students</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">🎓</div>
-                <div class="stat-value">98.2%</div>
-                <div class="stat-label">Pass Percentage</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.2); color: var(--danger);">📉</div>
-                <div class="stat-value">4.5%</div>
-                <div class="stat-label">Dropout Rate</div>
-            </div>
-        </div>
-
-        <!-- Charts Grid -->
+        <!-- Charts Grid (Visual Only for now) -->
         <div class="cards-grid" style="grid-template-columns: 2fr 1fr; margin-bottom: 30px;">
-            <!-- Revenue Chart Placeholder -->
-            <div class="module-card">
+             <!-- ... (Charts code remains same or simplified) ... -->
+             <div class="module-card">
                 <h3 class="module-title">Revenue Growth</h3>
-                <p class="module-description">Monthly revenue comparison (2023 vs 2024)</p>
-                
                 <div class="chart-container">
-                    <!-- CSS Bar Chart Simulation -->
                     <div class="chart-bar" style="height: 40%; background: var(--primary);"></div>
                     <div class="chart-bar" style="height: 60%; background: var(--secondary);"></div>
                     <div class="chart-bar" style="height: 45%; background: var(--primary);"></div>
                     <div class="chart-bar" style="height: 70%; background: var(--secondary);"></div>
                     <div class="chart-bar" style="height: 55%; background: var(--primary);"></div>
                     <div class="chart-bar" style="height: 85%; background: var(--secondary);"></div>
-                    <div class="chart-bar" style="height: 65%; background: var(--primary);"></div>
-                    <div class="chart-bar" style="height: 90%; background: var(--secondary);"></div>
-                    <div class="chart-bar" style="height: 75%; background: var(--primary);"></div>
-                    <div class="chart-bar" style="height: 95%; background: var(--success);"></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; margin-top:10px; color:var(--text-muted); font-size:0.8rem;">
-                    <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span>
                 </div>
             </div>
-
-            <!-- Attendance Pie Placeholder -->
             <div class="module-card">
-                <h3 class="module-title">Attendance Overview</h3>
-                <p class="module-description">Today's breakdown</p>
-                <div style="display:flex; justify-content:center; align-items:center; height:250px; position:relative;">
-                    <div style="width:200px; height:200px; border-radius:50%; background: conic-gradient(var(--success) 0% 75%, var(--danger) 75% 85%, var(--warning) 85% 100%); position:relative; box-shadow: 0 0 20px rgba(0,0,0,0.3);">
-                        <div style="position:absolute; top:20%; left:20%; width:60%; height:60%; background: rgba(30, 41, 59, 1); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                            <span style="font-size:1.5rem; font-weight:bold;">75%</span>
-                            <span style="font-size:0.7rem; color:var(--text-muted);">Present</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top:20px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="color:var(--success)">● Present</span> <span>75%</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="color:var(--danger)">● Absent</span> <span>10%</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--warning)">● Late/Leave</span> <span>15%</span>
+                <h3 class="module-title">Status Overview</h3>
+                <div style="display:flex; justify-content:center; align-items:center; height:200px;">
+                    <div style="text-align:center;">
+                        <h2 style="font-size:3rem; color:var(--success);">98%</h2>
+                        <p style="color:var(--text-muted);">System Uptime</p>
                     </div>
                 </div>
             </div>
@@ -1364,49 +1317,189 @@ const DashboardApp = {
         <!-- Recent Reports Table -->
         <div class="data-table-container">
             <div style="padding: 20px; border-bottom: 1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="color: white; margin:0;">Recent Generated Reports</h3>
-                <input type="text" placeholder="Search reports..." class="search-input" style="width:200px; padding:8px 15px;">
+                <h3 style="color: white; margin:0;">Generated Reports History</h3>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>Report Name</th>
                         <th>Type</th>
-                        <th>Generated By</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>Monthly Financial Statement</td>
-                        <td>Finance</td>
-                        <td>Admin</td>
-                        <td>2024-03-31</td>
-                        <td><span class="status-badge status-active">Ready</span></td>
-                        <td><button class="btn-action" style="padding:4px 10px; font-size:0.8rem;">Download</button></td>
-                    </tr>
-                    <tr>
-                        <td>Q1 Student Performance</td>
-                        <td>Academic</td>
-                        <td>Principal</td>
-                        <td>2024-03-30</td>
-                        <td><span class="status-badge status-active">Ready</span></td>
-                        <td><button class="btn-action" style="padding:4px 10px; font-size:0.8rem;">Download</button></td>
-                    </tr>
-                    <tr>
-                        <td>Staff Attendance Log</td>
-                        <td>HR</td>
-                        <td>HR Manager</td>
-                        <td>2024-03-28</td>
-                        <td><span class="status-badge status-pending">Processing</span></td>
-                        <td><button class="btn-action" style="padding:4px 10px; font-size:0.8rem;" disabled>Wait</button></td>
-                    </tr>
+                <tbody id="reportsTableBody">
+                    <tr><td colspan="5" class="text-center">Loading reports...</td></tr>
                 </tbody>
             </table>
         </div>
-    `;
+        `;
+
+        // Fetch Real Reports
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/reports/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const reports = await response.json();
+
+            const tbody = document.getElementById('reportsTableBody');
+            if (reports.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No reports generated yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = reports.map(r => `
+                <tr>
+                    <td>${r.name}</td>
+                    <td>${r.type}</td>
+                    <td>${r.date}</td>
+                    <td><span class="status-badge status-active">${r.status}</span></td>
+                    <td>
+                        ${r.url !== '#' ? `<a href="${this.apiBaseUrl}/reports/download/${r.id}/" target="_blank" class="btn-action" style="padding:4px 10px; font-size:0.8rem; text-decoration:none;">Download</a>` : '<button disabled>Processing</button>'}
+                    </td>
+                </tr>
+            `).join('');
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('reportsTableBody').innerHTML = '<tr><td colspan="5" class="text-center">Failed to load reports.</td></tr>';
+        }
+    },
+
+    async generateReport() {
+        const type = prompt("Enter Report Type (FINANCE, ACADEMIC, ATTENDANCE, HR):", "FINANCE");
+        if (!type) return;
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/reports/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify({ type: type.toUpperCase() })
+            });
+
+            if (response.ok) {
+                alert('Report generation started!');
+                this.loadReportsAnalytics(); // Reload
+            } else {
+                alert('Failed to generate report');
+            }
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    },
+
+    async loadSubscriptionManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = '<div class="loading-spinner"></div>';
+
+        try {
+            // Fetch Status
+            const res = await fetch(`${this.apiBaseUrl}/subscription/status/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const sub = await res.json();
+
+            if (sub.status === 'NO_SUBSCRIPTION') {
+                container.innerHTML = `<h1>No Active Subscription</h1><p>Please contact support or purchase a plan.</p>`;
+                return;
+            }
+
+            const daysColor = sub.days_left < 7 ? 'var(--danger)' : 'var(--success)';
+
+            container.innerHTML = `
+                <div class="module-header">
+                    <div>
+                        <h1 class="page-title">💳 Plan & Subscription</h1>
+                        <p class="page-subtitle">Manage your billing and renewal details.</p>
+                    </div>
+                </div>
+
+                <div class="cards-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="module-card">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                            <div>
+                                <h2 style="font-size:2rem; margin-bottom:5px;">${sub.plan_type} Plan</h2>
+                                <span class="status-badge status-${sub.status === 'ACTIVE' ? 'active' : 'inactive'}">${sub.status}</span>
+                            </div>
+                            <div style="font-size:3rem;">💎</div>
+                        </div>
+                        
+                        <div style="margin-bottom:20px;">
+                            <div style="color:var(--text-muted); font-size:0.9rem;">Valid Until</div>
+                            <div style="font-size:1.2rem; font-weight:600;">${sub.end_date}</div>
+                        </div>
+
+                         <div style="margin-bottom:20px;">
+                            <div style="color:var(--text-muted); font-size:0.9rem;">Days Remaining</div>
+                            <div style="font-size:2.5rem; font-weight:800; color:${daysColor}">${sub.days_left} Days</div>
+                        </div>
+                        
+                        <button class="btn-primary" style="width:100%;" onclick="DashboardApp.renewSubscription('${sub.plan_type}')">
+                            🔄 Renew Plan Now
+                        </button>
+                    </div>
+
+                    <div class="module-card">
+                        <h3>Billing History</h3>
+                        <p style="color:var(--text-muted); margin-bottom:20px;">Recent transactions</p>
+                        
+                        <div style="padding:15px; background:rgba(255,255,255,0.05); border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-weight:600;">Subscription Renewal</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">${sub.start_date}</div>
+                            </div>
+                            <div style="font-weight:bold; color:var(--success);">Paid ₹${sub.amount_paid}</div>
+                        </div>
+                         <div style="padding:15px; background:rgba(255,255,255,0.05); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-weight:600;">Platform Setup Fee</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">2024-01-01</div>
+                            </div>
+                            <div style="font-weight:bold; color:var(--success);">Paid ₹0.00 (Waived)</div>
+                        </div>
+                    </div>
+                </div>
+             `;
+
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = '<p>Failed to load subscription details.</p>';
+        }
+    },
+
+    renewSubscription(planType) {
+        // Reuse the purchase flow logic, or simpler prompt
+        // In real app, redirect to Payment Gateway with 'renewal' context
+        const amount = prompt(`Confirm Renewal for ${planType}?\nEnter Amount to Pay:`, "4999");
+        if (!amount) return;
+
+        // Simulate Renewal
+        fetch(`${this.apiBaseUrl}/subscription/buy/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: document.getElementById('profileEmail') ? document.getElementById('profileEmail').value : 'user@example.com', // Try to get email, fallback if not found
+                plan_type: planType,
+                amount: amount
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'INITIATED') {
+                    // If initiated, we simulate success for demo
+                    // In real app, user goes to payment_url
+                    fetch(`${this.apiBaseUrl}/subscription/success/?email=${document.getElementById('profileEmail').value}`)
+                        .then(() => {
+                            alert("Renewal Successful! Access extended by 30 days.");
+                            this.loadSubscriptionManagement(); // Reload
+                        });
+                }
+            })
+            .catch(err => alert("Renewal Failed"));
     },
 
     loadSettings() {

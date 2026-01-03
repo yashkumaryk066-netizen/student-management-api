@@ -33,7 +33,9 @@ from .views import (
 )
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
-from .subscription_views import SubscriptionPurchaseView, SubscriptionSuccessView
+
+from .subscription_views import SubscriptionPurchaseView, SubscriptionSuccessView, SubscriptionStatusView
+from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
 from .password_reset_views import RequestPasswordResetView, VerifyAndResetPasswordView
@@ -129,4 +131,9 @@ urlpatterns = [
     # SUBSCRIPTION (CLIENT ONBOARDING)
     path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),
     path('subscription/success/', SubscriptionSuccessView.as_view(), name='subscription-success'),
+    path('subscription/status/', SubscriptionStatusView.as_view(), name='subscription-status'),
+
+    # REPORTS
+    path('reports/', ReportListView.as_view(), name='report-list'),
+    path('reports/download/<int:pk>/', ReportDownloadView.as_view(), name='report-download'),
 ]

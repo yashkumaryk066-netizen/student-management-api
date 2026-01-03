@@ -92,3 +92,26 @@ class SubscriptionSuccessView(APIView):
             },
             "dashboard_url": "/dashboard/"
         })
+
+class SubscriptionStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not hasattr(request.user, 'subscription'):
+             return Response({"status": "NO_SUBSCRIPTION", "message": "No active plan found."})
+        
+        sub = request.user.subscription
+        today = date.today()
+        days_left = 0
+        if sub.end_date:
+            days_left = (sub.end_date - today).days
+        
+        return Response({
+            "plan_type": sub.plan_type,
+            "status": sub.status,
+            "start_date": sub.start_date,
+            "end_date": sub.end_date,
+            "days_left": days_left if days_left > 0 else 0,
+            "amount_paid": sub.amount_paid,
+            "is_expired": days_left <= 0
+        })
