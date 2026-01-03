@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import razorpay
 import uuid
+from rest_framework.permissions import AllowAny
 
 # Initialize Razorpay Client
 # Use test keys if real ones aren't available yet
@@ -13,6 +14,7 @@ KEY_SECRET = getattr(settings, 'RAZORPAY_KEY_SECRET', 'YourSecretHere')
 client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
 
 class CreateOrderView(APIView):
+    permission_classes = [AllowAny]
     """
     Creates a Razorpay Order ID for frontend checkout.
     """

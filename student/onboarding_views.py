@@ -8,7 +8,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from rest_framework.permissions import AllowAny
+
 class OnboardingPaymentView(APIView):
+    permission_classes = [AllowAny]
     """
     Handles plan purchase and user onboarding.
     Mocks payment verification and sends credentials via 'WhatsApp'.
