@@ -59,12 +59,19 @@ async function checkAuth() {
 
 // Redirect to appropriate dashboard based on role
 function redirectToDashboard(role) {
+    console.log('Redirecting for role:', role);
     const dashboards = {
         'admin': '/dashboard/admin/',
         'teacher': '/dashboard/teacher/',
         'parent': '/dashboard/parent/',
         'student': '/dashboard/student/',
     };
+
+    // Force admin redirect for admin username
+    if (localStorage.getItem('username') === 'admin' || role === 'admin') {
+        window.location.href = '/dashboard/admin/';
+        return;
+    }
 
     const dashboardUrl = dashboards[role] || '/dashboard/student/';
     window.location.href = dashboardUrl;

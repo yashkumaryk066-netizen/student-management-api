@@ -18,11 +18,15 @@ class IsParent(permissions.BasePermission):
 class IsAdminRole(permissions.BasePermission):
     """Allow only users with ADMIN role"""
     def has_permission(self, request, view):
+        if request.user.is_staff or request.user.is_superuser:
+            return True
         return hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN'
 
 class IsTeacherOrAdmin(permissions.BasePermission):
     """Allow users with TEACHER or ADMIN role"""
     def has_permission(self, request, view):
+        if request.user.is_staff or request.user.is_superuser:
+            return True
         if not hasattr(request.user, 'profile'):
             return False
         return request.user.profile.role in ['TEACHER', 'ADMIN']
