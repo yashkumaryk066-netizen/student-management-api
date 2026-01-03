@@ -1009,6 +1009,9 @@
         </div>
     </div>
 
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <!-- Payment Logic Script -->
     <script>
         let selectedPlan = '';
@@ -1023,12 +1026,6 @@
             document.getElementById('paymentModalOverlay').style.display = 'flex';
             document.getElementById('step1').style.display = 'block';
             document.getElementById('step2').style.display = 'none';
-            document.getElementById('confirmPaymentBtn').disabled = false;
-            document.getElementById('confirmPaymentBtn').style.opacity = '1';
-            document.getElementById('confirmPaymentBtn').innerText = 'I Have Paid';
-            document.getElementById('paymentProcessing').style.display = 'none';
-            document.getElementById('paymentProcessing').style.color = "var(--primary)";
-            document.getElementById('paymentProcessing').innerHTML = `<span class="pulse-dot"></span> Verifying Payment & Creating Account...`;
         }
 
         function closePaymentModal() {
@@ -1048,28 +1045,91 @@
                 return;
             }
 
-            // Proceed to Step 2
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
+            // Trigger Razorpay Payment Flow directly instead of showing QR Step
+            initiateRazorpayPayment();
         }
 
-        async function confirmPayment() {
+        async function initiateRazorpayPayment() {
             const email = document.getElementById('userEmail').value;
             const phone = document.getElementById('userPhone').value;
-            const btn = document.getElementById('confirmPaymentBtn');
-            const processing = document.getElementById('paymentProcessing');
-
-            // UI Feedback: Disable button and show processing
+            const btn = document.querySelector('#step1 button'); // The Proceed Button
+            btn.innerText = "Initializing Payment Gateway...";
             btn.disabled = true;
-            btn.style.opacity = '0.5';
-            btn.innerText = "Processing...";
-            processing.style.display = 'block';
 
-            // Determine correct plan type enum for backend
-            let planTypeEnum = 'SCHOOL'; // default
+            try {
+                // 1. Create Order
+                const res = await fetch('/api/payment/create-order/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: selectedAmount })
+                });
+                const orderData = await res.json();
+
+                if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
+
+                // 2. Open Razorpay Checkout
+                const options = {
+                    "key": orderData.key_id,
+                    "amount": orderData.amount,
+                    "currency": orderData.currency,
+                    "name": "IMS Premium",
+                    "description": `Payment for ${selectedPlan}`,
+                    "image": "https://cdn-icons-png.flaticon.com/512/2995/2995467.png", // Demo logo
+                    "order_id": orderData.order_id,
+                    "handler": function (response) {
+                        // Payment Success! Now Verify.
+                        verifyAndOnboard(response);
+                    },
+                    "prefill": {
+                        "name": email.split('@')[0],
+                        "email": email,
+                        "contact": phone
+                    },
+                    "theme": {
+                        "color": "#6366f1"
+                    }
+                };
+
+                const rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response) {
+                    alert("Payment Failed: " + response.error.description);
+                    btn.innerText = "Proceed to Payment";
+                    btn.disabled = false;
+                });
+                rzp1.open();
+
+            } catch (e) {
+                console.error(e);
+                alert("Error initializing payment: " + e.message);
+                btn.innerText = "Proceed to Payment";
+                btn.disabled = false;
+            }
+        }
+
+        async function verifyAndOnboard(paymentResponse) {
+            const email = document.getElementById('userEmail').value;
+            const phone = document.getElementById('userPhone').value;
+
+            // Show processing UI (reuse step2 container for feedback)
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step2').innerHTML = `
+                <div style="padding:40px; text-align:center;">
+                    <div style="font-size:3rem; margin-bottom:20px;">🎉</div>
+                    <h3 style="margin-bottom:10px;">Payment Successful!</h3>
+                    <p style="color:var(--text-muted); margin-bottom:20px;">Transaction ID: ${paymentResponse.razorpay_payment_id}</p>
+                    <div style="color:var(--primary); font-weight:bold;">
+                        <span class="pulse-dot"></span> Creating your Account...
+                    </div>
+                </div>
+             `;
+
+            // Determine plan type
+            let planTypeEnum = 'SCHOOL';
             if (selectedPlan.toLowerCase().includes('coaching')) planTypeEnum = 'COACHING';
             if (selectedPlan.toLowerCase().includes('institute')) planTypeEnum = 'INSTITUTE';
 
+            // Call Onboarding API
             try {
                 const response = await fetch('/api/onboarding/pay/', {
                     method: 'POST',
@@ -1078,38 +1138,25 @@
                         email: email,
                         phone: phone,
                         plan_type: planTypeEnum,
-                        amount: selectedAmount
+                        amount: selectedAmount,
+                        // Pass payment details for backend to verify if implemented
+                        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                        razorpay_order_id: paymentResponse.razorpay_order_id,
+                        razorpay_signature: paymentResponse.razorpay_signature
                     })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Success UI
-                    processing.style.color = "#10b981"; // Success Green
-                    processing.innerHTML = `
-                        <div style="font-size:1.2rem; margin-bottom:5px;">✅ Payment Successful!</div>
-                        <div style="font-size:0.9rem; color:var(--text-muted);">Account Created. Redirecting...</div>
-                    `;
-                    btn.innerText = "Redirecting...";
-
-                    // Delay slightly so user reads the message, then redirect
                     setTimeout(() => {
                         window.location.href = data.redirect_url || '/login/';
                     }, 2000);
                 } else {
-                    throw new Error(data.error || 'Verification Failed');
+                    document.getElementById('step2').innerHTML = `<p style="color:red">Account Creation Failed: ${data.error}</p>`;
                 }
-
-            } catch (error) {
-                console.error(error);
-                processing.style.color = "#ef4444"; // Error Red
-                processing.innerHTML = `❌ Error: ${error.message}`;
-
-                // Re-enable button to try again
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.innerText = "Retry Payment Verification";
+            } catch (e) {
+                document.getElementById('step2').innerHTML = `<p style="color:red">Server Error: ${e.message}</p>`;
             }
         }
     </script>

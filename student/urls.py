@@ -32,6 +32,7 @@ from .views import (
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView
 )
 from .onboarding_views import OnboardingPaymentView
+from .payment_gateway_views import CreateOrderView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -107,4 +108,6 @@ urlpatterns = [
     
     # ONBOARDING
     path('onboarding/pay/', OnboardingPaymentView.as_view(), name='onboarding-pay'),
+    # RAZORPAY
+    path('payment/create-order/', CreateOrderView.as_view(), name='payment-create-order'),
 ]

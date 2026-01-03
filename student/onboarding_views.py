@@ -23,6 +23,13 @@ class OnboardingPaymentView(APIView):
         if not phone or not email or not plan_type:
             return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
 
+        PRICING = {
+            'COACHING': 500,
+            'SCHOOL': 10000,
+            'INSTITUTE': 15000
+        }
+        expected_amount = PRICING.get(plan_type.upper(), 0)
+
         if int(amount) < expected_amount:
              return Response({
                  'error': f'Payment Amount Mismatch. Expected ₹{expected_amount} for {plan_type} plan, but received ₹{amount}.'
