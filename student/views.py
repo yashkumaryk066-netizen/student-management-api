@@ -83,7 +83,20 @@ class StudentListCreateView(APIView):
     def post(self, request):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            # Auto-assign Institution Type based on Admin's Profile (if not superuser)
+            institution_type = 'SCHOOL' # Default
+            if hasattr(request.user, 'profile') and request.user.profile.institution_type:
+                institution_type = request.user.profile.institution_type
+            
+            # Superadmin can override (if provided in data)? 
+            # Ideally, serializer.validated_data might have it if provided.
+            # But let's enforce:
+            if not request.user.is_superuser:
+                 serializer.save(institution_type=institution_type)
+            else:
+                 # Superuser can specify, or fallback to default
+                 serializer.save()
+                 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
