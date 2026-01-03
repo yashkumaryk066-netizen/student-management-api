@@ -62,6 +62,7 @@ function redirectToDashboard(role) {
     console.log('Redirecting for role:', role);
     const dashboards = {
         'admin': '/dashboard/admin/',
+        'client': '/dashboard/admin/', // Clients use Admin Dashboard (Restricted view)
         'teacher': '/dashboard/teacher/',
         'parent': '/dashboard/parent/',
         'student': '/dashboard/student/',

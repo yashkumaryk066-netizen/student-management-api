@@ -39,7 +39,7 @@ class SubscriptionPurchaseView(APIView):
         if not hasattr(user, 'profile'):
             UserProfile.objects.create(
                 user=user, 
-                role='ADMIN', 
+                role='CLIENT', # Not ADMIN
                 institution_type=plan_type,
                 phone=phone or ''
             )

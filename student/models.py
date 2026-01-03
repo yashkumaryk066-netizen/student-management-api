@@ -55,9 +55,11 @@ class ClientSubscription(models.Model):
         # Sync with UserProfile to control login/API access
         if hasattr(self.user, 'profile'):
             self.user.profile.institution_type = self.plan_type
-            # Ensure role is set correctly (e.g., ADMIN for the purchaser)
-            if self.user.profile.role not in ['ADMIN', 'TEACHER', 'STUDENT', 'PARENT']:
-                self.user.profile.role = 'ADMIN'
+            
+            # CRITICAL: Clients are NOT Admins. They are CLIENTS.
+            # Only preserve role if they are already superuser/staff, otherwise force CLIENT.
+            if not self.user.is_superuser:
+                 self.user.profile.role = 'CLIENT'
             
             self.user.profile.subscription_expiry = self.end_date
             self.user.profile.save()
@@ -101,7 +103,8 @@ class UserProfile(models.Model):
         ('STUDENT', 'Student'),
         ('TEACHER', 'Teacher'),
         ('PARENT', 'Parent'),
-        ('ADMIN', 'Admin'),
+        ('ADMIN', 'Admin'),   # System Admin (Superuser)
+        ('CLIENT', 'Client'), # Subscription Owner (School/Coaching Owner)
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)

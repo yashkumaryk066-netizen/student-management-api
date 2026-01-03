@@ -22,6 +22,20 @@ const DashboardApp = {
             if (res.ok) {
                 this.currentUser = await res.json();
                 console.log("Logged in as:", this.currentUser.role, this.currentUser.institution_type);
+
+                // --- UPDATE UI FOR CLIENT ROLE ---
+                const roleEl = document.querySelector('.user-role');
+                const welcomeEl = document.querySelector('.page-title');
+
+                if (this.currentUser.role === 'CLIENT') {
+                    if (roleEl) roleEl.textContent = "Institute Admin"; // Or "Client"
+                    if (welcomeEl && welcomeEl.textContent.includes('Admin')) {
+                        welcomeEl.textContent = `Welcome Back, ${this.currentUser.institution_type || 'Client'}! 👋`;
+                    }
+
+                    // Hide any Super Admin-only elements (if any exist in future)
+                    // e.g. document.querySelector('.super-admin-only').style.display = 'none';
+                }
             }
         } catch (e) {
             console.error("Failed to fetch profile", e);

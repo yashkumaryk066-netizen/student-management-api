@@ -15,29 +15,55 @@ class IsParent(permissions.BasePermission):
     def has_permission(self, request, view):
         return hasattr(request.user, 'profile') and request.user.profile.role == 'PARENT'
 
+
 class IsAdminRole(permissions.BasePermission):
-    """Allow only users with ADMIN role AND valid subscription"""
+    """
+    Custom permission for System Superadmins ONLY.
+    Clients are NOT Admins in this context. Use IsClient for them.
+    """
     def has_permission(self, request, view):
-        # 1. Superuser always allow (Lifetime Access)
+        # Only Superuser is 'ADMIN' in the strict sense for Critical System Actions
+        return bool(request.user and request.user.is_superuser)
+
+class IsClient(permissions.BasePermission):
+    """
+    Custom permission for Subscription Clients (Schools/Coaching Owners).
+    They have FULL access but ONLY to their institution type data.
+    """
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+            
+        # Superuser implicitly has client access too (god mode)
         if request.user.is_superuser:
             return True
             
-        # 2. Check Role
-        if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
-            # 3. Check Subscription Validity
+        # Check Role is CLIENT
+        is_client = hasattr(request.user, 'profile') and request.user.profile.role == 'CLIENT'
+        
+        if is_client:
+            # Check Subscription Validity
             from django.utils import timezone
             profile = request.user.profile
             if profile.subscription_expiry and profile.subscription_expiry < timezone.now().date():
-                return False # Subscription Expired
+                 return False # Expired
             return True
-            
         return False
 
 class IsTeacherOrAdmin(permissions.BasePermission):
-    """Allow users with TEACHER or ADMIN role"""
+    """
+    Updated to allow Teachers OR Clients (Owners).
+    Clients act as Admins for their organization.
+    """
     def has_permission(self, request, view):
-        if request.user.is_staff or request.user.is_superuser:
-            return True
-        if not hasattr(request.user, 'profile'):
+        if not request.user or not request.user.is_authenticated:
             return False
-        return request.user.profile.role in ['TEACHER', 'ADMIN']
+            
+        if request.user.is_superuser:
+            return True
+            
+        if hasattr(request.user, 'profile'):
+             role = request.user.profile.role
+             return role in ['TEACHER', 'CLIENT'] 
+        
+        return False

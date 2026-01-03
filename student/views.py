@@ -17,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from .permissions import IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin
+from .permissions import IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin, IsClient
 from datetime import date, timedelta
 
 @extend_schema_view(
@@ -370,6 +370,7 @@ class ProfileView(APIView):
             profile = user.profile
             data.update({
                 "role": profile.role,
+                "institution_type": profile.institution_type,
                 "phone": profile.phone,
                 "profile_id": profile.id
             })
