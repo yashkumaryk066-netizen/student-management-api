@@ -90,9 +90,9 @@
                 <!-- Step 1: Request OTP -->
                 <div id="resetStep1">
                     <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Enter your registered email address
-                        to receive a verification OTP.</p>
+                        or phone number to receive a verification OTP.</p>
                     <div class="form-group">
-                        <input type="email" id="resetEmail" placeholder="Enter your email"
+                        <input type="text" id="resetIdentifier" placeholder="Enter Email or Phone"
                             style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid #475569; color:white; border-radius:5px;">
                     </div>
                     <button onclick="requestOTP()" id="btnGetOTP" class="btn-primary"
@@ -140,13 +140,13 @@
             }
 
             async function requestOTP() {
-                const email = document.getElementById('resetEmail').value.trim();
+                const identifier = document.getElementById('resetIdentifier').value.trim();
                 const btn = document.getElementById('btnGetOTP');
                 const msg = document.getElementById('resetMessage');
 
-                if (!email) {
+                if (!identifier) {
                     msg.style.display = 'block';
-                    msg.innerText = "Please enter your email.";
+                    msg.innerText = "Please enter your email or phone.";
                     return;
                 }
 
@@ -158,7 +158,7 @@
                     const res = await fetch(`${API_BASE}/auth/password-reset/request/`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: email })
+                        body: JSON.stringify({ identifier: identifier })
                     });
                     const data = await res.json();
 
@@ -186,7 +186,7 @@
             }
 
             async function confirmReset() {
-                const email = document.getElementById('resetEmail').value.trim();
+                const identifier = document.getElementById('resetIdentifier').value.trim();
                 const otp = document.getElementById('resetOTP').value.trim();
                 const pass = document.getElementById('newPassword').value.trim();
                 const btn = document.getElementById('btnReset');
@@ -206,19 +206,31 @@
                     const res = await fetch(`${API_BASE}/auth/password-reset/confirm/`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: email, otp: otp, new_password: pass })
+                        body: JSON.stringify({ identifier: identifier, otp: otp, new_password: pass })
                     });
                     const data = await res.json();
 
                     if (res.ok) {
-                        msg.style.display = 'block';
-                        msg.style.color = '#10b981';
-                        msg.innerText = "Success! Password reset. Login now.";
-                        setTimeout(() => {
-                            closeResetModal();
-                            document.getElementById('password').value = pass; // Auto-fill
-                            document.getElementById('username').focus();
-                        }, 2000);
+                        // Success - Show Credentials
+                        document.getElementById('resetStep2').style.display = 'none';
+                        const successHtml = `
+                            <div style="text-align:center; animation:fadeInUp 0.3s ease;">
+                                <div style="font-size:3rem; margin-bottom:10px;">✅</div>
+                                <h3 style="color:#10b981; margin-bottom:10px;">Recovery Successful!</h3>
+                                <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:20px;">Credentials sent to Email & Phone.</p>
+                                
+                                <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; text-align:left; margin-bottom:20px;">
+                                    <div style="margin-bottom:5px; font-weight:bold; color:white;">Username: <span style="font-weight:400; color:#cbd5e1;">${data.username}</span></div>
+                                    <div style="font-weight:bold; color:white;">Password: <span style="font-weight:400; color:#cbd5e1;">${data.password}</span></div>
+                                </div>
+                                
+                                <button onclick="closeResetModal(); document.getElementById('username').value='${data.username}'; document.getElementById('password').value='${data.password}';" 
+                                    class="btn-primary" style="width:100%;">Login Now</button>
+                            </div>
+                        `;
+                        const container = document.getElementById('resetModal').querySelector('div');
+                        container.innerHTML = successHtml;
+
                     } else {
                         msg.style.display = 'block';
                         msg.style.color = '#ef4444';
