@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='userprofile',
-            name='subscription_expiry',
-            field=models.DateField(blank=True, null=True),
-        ),
+        # migrations.AddField(
+        #     model_name='userprofile',
+        #     name='subscription_expiry',
+        #     field=models.DateField(blank=True, null=True),
+        # ),
         migrations.CreateModel(
             name='PasswordResetOTP',
             fields=[
