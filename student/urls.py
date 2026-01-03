@@ -31,6 +31,7 @@ from .views import (
     ExamListCreateView, EventListCreateView,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView
 )
+from .onboarding_views import OnboardingPaymentView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -103,4 +104,7 @@ urlpatterns = [
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
     path('batches/', BatchListCreateView.as_view(), name='batch-list'),
     path('enrollments/', EnrollmentListCreateView.as_view(), name='enrollment-list'),
+    
+    # ONBOARDING
+    path('onboarding/pay/', OnboardingPaymentView.as_view(), name='onboarding-pay'),
 ]

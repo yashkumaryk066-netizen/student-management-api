@@ -993,19 +993,23 @@
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                         <span style="color:var(--text-muted);">Bank Transfer (IMPS/NEFT)</span>
                     </div>
-                    <!-- Hidden details, only revealed if needed, but user asked to hide them -->
                     <div style="font-family:monospace; color:var(--text-muted); font-size:0.85rem;">
                         IFSC: CNRB0004949<br>
                         ACC: 4949120000179
                     </div>
                 </div>
 
-                <button onclick="alert('Payment verification initiated! We will contact you shortly.')"
-                    class="btn-primary" style="width:100%;">I Have Paid</button>
+                <div id="paymentProcessing" style="display:none; color:var(--primary); margin-bottom:10px;">
+                    <span class="pulse-dot"></span> Verifying Payment & Creating Account...
+                </div>
+
+                <button id="confirmPaymentBtn" onclick="confirmPayment()" class="btn-primary" style="width:100%;">I Have
+                    Paid</button>
             </div>
         </div>
     </div>
 
+    <!-- Payment Logic Script -->
     <script>
         let selectedPlan = '';
         let selectedAmount = 0;
