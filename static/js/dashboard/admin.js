@@ -48,7 +48,7 @@ const DashboardApp = {
         if (settingsLink) {
             settingsLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.showSettings();
+                this.loadSettings();
             });
         }
     },
@@ -109,7 +109,7 @@ const DashboardApp = {
                 this.loadReportsAnalytics();
                 break;
             case 'settings':
-                this.showSettings();
+                this.loadSettings();
                 break;
             default:
                 this.loadDashboardHome();
@@ -745,45 +745,134 @@ const DashboardApp = {
         `;
     },
 
-    showSettings() {
+    loadSettings() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
             <div class="module-header">
-                <h1 class="page-title">⚙️ Settings</h1>
+                <div>
+                     <h1 class="page-title">⚙️ Settings</h1>
+                     <p class="page-subtitle">Manage your profile, security, and preferences.</p>
+                </div>
             </div>
             
             <div class="settings-grid">
+                <!-- Profile Section -->
                 <div class="settings-card">
-                    <h3>👤 Profile Settings</h3>
-                    <p>Update your profile information</p>
-                    <button class="btn-secondary">Edit Profile</button>
+                    <h3>👤 Profile Information</h3>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleProfileUpdate(event);" class="settings-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="first_name" id="profileName" class="form-input" placeholder="First Name">
+                            <input type="text" name="last_name" id="profileLastName" class="form-input" placeholder="Last Name" style="margin-top:10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" name="email" id="profileEmail" class="form-input">
+                        </div>
+                         <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" name="phone" id="profilePhone" class="form-input" placeholder="+91">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" id="profileRole" class="form-input" disabled value="ADMIN">
+                        </div>
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
                 
+                <!-- Security Section -->
                 <div class="settings-card">
-                    <h3>🔒 Change Password</h3>
-                    <p>Update your account password</p>
-                    <button class="btn-secondary">Change Password</button>
+                    <h3>🔒 Security</h3>
+                    <form onsubmit="event.preventDefault(); alert('Password change requires email verification (Coming Soon).');" class="settings-form">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" class="form-input" placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" class="form-input" placeholder="New Password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" class="form-input" placeholder="Confirm New Password">
+                        </div>
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn-primary">Update Password</button>
+                        </div>
+                    </form>
                 </div>
                 
-                <div class="settings-card">
-                    <h3>🔔 Notifications</h3>
-                    <p>Manage notification preferences</p>
-                    <button class="btn-secondary">Configure</button>
-                </div>
-                
-                <div class="settings-card">
-                    <h3>🏢 Institute Settings</h3>
-                    <p>Manage institute information</p>
-                    <button class="btn-secondary">Settings</button>
-                </div>
-                
-                <div class="settings-card danger">
-                    <h3>🚪 Logout</h3>
-                    <p>Sign out of your account</p>
-                    <button class="btn-danger" onclick="DashboardApp.logout()">Logout</button>
+                 <!-- Danger Zone -->
+                <div class="settings-card section-danger">
+                    <h3>🛑 Danger Zone</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Use these actions with caution.</p>
+                    
+                    <button class="btn-danger" style="width: 100%; padding: 15px;" onclick="DashboardApp.logout()">
+                        🚪 Logout from System
+                    </button>
                 </div>
             </div>
         `;
+
+        // Fetch and populate data
+        this.fetchProfileSettings();
+    },
+
+    async fetchProfileSettings() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/profile/`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('profileName').value = data.first_name || '';
+                document.getElementById('profileLastName').value = data.last_name || '';
+                document.getElementById('profileEmail').value = data.email || '';
+                document.getElementById('profilePhone').value = data.phone || '';
+                document.getElementById('profileRole').value = (data.role || 'USER').toUpperCase();
+            }
+        } catch (error) {
+            console.error('Failed to load profile settings', error);
+        }
+    },
+
+    async handleProfileUpdate(event) {
+        const form = event.target;
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = 'Saving...';
+        btn.disabled = true;
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/profile/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('Profile updated successfully!');
+            } else {
+                throw new Error('Failed to update profile');
+            }
+        } catch (error) {
+            alert('Error updating profile: ' + error.message);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     },
 
     logout() {

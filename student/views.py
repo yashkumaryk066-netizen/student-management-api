@@ -289,13 +289,63 @@ class AttendenceDetailsView(APIView):
 )
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request):
-        return Response({
-            "username": request.user.username
-        }, status=status.HTTP_200_OK)
     
-    def post(self, request):
+    def get(self, request):
+        user = request.user
+        data = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "full_name": user.get_full_name(),
+            "date_joined": user.date_joined,
+            "is_superuser": user.is_superuser,
+            "is_staff": user.is_staff,
+        }
+        
+        # Try to get UserProfile details if they exist
+        if hasattr(user, 'profile'):
+            profile = user.profile
+            data.update({
+                "role": profile.role,
+                "phone": profile.phone,
+                "profile_id": profile.id
+            })
+        else:
+            data.update({
+                "role": "ADMIN" if user.is_superuser else "USER",
+                "phone": "",
+                "profile_id": None
+            })
+            
+        return Response(data, status=status.HTTP_200_OK)
+    
+    def put(self, request):
+        user = request.user
+        data = request.data
+        
+        # Update User fields
+        if 'first_name' in data:
+            user.first_name = data['first_name']
+        if 'last_name' in data:
+            user.last_name = data['last_name']
+        if 'email' in data:
+            user.email = data['email']
+            
+        user.save()
+        
+        # Update Profile fields if profile exists
+        if hasattr(user, 'profile'):
+            profile = user.profile
+            if 'phone' in data:
+                profile.phone = data['phone']
+            profile.save()
+            
         return self.get(request)
+        
+    def patch(self, request):
+        return self.put(request)
 
 # Role-Based Dashboard and New Feature Views
 # Add these to existing views.py
