@@ -58,11 +58,15 @@ class OnboardingPaymentView(APIView):
                 user, created = User.objects.get_or_create(
                     email=email,
                     defaults={'username': username}
-                )
+                ) # If user exists by email, we get that user. 'username' default is ignored.
+
                 if created:
                     logger.info(f"Created new user: {username}")
                 else:
-                    logger.info(f"Updated existing user: {username}")
+                    logger.info(f"Updated existing user: {user.username}")
+                    # CRITICAL FIX: If user already existed, use their ACTUAL username for credentials,
+                    # not the one we just calculated/guessed above.
+                    username = user.username
                 
                 # ALWAYS set the password to the generated one so the credentials shown to the user WORK.
                 # This handles cases where a user retries payment or comes back.
