@@ -52,8 +52,16 @@ class StudentListCreateView(APIView):
     def get(self, request):
         search = request.query_params.get("search","").strip()
         batch_id = request.query_params.get("batch_id")
+        institution_type = request.query_params.get("institution_type")
+        grade = request.query_params.get("grade")
         
         students = Student.objects.all()
+        
+        if institution_type:
+            students = students.filter(institution_type=institution_type)
+
+        if grade:
+            students = students.filter(grade=grade)
         
         if batch_id:
             students = students.filter(enrollments__batch_id=batch_id, enrollments__status='ACTIVE')
@@ -770,8 +778,14 @@ class ExamListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Exam.objects.all()
         batch_id = self.request.query_params.get('batch_id')
+        grade = self.request.query_params.get('grade')
+
         if batch_id:
             queryset = queryset.filter(batch_id=batch_id)
+        if grade:
+            # Assuming input is just "10", but DB has "Class 10" or similar.
+            # Or we can exact match if frontend sends "Class 10"
+            queryset = queryset.filter(grade_class__icontains=grade)
         return queryset
 
 # --- EVENTS ---

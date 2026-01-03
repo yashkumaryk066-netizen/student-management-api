@@ -13,6 +13,13 @@ class Student(models.Model):
         user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='student_profile')
         parent = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
         
+        INSTITUTION_TYPES = [
+            ('SCHOOL', 'School'),
+            ('COACHING', 'Coaching'),
+            ('INSTITUTE', 'Institute/College'),
+        ]
+        institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL')
+        
         def __str__(self):
             return self.name
         

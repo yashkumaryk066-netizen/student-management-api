@@ -127,77 +127,113 @@ const DashboardApp = {
     loadStudentManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-            <div class="module-header">
-                <div>
-                    <h1 class="page-title">👥 Student Management</h1>
-                    <p class="page-subtitle">Manage student profiles, enrollments, and status.</p>
-                </div>
-                <button class="btn-action" onclick="DashboardApp.showAddStudentForm()">
-                    + Add New Student
-                </button>
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">👥 Student Management</h1>
+                <p class="page-subtitle">Manage profiles across School, Coaching, and Institute.</p>
             </div>
-            
-            <div class="filter-bar">
-                <input type="text" id="studentSearch" placeholder="🔍 Search students..." class="search-input">
-                <select class="filter-select">
-                    <option value="">All Classes</option>
-                    <option value="9">Class 9</option>
-                    <option value="10">Class 10</option>
-                    <option value="11">Class 11</option>
-                    <option value="12">Class 12</option>
-                </select>
-                <select class="filter-select">
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
+            <button class="btn-action" onclick="DashboardApp.showAddStudentForm()">
+                + Add New Student
+            </button>
+        </div>
+        
+        <div class="filter-bar">
+            <!-- Tabs for Institution Type -->
+            <div class="tab-group" style="display:flex; gap:10px; margin-right:auto;">
+                <button class="filter-tab active" onclick="DashboardApp.filterStudents(this, '')">All</button>
+                <button class="filter-tab" onclick="DashboardApp.filterStudents(this, 'SCHOOL')">School</button>
+                <button class="filter-tab" onclick="DashboardApp.filterStudents(this, 'COACHING')">Coaching</button>
+                <button class="filter-tab" onclick="DashboardApp.filterStudents(this, 'INSTITUTE')">Institute</button>
             </div>
-            
-            <div class="data-table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Class</th>
-                            <th>Age</th>
-                            <th>Gender</th>
-                            <th>Parent</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentsTableBody">
-                        <tr><td colspan="7" class="text-center" style="padding: 40px; color: var(--text-muted);">
-                            <span class="loader"></span> Loading student data...
-                        </td></tr>
-                    </tbody>
-                </table>
-            </div>
-        `;
 
+            <input type="text" id="studentSearch" onkeyup="DashboardApp.fetchStudents()" placeholder="🔍 Search..." class="search-input">
+        </div>
+        
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Class/Grade</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Parent</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr><td colspan="8" class="text-center" style="padding: 40px; color: var(--text-muted);">
+                        <span class="loader"></span> Loading student data...
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    `;
+
+        this.currentInstitutionType = ''; // Default all
+        this.fetchStudents();
+    },
+
+    filterStudents(btn, type) {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.currentInstitutionType = type;
         this.fetchStudents();
     },
 
     fetchStudents() {
-        // Fetch from API
-        fetch(`${this.apiBaseUrl}/students/`, {
+        const search = document.getElementById('studentSearch') ? document.getElementById('studentSearch').value : '';
+        let url = `${this.apiBaseUrl}/students/?search=${search}`;
+
+        if (this.currentInstitutionType) {
+            url += `&institution_type=${this.currentInstitutionType}`;
+        }
+
+        fetch(url, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
         })
             .then(res => res.json())
             .then(data => {
-                this.renderStudents(data.results || data);
+                const students = data.results || data; // Handle pagination if present
+                const tbody = document.getElementById('studentsTableBody');
+
+                if (students.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center">No students found.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>#${student.id}</td>
+                    <td>
+                        <div style="font-weight: 600; color: white;">${student.name}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${student.email || ''}</div>
+                    </td>
+                    <td><span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">${student.institution_type || 'General'}</span></td>
+                    <td>${student.grade}</td>
+                    <td>${student.age}</td>
+                    <td>${student.gender}</td>
+                    <td>${student.relation}</td>
+                    <td>
+                        <button class="btn-icon">✏️</button>
+                        <button class="btn-icon remove">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
             })
             .catch(err => {
                 console.error('Error fetching students:', err);
                 document.getElementById('studentsTableBody').innerHTML =
                     `<tr>
-                        <td colspan="7" class="text-center text-danger">
-                            Failed to load data. API connection error.
-                            <button class="btn-action" onclick="DashboardApp.fetchStudents()">Retry</button>
-                        </td>
-                    </tr>`;
+                    <td colspan="8" class="text-center text-danger">
+                        Failed to load data. API connection error.
+                        <button class="btn-action" onclick="DashboardApp.fetchStudents()">Retry</button>
+                    </td>
+                </tr>`;
             });
     },
 
@@ -225,25 +261,71 @@ const DashboardApp = {
     },
 
     loadAttendanceSystem() {
-        // Fetch Batches to display selection
-        this.fetchAttendanceBatches();
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">✅ Attendance System</h1>
+                <p class="page-subtitle">Mark attendance by Class (School), Batch (Coaching), or Department (Institute).</p>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="tab-group" style="display:flex; gap:10px;">
+                <button class="filter-tab active" onclick="DashboardApp.loadAttendanceView('SCHOOL', this)">School (Classes)</button>
+                <button class="filter-tab" onclick="DashboardApp.loadAttendanceView('COACHING', this)">Coaching (Batches)</button>
+                <button class="filter-tab" onclick="DashboardApp.loadAttendanceView('INSTITUTE', this)">Institute (Dept)</button>
+            </div>
+        </div>
+
+        <div id="attendanceContainer" style="margin-top: 20px;">
+            <!-- Content loads here dynamically -->
+        </div>
+    `;
+
+        // Default load School view
+        this.loadAttendanceView('SCHOOL', null);
+    },
+
+    loadAttendanceView(type, btn) {
+        if (btn) {
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        const container = document.getElementById('attendanceContainer');
+
+        if (type === 'SCHOOL') {
+            // Render Class 1-12 Cards
+            let html = '<div class="cards-grid">';
+            for (let i = 1; i <= 12; i++) {
+                html += `
+            <div class="module-card" onclick="DashboardApp.openClassAttendance(${i})">
+                <div class="module-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">🏫</div>
+                <h3 class="module-title">Class ${i}</h3>
+                <p class="module-description">Mark attendance for Grade ${i}</p>
+            </div>`;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+
+        } else if (type === 'COACHING') {
+            // Load Batches
+            this.fetchAttendanceBatches();
+        } else {
+            container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">Institute Management coming soon...</div>`;
+        }
     },
 
     async fetchAttendanceBatches() {
-        const container = document.getElementById('dashboardView');
+        const container = document.getElementById('attendanceContainer');
         container.innerHTML = `
-             <div class="module-header">
-                <div>
-                    <h1 class="page-title">✅ Attendance System</h1>
-                    <p class="page-subtitle">Select a batch to mark attendance.</p>
-                </div>
+        <div id="attendanceBatchList" class="cards-grid">
+            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
+                <span class="loader"></span> Loading Batches...
             </div>
-             <div id="attendanceBatchList" class="cards-grid" style="margin-top: 20px; padding-bottom: 50px;">
-                <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
-                    <div class="loading-spinner"></div> Loading Batches...
-                </div>
-            </div>
-        `;
+        </div>
+    `;
 
         try {
             const res = await fetch(`${this.apiBaseUrl}/batches/`, {
@@ -258,30 +340,36 @@ const DashboardApp = {
             }
 
             list.innerHTML = batches.map(batch => `
-                <div class="module-card">
-                    <div class="module-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">📝</div>
-                    <h3 class="module-title">${batch.name}</h3>
-                    <p class="module-description">
-                        Course: ${batch.course_name} (${batch.course || 'N/A'})<br>
-                        Enrolled: ${batch.student_count || 0}
-                    </p>
-                    <div class="module-stats">
-                        <button class="btn-action" style="width:100%; margin-top:10px;" onclick="DashboardApp.openBatchAttendance(${batch.id}, '${batch.name}', ${batch.student_count || 0})">
-                            Mark Attendance
-                        </button>
-                    </div>
+            <div class="module-card" onclick="DashboardApp.openBatchAttendance(${batch.id}, '${batch.name}', ${batch.student_count || 0})">
+                <div class="module-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">📝</div>
+                <h3 class="module-title">${batch.name}</h3>
+                <p class="module-description">
+                    Course: ${batch.course_name} (${batch.course || 'N/A'})<br>
+                    Enrolled: ${batch.student_count || 0}
+                </p>
+                <div class="module-stats">
+                    <button class="btn-action" style="width:100%; margin-top:10px;">
+                        Mark Attendance
+                    </button>
                 </div>
-            `).join('');
+            </div>
+        `).join('');
 
         } catch (error) {
             console.error('Failed to load batches:', error);
-            document.getElementById('attendanceBatchList').innerHTML = '<div style="color:red; text-align:center;">Failed to load batches.</div>';
+            container.innerHTML = '<div style="color:red; text-align:center;">Failed to load batches.</div>';
         }
     },
 
-    async openBatchAttendance(batchId, batchName, studentCount) {
-        if (!studentCount || studentCount === 0) {
-            alert('No students enrolled in this batch! Please enroll students first.');
+    // Placeholder for School Class Attendance
+    openClassAttendance(grade) {
+        // Reuse the same logic as batch attendance but filter by grade
+        this.openBatchAttendance(null, `Class ${grade}`, 0, grade);
+    },
+
+    async openBatchAttendance(batchId, batchName, studentCount, grade = null) {
+        if (!studentCount && !grade) { // Adjusted condition to handle grade-based attendance
+            alert('No students enrolled in this batch/class! Please enroll students first.');
             return;
         }
 
@@ -291,14 +379,15 @@ const DashboardApp = {
         container.innerHTML = `
             <div class="module-header">
                 <div>
-                     <a href="#" class="nav-link" onclick="DashboardApp.loadAttendanceSystem(); return false;" style="font-size: 0.9rem; color: var(--primary); display:block; margin-bottom:5px;">← Back to Batches</a>
+                     <a href="#" class="nav-link" onclick="DashboardApp.loadAttendanceSystem(); return false;" style="font-size: 0.9rem; color: var(--primary); display:block; margin-bottom:5px;">← Back to Selection</a>
                      <h1 class="page-title">Mark Attendance: ${batchName}</h1>
                      <div style="margin-top:10px;">
                         <label>Date: </label>
                         <input type="date" id="attendanceDate" value="${today}" class="form-input" style="width:auto; display:inline-block; padding:8px; background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);">
                      </div>
                 </div>
-                <button class="btn-action" onclick="DashboardApp.submitBulkAttendance(${batchId})">💾 Save Attendance</button>
+                <!-- We pass null for batchId if it's class based, but function signature expects it. It's just a variable name. We can pass 'SCHOOL' or null. -->
+                <button class="btn-action" onclick="DashboardApp.submitBulkAttendance('${batchId || 'CLASS'}')">💾 Save Attendance</button>
             </div>
             
             <div class="data-table-container">
@@ -317,12 +406,20 @@ const DashboardApp = {
             </div>
         `;
 
-        // Fetch Students for this Batch
+        // Fetch Students Logic
+        let url = `${this.apiBaseUrl}/students/`;
+        if (grade) {
+            url += `?grade=${grade}&institution_type=SCHOOL`; // Assume grade matches school
+        } else if (batchId) {
+            url += `?batch_id=${batchId}`;
+        }
+
         try {
-            const res = await fetch(`${this.apiBaseUrl}/students/?batch_id=${batchId}`, {
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            const students = await res.json();
+            const data = await res.json();
+            const students = data.results || data;
 
             const tbody = document.getElementById('attendanceListBody');
             if (students.length === 0) {
@@ -750,29 +847,74 @@ const DashboardApp = {
     },
 
     loadExamManagement() {
-        // Fetch Batches to display selection first
-        this.fetchExamBatches();
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">📝 Exam Management</h1>
+                <p class="page-subtitle">Schedule exams by Class (School), Batch (Coaching), or Department (Institute).</p>
+            </div>
+            <button class="btn-action" onclick="DashboardApp.openCreateExamModal()">
+                + Schedule New Exam
+            </button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="tab-group" style="display:flex; gap:10px;">
+                <button class="filter-tab active" onclick="DashboardApp.loadExamView('SCHOOL', this)">School (Classes)</button>
+                <button class="filter-tab" onclick="DashboardApp.loadExamView('COACHING', this)">Coaching (Batches)</button>
+                <button class="filter-tab" onclick="DashboardApp.loadExamView('INSTITUTE', this)">Institute (Dept)</button>
+            </div>
+        </div>
+
+        <div id="examContainer" style="margin-top: 20px;">
+            <!-- Content loads here dynamically -->
+        </div>
+    `;
+
+        // Default load School view
+        this.loadExamView('SCHOOL', null);
+    },
+
+    loadExamView(type, btn) {
+        if (btn) {
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        const container = document.getElementById('examContainer');
+
+        if (type === 'SCHOOL') {
+            // Render Class 1-12 Cards
+            let html = '<div class="cards-grid">';
+            for (let i = 1; i <= 12; i++) {
+                html += `
+            <div class="module-card" onclick="DashboardApp.openClassExams(${i})">
+                <div class="module-icon" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">🏫</div>
+                <h3 class="module-title">Class ${i}</h3>
+                <p class="module-description">View exams for Grade ${i}</p>
+            </div>`;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+
+        } else if (type === 'COACHING') {
+            // Load Batches
+            this.fetchExamBatches();
+        } else {
+            container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">Institute Management coming soon...</div>`;
+        }
     },
 
     async fetchExamBatches() {
-        const container = document.getElementById('dashboardView');
+        const container = document.getElementById('examContainer');
         container.innerHTML = `
-            <div class="module-header">
-                <div>
-                    <h1 class="page-title">📝 Exams & Grading</h1>
-                    <p class="page-subtitle">Select a batch to manage exams and results.</p>
-                </div>
-                <button class="btn-action" onclick="DashboardApp.openCreateExamModal()">
-                    + Schedule New Exam
-                </button>
+        <div id="examBatchList" class="cards-grid">
+            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
+                <span class="loader"></span> Loading Batches...
             </div>
-            
-            <div id="examBatchList" class="cards-grid" style="margin-top: 20px;">
-                <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
-                    <div class="loading-spinner"></div> Loading Batches...
-                </div>
-            </div>
-        `;
+        </div>
+    `;
 
         try {
             const res = await fetch(`${this.apiBaseUrl}/batches/`, {
@@ -782,160 +924,184 @@ const DashboardApp = {
 
             const list = document.getElementById('examBatchList');
             if (batches.length === 0) {
-                list.innerHTML = `<div style="grid-column: 1/-1; padding:40px; text-align:center; color:white;">No active batches found. Please create a batch first.</div>`;
+                list.innerHTML = `<div style="grid-column: 1/-1; padding:40px; text-align:center; color:white;">No active batches found.</div>`;
                 return;
             }
 
             list.innerHTML = batches.map(batch => `
-                <div class="module-card" onclick="DashboardApp.openBatchExams(${batch.id}, '${batch.name}')">
-                    <div class="module-icon" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa;">🎓</div>
-                    <h3 class="module-title">${batch.name}</h3>
-                    <p class="module-description">
-                        Course: ${batch.course_name}<br>
-                        Students: ${batch.student_count || 0}
-                    </p>
-                    <div class="module-stats">
-                        <button class="btn-action" style="width:100%; margin-top:10px;">View Exams</button>
-                    </div>
+            <div class="module-card" onclick="DashboardApp.openBatchExams(${batch.id}, '${batch.name}')">
+                <div class="module-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">📝</div>
+                <h3 class="module-title">${batch.name}</h3>
+                <p class="module-description">
+                    Course: ${batch.course_name || 'N/A'}
+                </p>
+                <div class="module-stats">
+                    <button class="btn-action" style="width:100%; margin-top:10px;">
+                        View Exams
+                    </button>
                 </div>
-            `).join('');
+            </div>
+        `).join('');
 
         } catch (error) {
             console.error('Failed to load batches:', error);
-            document.getElementById('examBatchList').innerHTML = '<div style="color:red; text-align:center;">Failed to load batches.</div>';
+            container.innerHTML = '<div style="color:red; text-align:center;">Failed to load batches.</div>';
         }
     },
 
-    async openBatchExams(batchId, batchName) {
+    openClassExams(grade) {
+        this.openBatchExams(null, `Class ${grade}`, grade);
+    },
+
+    async openBatchExams(batchId, batchName, grade = null) {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-            <div class="module-header">
-                <div>
-                     <a href="#" class="nav-link" onclick="DashboardApp.loadExamManagement(); return false;" style="font-size: 0.9rem; color: var(--primary); display:block; margin-bottom:5px;">← Back to Batches</a>
-                     <h1 class="page-title">Exams for ${batchName}</h1>
-                </div>
-                 <button class="btn-action" onclick="DashboardApp.openCreateExamModal(${batchId})">+ Schedule Exam for this Batch</button>
+        <div class="module-header">
+            <div>
+                 <a href="#" class="nav-link" onclick="DashboardApp.loadExamManagement(); return false;" style="font-size: 0.9rem; color: var(--primary); display:block; margin-bottom:5px;">← Back to Selection</a>
+                 <h1 class="page-title">${batchName}: Exams</h1>
             </div>
-            
-            <div class="data-table-container">
-                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
-                     <h3 style="color: white; margin-bottom: 5px;">Scheduled Examinations</h3>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Exam Name</th>
-                            <th>Subject</th>
-                            <th>Date</th>
-                            <th>Total Marks</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="examListBody">
-                        <tr><td colspan="6" class="text-center"><div class="loading-spinner"></div> Loading exams...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        `;
+            <button class="btn-action" onclick="DashboardApp.openCreateExamModal(${batchId}, '${grade || ''}')">
+                + Schedule Exam
+            </button>
+        </div>
+        
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Exam Name</th>
+                        <th>Type</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Marks</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="examListBody">
+                    <tr><td colspan="7" class="text-center"><span class="loader"></span> Loading exams...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    `;
+
+        // Fetch Exams
+        let url = `${this.apiBaseUrl}/exams/`;
+        if (grade) {
+            url += `?grade=${grade}`;
+        } else if (batchId) {
+            url += `?batch_id=${batchId}`;
+        }
 
         try {
-            const res = await fetch(`${this.apiBaseUrl}/exams/?batch_id=${batchId}`, {
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
             const exams = await res.json();
 
             const tbody = document.getElementById('examListBody');
             if (exams.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No exams scheduled for this batch.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No exams scheduled for this selection.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = exams.map(exam => `
-                <tr>
-                    <td style="font-weight:600; color:white;">${exam.name}</td>
-                    <td>${exam.subject_name || 'General'}</td>
-                    <td>${exam.exam_date}</td>
-                    <td>${exam.total_marks}</td>
-                    <td><span class="status-badge status-active">Scheduled</span></td>
-                    <td>
-                        <button class="btn-sm" style="background:#10b981; margin-right:5px;">Enter Marks</button>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td style="font-weight:600; color:white;">${exam.name}</td>
+                <td><span class="badge" style="background:rgba(255,255,255,0.1);">${exam.exam_type}</span></td>
+                <td>${exam.subject_name || 'General'}</td>
+                <td>${exam.exam_date}</td>
+                <td>${exam.passing_marks}/${exam.total_marks}</td>
+                <td><span class="badge" style="background:rgba(16,185,129,0.1); color:#10b981;">Scheduled</span></td>
+                <td>
+                    <button class="btn-icon">✏️</button>
+                    <button class="btn-icon remove">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
 
         } catch (error) {
             console.error(error);
-            alert('Failed to load exams.');
+            alert('Failed to load exams');
         }
     },
 
-    openCreateExamModal(preselectedBatchId = null) {
-        // Simple create modal
+    openCreateExamModal(preselectedBatchId = null, preselectedGrade = null) {
         const modalHtml = `
-            <div class="modal-overlay" id="createExamModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Schedule New Exam</h2>
-                        <button class="close-modal" onclick="document.getElementById('createExamModal').remove()">×</button>
-                    </div>
-                    <form onsubmit="event.preventDefault(); DashboardApp.submitCreateExam();">
-                        <div class="form-group">
-                            <label>Batch</label>
-                            <select id="examBatchSelect" class="form-input" required>
-                                <option value="">Loading batches...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Exam Name</label>
-                            <input type="text" id="examName" class="form-input" placeholder="e.g. Mid-Term Physics" required>
-                        </div>
-                         <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="examDate" class="form-input" required>
-                        </div>
-                        <div class="form-group">
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                                <div>
-                                    <label>Total Marks</label>
-                                    <input type="number" id="examTotalMarks" class="form-input" value="100">
-                                </div>
-                                <div>
-                                    <label>Passing Marks</label>
-                                    <input type="number" id="examPassingMarks" class="form-input" value="33">
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-primary" style="width:100%;">Schedule Exam</button>
-                    </form>
+    <div class="modal-overlay" id="createExamModal">
+        <div class="modal-card">
+            <h2>Schedule New Exam</h2>
+            <form id="createExamForm" onsubmit="event.preventDefault(); DashboardApp.submitCreateExam();">
+                <input type="hidden" name="batchId" value="${preselectedBatchId || ''}">
+                <input type="hidden" name="grade" value="${preselectedGrade || ''}">
+                
+                <div class="form-group">
+                    <label>Exam Name</label>
+                    <input type="text" name="name" class="form-input" required placeholder="e.g. Mid-Term Physics">
                 </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <select name="target_type" class="form-input" disabled>
+                        <option>${preselectedBatchId ? 'Batch Exam' : (preselectedGrade ? `Class ${preselectedGrade} Exam` : 'Select Target')}</option>
+                    </select>
+                </div>
 
-        // Populate batches in select
-        fetch(`${this.apiBaseUrl}/batches/`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-        }).then(res => res.json()).then(batches => {
-            const select = document.getElementById('examBatchSelect');
-            select.innerHTML = batches.map(b => `<option value="${b.id}" ${preselectedBatchId == b.id ? 'selected' : ''}>${b.name}</option>`).join('');
-        });
+                <div class="form-group">
+                    <label>Exam Type</label>
+                    <select name="exam_type" class="form-input" required>
+                        <option value="UNIT">Unit Test</option>
+                        <option value="MIDTERM">Mid-Term</option>
+                        <option value="FINAL">Final Exam</option>
+                        <option value="PRACTICAL">Practical</option>
+                    </select>
+                </div>
+                
+                <div class="row" style="display:flex; gap:15px;">
+                     <div class="form-group" style="flex:1;">
+                        <label>Date</label>
+                        <input type="date" name="exam_date" class="form-input" required>
+                    </div>
+                     <div class="form-group" style="flex:1;">
+                        <label>Total Marks</label>
+                        <input type="number" name="total_marks" class="form-input" required value="100">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('createExamModal').remove()">Cancel</button>
+                    <button type="submit" class="btn-primary">Schedule Exam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
     },
 
     async submitCreateExam() {
+        const form = document.getElementById('createExamForm');
+        const formData = new FormData(form);
+
         const data = {
-            batch: document.getElementById('examBatchSelect').value,
-            name: document.getElementById('examName').value,
-            exam_date: document.getElementById('examDate').value,
-            total_marks: document.getElementById('examTotalMarks').value,
-            passing_marks: document.getElementById('examPassingMarks').value,
-            exam_type: 'THEORY', // Default
-            subject: null, // Optional for now
-            duration_minutes: 180
+            name: formData.get('name'),
+            exam_type: formData.get('exam_type'),
+            exam_date: formData.get('exam_date'),
+            total_marks: parseInt(formData.get('total_marks')),
+            passing_marks: Math.floor(parseInt(formData.get('total_marks')) * 0.35), // Auto 35%
+            batch: formData.get('batchId') ? parseInt(formData.get('batchId')) : null,
+            grade_class: formData.get('grade') ? `Class ${formData.get('grade')}` : null,
+            subject: null // For simplicity now
         };
 
+        if (!data.batch && !data.grade_class) {
+            alert("Error: No Batch or Class selected.");
+            return;
+        }
+
         try {
-            const res = await fetch(`${this.apiBaseUrl}/exams/`, {
+            const response = await fetch(`${this.apiBaseUrl}/exams/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -944,15 +1110,21 @@ const DashboardApp = {
                 body: JSON.stringify(data)
             });
 
-            if (res.ok) {
-                alert('Exam scheduled successfully!');
+            if (response.ok) {
+                alert('Exam Scheduled Successfully!');
                 document.getElementById('createExamModal').remove();
-                this.loadExamManagement();
+                // Refresh
+                const batchId = formData.get('batchId');
+                const grade = formData.get('grade');
+
+                // To refresh properly, we need to know the name context, but simple reload works
+                this.openBatchExams(batchId ? parseInt(batchId) : null, batchId ? 'Batch Exams' : `Class ${grade}`, grade ? parseInt(grade) : null);
             } else {
-                alert('Failed to create exam');
+                const errorData = await response.json();
+                alert('Failed to create exam: ' + JSON.stringify(errorData));
             }
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error(error);
             alert('Error creating exam');
         }
     },
@@ -1153,48 +1325,65 @@ const DashboardApp = {
     // Placeholder functions for actions
     showAddStudentForm() {
         const modalHtml = `
-        <div class="modal-overlay" id="addStudentModal">
-            <div class="modal-card">
-                <h2>Add New Student</h2>
-                <form id="addStudentForm" onsubmit="event.preventDefault(); DashboardApp.handleStudentSubmit(event);">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="name" class="form-input" required placeholder="e.g. Rahul Kumar">
-                    </div>
-                    <div class="form-group">
-                        <label>Age</label>
-                        <input type="number" name="age" class="form-input" required placeholder="e.g. 16">
-                    </div>
-                    <div class="form-group">
-                        <label>Date of Birth</label>
-                        <input type="date" name="dob" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Class/Grade</label>
-                        <input type="number" name="grade" class="form-input" required placeholder="e.g. 10">
-                    </div>
-                    <div class="form-group">
-                        <label>Gender</label>
-                        <select name="gender" class="form-input" required>
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Parent/Guardian Relation</label>
-                        <input type="text" name="relation" class="form-input" required placeholder="e.g. Father">
-                    </div>
+    <div class="modal-overlay" id="addStudentModal">
+        <div class="modal-card">
+            <h2>Add New Student</h2>
+            <form id="addStudentForm" onsubmit="event.preventDefault(); DashboardApp.handleStudentSubmit(event);">
+                <div class="form-group">
+                    <label>Institution Type</label>
+                    <select name="institution_type" class="form-input" required onchange="DashboardApp.toggleStudentFields(this.value)">
+                        <option value="SCHOOL">School Student</option>
+                        <option value="COACHING">Coaching Student</option>
+                        <option value="INSTITUTE">Institute/College Student</option>
+                    </select>
+                </div>
 
-                    <div class="modal-actions">
-                        <button type="button" class="btn-secondary" onclick="document.getElementById('addStudentModal').remove()">Cancel</button>
-                        <button type="submit" class="btn-primary">Save Student</button>
-                    </div>
-                </form>
-            </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" class="form-input" required placeholder="e.g. Rahul Kumar">
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" name="age" class="form-input" required placeholder="e.g. 16">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="dob" class="form-input" required>
+                </div>
+                
+                <!-- Dynamic Field: Grade/Class -->
+                <div class="form-group" id="gradeField">
+                    <label>Class/Grade</label>
+                    <input type="number" name="grade" class="form-input" required placeholder="e.g. 10">
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select name="gender" class="form-input" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Parent/Guardian Relation</label>
+                    <input type="text" name="relation" class="form-input" required placeholder="e.g. Father">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('addStudentModal').remove()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Student</button>
+                </div>
+            </form>
         </div>
-        `;
+    </div>
+    `;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    toggleStudentFields(type) {
+        // Logic to show/hide specific fields based on type if needed
+        // For now keeping it simple as per prompt requirements
     },
 
     async handleStudentSubmit(event) {
