@@ -96,7 +96,7 @@ class VerifyAndResetPasswordView(APIView):
             return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)
             
         # Debugging: Log what we received
-        logger.info(f"Verify Attempt - ID: {identifier} | OTP: {otp}")
+        logger.info(f"Verify Attempt - ID: {identifier}")
 
         # 1. Check if we have ANY record for this identifier
         candidates = PasswordResetOTP.objects.filter(identifier=identifier)
