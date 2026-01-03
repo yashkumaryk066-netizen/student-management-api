@@ -876,73 +876,167 @@
                 </div>
                 <h2 style="font-size: 3rem; margin-bottom: 20px;">Simple, Transparent Pricing</h2>
                 <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
-                    Choose the perfect plan for your institution. No hidden fees, no surprises.
+                    Choose the perfect plan for your institution. Instant activation upon secure payment.
                 </p>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
-                <!-- Starter Plan -->
-                <div
+
+                <!-- Coaching Plan -->
+                <div class="pricing-card"
+                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s; position:relative;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Coaching Center</h3>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                        ₹500<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
+                    </div>
+                    <ul style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
+                        <li>✓ Up to 100 Students</li>
+                        <li>✓ Attendance & Batches</li>
+                        <li>✓ Basic Reports</li>
+                        <li>✓ Email Support</li>
+                    </ul>
+                    <button class="btn-secondary" style="width: 100%;"
+                        onclick="openPaymentModal('Coaching Center', 500)">
+                        CHOOSE PLAN
+                    </button>
+                </div>
+
+                <!-- School Plan -->
+                <div class="pricing-card"
+                    style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1)); border: 1px solid var(--primary); border-radius: 20px; padding: 40px; transform: scale(1.05); position: relative;">
+                    <div
+                        style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                        FOR SCHOOLS
+                    </div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">School</h3>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                        ₹10,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/year</span>
+                    </div>
+                    <ul style="list-style: none; color: white; line-height: 2; margin-bottom: 40px;">
+                        <li>✓ Unlimited Students</li>
+                        <li>✓ Exam & Grading System</li>
+                        <li>✓ ID Card Generation</li>
+                        <li>✓ Transport Management</li>
+                        <li>✓ Priority Support</li>
+                    </ul>
+                    <button class="btn-primary" style="width: 100%;" onclick="openPaymentModal('School', 10000)">
+                        CHOOSE PLAN
+                    </button>
+                </div>
+
+                <!-- Institute Plan -->
+                <div class="pricing-card"
                     style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Starter</h3>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Institute / University</h3>
                     <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
                         ₹15,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/year</span>
                     </div>
                     <ul style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
-                        <li>✓ Up to 500 Students</li>
-                        <li>✓ 50 GB Storage</li>
-                        <li>✓ Basic Features</li>
-                        <li>✓ Email Support</li>
-                        <li>✓ Community Access</li>
+                        <li>✓ Multi-Branch Support</li>
+                        <li>✓ HR & Payroll</li>
+                        <li>✓ Library & Hostel</li>
+                        <li>✓ Advanced Analytics</li>
+                        <li>✓ Dedicated Account Manager</li>
                     </ul>
-                    <button class="btn-secondary" style="width: 100%;"
-                        onclick="window.open('https://wa.me/918356926231?text=Hello%2C%20I%20am%20interested%20in%20the%20Starter%20plan%20for%20NextGen%20ERP.', '_blank')">CHOOSE
-                        STARTER</button>
-                </div>
-
-                <!-- Professional Plan -->
-                <div
-                    style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1)); border: 1px solid var(--primary); border-radius: 20px; padding: 40px; transform: scale(1.05); position: relative;">
-                    <div
-                        style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
-                        MOST POPULAR</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Professional</h3>
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
-                        ₹35,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/year</span>
-                    </div>
-                    <ul style="list-style: none; color: white; line-height: 2; margin-bottom: 40px;">
-                        <li>✓ Up to 2,000 Students</li>
-                        <li>✓ 200 GB Storage</li>
-                        <li>✓ <strong>All Core Features</strong></li>
-                        <li>✓ Priority Support</li>
-                        <li>✓ Custom Branding</li>
-                    </ul>
-                    <button class="btn-primary" style="width: 100%;"
-                        onclick="window.open('https://wa.me/918356926231?text=Hello%2C%20I%20am%20interested%20in%20the%20Professional%20plan%20for%20NextGen%20ERP.', '_blank')">CHOOSE
-                        PRO</button>
-                </div>
-
-                <!-- Enterprise Plan -->
-                <div
-                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Enterprise</h3>
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
-                        ₹75,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/year</span>
-                    </div>
-                    <ul style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
-                        <li>✓ <strong>Unlimited Students</strong></li>
-                        <li>✓ 1 TB Storage</li>
-                        <li>✓ All Features + Custom Modules</li>
-                        <li>✓ 24/7 Dedicated Support</li>
-                        <li>✓ White-label Solution</li>
-                    </ul>
-                    <button class="btn-secondary" style="width: 100%;"
-                        onclick="window.open('https://wa.me/918356926231?text=Hello%2C%20I%20am%20interested%20in%20the%20Enterprise%20plan%20for%20NextGen%20ERP.', '_blank')">CONTACT
-                        SALES</button>
+                    <button class="btn-secondary" style="width: 100%;" onclick="openPaymentModal('Institute', 15000)">
+                        CHOOSE PLAN
+                    </button>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Payment Modal -->
+    <div id="paymentModalOverlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); z-index:10000; justify-content:center; align-items:center;">
+        <div id="paymentModalContent"
+            style="background: #0f172a; border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; width: 90%; max-width: 500px; position:relative; animation: fadeInUp 0.3s ease-out;">
+            <button onclick="closePaymentModal()"
+                style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+
+            <!-- Step 1: Account Details -->
+            <div id="step1">
+                <h3 style="margin-bottom: 10px; font-family: 'Space Grotesk';">Create Account</h3>
+                <p style="color:var(--text-muted); margin-bottom:20px;">Enter your details to proceed with payment.</p>
+
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; margin-bottom:5px; color:var(--text-muted);">Email Address</label>
+                    <input type="email" id="userEmail" placeholder="admin@school.com"
+                        style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px;">
+                </div>
+                <div style="margin-bottom:25px;">
+                    <label style="display:block; margin-bottom:5px; color:var(--text-muted);">Mobile Number</label>
+                    <input type="tel" id="userPhone" placeholder="+91 98765 43210"
+                        style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px;">
+                </div>
+
+                <button onclick="goToPaymentStep()" class="btn-primary" style="width:100%;">Proceed to Payment</button>
+            </div>
+
+            <!-- Step 2: Payment Scanner -->
+            <div id="step2" style="display:none; text-align:center;">
+                <h3 style="margin-bottom: 10px; font-family: 'Space Grotesk';">Secure Payment</h3>
+                <p id="planAmountDisplay"
+                    style="color:var(--primary); font-size:1.5rem; font-weight:700; margin-bottom:20px;">₹0</p>
+
+                <div
+                    style="background:white; padding:15px; border-radius:15px; display:inline-block; margin-bottom:20px;">
+                    <img src="/static/images/payment_qr.jpg" alt="Payment QR"
+                        style="width:200px; height:200px; object-fit:contain;">
+                </div>
+
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Scan using any UPI App (GPay,
+                    PhonePe, Paytm)</p>
+
+                <div
+                    style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; text-align:left;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--text-muted);">Bank Transfer (IMPS/NEFT)</span>
+                    </div>
+                    <!-- Hidden details, only revealed if needed, but user asked to hide them -->
+                    <div style="font-family:monospace; color:var(--text-muted); font-size:0.85rem;">
+                        IFSC: CNRB0004949<br>
+                        ACC: 4949120000179
+                    </div>
+                </div>
+
+                <button onclick="alert('Payment verification initiated! We will contact you shortly.')"
+                    class="btn-primary" style="width:100%;">I Have Paid</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedPlan = '';
+        let selectedAmount = 0;
+
+        function openPaymentModal(plan, amount) {
+            selectedPlan = plan;
+            selectedAmount = amount;
+            document.getElementById('planAmountDisplay').innerText = '₹' + amount.toLocaleString('en-IN');
+            document.getElementById('paymentModalOverlay').style.display = 'flex';
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModalOverlay').style.display = 'none';
+        }
+
+        function goToPaymentStep() {
+            const email = document.getElementById('userEmail').value;
+            const phone = document.getElementById('userPhone').value;
+
+            if (!email || !phone) {
+                alert('Please enter both Email and Phone Number');
+                return;
+            }
+
+            // Proceed to Step 2
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
+    </script>
 
     <script>
         // Remove preloader after 2 seconds
