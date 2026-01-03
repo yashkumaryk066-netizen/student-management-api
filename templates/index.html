@@ -1067,17 +1067,22 @@
 
                 if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
 
-                // 2. Open Razorpay Checkout
+                // CHECK FOR MOCK MODE (If real keys aren't set)
+                if (orderData.mock_order) {
+                    showMockBankSimulator(orderData);
+                    return;
+                }
+
+                // 2. Open Razorpay Checkout (REAL MODE)
                 const options = {
                     "key": orderData.key_id,
                     "amount": orderData.amount,
                     "currency": orderData.currency,
                     "name": "IMS Premium",
                     "description": `Payment for ${selectedPlan}`,
-                    "image": "https://cdn-icons-png.flaticon.com/512/2995/2995467.png", // Demo logo
+                    "image": "https://cdn-icons-png.flaticon.com/512/2995/2995467.png",
                     "order_id": orderData.order_id,
                     "handler": function (response) {
-                        // Payment Success! Now Verify.
                         verifyAndOnboard(response);
                     },
                     "prefill": {
@@ -1085,9 +1090,7 @@
                         "email": email,
                         "contact": phone
                     },
-                    "theme": {
-                        "color": "#6366f1"
-                    }
+                    "theme": { "color": "#6366f1" }
                 };
 
                 const rzp1 = new Razorpay(options);
@@ -1104,6 +1107,56 @@
                 btn.innerText = "Proceed to Payment";
                 btn.disabled = false;
             }
+        }
+
+        function showMockBankSimulator(orderData) {
+            // Hide Email Step
+            document.getElementById('step1').style.display = 'none';
+            // Show new Bank UI in Step 2 container
+            const step2 = document.getElementById('step2');
+            step2.style.display = 'block';
+
+            step2.innerHTML = `
+                <div style="text-align:center; padding: 20px;">
+                    <h3 style="margin-bottom:15px; font-family:'Space Grotesk'">SECURE BANK GATEWAY</h3>
+                    <div style="background: white; color: black; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="font-weight:bold; font-size:1.2rem; margin-bottom:10px;">Merchant: IMS Premium</div>
+                        <div style="font-size:2rem; font-weight:700; color:#1a1a1a;">₹${(orderData.amount / 100).toLocaleString()}</div>
+                        <div style="margin-top:10px; font-size:0.9rem; color:#555;">Trans ID: ${orderData.order_id}</div>
+                    </div>
+                    
+                    <div style="margin-bottom:20px; color: #ef4444; font-weight:bold;">
+                        Session Expires in: <span id="bankTimer">05:00</span>
+                    </div>
+
+                    <button onclick="mockPaymentSuccess('${orderData.order_id}')" class="btn-primary" style="width:100%; margin-bottom:10px; background: #10b981;">
+                        CONFIRM PAYMENT
+                    </button>
+                    <button onclick="location.reload()" class="btn-secondary" style="width:100%;">
+                        CANCEL
+                    </button>
+                </div>
+            `;
+
+            // Simple Timer
+            let duration = 300; // 5 minutes
+            const timer = setInterval(() => {
+                duration--;
+                const m = Math.floor(duration / 60).toString().padStart(2, '0');
+                const s = (duration % 60).toString().padStart(2, '0');
+                const el = document.getElementById('bankTimer');
+                if (el) el.innerText = `${m}:${s}`;
+                if (duration <= 0) clearInterval(timer);
+            }, 1000);
+        }
+
+        function mockPaymentSuccess(orderId) {
+            // Simulate Gateway Callback
+            verifyAndOnboard({
+                razorpay_payment_id: "pay_mock_" + Math.random().toString(36).substr(2, 9),
+                razorpay_order_id: orderId,
+                razorpay_signature: "mock_signature_verified"
+            });
         }
 
         async function verifyAndOnboard(paymentResponse) {
@@ -1149,9 +1202,28 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    setTimeout(() => {
-                        window.location.href = data.redirect_url || '/login/';
-                    }, 2000);
+                    // DISPLAY CREDENTIALS TO USER ON SCREEN
+                    const creds = data.display_credentials;
+                    document.getElementById('step2').innerHTML = `
+                        <div style="padding:20px; text-align:center;">
+                            <div style="font-size:3rem; margin-bottom:10px;">✅</div>
+                            <h3 style="margin-bottom:10px; color:#10b981;">Account Activated!</h3>
+                            
+                            <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; margin:20px 0; border:1px solid #10b981;">
+                                <div style="color:#aaa; font-size:0.9rem;">Your Credentials</div>
+                                <div style="font-size:1.2rem; margin:10px 0; font-family:monospace;">
+                                    ID: <span style="color:white; font-weight:bold;">${creds.username}</span><br>
+                                    PASS: <span style="color:white; font-weight:bold;">${creds.password}</span>
+                                </div>
+                                <div style="color:#aaa; font-size:0.8rem;">(Also sent to Email & WhatsApp)</div>
+                            </div>
+
+                            <button onclick="window.location.href='${data.redirect_url}'" class="btn-primary" style="width:100%;">
+                                Login to Dashboard
+                            </button>
+                        </div>
+                    `;
+
                 } else {
                     document.getElementById('step2').innerHTML = `<p style="color:red">Account Creation Failed: ${data.error}</p>`;
                 }

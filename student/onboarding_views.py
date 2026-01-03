@@ -111,7 +111,7 @@ class OnboardingPaymentView(APIView):
 
                 return Response({
                     'message': 'Account created successfully! Credentials sent to Email & WhatsApp.',
-                    'credentials': {'username': username, 'password': password},
+                    'display_credentials': {'username': username, 'password': password}, # Explicitly for Frontend Display
                     'redirect_url': '/login/'
                 }, status=status.HTTP_201_CREATED)
 
