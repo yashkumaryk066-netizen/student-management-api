@@ -81,6 +81,7 @@ class OnboardingPaymentView(APIView):
                         profile.subscription_expiry = timezone.now().date() + timedelta(days=30)
                     
                     profile.institution_type = plan_type.upper() # Ensure consistent
+                    profile.phone = phone # Update phone number to latest provided
                     profile.save()
                     
                     username = target_username
