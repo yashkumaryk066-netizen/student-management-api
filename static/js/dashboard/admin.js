@@ -1475,25 +1475,47 @@ const DashboardApp = {
             <thead>
                 <tr>
                     <th>Event Name</th>
-                    <th>Type</th>
+                    <th>Description</th>
                     <th>Date</th>
-                    <th>Organizer</th>
+                    <th>Location</th>
                     <th>Status</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Dummy Data -->
-                <tr>
-                    <td>Annual Sports Day</td>
-                    <td>Sports</td>
-                    <td>2024-04-20</td>
-                    <td>P.E. Department</td>
-                    <td><span class="status-badge status-active">Upcoming</span></td>
-                </tr>
+            <tbody id="eventTableBody">
+                <tr><td colspan="5" class="text-center">Loading events...</td></tr>
             </tbody>
         </table>
     </div>
 `;
+        this.fetchEvents();
+    },
+
+    async fetchEvents() {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/events/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const events = await res.json();
+            const tbody = document.getElementById('eventTableBody');
+
+            if (events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No upcoming events found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = events.map(e => `
+                <tr>
+                    <td style="font-weight:600; color:white;">${e.name}</td>
+                    <td>${e.description || '-'}</td>
+                    <td>${e.date}</td>
+                    <td>${e.location || 'On Campus'}</td>
+                    <td><span class="status-badge status-active">Active</span></td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error(error);
+            document.getElementById('eventTableBody').innerHTML = '<tr><td colspan="5" class="text-center">Failed to load events.</td></tr>';
+        }
     },
 
     async loadReportsAnalytics() {
@@ -1505,7 +1527,7 @@ const DashboardApp = {
                 <p class="page-subtitle">Real-time performance metrics and detailed reports.</p>
             </div>
             <div style="display:flex; gap:10px;">
-                <button class="btn-action" onclick="alert('Exporting PDF...')">📥 Export PDF</button>
+                <button class="btn-action" onclick="DashboardApp.generateReport('GENERAL_PDF')">📥 Export PDF</button>
                 <button class="btn-primary" onclick="DashboardApp.generateReport()">⚡ Generate New Report</button>
             </div>
         </div>
@@ -2136,42 +2158,9 @@ const DashboardApp = {
         },
 
         // --- EXAMS ---
-        createExam() {
-            const modalHtml = `
-        <div class="modal-overlay" id="examModal">
-            <div class="modal-card">
-                <h2>Create New Exam</h2>
-                <form onsubmit="event.preventDefault(); DashboardApp.handleExamSubmit(event);">
-                    <div class="form-group">
-                        <label>Exam Name</label>
-                        <input type="text" name="name" class="form-input" required placeholder="e.g. Mid-Term 2024">
-                    </div>
-                    <div class="form-group">
-                        <label>Date</label>
-                        <input type="date" name="date" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Subject</label>
-                        <input type="text" name="subject" class="form-input" required placeholder="Subject Name/ID">
-                    </div>
-                    <div class="form-group">
-                        <label>Total Marks</label>
-                        <input type="number" name="total_marks" class="form-input" required value="100">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn-secondary" onclick="document.getElementById('examModal').remove()">Cancel</button>
-                        <button type="submit" class="btn-primary">Create Exam</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        },
-
-    async handleExamSubmit(event) {
-            this.submitForm(event, '/exams/', 'examModal', 'Exam created successfully!');
-        },
+        // --- EXAMS (Uses context-aware modals above) ---
+        // Legacy functions removed to avoid conflicts.
+        // See openCreateExamModal and submitCreateExam.
 
         // --- EVENTS ---
         createEvent() {
