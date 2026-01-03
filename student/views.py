@@ -57,7 +57,12 @@ class StudentListCreateView(APIView):
         
         students = Student.objects.all()
         
-        if institution_type:
+        if not request.user.is_superuser and hasattr(request.user, 'profile'):
+             # ENFORCE: Only show students for the user's institution type
+             institution_type = request.user.profile.institution_type
+             students = students.filter(institution_type=institution_type)
+        elif institution_type:
+            # For Superadmin, allow filtering via param
             students = students.filter(institution_type=institution_type)
 
         if grade:

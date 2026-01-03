@@ -45,42 +45,47 @@ class OnboardingPaymentView(APIView):
         is_payment_verified = True 
         
         if is_payment_verified:
-            # 2. Generate Credentials
-            username = email.split('@')[0]
-            # Ensure unique username
-            if User.objects.filter(username=username).exists():
-                username = f"{username}_{phone[-4:]}"
+            # 2. Generate Credentials based on Plan (Advanced: Separate accounts for separate businesses)
+            import random
+            import string
+            
+            email_prefix = email.split('@')[0]
+            # e.g. "yash" + "_sch" (school) or "_chg" (coaching)
+            plan_suffix = plan_type[:3].lower() 
+            
+            # Base username
+            base_username = f"{email_prefix}_{plan_suffix}"
+            username = base_username
+            
+            # Ensure global uniqueness
+            while User.objects.filter(username=username).exists():
+                random_digits = ''.join(random.choices(string.digits, k=3))
+                username = f"{base_username}{random_digits}"
                 
             password = phone[-6:] # Simple password: last 6 digits
             
             try:
-                # Create or Get User
-                user, created = User.objects.get_or_create(
+                # Create NEW User for this specific plan (Allowing same email for multiple plans)
+                user = User.objects.create_user(
+                    username=username,
                     email=email,
-                    defaults={'username': username}
-                ) # If user exists by email, we get that user. 'username' default is ignored.
-
-                if created:
-                    logger.info(f"Created new user: {username}")
-                else:
-                    logger.info(f"Updated existing user: {user.username}")
-                    # CRITICAL FIX: If user already existed, use their ACTUAL username for credentials,
-                    # not the one we just calculated/guessed above.
-                    username = user.username
+                    password=password
+                )
                 
-                # ALWAYS set the password to the generated one so the credentials shown to the user WORK.
-                # This handles cases where a user retries payment or comes back.
-                user.set_password(password)
                 user.is_active = True
                 user.save()
                 
-                # Update Profile Permissions
-                # They get 'ADMIN' role for their specific Institution Type
-                profile, p_created = UserProfile.objects.get_or_create(user=user)
-                profile.role = 'ADMIN' 
-                profile.phone = phone
-                profile.institution_type = plan_type.upper()
-                profile.save()
+                logger.info(f"Created new Plan-Specific User: {username} for {plan_type}")
+
+                # Create Profile
+                profile = UserProfile.objects.create(
+                    user=user,
+                    role='ADMIN',
+                    phone=phone,
+                    institution_type=plan_type.upper()
+                )
+                
+                # 3. Notification Content
                 
                 # 3. Notification Content
                 login_url = "https://yashamishra.pythonanywhere.com/login/"
