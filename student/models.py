@@ -719,3 +719,20 @@ class Enrollment(models.Model):
         
     def __str__(self):
         return f"{self.student.name} -> {self.batch.name}"
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_otps')
+    otp_code = models.CharField(max_length=6)
+    identifier = models.CharField(max_length=255) # Email or Phone
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        return not self.is_used and self.expires_at > timezone.now()
+
+    def __str__(self):
+        return f"OTP for {self.user.username} ({self.otp_code})"
