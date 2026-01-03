@@ -95,16 +95,31 @@ class VerifyAndResetPasswordView(APIView):
         if not identifier or not otp or not new_password:
             return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)
             
-        # Verify OTP from Database
-        otp_record = PasswordResetOTP.objects.filter(
-            identifier=identifier,
-            otp_code=otp,
-            is_used=False,
-            expires_at__gt=timezone.now()
-        ).first()
+        # Debugging: Log what we received
+        logger.info(f"Verify Attempt - ID: {identifier} | OTP: {otp}")
+
+        # 1. Check if we have ANY record for this identifier
+        candidates = PasswordResetOTP.objects.filter(identifier=identifier)
+        if not candidates.exists():
+            logger.warning(f"No OTP records found for identifier: {identifier}")
+            return Response({'error': 'No OTP request found for this email/phone'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Check for Specific OTP Match
+        otp_record = candidates.filter(otp_code=otp).first()
         
         if not otp_record:
-            return Response({'error': 'Invalid or Expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
+            logger.warning(f"Invalid OTP code provided for {identifier}")
+            return Response({'error': 'Invalid OTP Code'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # 3. Check Status
+        if otp_record.is_used:
+            logger.warning(f"OTP already used for {identifier}")
+            return Response({'error': 'This OTP has already been used'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # 4. Check Expiry
+        if timezone.now() > otp_record.expires_at:
+            logger.warning(f"OTP expired for {identifier}. Now: {timezone.now()}, Exp: {otp_record.expires_at}")
+            return Response({'error': 'OTP has Expired. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
              
         # OTP Valid - Perform Reset
         try:
