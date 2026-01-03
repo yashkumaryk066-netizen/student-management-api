@@ -1,21 +1,52 @@
 // Authentication Logic
 
 // Check if user is already logged in (on page load)
-function checkAuth() {
+// Check if user is already logged in (on page load)
+async function checkAuth() {
     const token = localStorage.getItem('authToken');
     const currentPage = window.location.pathname;
 
-    // If user is logged in and on login page, redirect to dashboard
-    if (token && (currentPage.includes('/login/') || currentPage === '/login')) {
-        const role = localStorage.getItem('userRole');
-        redirectToDashboard(role);
+    // 1. If no token, redirect to login if on protected page
+    if (!token) {
+        if (currentPage.includes('dashboard')) {
+            window.location.href = '/login/';
+        }
         return;
     }
 
-    // If user is NOT logged in and on dashboard page, redirect to login
-    if (!token && currentPage.includes('dashboard')) {
-        window.location.href = '/login/';
-        return;
+    // 2. If token exists, VERIFY it with the backend (Secure Check)
+    try {
+        const response = await fetch('/api/profile/', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Token invalid or expired');
+        }
+
+        const profile = await response.json();
+
+        // Update local storage with fresh data
+        localStorage.setItem('userRole', (profile.role || 'student').toLowerCase());
+
+        // If on login page, redirect to dashboard *after* verification
+        if (currentPage.includes('/login/') || currentPage === '/login') {
+            const role = localStorage.getItem('userRole');
+            redirectToDashboard(role);
+        }
+
+    } catch (error) {
+        console.error('Auth verification failed:', error);
+        // Clear invalid token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+
+        // Redirect to login if needed
+        if (currentPage.includes('dashboard')) {
+            window.location.href = '/login/';
+        }
     }
 }
 

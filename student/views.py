@@ -603,6 +603,91 @@ class ParentDashboardTemplateView(TemplateView):
 class DeveloperProfileView(TemplateView):
     template_name = "developer.html"
 
+class ResumeView(TemplateView):
+    template_name = "resume.html"
+
+# ==================== NEW MODULE API VIEWS ====================
+
+from rest_framework import generics
+from .Serializer import (
+    LibraryBookSerializer, BookIssueSerializer, 
+    HostelSerializer, RoomSerializer, HostelAllocationSerializer,
+    VehicleSerializer, RouteSerializer, TransportAllocationSerializer,
+    EmployeeSerializer, LeaveRequestSerializer, DepartmentSerializer, DesignationSerializer,
+    ExamSerializer, EventSerializer
+)
+from .models import (
+    LibraryBook, BookIssue, Hostel, Room, HostelAllocation,
+    Vehicle, Route, TransportAllocation, Employee, LeaveRequest, Department, Designation,
+    Exam, Event
+)
+
+# --- LIBRARY ---
+class LibraryBookListCreateView(generics.ListCreateAPIView):
+    queryset = LibraryBook.objects.all()
+    serializer_class = LibraryBookSerializer
+    permission_classes = [IsAuthenticated]
+
+class LibraryBookDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = LibraryBook.objects.all()
+    serializer_class = LibraryBookSerializer
+    permission_classes = [IsAuthenticated]
+
+class BookIssueListCreateView(generics.ListCreateAPIView):
+    queryset = BookIssue.objects.all()
+    serializer_class = BookIssueSerializer
+    permission_classes = [IsAuthenticated]
+
+# --- HOSTEL ---
+class HostelListCreateView(generics.ListCreateAPIView):
+    queryset = Hostel.objects.all()
+    serializer_class = HostelSerializer
+    permission_classes = [IsAuthenticated]
+
+class RoomListCreateView(generics.ListCreateAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    permission_classes = [IsAuthenticated]
+
+class HostelAllocationListCreateView(generics.ListCreateAPIView):
+    queryset = HostelAllocation.objects.all()
+    serializer_class = HostelAllocationSerializer
+    permission_classes = [IsAuthenticated]
+
+# --- TRANSPORT ---
+class VehicleListCreateView(generics.ListCreateAPIView):
+    queryset = Vehicle.objects.all()
+    serializer_class = VehicleSerializer
+    permission_classes = [IsAuthenticated]
+
+class RouteListCreateView(generics.ListCreateAPIView):
+    queryset = Route.objects.all()
+    serializer_class = RouteSerializer
+    permission_classes = [IsAuthenticated]
+
+# --- HR ---
+class EmployeeListCreateView(generics.ListCreateAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+    permission_classes = [IsAuthenticated]
+
+class LeaveRequestListCreateView(generics.ListCreateAPIView):
+    queryset = LeaveRequest.objects.all()
+    serializer_class = LeaveRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+# --- EXAMS ---
+class ExamListCreateView(generics.ListCreateAPIView):
+    queryset = Exam.objects.all()
+    serializer_class = ExamSerializer
+    permission_classes = [IsAuthenticated]
+
+# --- EVENTS ---
+class EventListCreateView(generics.ListCreateAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]
+
 
 
 # ==================== DEMO REQUEST VIEW ====================

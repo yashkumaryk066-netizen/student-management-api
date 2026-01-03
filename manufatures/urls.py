@@ -29,6 +29,8 @@ from student.views import (
     TeacherDashboardTemplateView,
     StudentDashboardTemplateView,
     ParentDashboardTemplateView,
+    DeveloperProfileView,
+    ResumeView,
 )
 
 urlpatterns = [
@@ -40,6 +42,8 @@ urlpatterns = [
     path('', LandingPageView.as_view(), name='landing-page'),
     path('demo/', DemoPageView.as_view(), name='demo-page'),
     path('login/', LoginPageView.as_view(), name='login-page'),
+    path('developer/', DeveloperProfileView.as_view(), name='developer-profile-root'),
+    path('resume/', ResumeView.as_view(), name='resume-view-root'),
     
     # Dashboard Pages (after login)
     path('dashboard/admin/', AdminDashboardTemplateView.as_view(), name='admin-dashboard'),

@@ -324,7 +324,7 @@ const DashboardApp = {
         container.innerHTML = `
             <div class="module-header">
                 <h1 class="page-title">🏢 Hostel Management</h1>
-                <button class="btn-primary">+ Allocate Room</button>
+                <button class="btn-primary" onclick="DashboardApp.allocateRoom()">+ Allocate Room</button>
             </div>
             
             <div class="stats-mini-grid">
@@ -358,7 +358,7 @@ const DashboardApp = {
         container.innerHTML = `
             <div class="module-header">
                 <h1 class="page-title">🚌 Transportation</h1>
-                <button class="btn-primary">+ Add Vehicle</button>
+                <button class="btn-primary" onclick="DashboardApp.addVehicle()">+ Add Vehicle</button>
             </div>
             
             <div class="stats-mini-grid">
@@ -392,7 +392,7 @@ const DashboardApp = {
         container.innerHTML = `
             <div class="module-header">
                 <h1 class="page-title">👔 HR & Payroll</h1>
-                <button class="btn-primary">+ Add Staff Member</button>
+                <button class="btn-primary" onclick="DashboardApp.addStaff()">+ Add Staff Member</button>
             </div>
             
             <div class="stats-mini-grid">
@@ -426,7 +426,7 @@ const DashboardApp = {
         container.innerHTML = `
             <div class="module-header">
                 <h1 class="page-title">📝 Exams & Grading</h1>
-                <button class="btn-primary">+ Create Exam</button>
+                <button class="btn-primary" onclick="DashboardApp.createExam()">+ Create Exam</button>
             </div>
             
             <div class="stats-mini-grid">
@@ -460,7 +460,7 @@ const DashboardApp = {
         container.innerHTML = `
             <div class="module-header">
                 <h1 class="page-title">📅 Events & Calendar</h1>
-                <button class="btn-primary">+ Create Event</button>
+                <button class="btn-primary" onclick="DashboardApp.createEvent()">+ Create Event</button>
             </div>
             
             <div class="content-card">
@@ -536,10 +536,88 @@ const DashboardApp = {
 
     // Placeholder functions for actions
     showAddStudentForm() {
-        showToast('Opening Secure Admin Panel... Please log in if prompted.', 'info');
-        setTimeout(() => {
-            window.open('/admin/student/student/add/', '_blank');
-        }, 800);
+        const modalHtml = `
+            <div class="modal-overlay" id="addStudentModal">
+                <div class="modal-card">
+                    <h2>Add New Student</h2>
+                    <form id="addStudentForm" onsubmit="event.preventDefault(); DashboardApp.handleStudentSubmit(event);">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="name" class="form-input" required placeholder="e.g. Rahul Kumar">
+                        </div>
+                         <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" name="age" class="form-input" required placeholder="e.g. 16">
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" name="dob" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Class/Grade</label>
+                            <input type="number" name="grade" class="form-input" required placeholder="e.g. 10">
+                        </div>
+                         <div class="form-group">
+                            <label>Gender</label>
+                            <select name="gender" class="form-input" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Parent/Guardian Relation</label>
+                            <input type="text" name="relation" class="form-input" required placeholder="e.g. Father">
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addStudentModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Save Student</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleStudentSubmit(event) {
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Disable button
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = 'Saving...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/students/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(Object.values(errorData).flat().join(', ') || 'Failed to add student');
+            }
+
+            // Success
+            document.getElementById('addStudentModal').remove();
+            this.fetchStudents(); // Refresh list
+            // Simple toast
+            alert('Student added successfully!');
+
+        } catch (error) {
+            alert('Error: ' + error.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     },
 
     editStudent(id) {
@@ -558,26 +636,385 @@ const DashboardApp = {
         }
     },
 
+    // --- ATTENDANCE ---
     markAttendance() {
-        showToast('Opening Attendance Register...', 'success');
-        setTimeout(() => {
-            window.open('/admin/student/attendence/add/', '_blank');
-        }, 800);
+        const modalHtml = `
+            <div class="modal-overlay" id="attendanceModal">
+                <div class="modal-card">
+                    <h2>Mark Attendance</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleAttendanceSubmit(event);">
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="number" name="student" class="form-input" required placeholder="Student ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" name="date" class="form-input" required value="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select name="status" class="form-input" required>
+                                <option value="PRESENT">Present</option>
+                                <option value="ABSENT">Absent</option>
+                                <option value="LATE">Late</option>
+                            </select>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('attendanceModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Mark</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
     },
 
+    async handleAttendanceSubmit(event) {
+        this.submitForm(event, '/attendence/', 'attendanceModal', 'Attendance marked successfully!');
+    },
+
+    // --- FINANCE ---
     addPayment() {
-        showToast('Accessing Secure Payment Gateway...', 'success');
-        setTimeout(() => {
-            window.open('/admin/student/payment/add/', '_blank');
-        }, 800);
+        const modalHtml = `
+            <div class="modal-overlay" id="paymentModal">
+                <div class="modal-card">
+                    <h2>Create Fee Record</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handlePaymentSubmit(event);">
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="number" name="student" class="form-input" required placeholder="Student ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" name="amount" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            <input type="date" name="due_date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select name="status" class="form-input" required>
+                                <option value="PENDING">Pending</option>
+                                <option value="PAID">Paid</option>
+                                <option value="OVERDUE">Overdue</option>
+                            </select>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('paymentModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Create Record</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
     },
 
+    async handlePaymentSubmit(event) {
+        this.submitForm(event, '/payment/', 'paymentModal', 'Payment record created successfully!');
+    },
+
+    // --- HOSTEL ---
+    allocateRoom() {
+        const modalHtml = `
+            <div class="modal-overlay" id="hostelModal">
+                <div class="modal-card">
+                    <h2>Allocate Hostel Room</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleHostelSubmit(event);">
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="number" name="student" class="form-input" required placeholder="Student ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Room ID</label>
+                            <input type="number" name="room" class="form-input" required placeholder="Room ID">
+                        </div>
+                         <div class="form-group">
+                            <label>Allocation Date</label>
+                            <input type="date" name="allocation_date" class="form-input" required>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('hostelModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Allocate</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleHostelSubmit(event) {
+        this.submitForm(event, '/hostel/allocations/', 'hostelModal', 'Room allocated successfully!');
+    },
+
+    // --- EXAMS ---
+    createExam() {
+        const modalHtml = `
+            <div class="modal-overlay" id="examModal">
+                <div class="modal-card">
+                    <h2>Create New Exam</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleExamSubmit(event);">
+                        <div class="form-group">
+                            <label>Exam Name</label>
+                            <input type="text" name="name" class="form-input" required placeholder="e.g. Mid-Term 2024">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" name="date" class="form-input" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Subject</label>
+                            <input type="text" name="subject" class="form-input" required placeholder="Subject Name/ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Marks</label>
+                            <input type="number" name="total_marks" class="form-input" required value="100">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('examModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Create Exam</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleExamSubmit(event) {
+        this.submitForm(event, '/exams/', 'examModal', 'Exam created successfully!');
+    },
+
+    // --- EVENTS ---
+    createEvent() {
+        const modalHtml = `
+            <div class="modal-overlay" id="eventModal">
+                <div class="modal-card">
+                    <h2>Create New Event</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleEventSubmit(event);">
+                        <div class="form-group">
+                            <label>Event Name</label>
+                            <input type="text" name="name" class="form-input" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" name="date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" name="description" class="form-input" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="location" class="form-input" required>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('eventModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Create Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleEventSubmit(event) {
+        this.submitForm(event, '/events/', 'eventModal', 'Event created successfully!');
+    },
+
+    // --- LIBRARY ---
     addBook() {
-        showToast('Opening Library Database...', 'info');
-        setTimeout(() => {
-            window.open('/admin/student/librarybook/add/', '_blank');
-        }, 800);
-    }
+        const modalHtml = `
+            <div class="modal-overlay" id="addBookModal">
+                <div class="modal-card">
+                    <h2>Add New Book</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleBookSubmit(event);">
+                        <div class="form-group">
+                            <label>ISBN</label>
+                            <input type="text" name="isbn" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" name="title" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Author</label>
+                            <input type="text" name="author" class="form-input" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Publisher</label>
+                            <input type="text" name="publisher" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" class="form-input" required>
+                                <option value="TEXTBOOK">Textbook</option>
+                                <option value="FICTION">Fiction</option>
+                                <option value="REFERENCE">Reference</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price (₹)</label>
+                            <input type="number" name="price" class="form-input" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Total Copies</label>
+                            <input type="number" name="total_copies" class="form-input" required value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="number" name="published_year" class="form-input" required value="2024">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addBookModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Save Book</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleBookSubmit(event) {
+        this.submitForm(event, '/library/books/', 'addBookModal', 'Book added successfully!');
+    },
+
+    // --- TRANSPORT ---
+    addVehicle() {
+        const modalHtml = `
+            <div class="modal-overlay" id="addVehicleModal">
+                <div class="modal-card">
+                    <h2>Add New Vehicle</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleVehicleSubmit(event);">
+                        <div class="form-group">
+                            <label>Registration Number</label>
+                            <input type="text" name="registration_number" class="form-input" required placeholder="MH-04-AB-1234">
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select name="vehicle_type" class="form-input" required>
+                                <option value="BUS">Bus</option>
+                                <option value="VAN">Van</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacity</label>
+                            <input type="number" name="capacity" class="form-input" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Driver Name</label>
+                            <input type="text" name="driver_name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Driver Phone</label>
+                            <input type="text" name="driver_phone" class="form-input" required>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addVehicleModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Save Vehicle</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleVehicleSubmit(event) {
+        this.submitForm(event, '/transport/vehicles/', 'addVehicleModal', 'Vehicle added successfully!');
+    },
+
+    // --- HR ---
+    addStaff() {
+        const modalHtml = `
+            <div class="modal-overlay" id="addStaffModal">
+                <div class="modal-card">
+                    <h2>Add New Staff/Employee</h2>
+                    <p style="font-size:0.8rem; color:var(--warning); margin-bottom:10px;">Note: User account must exist first.</p>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleStaffSubmit(event);">
+                        <div class="form-group">
+                            <label>User ID (System ID)</label>
+                            <input type="number" name="user" class="form-input" required placeholder="Enter User ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Joining Date</label>
+                            <input type="date" name="joining_date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Basic Salary (₹)</label>
+                            <input type="number" name="basic_salary" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contract Type</label>
+                            <select name="contract_type" class="form-input" required>
+                                <option value="PERMANENT">Permanent</option>
+                                <option value="CONTRACT">Contract</option>
+                            </select>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addStaffModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Save Staff</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleStaffSubmit(event) {
+        this.submitForm(event, '/hr/employees/', 'addStaffModal', 'Staff member added successfully!');
+    },
+
+
+    // --- GENERIC SUBMIT HELPER ---
+    async submitForm(event, endpoint, modalId, successMessage) {
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Ensure availability of 'available_copies' matching 'total_copies' for books
+        if (data.total_copies && !data.available_copies) {
+            data.available_copies = data.total_copies;
+        }
+
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = 'Saving...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(Object.values(errorData).flat().join(', ') || 'Operation failed');
+            }
+
+            document.getElementById(modalId).remove();
+            alert(successMessage);
+            // Refresh current module if needed
+            const currentModule = this.currentModule;
+            this.loadModule(currentModule);
+
+        } catch (error) {
+            alert('Error: ' + error.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    },
 };
 
 // Add Pulse Animation Style for Live Badge

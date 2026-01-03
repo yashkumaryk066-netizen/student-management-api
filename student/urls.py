@@ -20,8 +20,15 @@ from .views import (
     TeacherDashboardTemplateView,
     StudentDashboardTemplateView,
     ParentDashboardTemplateView,
-    DemoRequestView,  # Added for demo request functionality
+    DemoRequestView,
     DeveloperProfileView,
+    ResumeView,
+    # New Views
+    LibraryBookListCreateView, LibraryBookDetailView, BookIssueListCreateView,
+    HostelListCreateView, RoomListCreateView, HostelAllocationListCreateView,
+    VehicleListCreateView, RouteListCreateView,
+    EmployeeListCreateView, LeaveRequestListCreateView,
+    ExamListCreateView, EventListCreateView
 )
 
 from rest_framework_simplejwt.views import (
@@ -63,4 +70,30 @@ urlpatterns = [
     
     # DEVELOPER PROFILE
     path('developer/', DeveloperProfileView.as_view(), name='developer-profile'),
+    path('resume/', ResumeView.as_view(), name='resume-view'),
+
+    # ==================== NEW MODULE URLS ====================
+    # LIBRARY
+    path('library/books/', LibraryBookListCreateView.as_view(), name='library-books'),
+    path('library/books/<int:pk>/', LibraryBookDetailView.as_view(), name='library-book-detail'),
+    path('library/issues/', BookIssueListCreateView.as_view(), name='library-issues'),
+
+    # HOSTEL
+    path('hostel/', HostelListCreateView.as_view(), name='hostel-list'),
+    path('hostel/rooms/', RoomListCreateView.as_view(), name='hostel-rooms'),
+    path('hostel/allocations/', HostelAllocationListCreateView.as_view(), name='hostel-allocations'),
+
+    # TRANSPORT
+    path('transport/vehicles/', VehicleListCreateView.as_view(), name='transport-vehicles'),
+    path('transport/routes/', RouteListCreateView.as_view(), name='transport-routes'),
+
+    # HR
+    path('hr/employees/', EmployeeListCreateView.as_view(), name='hr-employees'),
+    path('hr/leaves/', LeaveRequestListCreateView.as_view(), name='hr-leaves'),
+
+    # EXAMS
+    path('exams/', ExamListCreateView.as_view(), name='exam-list'),
+
+    # EVENTS
+    path('events/', EventListCreateView.as_view(), name='event-list'),
 ]

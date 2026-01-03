@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Student, Attendence, UserProfile, Payment, Notification
+from .models import (
+    Student, Attendence, UserProfile, Payment, Notification,
+    LibraryBook, BookIssue, Hostel, Room, HostelAllocation,
+    Vehicle, Route, TransportAllocation, Employee, Department, Designation,
+    LeaveRequest, Payroll, Exam, Grade, Event
+)
 
 class StudentSerializer(serializers.ModelSerializer):
     parent_name = serializers.SerializerMethodField()
@@ -50,7 +55,95 @@ class NotificationSerializer(serializers.ModelSerializer):
     
     def get_recipient_name(self, obj):
         return obj.recipient.username if obj.recipient else "All"
-        
-        
-        
-        
+
+# ==================== NEW SERIALIZERS ====================
+
+class LibraryBookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LibraryBook
+        fields = '__all__'
+
+class BookIssueSerializer(serializers.ModelSerializer):
+    book_title = serializers.CharField(source='book.title', read_only=True)
+    student_name = serializers.CharField(source='student.name', read_only=True)
+    
+    class Meta:
+        model = BookIssue
+        fields = '__all__'
+
+class HostelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hostel
+        fields = '__all__'
+
+class RoomSerializer(serializers.ModelSerializer):
+    hostel_name = serializers.CharField(source='hostel.name', read_only=True)
+    class Meta:
+        model = Room
+        fields = '__all__'
+
+class HostelAllocationSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.name', read_only=True)
+    room_number = serializers.CharField(source='room.room_number', read_only=True)
+    hostel_name = serializers.CharField(source='room.hostel.name', read_only=True)
+    
+    class Meta:
+        model = HostelAllocation
+        fields = '__all__'
+
+class VehicleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = '__all__'
+
+class RouteSerializer(serializers.ModelSerializer):
+    vehicle_number = serializers.CharField(source='vehicle.registration_number', read_only=True)
+    class Meta:
+        model = Route
+        fields = '__all__'
+
+class TransportAllocationSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.name', read_only=True)
+    route_name = serializers.CharField(source='route.route_name', read_only=True)
+    
+    class Meta:
+        model = TransportAllocation
+        fields = '__all__'
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = '__all__'
+
+class DesignationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Designation
+        fields = '__all__'
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    designation_title = serializers.CharField(source='designation.title', read_only=True)
+    fullname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Employee
+        fields = '__all__'
+    
+    def get_fullname(self, obj):
+        return obj.user.get_full_name()
+
+class LeaveRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeaveRequest
+        fields = '__all__'
+
+class ExamSerializer(serializers.ModelSerializer):
+    subject_name = serializers.CharField(source='subject.name', read_only=True)
+    class Meta:
+        model = Exam
+        fields = '__all__'
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = '__all__'
