@@ -4,8 +4,15 @@ from django.db.models import Q
 from django.contrib.auth import authenticate
 from django.utils import timezone
 from rest_framework.response import Response
-from .models import Student, Attendence, UserProfile, Payment, Notification
-from .Serializer import StudentSerializer, AttendenceSerializer, UserProfileSerializer, PaymentSerializer, NotificationSerializer
+from .models import (
+    Student, Attendence, UserProfile, Payment, Notification,
+    Course, Batch, Enrollment
+)
+from .Serializer import (
+    StudentSerializer, AttendenceSerializer, UserProfileSerializer, PaymentSerializer, NotificationSerializer,
+    CourseSerializer, BatchSerializer, EnrollmentSerializer
+)
+from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
@@ -770,3 +777,25 @@ class DemoRequestView(generics.CreateAPIView):
             'message': 'Thank you for your interest! We will contact you shortly.',
             'data': serializer.data
         }, status=status.HTTP_201_CREATED, headers=headers)
+
+# ==================== COACHING/COURSE MANAGEMENT VIEWS ====================
+
+class CourseListCreateView(generics.ListCreateAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class BatchListCreateView(generics.ListCreateAPIView):
+    queryset = Batch.objects.all()
+    serializer_class = BatchSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class EnrollmentListCreateView(generics.ListCreateAPIView):
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
+    permission_classes = [permissions.IsAuthenticated]

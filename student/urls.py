@@ -28,7 +28,8 @@ from .views import (
     HostelListCreateView, RoomListCreateView, HostelAllocationListCreateView,
     VehicleListCreateView, RouteListCreateView,
     EmployeeListCreateView, LeaveRequestListCreateView,
-    ExamListCreateView, EventListCreateView
+    ExamListCreateView, EventListCreateView,
+    CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView
 )
 
 from rest_framework_simplejwt.views import (
@@ -96,4 +97,10 @@ urlpatterns = [
 
     # EVENTS
     path('events/', EventListCreateView.as_view(), name='event-list'),
+
+    # COACHING
+    path('courses/', CourseListCreateView.as_view(), name='course-list'),
+    path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
+    path('batches/', BatchListCreateView.as_view(), name='batch-list'),
+    path('enrollments/', EnrollmentListCreateView.as_view(), name='enrollment-list'),
 ]

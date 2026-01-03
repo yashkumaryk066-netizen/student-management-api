@@ -3,7 +3,8 @@ from .models import (
     Student, Attendence, UserProfile, Payment, Notification,
     LibraryBook, BookIssue, Hostel, Room, HostelAllocation,
     Vehicle, Route, TransportAllocation, Employee, Department, Designation,
-    LeaveRequest, Payroll, Exam, Grade, Event
+    LeaveRequest, Payroll, Exam, Grade, Event,
+    Course, Batch, Enrollment
 )
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -146,4 +147,29 @@ class ExamSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
+        fields = '__all__'
+
+# ==================== COACHING MANAGEMENT SERIALIZERS ====================
+
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = '__all__'
+
+class BatchSerializer(serializers.ModelSerializer):
+    course_name = serializers.CharField(source='course.name', read_only=True)
+    teacher_name = serializers.CharField(source='primary_teacher.get_full_name', read_only=True)
+    student_count = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = Batch
+        fields = '__all__'
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.name', read_only=True)
+    batch_name = serializers.CharField(source='batch.name', read_only=True)
+    course_name = serializers.CharField(source='batch.course.name', read_only=True)
+    
+    class Meta:
+        model = Enrollment
         fields = '__all__'

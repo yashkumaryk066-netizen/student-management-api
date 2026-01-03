@@ -81,6 +81,9 @@ const DashboardApp = {
             case 'students':
                 this.loadStudentManagement();
                 break;
+            case 'courses':
+                this.loadCourseManagement();
+                break;
             case 'attendance':
                 this.loadAttendanceSystem();
                 break;
@@ -1318,6 +1321,230 @@ const DashboardApp = {
 
     async handleStaffSubmit(event) {
         this.submitForm(event, '/hr/employees/', 'addStaffModal', 'Staff member added successfully!');
+    },
+
+    // --- COURSES & BATCHES ---
+    loadCourseManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+            <div class="module-header">
+                <div>
+                     <h1 class="page-title">🎓 Courses & Batches</h1>
+                     <p class="page-subtitle">Manage institute courses, batches, and enrollments.</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-action" onclick="DashboardApp.addCourse()">+ Add Course</button>
+                    <button class="btn-action" style="background:var(--secondary);" onclick="DashboardApp.addBatch()">+ Add Batch</button>
+                </div>
+            </div>
+            
+            <div class="stats-mini-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="totalCourses">0</div>
+                    <div class="stat-mini-label">Active Courses</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="totalBatches" style="color: #fbbf24;">0</div>
+                    <div class="stat-mini-label">Running Batches</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="totalEnrollments" style="color: #34d399;">0</div>
+                    <div class="stat-mini-label">Total Enrollments</div>
+                </div>
+            </div>
+            
+            <div class="data-table-container">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Course Catalog</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Course Name</th>
+                            <th>Level</th>
+                            <th>Duration (Weeks)</th>
+                            <th>Fee (₹)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="courseTableBody">
+                        <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+             <div class="data-table-container" style="margin-top: 30px;">
+                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                     <h3 style="color: white; margin-bottom: 5px;">Active Batches</h3>
+                </div>
+                 <table class="data-table">
+                     <thead>
+                        <tr>
+                            <th>Batch Name</th>
+                            <th>Course</th>
+                            <th>Teacher</th>
+                            <th>Start Date</th>
+                            <th>Students</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchTableBody">
+                        <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        this.fetchCoursesAndBatches();
+    },
+
+    async fetchCoursesAndBatches() {
+        try {
+            // Fetch Courses
+            const courseRes = await fetch(`${this.apiBaseUrl}/courses/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const courses = await courseRes.json();
+
+            // Fetch Batches
+            const batchRes = await fetch(`${this.apiBaseUrl}/batches/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const batches = await batchRes.json();
+
+            // Update Stats
+            document.getElementById('totalCourses').innerText = courses.length;
+            document.getElementById('totalBatches').innerText = batches.length;
+            // Assuming we get enrollments count from somewhere else or just sum up for now
+            // document.getElementById('totalEnrollments').innerText = batches.reduce((acc, b) => acc + b.student_count, 0);
+
+            // Populate Courses
+            const courseBody = document.getElementById('courseTableBody');
+            courseBody.innerHTML = courses.map(c => `
+                <tr class="hover-row">
+                    <td><span style="font-family:monospace; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">${c.code}</span></td>
+                    <td style="font-weight:600; color:white;">${c.name}</td>
+                    <td><span class="status-badge status-${c.level === 'ADVANCED' ? 'active' : 'pending'}">${c.level}</span></td>
+                    <td>${c.duration_weeks} weeks</td>
+                    <td>₹${c.fee}</td>
+                    <td>${c.is_active ? '✅ Active' : '❌ Inactive'}</td>
+                </tr>
+            `).join('');
+
+            // Populate Batches
+            const batchBody = document.getElementById('batchTableBody');
+            batchBody.innerHTML = batches.map(b => `
+                <tr class="hover-row">
+                    <td style="font-weight:600; color:white;">${b.name}</td>
+                    <td>${b.course_name}</td>
+                    <td>${b.teacher_name || 'Unassigned'}</td>
+                    <td>${b.start_date}</td>
+                    <td>${b.student_count || 0} / ${b.max_capacity}</td>
+                </tr>
+            `).join('');
+
+        } catch (error) {
+            console.error('Error fetching course data:', error);
+        }
+    },
+
+    addCourse() {
+        const modalHtml = `
+            <div class="modal-overlay" id="addCourseModal">
+                <div class="modal-card">
+                    <h2>Add New Course</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleCourseSubmit(event);">
+                        <div class="form-group">
+                            <label>Course Name</label>
+                            <input type="text" name="name" class="form-input" required placeholder="e.g. Full Stack Web Development">
+                        </div>
+                        <div class="form-group">
+                            <label>Course Code</label>
+                            <input type="text" name="code" class="form-input" required placeholder="e.g. WEB-101">
+                        </div>
+                        <div class="form-group">
+                            <label>Level</label>
+                            <select name="level" class="form-input" required>
+                                <option value="BEGINNER">Beginner</option>
+                                <option value="INTERMEDIATE">Intermediate</option>
+                                <option value="ADVANCED">Advanced</option>
+                            </select>
+                        </div>
+                         <div class="form-group">
+                            <label>Fee (₹)</label>
+                            <input type="number" name="fee" class="form-input" required>
+                        </div>
+                         <div class="form-group">
+                            <label>Duration (Weeks)</label>
+                            <input type="number" name="duration_weeks" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" class="form-input" required></textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addCourseModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Create Course</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    addBatch() {
+        // We need to fetch courses first to populate select
+        fetch(`${this.apiBaseUrl}/courses/`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        }).then(res => res.json()).then(courses => {
+            const options = courses.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join('');
+
+            const modalHtml = `
+                <div class="modal-overlay" id="addBatchModal">
+                    <div class="modal-card">
+                        <h2>Start New Batch</h2>
+                        <form onsubmit="event.preventDefault(); DashboardApp.handleBatchSubmit(event);">
+                            <div class="form-group">
+                                <label>Select Course</label>
+                                <select name="course" class="form-input" required>
+                                    ${options}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Batch Name</label>
+                                <input type="text" name="name" class="form-input" required placeholder="e.g. Batch A - Morning">
+                            </div>
+                            <div class="form-group">
+                                <label>Start Date</label>
+                                <input type="date" name="start_date" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Teacher (User ID)</label>
+                                <input type="number" name="primary_teacher" class="form-input" placeholder="Teacher ID (Optional)">
+                            </div>
+                             <div class="form-group">
+                                <label>Max Capacity</label>
+                                <input type="number" name="max_capacity" class="form-input" value="60">
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('addBatchModal').remove()">Cancel</button>
+                                <button type="submit" class="btn-primary">Launch Batch</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        });
+    },
+
+    async handleCourseSubmit(event) {
+        this.submitForm(event, '/courses/', 'addCourseModal', 'Course created successfully!');
+    },
+
+    async handleBatchSubmit(event) {
+        this.submitForm(event, '/batches/', 'addBatchModal', 'Batch launched successfully!');
     },
 
 
