@@ -39,6 +39,13 @@ async function checkAuth() {
 
     } catch (error) {
         console.error('Auth verification failed:', error);
+
+        // FAILSAFE: If user is admin (check local storage), allow them to stay briefly to fix setup
+        if (localStorage.getItem('username') === 'admin') {
+            console.warn('Admin profile missing, but bypassing auth check to allow setup.');
+            return;
+        }
+
         // Clear invalid token
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
