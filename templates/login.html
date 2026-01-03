@@ -39,7 +39,7 @@
                         <input type="checkbox" id="rememberMe">
                         <span>Remember me</span>
                     </label>
-                    <a href="#" class="forgot-link">Forgot password?</a>
+                    <a href="#" class="forgot-link" onclick="openResetModal()">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="btn-primary" id="loginBtn">
@@ -78,10 +78,162 @@
                 </div>
             </div>
         </div>
-    </div>
+        <!-- Password Reset Modal -->
+        <div id="resetModal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+            <div
+                style="background:#1e293b; color:white; padding:30px; border-radius:15px; width:90%; max-width:400px; position:relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                <button onclick="closeResetModal()"
+                    style="position:absolute; top:15px; right:15px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+                <h3 style="margin-top:0; margin-bottom:20px;">Reset Password</h3>
 
-    <script src="/static/js/api.js?v=2.1"></script>
-    <script src="/static/js/auth.js?v=2.1"></script>
+                <!-- Step 1: Request OTP -->
+                <div id="resetStep1">
+                    <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Enter your registered email address
+                        to receive a verification OTP.</p>
+                    <div class="form-group">
+                        <input type="email" id="resetEmail" placeholder="Enter your email"
+                            style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid #475569; color:white; border-radius:5px;">
+                    </div>
+                    <button onclick="requestOTP()" id="btnGetOTP" class="btn-primary"
+                        style="width:100%; margin-top:10px;">Send OTP</button>
+                </div>
+
+                <!-- Step 2: Verify & Reset -->
+                <div id="resetStep2" style="display:none;">
+                    <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Enter the 4-digit OTP sent to your
+                        email and set a new password.</p>
+
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <input type="text" id="resetOTP" placeholder="Enter 4-digit OTP" maxlength="4"
+                            style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid #475569; color:white; border-radius:5px; letter-spacing: 2px; text-align:center;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <input type="password" id="newPassword" placeholder="New Password"
+                            style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid #475569; color:white; border-radius:5px;">
+                    </div>
+
+                    <button onclick="confirmReset()" id="btnReset" class="btn-primary"
+                        style="width:100%; margin-top:10px;">Reset Password</button>
+                    <button onclick="backToStep1()"
+                        style="width:100%; margin-top:10px; background:none; border:none; color:#94a3b8; cursor:pointer;">Back</button>
+                </div>
+
+                <div id="resetMessage"
+                    style="color:#ef4444; margin-top:15px; text-align:center; font-size:0.9rem; display:none;"></div>
+            </div>
+        </div>
+
+        <script>
+            const API_BASE = 'https://yashamishra.pythonanywhere.com/api';
+
+            function openResetModal() {
+                document.getElementById('resetModal').style.display = 'flex';
+                document.getElementById('resetStep1').style.display = 'block';
+                document.getElementById('resetStep2').style.display = 'none';
+                document.getElementById('resetMessage').style.display = 'none';
+            }
+
+            function closeResetModal() {
+                document.getElementById('resetModal').style.display = 'none';
+            }
+
+            async function requestOTP() {
+                const email = document.getElementById('resetEmail').value.trim();
+                const btn = document.getElementById('btnGetOTP');
+                const msg = document.getElementById('resetMessage');
+
+                if (!email) {
+                    msg.style.display = 'block';
+                    msg.innerText = "Please enter your email.";
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerText = "Sending...";
+                msg.style.display = 'none';
+
+                try {
+                    const res = await fetch(`${API_BASE}/auth/password-reset/request/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        // Show Step 2
+                        document.getElementById('resetStep1').style.display = 'none';
+                        document.getElementById('resetStep2').style.display = 'block';
+                        msg.style.display = 'none';
+                    } else {
+                        msg.style.display = 'block';
+                        msg.innerText = data.error || data.message || "Failed to send OTP";
+                    }
+                } catch (e) {
+                    msg.style.display = 'block';
+                    msg.innerText = "Network Error: " + e.message;
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "Send OTP";
+                }
+            }
+
+            function backToStep1() {
+                document.getElementById('resetStep2').style.display = 'none';
+                document.getElementById('resetStep1').style.display = 'block';
+            }
+
+            async function confirmReset() {
+                const email = document.getElementById('resetEmail').value.trim();
+                const otp = document.getElementById('resetOTP').value.trim();
+                const pass = document.getElementById('newPassword').value.trim();
+                const btn = document.getElementById('btnReset');
+                const msg = document.getElementById('resetMessage');
+
+                if (!otp || !pass) {
+                    msg.style.display = 'block';
+                    msg.innerText = "All fields required.";
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerText = "Verifying...";
+                msg.style.display = 'none';
+
+                try {
+                    const res = await fetch(`${API_BASE}/auth/password-reset/confirm/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, otp: otp, new_password: pass })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        msg.style.display = 'block';
+                        msg.style.color = '#10b981';
+                        msg.innerText = "Success! Password reset. Login now.";
+                        setTimeout(() => {
+                            closeResetModal();
+                            document.getElementById('password').value = pass; // Auto-fill
+                            document.getElementById('username').focus();
+                        }, 2000);
+                    } else {
+                        msg.style.display = 'block';
+                        msg.style.color = '#ef4444';
+                        msg.innerText = data.error || "Reset Failed";
+                    }
+                } catch (e) {
+                    msg.style.display = 'block';
+                    msg.innerText = "Error: " + e.message;
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "Reset Password";
+                }
+            }
+        </script>
+        <script src="/static/js/auth.js?v=2.1"></script>
 </body>
 
 </html>

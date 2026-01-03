@@ -33,6 +33,7 @@ from .views import (
 )
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
+from .password_reset_views import RequestPasswordResetView, VerifyAndResetPasswordView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -110,4 +111,8 @@ urlpatterns = [
     path('onboarding/pay/', OnboardingPaymentView.as_view(), name='onboarding-pay'),
     # RAZORPAY
     path('payment/create-order/', CreateOrderView.as_view(), name='payment-create-order'),
+    
+    # PASSWORD RESET
+    path('auth/password-reset/request/', RequestPasswordResetView.as_view(), name='password-reset-request'),
+    path('auth/password-reset/confirm/', VerifyAndResetPasswordView.as_view(), name='password-reset-confirm'),
 ]
