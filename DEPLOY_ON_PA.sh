@@ -37,7 +37,8 @@ echo "🗄️ Applying database migrations..."
 # Attempt to merge any conflicting migrations
 echo "yes" | python manage.py makemigrations --merge
 python manage.py makemigrations
-python manage.py migrate
+# Use fake-initial to handle cases where tables already exist (fixes "table already exists" error)
+python manage.py migrate --fake-initial
 
 # Collect Static Files
 echo "🎨 Collecting static files..."
