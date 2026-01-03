@@ -17,6 +17,7 @@ ENV/
 db.sqlite3
 db.sqlite3-journal
 # /static/  # REMOVED - We need to deploy static files for dashboards
+/staticfiles/
 /media/
 
 # IDE
