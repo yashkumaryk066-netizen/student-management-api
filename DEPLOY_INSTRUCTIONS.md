@@ -24,6 +24,7 @@ This project is fully ready for deployment.
 3.  **Environment Variables**:
     *   Create a `.env` file in your project root `/home/yourusername/manufatures/.env`.
     *   Copy content from `.env.example` and fill in real values.
+    *   **Crucial**: Add `EAZYPAY_MERCHANT_ID`, `EAZYPAY_ENCRYPTION_KEY`, etc. for payments.
 
 4.  **Static Files**:
     *   Run: `python manage.py collectstatic`

@@ -281,3 +281,10 @@ EMAIL_HOST_USER = 'yashkumaryk066@gmail.com'
 EMAIL_HOST_PASSWORD = 'gmoldxkqfxzhyidc'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+
+# Payment Gateway - ICICI Eazypay
+EAZYPAY_MERCHANT_ID = config('EAZYPAY_MERCHANT_ID', default='123456')
+EAZYPAY_ENCRYPTION_KEY = config('EAZYPAY_ENCRYPTION_KEY', default='1234567890123456') # Must be 16, 24, or 32 bytes
+EAZYPAY_SUB_MERCHANT_ID = config('EAZYPAY_SUB_MERCHANT_ID', default='1234')
+EAZYPAY_RETURN_URL = config('EAZYPAY_RETURN_URL', default='http://localhost:8000/api/payment/callback/')
+EAZYPAY_MODE = config('EAZYPAY_MODE', default='TEST')

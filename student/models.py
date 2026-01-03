@@ -3,6 +3,65 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+# --- NEW SUBSCRIPTION MODEL ---
+class ClientSubscription(models.Model):
+    PLAN_CHOICES = [
+        ('SCHOOL', 'School Management'),
+        ('COACHING', 'Coaching Management'),
+        ('INSTITUTE', 'Institute Management'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Payment'),
+        ('ACTIVE', 'Active'),
+        ('EXPIRED', 'Expired'),
+        ('SUSPENDED', 'Suspended')
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='subscription')
+    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    auto_renew = models.BooleanField(default=True)
+    transaction_id = models.CharField(max_length=100, blank=True, null=True) # Last payment Ref
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.plan_type} ({self.status})"
+
+    def activate(self, days=30):
+        """
+        Activates or Renews the subscription.
+        Data Preservation: This method ONLY updates the status and dates.
+        It does NOT touch any student/attendance data, ensuring strictly 'Access-Only' logic.
+        """
+        today = timezone.now().date()
+        
+        if self.status == 'ACTIVE' and self.end_date and self.end_date >= today:
+             # If already active, extend from the current end date
+             self.end_date = self.end_date + timezone.timedelta(days=days)
+        else:
+             # If expired or new, start from today
+             self.status = 'ACTIVE'
+             self.start_date = today
+             self.end_date = today + timezone.timedelta(days=days)
+             
+        self.save()
+        
+        # Sync with UserProfile to control login/API access
+        if hasattr(self.user, 'profile'):
+            self.user.profile.institution_type = self.plan_type
+            # Ensure role is set correctly (e.g., ADMIN for the purchaser)
+            if self.user.profile.role not in ['ADMIN', 'TEACHER', 'STUDENT', 'PARENT']:
+                self.user.profile.role = 'ADMIN'
+            
+            self.user.profile.subscription_expiry = self.end_date
+            self.user.profile.save()
+
 class Student(models.Model):
         name = models.CharField(max_length=20)
         age = models.PositiveBigIntegerField()
@@ -80,6 +139,7 @@ class Payment(models.Model):
         ('OVERDUE', 'Overdue'),
     ]
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments')
+    transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     due_date = models.DateField()
     paid_date = models.DateField(null=True, blank=True)

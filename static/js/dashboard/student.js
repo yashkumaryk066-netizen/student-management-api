@@ -67,7 +67,11 @@ async function loadStudentData() {
                     <td>${p.description}</td>
                     <td>${new Date(p.due_date).toLocaleDateString()}</td>
                     <td>₹${p.amount}</td>
-                    <td><span class="status-badge ${p.status === 'PAID' ? 'status-success' : 'status-pending'}">${p.status}</span></td>
+                    <td>
+                        ${p.status === 'PAID'
+                    ? '<span class="status-badge status-success">PAID</span>'
+                    : `<button onclick="payFee('${p.amount}', '${p.description}')" style="background:#3b82f6; border:none; color:white; padding:5px 10px; border-radius:4px; cursor:pointer;">Pay Now</button>`}
+                    </td>
                 </tr>
             `).join('');
         } else {
@@ -77,6 +81,50 @@ async function loadStudentData() {
     } catch (e) {
         console.error('Failed to load student dashboard', e);
         // Show silent error in console, keep UI as partial load
+    }
+}
+
+
+async function submitManualPayment(amount, description) {
+    const txnId = prompt(`Please enter the Bank UTR / Transaction No. you received after paying ₹${amount}:`);
+    if (!txnId) return;
+
+    try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch('/api/payment/manual/submit/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                amount: amount,
+                description: description,
+                transaction_id: txnId
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Payment Submitted Successfully! Verification Pending.');
+            window.location.reload();
+        } else {
+            alert('Submission Error: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Payment Error:', error);
+        alert('Failed to submit payment.');
+    }
+}
+async function payFee(amount, description) {
+    // Show Modal or Options
+    // Since user has no merchant gateway, we default to the Manual Flow or show options.
+    // For simplicity, let's guide them to the Manual Flow directly as Eazypay is not active without keys.
+    const choice = confirm(`Proceed to pay ₹${amount}?\n\nClick OK to Enter Transaction ID (If you have already paid via QR/Bank)\nClick Cancel to go back.`);
+
+    if (choice) {
+        submitManualPayment(amount, description);
     }
 }
 

@@ -31,6 +31,9 @@ from .views import (
     ExamListCreateView, EventListCreateView,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView
 )
+from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
+from .manual_payment_views import ManualPaymentSubmitView
+from .subscription_views import SubscriptionPurchaseView, SubscriptionSuccessView
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
 from .password_reset_views import RequestPasswordResetView, VerifyAndResetPasswordView
@@ -115,4 +118,15 @@ urlpatterns = [
     # PASSWORD RESET
     path('auth/password-reset/request/', RequestPasswordResetView.as_view(), name='password-reset-request'),
     path('auth/password-reset/confirm/', VerifyAndResetPasswordView.as_view(), name='password-reset-confirm'),
+
+    # EAZYPAY
+    path('payment/eazypay/init/', InitEazypayPaymentView.as_view(), name='payment-eazypay-init'),
+    path('payment/eazypay/callback/', EazypayCallbackView.as_view(), name='payment-eazypay-callback'),
+    
+    # MANUAL PAYMENT
+    path('payment/manual/submit/', ManualPaymentSubmitView.as_view(), name='payment-manual-submit'),
+    
+    # SUBSCRIPTION (CLIENT ONBOARDING)
+    path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),
+    path('subscription/success/', SubscriptionSuccessView.as_view(), name='subscription-success'),
 ]
