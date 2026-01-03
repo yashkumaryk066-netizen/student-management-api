@@ -184,7 +184,12 @@ const DashboardApp = {
             .catch(err => {
                 console.error('Error fetching students:', err);
                 document.getElementById('studentsTableBody').innerHTML =
-                    '<tr><td colspan="7" class="text-center text-danger">Error loading students. <a href="/admin/student/student/">Use Admin Panel</a></td></tr>';
+                    `<tr>
+                        <td colspan="7" class="text-center text-danger">
+                            Failed to load data. API connection error.
+                            <button class="btn-action" onclick="DashboardApp.fetchStudents()">Retry</button>
+                        </td>
+                    </tr>`;
             });
     },
 
