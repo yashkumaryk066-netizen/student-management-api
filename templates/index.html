@@ -598,6 +598,118 @@
                 gap: 20px;
             }
         }
+
+        /* Feature Bento Grid */
+        .features-section {
+            padding: 100px 60px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .bento-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: 0.4s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .bento-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .bento-card.large {
+            grid-column: span 2;
+        }
+
+        .bento-card.tall {
+            grid-row: span 2;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .bento-card h3 {
+            font-size: 1.4rem;
+            color: white;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .bento-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bento-card.large,
+            .bento-card.tall {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -629,9 +741,9 @@
             </div>
         </a>
         <div class="nav-links">
-            <a href="#features" class="nav-link">Modules</a>
+            <a href="#modules" class="nav-link">Modules</a>
             <a href="#pricing" class="nav-link">Pricing</a>
-            <a href="/swagger/" class="nav-link">API</a>
+            <!-- API Link Hidden -->
             <button class="btn-login" onclick="window.location.href='/login/'">ACCESS PORTAL</button>
         </div>
     </nav>
@@ -689,6 +801,67 @@
                     <div class="data-point dp-2">Revenue: +12%</div>
                     <div class="data-point dp-3">Staff: 120</div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modules Section -->
+    <section id="modules" class="features-section">
+        <div class="section-header">
+            <div class="badge">
+                <span class="pulse-dot"></span>
+                POWERFUL FEATURES
+            </div>
+            <h2>Enterprise Modules</h2>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Everything you need to manage your
+                institution efficiently in one unified platform.</p>
+        </div>
+
+        <div class="bento-grid">
+            <!-- Academics -->
+            <div class="bento-card large">
+                <div class="card-icon">📚</div>
+                <h3>Academics & Exams</h3>
+                <p>Complete examination management, grading systems, automated report cards (GPA/CGPA), and smart
+                    timetable scheduling with conflict detection.</p>
+            </div>
+
+            <!-- Finance -->
+            <div class="bento-card">
+                <div class="card-icon">💰</div>
+                <h3>Finance & Payroll</h3>
+                <p>Fee collection, automated receipts, staff payroll processing, expense tracking, and financial
+                    auditing reports.</p>
+            </div>
+
+            <!-- Library -->
+            <div class="bento-card">
+                <div class="card-icon">📖</div>
+                <h3>Digital Library</h3>
+                <p>LMS for book issue/returns, digital catalog, fine calculation, and ebook management support.</p>
+            </div>
+
+            <!-- HR -->
+            <div class="bento-card tall">
+                <div class="card-icon">👥</div>
+                <h3>HR Management</h3>
+                <p>Staff attendance, leave management, recruitment portal, and performance appraisal systems. Track
+                    every employee's lifecycle from hiring to retiring.</p>
+            </div>
+
+            <!-- Transport -->
+            <div class="bento-card large">
+                <div class="card-icon">🚌</div>
+                <h3>Transport & GPS</h3>
+                <p>Real-time bus tracking, route optimization, driver management, and parent alerts. Ensure student
+                    safety with live location updates.</p>
+            </div>
+
+            <!-- Hostel -->
+            <div class="bento-card">
+                <div class="card-icon">🏨</div>
+                <h3>Smart Hostel</h3>
+                <p>Room allocation, mess management, gate pass system, and biometric attendance integration.</p>
             </div>
         </div>
     </section>
