@@ -41,6 +41,8 @@ pip install --force-reinstall pycryptodome
 
 # 4. Migrate DB
 echo "🗄️ Migrating Database..."
+# Attempt to merge conflicting migrations automatically
+python manage.py makemigrations --merge --noinput
 python manage.py makemigrations
 python manage.py migrate
 
@@ -49,6 +51,7 @@ echo "🎨 Collecting Static Files..."
 python manage.py collectstatic --noinput
 
 # 6. Verify Import (Sanity Check)
+export DJANGO_SETTINGS_MODULE=manufatures.settings
 python -c "import django; django.setup(); from student import urls; print('✅ Syntax Check Passed')"
 
 echo "---------------------------------------------------"
