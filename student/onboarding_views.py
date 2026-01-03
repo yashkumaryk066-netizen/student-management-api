@@ -60,8 +60,15 @@ class OnboardingPaymentView(APIView):
                     defaults={'username': username}
                 )
                 if created:
-                    user.set_password(password)
-                    user.save()
+                    logger.info(f"Created new user: {username}")
+                else:
+                    logger.info(f"Updated existing user: {username}")
+                
+                # ALWAYS set the password to the generated one so the credentials shown to the user WORK.
+                # This handles cases where a user retries payment or comes back.
+                user.set_password(password)
+                user.is_active = True
+                user.save()
                 
                 # Update Profile Permissions
                 # They get 'ADMIN' role for their specific Institution Type
