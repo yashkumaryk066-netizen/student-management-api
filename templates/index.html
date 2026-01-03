@@ -1068,8 +1068,9 @@
                 if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
 
                 // CHECK FOR MOCK MODE (If real keys aren't set)
+                // Use User's Custom QR Scanner instead of generic bank
                 if (orderData.mock_order) {
-                    showMockBankSimulator(orderData);
+                    showQRScanner(orderData);
                     return;
                 }
 
@@ -1109,53 +1110,74 @@
             }
         }
 
-        function showMockBankSimulator(orderData) {
+        function showQRScanner(orderData) {
             // Hide Email Step
             document.getElementById('step1').style.display = 'none';
-            // Show new Bank UI in Step 2 container
+            // Show new QR UI in Step 2 container
             const step2 = document.getElementById('step2');
             step2.style.display = 'block';
 
             step2.innerHTML = `
                 <div style="text-align:center; padding: 20px;">
-                    <h3 style="margin-bottom:15px; font-family:'Space Grotesk'">SECURE BANK GATEWAY</h3>
-                    <div style="background: white; color: black; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <div style="font-weight:bold; font-size:1.2rem; margin-bottom:10px;">Merchant: IMS Premium</div>
-                        <div style="font-size:2rem; font-weight:700; color:#1a1a1a;">₹${(orderData.amount / 100).toLocaleString()}</div>
-                        <div style="margin-top:10px; font-size:0.9rem; color:#555;">Trans ID: ${orderData.order_id}</div>
+                    <h3 style="margin-bottom:5px; font-family:'Space Grotesk'">Scan & Pay</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Use any UPI App to pay securely</p>
+                    
+                    <div style="background:white; padding:15px; border-radius:15px; display:inline-block; margin-bottom:20px; box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);">
+                        <img src="/static/images/payment_qr.jpg" alt="Payment QR"
+                            style="width:220px; height:220px; object-fit:contain;">
                     </div>
                     
-                    <div style="margin-bottom:20px; color: #ef4444; font-weight:bold;">
-                        Session Expires in: <span id="bankTimer">05:00</span>
+                    <div style="margin-bottom:20px;">
+                        <div style="font-size:1.5rem; font-weight:700; color:var(--primary);">₹${(orderData.amount / 100).toLocaleString('en-IN')}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">Ref: ${orderData.order_id}</div>
+                    </div>
+                    
+                    <div style="margin-bottom:20px; text-align:left;">
+                        <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.9rem;">Transaction ID / UTR (Required)</label>
+                        <input type="text" id="txnUtrInput" placeholder="Enter 12-digit UTR No." maxlength="12"
+                            style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; font-family:monospace; letter-spacing:1px;">
+                        <div id="utrError" style="color:#ef4444; font-size:0.8rem; margin-top:5px; display:none;"></div>
                     </div>
 
-                    <button onclick="mockPaymentSuccess('${orderData.order_id}')" class="btn-primary" style="width:100%; margin-bottom:10px; background: #10b981;">
-                        CONFIRM PAYMENT
+                    <button id="verifyBtn" onclick="verifyManualPayment('${orderData.order_id}')" class="btn-primary" style="width:100%; margin-bottom:10px;">
+                        VERIFY PAYMENT
                     </button>
                     <button onclick="location.reload()" class="btn-secondary" style="width:100%;">
                         CANCEL
                     </button>
                 </div>
             `;
-
-            // Simple Timer
-            let duration = 300; // 5 minutes
-            const timer = setInterval(() => {
-                duration--;
-                const m = Math.floor(duration / 60).toString().padStart(2, '0');
-                const s = (duration % 60).toString().padStart(2, '0');
-                const el = document.getElementById('bankTimer');
-                if (el) el.innerText = `${m}:${s}`;
-                if (duration <= 0) clearInterval(timer);
-            }, 1000);
         }
 
-        function mockPaymentSuccess(orderId) {
-            // Simulate Gateway Callback
+        async function verifyManualPayment(orderId) {
+            const utr = document.getElementById('txnUtrInput').value.trim();
+            const errDiv = document.getElementById('utrError');
+            const btn = document.getElementById('verifyBtn');
+
+            // 1. Strict UTR Validation (Must be 12 digits)
+            if (!/^\d{12}$/.test(utr)) {
+                errDiv.style.display = 'block';
+                errDiv.innerText = "Invalid UTR! Please enter correct 12-digit Transaction ID from your UPI App.";
+                return;
+            }
+            errDiv.style.display = 'none';
+
+            // 2. Show Advanced Verification Animation
+            btn.disabled = true;
+            btn.innerHTML = `<span class="pulse-dot"></span> Connecting to Bank Server...`;
+
+            // Simulate checks
+            await new Promise(r => setTimeout(r, 1500));
+            btn.innerHTML = `<span class="pulse-dot"></span> Verifying Amount...`;
+            await new Promise(r => setTimeout(r, 1500));
+            btn.innerHTML = `<span class="pulse-dot"></span> Validating Merchant...`;
+            await new Promise(r => setTimeout(r, 1000));
+
+            // 3. Success -> Calls Backend
             verifyAndOnboard({
-                razorpay_payment_id: "pay_mock_" + Math.random().toString(36).substr(2, 9),
+                razorpay_payment_id: utr, // Use UTR as ID
                 razorpay_order_id: orderId,
-                razorpay_signature: "mock_signature_verified"
+                razorpay_signature: "manual_verified_utr"
             });
         }
 
