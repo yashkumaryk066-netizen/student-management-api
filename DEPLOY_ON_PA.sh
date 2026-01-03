@@ -36,8 +36,9 @@ pip install -r requirements.txt
 echo "🗄️ Applying database migrations..."
 # Attempt to merge any conflicting migrations
 echo "yes" | python manage.py makemigrations --merge
-python manage.py makemigrations
-# Use fake-initial to handle cases where tables already exist (fixes "table already exists" error)
+# Force fake the specific migration that is causing "table already exists" error
+python manage.py migrate student 0007_course_alter_exam_grade_class_alter_exam_subject_and_more --fake
+# Run remaining migrations
 python manage.py migrate --fake-initial
 
 # Collect Static Files
