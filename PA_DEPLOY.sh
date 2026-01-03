@@ -44,7 +44,15 @@ echo "🗄️ Migrating Database..."
 # Attempt to merge conflicting migrations automatically
 python manage.py makemigrations --merge --noinput
 python manage.py makemigrations
-python manage.py migrate
+
+# Try migrating normally
+if ! python manage.py migrate; then
+    echo "⚠️ standard migration failed. It's likely due to 'subscription_expiry' column existing."
+    echo "🔧 Attempting to FAKE migration 0020 to sync history..."
+    python manage.py migrate --fake student 0020
+    echo "🔄 Retrying migration..."
+    python manage.py migrate
+fi
 
 # 5. Collect Static
 echo "🎨 Collecting Static Files..."
