@@ -4,93 +4,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yash A Mishra - Senior Software Architect CV</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <title>Yash Kumar - Chief Software Architect CV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --text-dark: #1e293b;
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --text-main: #334155;
             --text-light: #64748b;
-            --bg-gray: #f8fafc;
+            --bg-light: #f1f5f9;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: #e2e8f0;
-            color: var(--text-dark);
-            line-height: 1.6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #cbd5e1;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 0;
         }
 
-        .page {
-            max-width: 210mm;
+        .cv-container {
+            width: 210mm;
             min-height: 297mm;
-            margin: 40px auto;
             background: white;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: 300px 1fr;
             position: relative;
         }
 
-        .header {
-            background: #1e293b;
+        /* Left Sidebar */
+        .sidebar {
+            background: var(--primary);
             color: white;
-            padding: 60px 50px;
+            padding: 40px 30px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            margin: 0 auto;
+            overflow: hidden;
+            background: #1e293b;
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .contact-list {
+            list-style: none;
+            font-size: 0.9rem;
+        }
+
+        .contact-list li {
+            margin-bottom: 15px;
+            display: flex;
             align-items: center;
+            gap: 15px;
         }
 
-        .header-content h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -1px;
+        .contact-list i {
+            width: 20px;
+            color: var(--accent);
+        }
+
+        .skill-group {
+            margin-bottom: 20px;
+        }
+
+        .skill-name {
+            font-weight: 600;
             margin-bottom: 5px;
+            font-size: 0.9rem;
         }
 
-        .header-content p {
-            font-size: 1.2rem;
-            color: #94a3b8;
+        .skill-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .skill-level {
+            height: 100%;
+            background: var(--accent);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 50px 40px;
+        }
+
+        .header {
+            margin-bottom: 50px;
+        }
+
+        .name {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .role-title {
+            font-size: 1.4rem;
+            color: var(--accent);
+            font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-        .contact-info {
-            text-align: right;
-            font-size: 0.9rem;
-            color: #cbd5e1;
-        }
-
-        .contact-item {
-            margin-bottom: 5px;
-        }
-
-        .contact-item i {
-            width: 20px;
-            color: var(--primary);
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            min-height: 800px;
-        }
-
-        .left-col {
-            padding: 50px;
-            border-right: 1px solid #e2e8f0;
-        }
-
-        .right-col {
-            background: var(--bg-gray);
-            padding: 50px 40px;
+        .intro {
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-top: 20px;
         }
 
         .section {
@@ -98,133 +156,139 @@
         }
 
         .section-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: var(--primary);
+            font-size: 1.2rem;
             font-weight: 700;
-            letter-spacing: 1.5px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 25px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
         .section-title::after {
             content: '';
             flex: 1;
-            height: 1px;
+            height: 2px;
             background: #e2e8f0;
         }
 
-        .exp-item {
+        .exp-card {
             margin-bottom: 30px;
+            position: relative;
+            padding-left: 25px;
+            border-left: 2px solid #e2e8f0;
         }
 
-        .exp-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
+        .exp-card::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
         }
 
-        .role {
-            font-weight: 700;
+        .exp-role {
             font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
         }
 
-        .company {
+        .exp-company {
             color: var(--text-light);
             font-weight: 500;
-        }
-
-        .date {
-            font-size: 0.85rem;
-            color: var(--primary);
-            font-weight: 600;
-            background: #eff6ff;
-            padding: 2px 10px;
-            border-radius: 4px;
-        }
-
-        .exp-desc {
-            font-size: 0.95rem;
-            color: #475569;
-        }
-
-        .exp-desc ul {
-            padding-left: 20px;
-            margin-top: 10px;
-        }
-
-        .exp-desc li {
             margin-bottom: 5px;
         }
 
-        .skill-tag {
-            display: inline-block;
-            padding: 6px 12px;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
+        .exp-date {
             font-size: 0.85rem;
-            font-weight: 500;
-            margin: 0 5px 8px 0;
-            color: #334155;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: inline-block;
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 4px;
         }
 
-        .project-item {
-            margin-bottom: 25px;
-            padding: 20px;
+        .exp-details {
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .project-card {
             background: #f8fafc;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid #e2e8f0;
         }
 
-        .btn-download {
+        /* Actions */
+        .actions {
             position: fixed;
             bottom: 40px;
             right: 40px;
-            background: var(--primary);
-            color: white;
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
             padding: 15px 30px;
             border-radius: 50px;
             text-decoration: none;
+            color: white;
             font-weight: 600;
-            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
-            transition: all 0.3s;
-            z-index: 100;
             display: flex;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .btn-download {
+            background: var(--accent);
         }
 
         .btn-download:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(37, 99, 235, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-home {
+            background: var(--primary);
         }
 
         @media print {
             body {
+                padding: 0;
                 background: white;
+                display: block;
             }
 
-            .page {
-                margin: 0;
+            .cv-container {
                 box-shadow: none;
+                margin: 0;
                 width: 100%;
-                max-width: none;
+                height: auto;
+                min-height: 100vh;
             }
 
-            .btn-download {
+            .actions {
                 display: none;
             }
 
-            .right-col {
-                background: #f8fafc !important;
-                -webkit-print-color-adjust: exact;
-            }
-
-            .header {
-                background: #1e293b !important;
+            .sidebar {
                 -webkit-print-color-adjust: exact;
             }
         }
@@ -232,142 +296,153 @@
 </head>
 
 <body>
-    <div class="page">
-        <header class="header">
-            <div class="header-content">
-                <h1>Yash A Mishra</h1>
-                <p>Senior Software Architect</p>
+    <div class="cv-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-photo">
+                <img src="https://ui-avatars.com/api/?name=Yash+Kumar&background=3b82f6&color=fff&size=200&font-size=0.4"
+                    alt="Yash Kumar">
             </div>
-            <div class="contact-info">
-                <div class="contact-item"><i class="fas fa-envelope"></i> admin@yashamishra.com</div>
-                <div class="contact-item"><i class="fas fa-phone"></i> +91 83569 26231</div>
-                <div class="contact-item"><i class="fab fa-linkedin"></i> linkedin.com/in/yashamishra</div>
-                <div class="contact-item"><i class="fas fa-map-marker-alt"></i> Mumbai, India</div>
+
+            <div class="sidebar-section">
+                <h3>Contact</h3>
+                <ul class="contact-list">
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope"></i> yash.kumar@example.com</li>
+                    <li><i class="fab fa-linkedin"></i> linkedin.com/in/yash-kumar</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
             </div>
-        </header>
 
-        <div class="main-content">
-            <div class="left-col">
-                <div class="section">
-                    <h2 class="section-title">Professional Summary</h2>
-                    <p style="color: #475569;">
-                        Results-driven Senior Software Architect with 8+ years of experience in designing
-                        high-performance distributed systems.
-                        Expertise in full-stack development, cloud infrastructure, and AI integration. Proven track
-                        record of delivering
-                        enterprise-grade solutions that optimize business processes and scalability.
-                    </p>
-                </div>
+            <div class="sidebar-section">
+                <h3>Skills</h3>
 
-                <div class="section">
-                    <h2 class="section-title">Experience</h2>
-
-                    <div class="exp-item">
-                        <div class="exp-header">
-                            <div>
-                                <div class="role">Lead Software Architect</div>
-                                <div class="company">Telepathy Infotech</div>
-                            </div>
-                            <div class="date">2023 - Present</div>
-                        </div>
-                        <div class="exp-desc">
-                            <ul>
-                                <li>Architected "NextGen ERP", a cloud-native education management platform serving
-                                    10,000+ users.</li>
-                                <li>Implemented microservices architecture using Django and RabbitMQ, improving system
-                                    throughput by 300%.</li>
-                                <li>Led a team of 5 developers, establishing CI/CD pipelines and coding standards.</li>
-                                <li>Integrated AI-driven analytics for student performance prediction.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="exp-item">
-                        <div class="exp-header">
-                            <div>
-                                <div class="role">Senior Full Stack Developer</div>
-                                <div class="company">Innovate Solutions</div>
-                            </div>
-                            <div class="date">2021 - 2023</div>
-                        </div>
-                        <div class="exp-desc">
-                            <ul>
-                                <li>Developed high-frequency trading dashboards using React and WebSockets.</li>
-                                <li>Optimized PostgreSQL database queries, reducing report generation time by 60%.</li>
-                                <li>Mentored junior developers and conducted code reviews.</li>
-                            </ul>
-                        </div>
+                <div class="skill-group">
+                    <div class="skill-name">Python & Django</div>
+                    <div class="skill-bar">
+                        <div class="skill-level" style="width: 98%"></div>
                     </div>
                 </div>
 
-                <div class="section">
-                    <h2 class="section-title">Key Projects</h2>
-                    <div class="project-item">
-                        <h3 style="font-size: 1rem; margin-bottom: 5px;">Institute Management SaaS</h3>
-                        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">Python, Django, React, AWS
+                <div class="skill-group">
+                    <div class="skill-name">System Architecture</div>
+                    <div class="skill-bar">
+                        <div class="skill-level" style="width: 95%"></div>
+                    </div>
+                </div>
+
+                <div class="skill-group">
+                    <div class="skill-name">Cloud (AWS/Azure)</div>
+                    <div class="skill-bar">
+                        <div class="skill-level" style="width: 90%"></div>
+                    </div>
+                </div>
+
+                <div class="skill-group">
+                    <div class="skill-name">AI & Machine Learning</div>
+                    <div class="skill-bar">
+                        <div class="skill-level" style="width: 85%"></div>
+                    </div>
+                </div>
+
+                <div class="skill-group">
+                    <div class="skill-name">React & Frontend</div>
+                    <div class="skill-bar">
+                        <div class="skill-level" style="width: 88%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Education</h3>
+                <div style="margin-bottom: 15px;">
+                    <div style="font-weight: 700; color: white;">B.Tech Computer Science</div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">Top Tier University</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">2019 - 2023</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <header class="header">
+                <h1 class="name">Yash Kumar</h1>
+                <div class="role-title">Chief Software Architect</div>
+                <p class="intro">
+                    Visionary technology leader with extensive experience in designing scalable distributed systems,
+                    microservices architecture, and AI-native applications. Passionate about transforming complex
+                    business
+                    requirements into elegant, high-performance technical solutions.
+                </p>
+            </header>
+
+            <section class="section">
+                <h2 class="section-title"><i class="fas fa-briefcase"></i> Experience</h2>
+
+                <div class="exp-card">
+                    <div class="exp-role">Principal Architect</div>
+                    <div class="exp-company">Tech Innovators Global</div>
+                    <div class="exp-date">2023 - Present</div>
+                    <div class="exp-details">
+                        Spearheading the development of "NextGen ERP", an enterprise-grade management system.
+                        Implemented event-driven microservices reducing system latency by 40%. Leading a team of 15+
+                        engineers.
+                    </div>
+                </div>
+
+                <div class="exp-card">
+                    <div class="exp-role">Senior Full Stack Developer</div>
+                    <div class="exp-company">Future Systems Inc.</div>
+                    <div class="exp-date">2021 - 2023</div>
+                    <div class="exp-details">
+                        Architected high-scale SaaS platforms serving 50k+ daily users. Optimized database performance
+                        resulting in 60% faster query execution. integrated Generative AI for automated reporting.
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title"><i class="fas fa-rocket"></i> Key Projects</h2>
+                <div class="project-grid">
+                    <div class="project-card">
+                        <h4 style="color: var(--primary); margin-bottom: 5px;">Enterprise ERP System</h4>
+                        <p style="font-size: 0.9rem; color: #64748b;">
+                            Comprehensive management solution with Finance, HR, and IoT modules.
                         </p>
-                        <p style="font-size: 0.9rem;">
-                            A comprehensive SaaS platform for educational institutions featuring exam management,
-                            automated payroll,
-                            and IoT-based attendance tracking. Deployed on AWS with auto-scaling capabilities.
+                    </div>
+                    <div class="project-card">
+                        <h4 style="color: var(--primary); margin-bottom: 5px;">AI Analytics Engine</h4>
+                        <p style="font-size: 0.9rem; color: #64748b;">
+                            Predictive modeling for student performance using TensorFlow.
+                        </p>
+                    </div>
+                    <div class="project-card">
+                        <h4 style="color: var(--primary); margin-bottom: 5px;">Smart Campus IoT</h4>
+                        <p style="font-size: 0.9rem; color: #64748b;">
+                            Real-time tracking system for transport and attendance.
+                        </p>
+                    </div>
+                    <div class="project-card">
+                        <h4 style="color: var(--primary); margin-bottom: 5px;">FinTech Payment Gateway</h4>
+                        <p style="font-size: 0.9rem; color: #64748b;">
+                            Secure, PCI-DSS compliant payment processing integration.
                         </p>
                     </div>
                 </div>
-            </div>
-
-            <div class="right-col">
-                <div class="section">
-                    <h2 class="section-title">Technical Skills</h2>
-
-                    <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #1e293b;">Backend</h3>
-                    <div style="margin-bottom: 20px;">
-                        <span class="skill-tag">Python (Django/FastAPI)</span>
-                        <span class="skill-tag">Node.js</span>
-                        <span class="skill-tag">Go</span>
-                        <span class="skill-tag">GraphQL</span>
-                    </div>
-
-                    <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #1e293b;">Frontend</h3>
-                    <div style="margin-bottom: 20px;">
-                        <span class="skill-tag">React.js</span>
-                        <span class="skill-tag">Next.js</span>
-                        <span class="skill-tag">TypeScript</span>
-                        <span class="skill-tag">Tailwind CSS</span>
-                    </div>
-
-                    <h3 style="font-size: 0.9rem; margin-bottom: 10px; color: #1e293b;">Cloud & DevOps</h3>
-                    <div style="margin-bottom: 20px;">
-                        <span class="skill-tag">AWS</span>
-                        <span class="skill-tag">Docker</span>
-                        <span class="skill-tag">Kubernetes</span>
-                        <span class="skill-tag">CI/CD</span>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2 class="section-title">Education</h2>
-                    <div style="margin-bottom: 15px;">
-                        <div style="font-weight: 700;">Master of Computer Science</div>
-                        <div style="font-size: 0.9rem; color: #64748b;">IIT Bombay</div>
-                        <div style="font-size: 0.85rem; color: var(--primary);">2018 - 2020</div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2 class="section-title">Certifications</h2>
-                    <ul style="list-style: none; font-size: 0.9rem; color: #475569;">
-                        <li style="margin-bottom: 8px;">★ AWS Certified Solutions Architect</li>
-                        <li style="margin-bottom: 8px;">★ Google Cloud Professional Engineer</li>
-                        <li style="margin-bottom: 8px;">★ Certified Kubernetes Administrator</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
-    <a href="#" onclick="window.print()" class="btn-download">
-        <i class="fas fa-file-pdf"></i> Save as PDF
-    </a>
+    <div class="actions">
+        <!-- Developer Profile Link -->
+        <a href="/developer/" class="btn btn-home">
+            <i class="fas fa-arrow-left"></i> Back to Profile
+        </a>
+        <!-- Print/Download Button -->
+        <a href="#" onclick="window.print(); return false;" class="btn btn-download">
+            <i class="fas fa-download"></i> Download PDF
+        </a>
+    </div>
 </body>
 
 </html>
