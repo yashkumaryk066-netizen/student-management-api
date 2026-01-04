@@ -31,6 +31,9 @@ async function checkAuth() {
         // Update local storage with fresh data
         localStorage.setItem('userRole', (profile.role || 'student').toLowerCase());
 
+        // CRITICAL: Store superuser status
+        localStorage.setItem('isSuperuser', profile.is_superuser);
+
         // If on login page, redirect to dashboard *after* verification
         if (currentPage.includes('/login/') || currentPage === '/login') {
             const role = localStorage.getItem('userRole');
@@ -117,6 +120,9 @@ if (document.getElementById('loginForm')) {
                 localStorage.setItem('userRole', role);
                 localStorage.setItem('userId', profile.id);
                 localStorage.setItem('userFullName', profile.full_name || username);
+
+                // CRITICAL: Store superuser status
+                localStorage.setItem('isSuperuser', profile.is_superuser);
 
                 // Remember me
                 if (rememberMe) {

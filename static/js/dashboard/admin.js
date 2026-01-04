@@ -2935,54 +2935,11 @@ const DashboardApp = {
         } catch (e) {
             this.showAlert('Error', 'Network error occurred.', 'error');
         }
-    }
-}; // End DashboardApp
-
-// Add Pulse Animation Style for Live Badge
-const style = document.createElement('style');
-style.innerHTML = `
-        @keyframes pulse {
-            0 % { transform: scale(0.95); opacity: 0.8; }
-        50% {transform: scale(1.05); opacity: 1; }
-        100% {transform: scale(0.95); opacity: 0.8; }
-    }
-        .loading-spinner {
-            display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 300px;
-        color: var(--primary);
-        font-size: 1.2rem;
-        gap: 10px;
-    }
-        .loading-spinner::after {
-            content: '';
-        width: 30px;
-        height: 30px;
-        border: 3px solid var(--primary);
-        border-top-color: transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-        @keyframes spin {to {transform: rotate(360deg); } }
-        `;
-document.head.appendChild(style);
-
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-
-    document.addEventListener('DOMContentLoaded', () => DashboardApp.init());
-} else {
-    DashboardApp.init();
-}
-
-// Make it globally accessible
-window.DashboardApp = DashboardApp;
-window.navigateTo = (module) => DashboardApp.loadModule(module);
+    },
 
     async loadSuperAdminSubscriptionOverview() {
         const container = document.getElementById('dashboardView');
-        
+
         try {
             const response = await fetch(`${this.apiBaseUrl}/admin/subscriptions/overview/`, {
                 headers: {
@@ -3034,7 +2991,7 @@ window.navigateTo = (module) => DashboardApp.loadModule(module);
 
                     ${pending_payments.length > 0 ? `<div class="module-card" style="margin-bottom: 24px;"><h2 style="margin-bottom: 16px;">⏳ Pending Approvals (${pending_payments.length})</h2><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: rgba(255,255,255,0.05);"><th style="padding: 12px; text-align: left;">Email</th><th style="padding: 12px; text-align: left;">Plan</th><th style="padding: 12px; text-align: left;">Amount</th><th style="padding: 12px; text-align: left;">UTR</th><th style="padding: 12px; text-align: left;">Date</th><th style="padding: 12px; text-align: center;">Action</th></tr></thead><tbody>${pending_payments.map(p => `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 12px;">${p.email}</td><td style="padding: 12px;"><span class="status-badge" style="background: #667eea44; color: #667eea;">${p.plan_type}</span></td><td style="padding: 12px; font-weight: 600;">₹${p.amount}</td><td style="padding: 12px; font-family: monospace; font-size: 0.85rem;">${p.utr}</td><td style="padding: 12px; font-size: 0.85rem;">${p.date}</td><td style="padding: 12px; text-align: center;"><button onclick="DashboardApp.approvePayment(${p.id})" class="btn-primary" style="padding: 6px 16px; font-size: 0.85rem; margin-right: 8px;">Approve</button><button onclick="DashboardApp.rejectPayment(${p.id})" class="btn-secondary" style="padding: 6px 16px; font-size: 0.85rem;">Reject</button></td></tr>`).join('')}</tbody></table></div></div>` : ''}
 
-                    <div class="clients-table"><h2 style="padding: 20px 20px 0 20px; margin: 0;">📋 All Client Subscriptions (${client_subscriptions.length})</h2><div style="overflow-x: auto;"><table><thead><tr><th>Username</th><th>Plan</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Days Left</th><th>Amount Paid</th></tr></thead><tbody>${client_subscriptions.length > 0 ? client_subscriptions.map(client => { const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe'; return `<tr><td style="font-weight: 600;">${client.username}</td><td><span class="status-badge" style="background: #667eea44; color: #667eea;">${client.plan_type}</span></td><td><span class="status-badge ${client.is_expired ? 'status-expired' : 'status-active'}">${client.is_expired ? 'EXPIRED' : client.status}</span></td><td>${client.start_date || '-'}</td><td>${client.end_date || '-'}</td><td><span class="days-badge ${daysClass}">${client. days_left} days</span></td><td style="font-weight: 600;">₹${client.amount_paid}</td></tr>`; }).join('') : '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
+                    <div class="clients-table"><h2 style="padding: 20px 20px 0 20px; margin: 0;">📋 All Client Subscriptions (${client_subscriptions.length})</h2><div style="overflow-x: auto;"><table><thead><tr><th>Username</th><th>Plan</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Days Left</th><th>Amount Paid</th></tr></thead><tbody>${client_subscriptions.length > 0 ? client_subscriptions.map(client => { const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe'; return `<tr><td style="font-weight: 600;">${client.username}</td><td><span class="status-badge" style="background: #667eea44; color: #667eea;">${client.plan_type}</span></td><td><span class="status-badge ${client.is_expired ? 'status-expired' : 'status-active'}">${client.is_expired ? 'EXPIRED' : client.status}</span></td><td>${client.start_date || '-'}</td><td>${client.end_date || '-'}</td><td><span class="days-badge ${daysClass}">${client.days_left} days</span></td><td style="font-weight: 600;">₹${client.amount_paid}</td></tr>`; }).join('') : '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
                 </div>
             `;
 
@@ -3087,17 +3044,17 @@ window.navigateTo = (module) => DashboardApp.loadModule(module);
 };
 
 // Mobile Menu Toggle
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
-    
+
     if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
+        menuToggle.addEventListener('click', function () {
             sidebar.classList.toggle('active');
         });
 
         // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             if (window.innerWidth <= 767) {
                 if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                     sidebar.classList.remove('active');
@@ -3108,7 +3065,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Close sidebar when nav link clicked on mobile
         const navLinks = sidebar.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function () {
                 if (window.innerWidth <= 767) {
                     sidebar.classList.remove('active');
                 }
@@ -3116,3 +3073,45 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Add Pulse Animation Style for Live Badge
+const style = document.createElement('style');
+style.innerHTML = `
+        @keyframes pulse {
+            0 % { transform: scale(0.95); opacity: 0.8; }
+        50% {transform: scale(1.05); opacity: 1; }
+        100% {transform: scale(0.95); opacity: 0.8; }
+    }
+        .loading-spinner {
+            display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+        color: var(--primary);
+        font-size: 1.2rem;
+        gap: 10px;
+    }
+        .loading-spinner::after {
+            content: '';
+        width: 30px;
+        height: 30px;
+        border: 3px solid var(--primary);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+        @keyframes spin {to {transform: rotate(360deg); } }
+        `;
+document.head.appendChild(style);
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+
+    document.addEventListener('DOMContentLoaded', () => DashboardApp.init());
+} else {
+    DashboardApp.init();
+}
+
+// Make it globally accessible
+window.DashboardApp = DashboardApp;
+window.navigateTo = (module) => DashboardApp.loadModule(module);
