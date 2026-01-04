@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.contrib.auth.models import User
 from django.db import models
-from .models import ClientSubscription, UserProfile, Payment
+from .models import ClientSubscription, UserProfile, Payment, Notification
 from datetime import date, timedelta
 import random
 import string
@@ -40,7 +40,8 @@ class SuperAdminDashboardView(APIView):
         
         # Get all client subscriptions
         subscriptions = []
-        all_subs = ClientSubscription.objects.select_related('user', 'user__profile').all()
+        # Removed user__profile from select_related as it might not exist for all users or invalid lookup
+        all_subs = ClientSubscription.objects.select_related('user').all()
         
         for sub in all_subs:
             if sub.user.is_superuser:
@@ -75,7 +76,8 @@ class SuperAdminDashboardView(APIView):
             elif pmt.student:
                 user_name = pmt.student.name
             elif pmt.metadata:
-                user_name = pmt.metadata.get('email', 'Unknown')
+                # Safer get
+                user_name = pmt.metadata.get('email', 'Unknown') if pmt.metadata else 'Unknown'
                 
             pending_list.append({
                 'id': pmt.id,
@@ -95,7 +97,7 @@ class SuperAdminDashboardView(APIView):
             },
             'pending_payments': pending_list,
             'client_subscriptions': subscriptions,
-            'recent_notifications': models.Notification.objects.filter(recipient_type='ADMIN').order_by('-created_at')[:5].values('title', 'message', 'created_at')
+            'recent_notifications': Notification.objects.filter(recipient_type='ADMIN').order_by('-created_at')[:5].values('title', 'message', 'created_at')
         })
 
 class SuperAdminClientActionView(APIView):
