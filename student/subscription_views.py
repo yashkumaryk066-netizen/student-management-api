@@ -119,63 +119,71 @@ class SubscriptionPaymentVerifyView(APIView):
                 "received": str(amount)
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create or get user (without password initially)
-        user, created = User.objects.get_or_create(
-            username=email,
-            defaults={'email': email}
-        )
-        
-        if created:
-            user.set_unusable_password()  # No access until verified
-            user.save()
-        
-        # Create profile if not exists
-        if not hasattr(user, 'profile'):
-            UserProfile.objects.create(
-                user=user,
-                role='CLIENT',
-                institution_type=plan_type,
-                phone=phone or ''
+        try:
+            # Create or get user (without password initially)
+            user, created = User.objects.get_or_create(
+                username=email,
+                defaults={'email': email}
             )
-        
-        # Create pending payment record
-        payment = Payment.objects.create(
-            student=None,  # No student yet, will be linked after verification
-            transaction_id=utr_number,
-            amount=amount,
-            due_date=date.today(),
-            status='PENDING_VERIFICATION',
-            description=f"{plan_type} Plan - Bank Transfer (UTR: {utr_number})"
-        )
-        
-        # Store additional metadata
-        payment.metadata = {
-            'email': email,
-            'phone': phone,
-            'plan_type': plan_type,
-            'user_id': user.id
-        }
-        payment.save()
-        
-        # Notify admin
-        logger.info(f"🔔 NEW PAYMENT SUBMISSION: {plan_type} - ₹{amount} - UTR: {utr_number} - Email: {email}")
-        
-        return Response({
-            "status": "SUBMITTED_FOR_VERIFICATION",
-            "message": "Payment submitted successfully!",
-            "details": {
-                "utr_number": utr_number,
-                "amount": str(amount),
-                "plan_type": plan_type,
-                "verification_status": "PENDING"
-            },
-            "next_steps": [
-                "Admin will verify your payment with bank statement",
-                "You will receive credentials via email/SMS within 1-2 hours",
-                "Check your email for updates"
-            ],
-            "estimated_activation": "1-2 hours"
-        })
+            
+            if created:
+                user.set_unusable_password()  # No access until verified
+                user.save()
+            
+            # Create profile if not exists
+            if not hasattr(user, 'profile'):
+                UserProfile.objects.create(
+                    user=user,
+                    role='CLIENT',
+                    institution_type=plan_type,
+                    phone=phone or ''
+                )
+            
+            # Create pending payment record
+            payment = Payment.objects.create(
+                student=None,  # No student yet, will be linked after verification
+                transaction_id=utr_number,
+                amount=amount,
+                due_date=date.today(),
+                status='PENDING_VERIFICATION',
+                description=f"{plan_type} Plan - Bank Transfer (UTR: {utr_number})"
+            )
+            
+            # Store additional metadata
+            payment.metadata = {
+                'email': email,
+                'phone': phone,
+                'plan_type': plan_type,
+                'user_id': user.id
+            }
+            payment.save()
+            
+            # Notify admin
+            logger.info(f"🔔 NEW PAYMENT SUBMISSION: {plan_type} - ₹{amount} - UTR: {utr_number} - Email: {email}")
+            
+            return Response({
+                "status": "SUBMITTED_FOR_VERIFICATION",
+                "message": "Payment submitted successfully!",
+                "details": {
+                    "utr_number": utr_number,
+                    "amount": str(amount),
+                    "plan_type": plan_type,
+                    "verification_status": "PENDING"
+                },
+                "next_steps": [
+                    "Admin will verify your payment with bank statement",
+                    "You will receive credentials via email/SMS within 1-2 hours",
+                    "Check your email for updates"
+                ],
+                "estimated_activation": "1-2 hours"
+            })
+            
+        except Exception as e:
+            logger.error(f"❌ Payment Verification Failed: {str(e)}")
+            return Response({
+                "error": "Server Error",
+                "message": f"Could not process payment: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class AdminPaymentApprovalView(APIView):
@@ -265,29 +273,25 @@ Plan: {plan_type}
 Valid Until: {profile.subscription_expiry}
 Amount Paid: ₹{amount}
 
-⚠️ IMPORTANT:
-• Save these credentials immediately
-• Change your password after first login
-• Contact support for any issues
+Please change your password after your first login.
 
-Thank you for choosing our platform!
-
-Best regards,
-Team
+Regards,
+Institute Management System Team
                     """
                     
                     send_mail(
-                        subject=subject,
-                        message=message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[email],
-                        fail_silently=False
+                        subject,
+                        message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                        fail_silently=False,
                     )
                     
-                    logger.info(f"📧 Credentials emailed to {email}")
+                    logger.info(f"📧 Credentials email sent to {email}")
                     
-                except Exception as email_error:
-                    logger.error(f"📧 Email sending failed: {email_error}")
+                except Exception as mail_error:
+                    logger.error(f"❌ Failed to send email to {email}: {str(mail_error)}")
+                    # Don't fail the request, just log it. Admin can resend manually if needed.
                     # Don't fail the approval if email fails
                 
                 return Response({
