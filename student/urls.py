@@ -163,7 +163,7 @@ urlpatterns = [
 
     # REPORTS
     path('reports/', ReportListView.as_view(), name='report-list'),
-    path('reports/download/', ReportDownloadView.as_view(), name='report-download'),
+    path('reports/download/<int:pk>/', ReportDownloadView.as_view(), name='report-download'),
     
     # Invoice
     path('invoice/<int:payment_id>/download/', InvoiceDownloadView.as_view(), name='invoice-download'),

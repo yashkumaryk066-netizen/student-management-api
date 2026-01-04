@@ -1258,14 +1258,14 @@
 
             try {
                 // Call new subscription verify API
-                const response = await fetch('/api/subscription/verify-payment/', {
+                const response = await fetch('/api/subscription/submit/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         email: email,
                         phone: phone,
                         plan_type: selectedPlan,
-                        utr_number: utr,
+                        utr: utr,
                         amount: selectedAmount.toString()
                     })
                 });

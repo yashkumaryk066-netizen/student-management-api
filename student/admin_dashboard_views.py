@@ -36,13 +36,16 @@ class PublicSubscriptionSubmitView(APIView):
             return Response({'error': 'This UTR/Transaction ID has already been submitted.'}, status=400)
 
         # Create Payment Record
+        # Payment model does not have 'plan_type', so we store it in metadata
         Payment.objects.create(
             amount=amount,
             transaction_id=utr,
-            plan_type=plan_type,
+            # plan_type=plan_type,  <-- REMOVED (Field doesn't exist)
             status='PENDING_VERIFICATION',
             payment_type='SUBSCRIPTION',
-            metadata={'email': email} # Store email for user creation later
+            due_date=date.today(), # Required field
+            description=f"Subscription: {plan_type}",
+            metadata={'email': email, 'plan_type': plan_type} # Store plan here
         )
 
         return Response({'message': 'Payment submitted successfully! Admin will verify and email your credentials.'})
@@ -112,7 +115,7 @@ class AdminPaymentApprovalView(APIView):
 
             # 2. Create/Update Subscription
             sub, _ = ClientSubscription.objects.get_or_create(user=user)
-            sub.plan_type = payment.plan_type or 'SCHOOL'
+            sub.plan_type = payment.metadata.get('plan_type', 'SCHOOL')
             sub.transaction_id = payment.transaction_id
             sub.amount_paid = payment.amount
             sub.activate(days=30) # Activates and sets dates

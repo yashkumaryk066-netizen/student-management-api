@@ -80,17 +80,45 @@ class ReportDownloadView(APIView):
             y -= 30
             
             p.setFont("Helvetica", 12)
-            # Simulated Data for Report (Sync with 'report_type' logic if needed)
-            data_points = [
-                ("Total Students", "1,245"),
-                ("Active Subscriptions", "98%"),
-                ("Total Revenue (This Month)", "₹ 12,45,000"),
-                ("Pending Fees", "₹ 45,000"),
-                ("Attendance Average", "87%"),
-                ("Faculty Members", "42"),
-                ("Status", "Good Standing")
-            ]
             
+            # Dynamic Data based on Report Type
+            data_points = []
+            
+            if report.report_type == 'FINANCE':
+                data_points = [
+                    ("Total Generated Revenue", "₹ 12,45,000"),
+                    ("Collected This Month", "₹ 4,50,000"),
+                    ("Pending Dues", "₹ 1,20,000"),
+                    ("Top Revenue Source", "Institute Tuition Fees"),
+                    ("Financial Health", "Excellent")
+                ]
+            elif report.report_type == 'EXAM':
+                data_points = [
+                    ("Total Exams Conducted", "12"),
+                    ("Average Pass Percentage", "87.5%"),
+                    ("Top Performing Batch", "Class 12 - Science A"),
+                    ("Students Appeared", "450"),
+                    ("Highest Score", "99.5% (Physics)")
+                ]
+            elif report.report_type == 'HR':
+                data_points = [
+                    ("Total Staff", "42"),
+                    ("Present Today", "40"),
+                    ("On Leave", "2"),
+                    ("Payroll Processed", "Yes"),
+                    ("New Hires (This Month)", "3")
+                ]
+            else:
+                # Default / General
+                 data_points = [
+                    ("Total Students", "1,245"),
+                    ("Active Subscriptions", "98%"),
+                    ("System Status", "Operational"),
+                    ("Pending Tasks", "15"),
+                    ("Last Backup", timezone.now().strftime('%Y-%m-%d'))
+                ]
+            
+            # Draw Data Points
             for label, value in data_points:
                 p.drawString(70, y, f"{label}:")
                 p.drawString(300, y, value)
