@@ -6,13 +6,20 @@ class Command(BaseCommand):
     help = 'Create a super admin with lifetime access'
 
     def handle(self, *args, **options):
-        username = 'superadmin'
-        email = 'admin@yourdomain.com'
-        password = 'Admin@123456'  # Change this after first login
+        username = 'yash.kumar'
+        email = 'yash.kumar@yourdomain.com'
+        password = 'Ysonm@12'
         
         # Check if super admin already exists
         if User.objects.filter(username=username).exists():
             self.stdout.write(self.style.WARNING(f'Super admin "{username}" already exists!'))
+            user = User.objects.get(username=username)
+            # Update password if needed
+            user.set_password(password)
+            user.is_superuser = True
+            user.is_staff = True
+            user.save()
+            self.stdout.write(self.style.SUCCESS('✅ Super Admin Password Updated!'))
             return
         
         # Create super admin user
@@ -36,4 +43,4 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'   Email: {email}'))
         self.stdout.write(self.style.SUCCESS(f'   Password: {password}'))
         self.stdout.write(self.style.SUCCESS(f'   Access: Lifetime (No expiry)'))
-        self.stdout.write(self.style.WARNING('⚠️  IMPORTANT: Change password after first login!'))
+        self.stdout.write(self.style.WARNING('⚠️  Keep these credentials secure!'))

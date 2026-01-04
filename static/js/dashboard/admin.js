@@ -1632,6 +1632,16 @@ const DashboardApp = {
         const container = document.getElementById('dashboardView');
         container.innerHTML = '<div class="loading-spinner"></div>';
 
+        // Check if super admin
+        const userRole = localStorage.getItem('userRole');
+        const isSuperuser = localStorage.getItem('isSuperuser') === 'true';
+
+        if (isSuperuser) {
+            // Load super admin overview instead
+            await this.loadSuperAdminSubscriptionOverview();
+            return;
+        }
+
         try {
             // Fetch Real Status from API
             const sub = await SubscriptionAPI.getStatus();
@@ -2969,3 +2979,109 @@ if (document.readyState === 'loading') {
 // Make it globally accessible
 window.DashboardApp = DashboardApp;
 window.navigateTo = (module) => DashboardApp.loadModule(module);
+
+    async loadSuperAdminSubscriptionOverview() {
+        const container = document.getElementById('dashboardView');
+        
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/subscriptions/overview/`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load overview');
+            }
+
+            const data = await response.json();
+            const { stats, pending_payments, client_subscriptions } = data;
+
+            container.innerHTML = `
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+                    .superadmin-overview { font-family: 'Inter', sans-serif; padding: 20px; }
+                    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+                    .stat-card { background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; text-align: center; }
+                    .stat-value { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 12px 0; }
+                    .stat-label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+                    .clients-table { background: rgba(255,255,255,0.05); border-radius: 16px; overflow: hidden; margin-top: 20px; }
+                    .clients-table table { width: 100%; border-collapse: collapse; }
+                    .clients-table th { background: rgba(255,255,255,0.1); padding: 16px; text-align: left; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid rgba(255,255,255,0.2); }
+                    .clients-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+                    .clients-table tr:hover { background: rgba(255,255,255,0.03); }
+                    .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+                    .status-active { background: #10b98144; color: #10b981; }
+                    .status-expired { background: #ef444444; color: #ef4444; }
+                    .days-badge { padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+                    .days-danger { background: #ef4444; color: white; }
+                    .days-warning { background: #f59e0b; color: white; }
+                    .days-safe { background: #10b981; color: white; }
+                </style>
+
+                <div class="superadmin-overview">
+                    <div class="module-header">
+                        <h1 class="page-title">👑 Super Admin - Subscription Overview</h1>
+                        <p class="page-subtitle">Manage all client subscriptions and approvals</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-label">👥 Total Clients</div><div class="stat-value">${stats.total_clients}</div></div>
+                        <div class="stat-card"><div class="stat-label">✅ Active Subscriptions</div><div class="stat-value">${stats.active_subscriptions}</div></div>
+                        <div class="stat-card"><div class="stat-label">⏳ Pending Approvals</div><div class="stat-value">${stats.pending_approvals}</div></div>
+                        <div class="stat-card"><div class="stat-label">💰 Total Revenue</div><div class="stat-value">₹${parseFloat(stats.total_revenue).toLocaleString('en-IN')}</div></div>
+                    </div>
+
+                    ${pending_payments.length > 0 ? `<div class="module-card" style="margin-bottom: 24px;"><h2 style="margin-bottom: 16px;">⏳ Pending Approvals (${pending_payments.length})</h2><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: rgba(255,255,255,0.05);"><th style="padding: 12px; text-align: left;">Email</th><th style="padding: 12px; text-align: left;">Plan</th><th style="padding: 12px; text-align: left;">Amount</th><th style="padding: 12px; text-align: left;">UTR</th><th style="padding: 12px; text-align: left;">Date</th><th style="padding: 12px; text-align: center;">Action</th></tr></thead><tbody>${pending_payments.map(p => `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 12px;">${p.email}</td><td style="padding: 12px;"><span class="status-badge" style="background: #667eea44; color: #667eea;">${p.plan_type}</span></td><td style="padding: 12px; font-weight: 600;">₹${p.amount}</td><td style="padding: 12px; font-family: monospace; font-size: 0.85rem;">${p.utr}</td><td style="padding: 12px; font-size: 0.85rem;">${p.date}</td><td style="padding: 12px; text-align: center;"><button onclick="DashboardApp.approvePayment(${p.id})" class="btn-primary" style="padding: 6px 16px; font-size: 0.85rem; margin-right: 8px;">Approve</button><button onclick="DashboardApp.rejectPayment(${p.id})" class="btn-secondary" style="padding: 6px 16px; font-size: 0.85rem;">Reject</button></td></tr>`).join('')}</tbody></table></div></div>` : ''}
+
+                    <div class="clients-table"><h2 style="padding: 20px 20px 0 20px; margin: 0;">📋 All Client Subscriptions (${client_subscriptions.length})</h2><div style="overflow-x: auto;"><table><thead><tr><th>Username</th><th>Plan</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Days Left</th><th>Amount Paid</th></tr></thead><tbody>${client_subscriptions.length > 0 ? client_subscriptions.map(client => { const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe'; return `<tr><td style="font-weight: 600;">${client.username}</td><td><span class="status-badge" style="background: #667eea44; color: #667eea;">${client.plan_type}</span></td><td><span class="status-badge ${client.is_expired ? 'status-expired' : 'status-active'}">${client.is_expired ? 'EXPIRED' : client.status}</span></td><td>${client.start_date || '-'}</td><td>${client.end_date || '-'}</td><td><span class="days-badge ${daysClass}">${client. days_left} days</span></td><td style="font-weight: 600;">₹${client.amount_paid}</td></tr>`; }).join('') : '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
+                </div>
+            `;
+
+        } catch (error) {
+            console.error('Error loading super admin overview:', error);
+            container.innerHTML = `<div class="module-header"><h1 class="page-title">👑 Super Admin</h1></div><div class="module-card" style="text-align: center; padding: 40px;"><p style="color: var(--text-muted);">Failed to load overview. ${error.message}</p><button class="btn-primary" onclick="DashboardApp.loadSubscriptionManagement()">Try Again</button></div>`;
+        }
+    },
+
+    async approvePayment(paymentId) {
+        if (!confirm('Approve this payment? Credentials will be emailed.')) return;
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+                body: JSON.stringify({ payment_id: paymentId, action: 'approve' })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                this.showAlert('✅ Approved!', 'Account activated. Credentials emailed.', 'success');
+                setTimeout(() => this.loadSubscriptionManagement(), 1500);
+            } else {
+                this.showAlert('Failed', result.error || 'Could not approve', 'error');
+            }
+        } catch (error) {
+            this.showAlert('Error', 'Failed to approve. Try again.', 'error');
+        }
+    },
+
+    async rejectPayment(paymentId) {
+        const reason = prompt('Enter rejection reason:');
+        if (!reason) return;
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+                body: JSON.stringify({ payment_id: paymentId, action: 'reject', notes: reason })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                this.showAlert('Rejected', 'Payment rejected.', 'success');
+                setTimeout(() => this.loadSubscriptionManagement(), 1500);
+            } else {
+                this.showAlert('Failed', result.error || 'Could not reject', 'error');
+            }
+        } catch (error) {
+            this.showAlert('Error', 'Failed to reject. Try again.', 'error');
+        }
+    },
+};
