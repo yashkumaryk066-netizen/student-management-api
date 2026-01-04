@@ -38,6 +38,7 @@ from .subscription_views import (
     SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
     SubscriptionPaymentVerifyView, AdminPaymentApprovalView, PendingPaymentsListView
 )
+from .admin_dashboard_views import SuperAdminDashboardView
 from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
@@ -140,6 +141,9 @@ urlpatterns = [
     # ADMIN PAYMENT VERIFICATION
     path('admin/payments/pending/', PendingPaymentsListView.as_view(), name='admin-pending-payments'),
     path('admin/payments/approve/', AdminPaymentApprovalView.as_view(), name='admin-approve-payment'),
+    
+    # SUPER ADMIN DASHBOARD
+    path('admin/subscriptions/overview/', SuperAdminDashboardView.as_view(), name='superadmin-overview'),
 
     # REPORTS
     path('reports/', ReportListView.as_view(), name='report-list'),
