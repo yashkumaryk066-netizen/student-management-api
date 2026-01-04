@@ -1592,7 +1592,9 @@ const DashboardApp = {
                     <td>${r.date}</td>
                     <td><span class="status-badge status-active">${r.status}</span></td>
                     <td>
-                        ${r.url !== '#' ? `<a href="${this.apiBaseUrl}/reports/download/${r.id}/" target="_blank" class="btn-action" style="padding:4px 10px; font-size:0.8rem; text-decoration:none;">Download</a>` : '<button disabled>Processing</button>'}
+                        <button onclick="DashboardApp.downloadReport(${r.id}, '${r.name}')" class="btn-action" style="padding:4px 10px; font-size:0.8rem;">
+                            Download
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -1600,6 +1602,43 @@ const DashboardApp = {
         } catch (error) {
             console.error(error);
             document.getElementById('reportsTableBody').innerHTML = '<tr><td colspan="5" class="text-center">Failed to load reports.</td></tr>';
+        }
+    },
+
+    async downloadReport(id, name) {
+        try {
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Downloading...";
+            btn.disabled = true;
+
+            const response = await fetch(`${this.apiBaseUrl}/reports/download/${id}/`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                // Clean filename
+                const filename = name.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                btn.innerText = "Downloaded";
+            } else {
+                alert("Download failed: " + response.statusText);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Download Error");
         }
     },
 
