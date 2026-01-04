@@ -676,21 +676,21 @@ const DashboardApp = {
             </div>
             
             <div class="stats-mini-grid">
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #34d399;">₹12.4L</div>
-                    <div class="stat-mini-label">Collected This Month</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #34d399;">₹12.4L</div>
+                    <div class="card-title">Collected This Month</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #fbbf24;">₹4.8L</div>
-                    <div class="stat-mini-label">Pending Fees</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #fbbf24;">₹4.8L</div>
+                    <div class="card-title">Pending Fees</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #f87171;">₹1.2L</div>
-                    <div class="stat-mini-label">Overdue</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #f87171;">₹1.2L</div>
+                    <div class="card-title">Overdue</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">47</div>
-                    <div class="stat-mini-label">Pending Records</div>
+                <div class="stat-card">
+                    <div class="card-value">47</div>
+                    <div class="card-title">Pending Records</div>
                 </div>
             </div>
             
@@ -2664,17 +2664,17 @@ const DashboardApp = {
         </div>
 
         <div class="stats-mini-grid">
-            <div class="stat-mini-card">
-                <div class="stat-mini-value" id="totalCourses">0</div>
-                <div class="stat-mini-label">Active Courses</div>
+            <div class="stat-card">
+                <div class="card-value" id="totalCourses">0</div>
+                <div class="card-title">Active Courses</div>
             </div>
-            <div class="stat-mini-card">
-                <div class="stat-mini-value" id="totalBatches" style="color: #fbbf24;">0</div>
-                <div class="stat-mini-label">Running Batches</div>
+            <div class="stat-card">
+                <div class="card-value" id="totalBatches" style="color: #fbbf24;">0</div>
+                <div class="card-title">Running Batches</div>
             </div>
-            <div class="stat-mini-card">
-                <div class="stat-mini-value" id="totalEnrollments" style="color: #34d399;">0</div>
-                <div class="stat-mini-label">Total Enrollments</div>
+            <div class="stat-card">
+                <div class="card-value" id="totalEnrollments" style="color: #34d399;">0</div>
+                <div class="card-title">Total Enrollments</div>
             </div>
         </div>
 
