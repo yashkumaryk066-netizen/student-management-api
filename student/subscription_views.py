@@ -76,6 +76,8 @@ class SubscriptionPaymentVerifyView(APIView):
         'INSTITUTE': Decimal('1500.00')
     }
 
+    authentication_classes = [] # Disable auth to prevent CSRF errors on public endpoint
+
     def post(self, request):
         email = request.data.get('email')
         phone = request.data.get('phone')
