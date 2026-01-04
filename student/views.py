@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework.response import Response
 from .models import (
     Student, Attendence, UserProfile, Payment, Notification,
-    Course, Batch, Enrollment
+    Course, Batch, Enrollment, LiveClass
 )
 from .Serializer import (
     StudentSerializer, AttendenceSerializer, UserProfileSerializer, PaymentSerializer, NotificationSerializer,
@@ -1047,3 +1047,48 @@ class InvoiceDownloadView(APIView):
         response = HttpResponse(pdf_buffer, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="invoice_{payment.id}.pdf"'
         return response
+
+# ==================== LIVE CLASS VIEWS ====================
+from datetime import datetime
+
+class LiveClassListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        today = timezone.now()
+        # Filter active classes
+        classes = LiveClass.objects.filter(is_active=True, start_time__gte=today - timedelta(hours=2)).order_by('start_time')
+        
+        # SAAS Isolation: Show only valid classes for this user's context
+        # (This logic assumes basic fetching. Enhance as needed for strict isolation)
+        
+        data = [{
+            "id": c.id,
+            "title": c.title,
+            "platform": c.get_platform_display(),
+            "start_time": c.start_time.strftime("%I:%M %p"),
+            "teacher": c.teacher.get_full_name() or c.teacher.username,
+            "url": c.meeting_url,
+            "status": "LIVE" if c.start_time <= today else "UPCOMING"
+        } for c in classes]
+        return Response(data)
+
+    def post(self, request):
+        if not (request.user.is_staff or hasattr(request.user, 'profile') and request.user.profile.role in ['ADMIN', 'TEACHER', 'CLIENT']):
+             return Response({"error": "Only Teachers/Admins can create classes"}, status=403)
+
+        title = request.data.get('title')
+        url = request.data.get('url')
+        start_time = request.data.get('start_time') # Expect ISO string
+
+        if not all([title, url, start_time]):
+             return Response({"error": "Missing fields"}, status=400)
+
+        LiveClass.objects.create(
+            title=title,
+            meeting_url=url,
+            start_time=start_time,
+            teacher=request.user,
+            platform='ZOOM' if 'zoom' in url.lower() else 'GOOGLE_MEET'
+        )
+        return Response({"message": "Class Scheduled Successfully!"})

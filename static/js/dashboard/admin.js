@@ -235,6 +235,9 @@ const DashboardApp = {
             case 'subscription':
                 this.loadSubscriptionManagement();
                 break;
+            case 'live-classes':
+                this.loadLiveClassManagement();
+                break;
             default:
                 this.loadDashboardHome();
         }
@@ -1706,6 +1709,136 @@ const DashboardApp = {
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
+        }
+    },
+
+    async loadLiveClassManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">🔴 Live Classes & Webinars</h1>
+                <p class="page-subtitle">Host or join interactive Zoom sessions instantly.</p>
+            </div>
+            <button class="btn-primary" onclick="DashboardApp.openLiveClassModal()">
+                + Schedule New Class
+            </button>
+        </div>
+
+        <div class="cards-grid" id="liveClassGrid">
+            <div class="module-card" style="text-align:center; padding:40px;">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+        `;
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/live-classes/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const classes = await response.json();
+
+            const grid = document.getElementById('liveClassGrid');
+            if (classes.length === 0) {
+                grid.innerHTML = `<div class="module-card" style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">
+                    <h3>No Live Classes Scheduled</h3>
+                    <p>Click "Schedule New Class" to start a session.</p>
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = classes.map(c => `
+                <div class="module-card" style="border-left: 4px solid ${c.status === 'LIVE' ? '#ef4444' : '#3b82f6'}; position:relative;">
+                    ${c.status === 'LIVE' ? '<div style="position:absolute; top:20px; right:20px; background:#ef4444; color:white; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:bold; animation:pulse 1.5s infinite;">LIVE NOW</div>' : ''}
+                    
+                    <h3 class="module-title" style="margin-bottom:5px;">${c.title}</h3>
+                    <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">
+                        👨‍🏫 ${c.teacher} &nbsp;|&nbsp; 🖥️ ${c.platform}
+                    </div>
+                    
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+                        <div style="background:var(--background); padding:8px 15px; border-radius:10px; font-weight:600;">
+                            🕒 ${c.start_time}
+                        </div>
+                    </div>
+
+                    <a href="${c.url}" target="_blank" class="btn-action" style="width:100%; text-align:center; text-decoration:none; display:block; background: ${c.status === 'LIVE' ? '#ef4444' : 'var(--primary)'}; border:none;">
+                        ${c.status === 'LIVE' ? '🔴 JOIN CLASS NOW' : 'Start / Join Class'}
+                    </a>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = '<div class="module-card error"><p>Failed to load classes.</p></div>';
+        }
+    },
+
+    openLiveClassModal() {
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal active';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:500px;">
+                <div class="modal-header">
+                    <h2>📅 Schedule Live Class</h2>
+                    <button class="close-modal" onclick="this.closest('.custom-modal').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="liveClassForm" onsubmit="event.preventDefault(); DashboardApp.createLiveClass(this);">
+                        <div class="form-group">
+                            <label>Class Title / Topic</label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. Advanced Physics Discussion" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Meeting URL (Zoom/Meet)</label>
+                            <input type="url" name="url" class="form-control" placeholder="https://zoom.us/j/..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Start From</label>
+                            <input type="datetime-local" name="start_time" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width:100%; margin-top:20px;">Schedule Class</button>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    },
+
+    async createLiveClass(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        btn.innerText = "Scheduling...";
+        btn.disabled = true;
+
+        const data = {
+            title: form.title.value,
+            url: form.url.value,
+            start_time: form.start_time.value
+        };
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/live-classes/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert("Class Scheduled Successfully!");
+                document.querySelector('.custom-modal').remove();
+                this.loadLiveClassManagement(); // Refresh
+            } else {
+                const err = await res.json();
+                alert("Error: " + (err.error || "Failed to schedule"));
+                btn.innerText = "Schedule Class";
+                btn.disabled = false;
+            }
+        } catch (e) {
+            alert("Network Error");
+            console.error(e);
         }
     },
 

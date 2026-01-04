@@ -31,7 +31,8 @@ from .views import (
     VehicleListCreateView, RouteListCreateView, TransportAllocationListCreateView,
     EmployeeListCreateView, LeaveRequestListCreateView,
     ExamListCreateView, EventListCreateView,
-    CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView
+    CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
+    LiveClassListCreateView
 )
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
@@ -119,6 +120,9 @@ urlpatterns = [
 
     # EVENTS
     path('events/', EventListCreateView.as_view(), name='event-list'),
+    
+    # LIVE CLASSES
+    path('live-classes/', LiveClassListCreateView.as_view(), name='live-classes'),
 
     # COACHING
     path('courses/', CourseListCreateView.as_view(), name='course-list'),

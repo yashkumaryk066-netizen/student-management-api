@@ -849,3 +849,32 @@ class GeneratedReport(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.status})"
+
+# ==================== LIVE CLASSES (ZOOM) ====================
+
+class LiveClass(models.Model):
+    """Live Class / Zoom Meeting integration"""
+    PLATFORM_CHOICES = [
+        ('ZOOM', 'Zoom Meeting'),
+        ('GOOGLE_MEET', 'Google Meet'),
+        ('TEAMS', 'Microsoft Teams'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='live_classes', null=True, blank=True)
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hosted_classes')
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, default='ZOOM')
+    meeting_url = models.URLField(max_length=500)
+    meeting_id = models.CharField(max_length=100, blank=True, null=True)
+    password = models.CharField(max_length=50, blank=True, null=True)
+    
+    start_time = models.DateTimeField()
+    duration_minutes = models.IntegerField(default=60)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-start_time']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_platform_display()})"
