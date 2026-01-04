@@ -239,6 +239,16 @@ body {
     margin: 0 auto;
 }
 
+/* Grids */
+.cards-grid,
+.stats-mini-grid,
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
 /* ============================================
    3D CARDS & MODULES
    ============================================ */

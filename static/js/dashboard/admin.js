@@ -784,7 +784,7 @@ const DashboardApp = {
     loadLibraryManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
+    <div class="module-header">
                 <div>
                      <h1 class="page-title">📚 Library Management</h1>
                      <p class="page-subtitle">Track books, issues, and library assets.</p>
@@ -792,24 +792,24 @@ const DashboardApp = {
                 <button class="btn-action" onclick="DashboardApp.addBook()">
                     + Add New Book
                 </button>
-            </div >
+            </div>
             
             <div class="stats-mini-grid">
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #a78bfa;">2,850</div>
-                    <div class="stat-mini-label">Total Books</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #a78bfa;">2,850</div>
+                    <div class="card-title">Total Books</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #60a5fa;">412</div>
-                    <div class="stat-mini-label">Books Issued</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #60a5fa;">412</div>
+                    <div class="card-title">Books Issued</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #34d399;">2,438</div>
-                    <div class="stat-mini-label">Available</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #34d399;">2,438</div>
+                    <div class="card-title">Available</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #f87171;">23</div>
-                    <div class="stat-mini-label">Overdue</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #f87171;">23</div>
+                    <div class="card-title">Overdue</div>
                 </div>
             </div>
             
@@ -882,30 +882,30 @@ const DashboardApp = {
     loadHostelManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
+    <div class="module-header">
                 <div>
                     <h1 class="page-title">🏢 Hostel Management</h1>
                     <p class="page-subtitle">Manage buildings, rooms, and resident allocations.</p>
                 </div>
                 <button class="btn-action" onclick="DashboardApp.allocateRoom()">+ Allocate Room</button>
-            </div >
+            </div>
             
             <div class="stats-mini-grid">
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #fbbf24;">456</div>
-                    <div class="stat-mini-label">Total Residents</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #fbbf24;">456</div>
+                    <div class="card-title">Total Residents</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">120</div>
-                    <div class="stat-mini-label">Total Rooms</div>
+                <div class="stat-card">
+                    <div class="card-value">120</div>
+                    <div class="card-title">Total Rooms</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #34d399;">32</div>
-                    <div class="stat-mini-label">Vacant Rooms</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #34d399;">32</div>
+                    <div class="card-title">Vacant Rooms</div>
                 </div>
-                 <div class="stat-mini-card">
-                    <div class="stat-mini-value">88%</div>
-                    <div class="stat-mini-label">Occupancy Rate</div>
+                 <div class="stat-card">
+                    <div class="card-value">88%</div>
+                    <div class="card-title">Occupancy Rate</div>
                 </div>
             </div>
             
@@ -978,30 +978,30 @@ const DashboardApp = {
     loadTransportManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
+    <div class="module-header">
                 <div>
                      <h1 class="page-title">🚌 Transportation</h1>
                      <p class="page-subtitle">Manage fleet, routes, and drivers.</p>
                 </div>
                 <button class="btn-action" onclick="DashboardApp.addVehicle()">+ Add Vehicle</button>
-            </div >
+            </div>
             
             <div class="stats-mini-grid">
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">18</div>
-                    <div class="stat-mini-label">Total Buses</div>
+                <div class="stat-card">
+                    <div class="card-value">18</div>
+                    <div class="card-title">Total Buses</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #34d399;">12</div>
-                    <div class="stat-mini-label">Active Routes</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #34d399;">12</div>
+                    <div class="card-title">Active Routes</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">650</div>
-                    <div class="stat-mini-label">Students Transported</div>
+                <div class="stat-card">
+                    <div class="card-value">650</div>
+                    <div class="card-title">Students Transported</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">24</div>
-                    <div class="stat-mini-label">Drivers & Staff</div>
+                <div class="stat-card">
+                    <div class="card-value">24</div>
+                    <div class="card-title">Drivers & Staff</div>
                 </div>
             </div>
             
@@ -1063,30 +1063,30 @@ const DashboardApp = {
     loadHRManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
+    <div class="module-header">
                  <div>
                     <h1 class="page-title">👔 HR & Payroll</h1>
                     <p class="page-subtitle">Manage staff, attendance, and payroll processing.</p>
                 </div>
                 <button class="btn-action" onclick="DashboardApp.addStaff()">+ Add Staff Member</button>
-            </div >
+            </div>
             
             <div class="stats-mini-grid">
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">87</div>
-                    <div class="stat-mini-label">Total Staff</div>
+                <div class="stat-card">
+                    <div class="card-value">87</div>
+                    <div class="card-title">Total Staff</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #fbbf24;">₹2.1L</div>
-                    <div class="stat-mini-label">Payroll This Month</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #fbbf24;">₹2.1L</div>
+                    <div class="card-title">Payroll This Month</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" style="color: #f87171;">12</div>
-                    <div class="stat-mini-label">On Leave</div>
+                <div class="stat-card">
+                    <div class="card-value" style="color: #f87171;">12</div>
+                    <div class="card-title">On Leave</div>
                 </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value">5</div>
-                    <div class="stat-mini-label">Pending Approval</div>
+                <div class="stat-card">
+                    <div class="card-value">5</div>
+                    <div class="card-title">Pending Approval</div>
                 </div>
             </div>
             
@@ -2092,12 +2092,12 @@ const DashboardApp = {
     loadSettings() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    < div class="module-header" >
+    <div class="module-header">
         <div>
             <h1 class="page-title">⚙️ Settings</h1>
             <p class="page-subtitle">Manage your profile, security, and preferences.</p>
         </div>
-            </div >
+            </div>
 
     <div class="settings-grid">
         <!-- Profile Section -->
