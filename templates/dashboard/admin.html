@@ -15,7 +15,7 @@
     <div class="dashboard-bg"></div>
 
     <!-- Mobile Menu Toggle -->
-    <button class="menu-toggle" id="menuToggle" style="display: none;">☰</button>
+    <button class="menu-toggle" id="menuToggle" style="display: block;">⋮</button>
 
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
@@ -384,13 +384,8 @@
         const menuToggle = document.getElementById('menuToggle');
 
         menuToggle.addEventListener('click', () => {
-            // On desktop: collapse/expand
-            // On mobile: show/hide
-            if (window.innerWidth > 1024) {
-                sidebar.classList.toggle('collapsed');
-            } else {
-                sidebar.classList.toggle('open');
-            }
+            // Toggle sidebar on all devices
+            sidebar.classList.toggle('open');
         });
 
         // Close sidebar when clicking outside on mobile

@@ -141,10 +141,8 @@ const DashboardApp = {
                 const module = link.getAttribute('href').substring(1);
                 this.loadModule(module);
 
-                // Close sidebar on mobile
-                if (window.innerWidth <= 1024) {
-                    document.getElementById('sidebar').classList.remove('open');
-                }
+                // Close sidebar on ALL devices
+                document.getElementById('sidebar').classList.remove('open');
             });
         });
 

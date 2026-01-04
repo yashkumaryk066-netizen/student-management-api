@@ -120,6 +120,12 @@ body {
     display: flex;
     flex-direction: column;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-100%);
+}
+
+.sidebar.open,
+.dash-sidebar.open {
+    transform: translateX(0);
 }
 
 .sidebar-header,
@@ -211,7 +217,7 @@ body {
    ============================================ */
 .main-content,
 .dash-main {
-    margin-left: var(--sidebar-w);
+    margin-left: 0;
     padding: 0;
     min-height: 100vh;
     transition: margin-left 0.3s;
