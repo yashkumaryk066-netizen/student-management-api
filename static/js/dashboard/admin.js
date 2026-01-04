@@ -1911,40 +1911,160 @@ const DashboardApp = {
             return;
         }
 
-        this.showConfirm(
-            "Renew Subscription?",
-            `Renew your ${planType} plan for 30 days at ₹${amount}?`,
-            () => {
-                this._processRenewal(planType, amount);
-            }
-        );
+        // Show bank transfer details for renewal
+        this._showRenewalBankDetails(planType, amount);
     },
 
-    async _processRenewal(planType, amount) {
+    _showRenewalBankDetails(planType, amount) {
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" onclick="this.parentElement.remove()"></div>
+            <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header">
+                    <h2 style="margin: 0; font-size: 1.5rem;">🔄 Renew ${planType} Plan</h2>
+                    <button class="modal-close" onclick="this.closest('.custom-modal').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Amount to Pay -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; text-align: center;">
+                        <div style="color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-bottom: 8px;">Amount to Pay</div>
+                        <div style="color: white; font-size: 3rem; font-weight: 800;">₹${amount}</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: 8px;">${planType} Plan - 30 Days</div>
+                    </div>
+
+                    <!-- Bank Details -->
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem;">💳 Bank Transfer Details</h3>
+                        <div style="display: grid; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <span style="color: var(--text-muted);">Account Name:</span>
+                                <strong>Your Institute Name</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <span style="color: var(--text-muted);">Account Number:</span>
+                                <strong>1234567890</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <span style="color: var(--text-muted);">IFSC Code:</span>
+                                <strong>SBIN0001234</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <span style="color: var(--text-muted);">Bank:</span>
+                                <strong>State Bank of India</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                                <span style="color: var(--text-muted);">UPI ID:</span>
+                                <strong>yourinstitute@sbi</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Section -->
+                    <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                        <div style="color: #333; font-weight: 600; margin-bottom: 12px;">Scan QR Code to Pay</div>
+                        <div style="width: 200px; height: 200px; margin: 0 auto; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666;">
+                            QR Code Here<br/>(Upload payment_qr.png)
+                        </div>
+                        <div style="color: #666; font-size: 0.85rem; margin-top: 12px;">Use any UPI app to scan and pay</div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div style="background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 12px 0; color: #22c55e; font-size: 1rem;">📝 Payment Instructions</h4>
+                        <ol style="margin: 0; padding-left: 20px; color: var(--text-muted); line-height: 1.6;">
+                            <li>Transfer <strong>exactly ₹${amount}</strong> to above account</li>
+                            <li>Save your payment screenshot</li>
+                            <li>Note down UTR/Transaction Reference Number</li>
+                            <li>Submit UTR below for verification</li>
+                            <li>Admin will verify and extend your plan (1-2 hours)</li>
+                        </ol>
+                    </div>
+
+                    <!-- UTR Submission Form -->
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;">
+                        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem;">✅ Submit Payment Proof</h3>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">UTR / Transaction Reference Number</label>
+                            <input type="text" id="renewalUTR" placeholder="Enter 12-digit UTR number" 
+                                   style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 1rem;"
+                                   minlength="10" maxlength="50" required />
+                        </div>
+                        <button onclick="DashboardApp._submitRenewalUTR('${planType}', ${amount})" 
+                                class="btn-primary" style="width: 100%;">
+                            Submit for Verification
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    },
+
+    async _submitRenewalUTR(planType, amount) {
+        const utrInput = document.getElementById('renewalUTR');
+        const utr = utrInput?.value?.trim();
+
+        if (!utr || utr.length < 10) {
+            this.showAlert("Invalid UTR", "Please enter a valid UTR/Transaction Reference (min 10 characters)", "error");
+            return;
+        }
+
         try {
-            // Show loading alert
-            this.showAlert("Processing...", "Renewing your subscription", "info");
+            // Get user email from profile or storage
+            const userEmail = localStorage.getItem('userEmail') || document.getElementById('profileEmail')?.value;
+            const userPhone = localStorage.getItem('userPhone') || '';
 
-            // Call renewal API
-            const result = await SubscriptionAPI.renew(planType, amount);
+            if (!userEmail) {
+                this.showAlert("Error", "User email not found. Please refresh and try again.", "error");
+                return;
+            }
 
-            // Show success with premium styling
-            this.showAlert(
-                "✅ Renewal Successful!",
-                `Your ${planType} Plan has been renewed for 30 days. New expiry: ${new Date(result.subscription.end_date).toLocaleDateString('en-IN')}`,
-                "success"
-            );
+            this.showAlert("Processing...", "Submitting payment for verification", "info");
 
-            // Reload subscription view to show updated data
-            setTimeout(() => {
-                this.loadSubscriptionManagement();
-            }, 2000);
+            // Submit to verification API
+            const response = await fetch(`${this.apiBaseUrl}/subscription/verify-payment/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify({
+                    email: userEmail,
+                    phone: userPhone,
+                    plan_type: planType,
+                    utr_number: utr,
+                    amount: amount.toString()
+                })
+            });
+
+            const result = await response.json();
+
+            // Close modal
+            document.querySelector('.custom-modal')?.remove();
+
+            if (response.ok) {
+                this.showAlert(
+                    "✅ Payment Submitted!",
+                    `Your renewal request has been submitted successfully. Admin will verify and extend your ${planType} plan within 1-2 hours. You'll receive an email confirmation.`,
+                    "success"
+                );
+
+                // Reload subscription view after 2 seconds
+                setTimeout(() => this.loadSubscriptionManagement(), 2000);
+            } else {
+                this.showAlert(
+                    "Submission Failed",
+                    result.error || result.message || "Could not submit payment. Please try again.",
+                    "error"
+                );
+            }
 
         } catch (error) {
-            console.error('Renewal failed:', error);
+            console.error('Renewal error:', error);
             this.showAlert(
-                "❌ Renewal Failed",
-                error.message || "Could not process renewal. Please try again or contact support.",
+                "Error",
+                "Failed to submit renewal request. Please check your connection and try again.",
                 "error"
             );
         }
