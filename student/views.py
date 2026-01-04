@@ -383,36 +383,47 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        user = request.user
-        data = {
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "full_name": user.get_full_name(),
-            "date_joined": user.date_joined,
-            "is_superuser": user.is_superuser,
-            "is_staff": user.is_staff,
-        }
-        
-        # Try to get UserProfile details if they exist
-        if hasattr(user, 'profile'):
-            profile = user.profile
-            data.update({
-                "role": profile.role,
-                "institution_type": profile.institution_type,
-                "phone": profile.phone,
-                "profile_id": profile.id
-            })
-        else:
-            data.update({
-                "role": "ADMIN" if user.is_superuser else "USER",
-                "phone": "",
-                "profile_id": None
-            })
+        try:
+            user = request.user
+            data = {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "full_name": user.get_full_name(),
+                "date_joined": user.date_joined,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+            }
             
-        return Response(data, status=status.HTTP_200_OK)
+            # Try to get UserProfile details if they exist
+            if hasattr(user, 'profile'):
+                profile = user.profile
+                data.update({
+                    "role": profile.role,
+                    "institution_type": profile.institution_type,
+                    "phone": profile.phone,
+                    "profile_id": profile.id
+                })
+            else:
+                data.update({
+                    "role": "ADMIN" if user.is_superuser else "STUDENT", # Default to STUDENT not USER for safety
+                    "phone": "",
+                    "profile_id": None
+                })
+                
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"❌ Profile View Error: {str(e)}")
+            return Response({
+                "error": "Profile Error",
+                "message": str(e),
+                "role": "student" # Fallback role to prevent frontend crash
+            }, status=status.HTTP_200_OK) # Return 200 with error so frontend parsing works (or handle 500 in frontend)
+
+    def post(self, request):
+        return self.get(request)
     
     def put(self, request):
         user = request.user
