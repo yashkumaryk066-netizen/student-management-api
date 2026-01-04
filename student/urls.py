@@ -39,6 +39,7 @@ from .subscription_views import (
     SubscriptionPaymentVerifyView, AdminPaymentApprovalView, PendingPaymentsListView
 )
 from .admin_dashboard_views import SuperAdminDashboardView
+from .plan_features_views import UserPlanFeaturesView
 from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
@@ -63,6 +64,9 @@ urlpatterns = [
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="jwt-refresh"),
     #PROFILE
     path("profile/", ProfileView.as_view(), name="profile"),
+    
+    # PLAN FEATURES (Check user's plan access)
+    path("plan/features/", UserPlanFeaturesView.as_view(), name="plan-features"),
     
     # ROLE-BASED DASHBOARDS
     path("dashboard/student/", StudentDashboardView.as_view(), name="student-dashboard"),

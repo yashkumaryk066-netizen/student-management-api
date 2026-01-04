@@ -17,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from .permissions import IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin, IsClient
+from .permissions import IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin, IsClient, StudentLimitPermission
 from datetime import date, timedelta
 
 @extend_schema_view(
@@ -47,7 +47,8 @@ from datetime import date, timedelta
     ),
 )
 class StudentListCreateView(APIView):
-    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, StudentLimitPermission]
+    required_feature = 'students'  # For plan-based access control
     
     def get(self, request):
         search = request.query_params.get("search","").strip()
