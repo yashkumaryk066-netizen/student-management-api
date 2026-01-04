@@ -180,12 +180,19 @@ class SubscriptionPaymentVerifyView(APIView):
 
 class AdminPaymentApprovalView(APIView):
     """
-    Admin verifies payment from bank statement and approves/rejects.
-    Only admin can access this endpoint.
+    Super Admin ONLY - Verifies payment from bank statement and approves/rejects.
+    Regular clients cannot approve payments.
     """
     permission_classes = [permissions.IsAdminUser]
 
     def post(self, request):
+        # CRITICAL: Only superuser can approve payments
+        if not request.user.is_superuser:
+            return Response({
+                "error": "Access Denied",
+                "message": "Only super admin can approve/reject payments."
+            }, status=status.HTTP_403_FORBIDDEN)
+        
         payment_id = request.data.get('payment_id')
         action = request.data.get('action')  # 'approve' or 'reject'
         admin_notes = request.data.get('notes', '')

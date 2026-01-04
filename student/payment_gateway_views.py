@@ -32,9 +32,11 @@ class CreateOrderView(APIView):
             # Check if Razorpay keys are properly configured
             if not KEY_ID or not KEY_SECRET or 'YourKeyHere' in KEY_ID or len(KEY_ID) < 10:
                 return Response({
-                    'error': 'Payment Gateway Not Configured',
-                    'message': 'Payment processing is currently unavailable. Please contact administrator to configure Razorpay.',
-                    'status': 'service_unavailable'
+                    'error': 'PAYMENT_GATEWAY_NOT_CONFIGURED',
+                    'message': 'Automatic payment gateway is not available. Please use Manual Bank Transfer payment method.',
+                    'payment_method': 'BANK_TRANSFER',
+                    'instructions': 'You will be shown QR code and bank details for payment.',
+                    'status': 'gateway_unavailable'
                 }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
             # REAL RAZORPAY ORDER CREATION
