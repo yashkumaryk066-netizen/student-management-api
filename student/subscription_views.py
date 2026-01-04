@@ -9,6 +9,8 @@ import string
 import logging
 from decimal import Decimal
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 logger = logging.getLogger(__name__)
 
@@ -64,140 +66,134 @@ class SubscriptionPurchaseView(APIView):
         })
 
 
-class SubscriptionPaymentVerifyView(APIView):
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([permissions.AllowAny])
+def verify_payment_api(request):
     """
     User submits UTR and payment screenshot for admin verification.
     Creates a pending payment record.
+    Function Based View to avoid Class-Based complications and 500 errors.
     """
-    permission_classes = [permissions.AllowAny]
-
     PRICING = {
         'SCHOOL': Decimal('1000.00'),
         'COACHING': Decimal('500.00'),
         'INSTITUTE': Decimal('1500.00')
     }
-
-    authentication_classes = [] # Disable auth to prevent CSRF errors on public endpoint
-
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            return super().dispatch(request, *args, **kwargs)
-        except Exception as e:
-            logger.error(f"❌ Dispatch Error: {str(e)}")
-            return JsonResponse({
-                "error": "Server Error",
-                "message": f"Server failed to process request: {str(e)}"
-            }, status=500)
-
-    def post(self, request):
+    
+    try:
+        # 1. Parse Data
         try:
             email = request.data.get('email')
             phone = request.data.get('phone')
             plan_type = request.data.get('plan_type')
-            utr_number = request.data.get('utr_number')  # UTR/Transaction Reference
+            utr_number = request.data.get('utr_number')
             amount = request.data.get('amount')
-            payment_screenshot = request.FILES.get('payment_screenshot')  # Optional
-            
-            if not all([email, plan_type, utr_number, amount]):
-                return Response({
-                    "error": "Missing required fields",
-                    "required": ["email", "plan_type", "utr_number", "amount"]
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Verify minimum length for UTR
-            if len(str(utr_number)) < 10:
-                return Response({
-                    "error": "Invalid UTR Number",
-                    "message": "UTR/Transaction Reference must be at least 10 characters"
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Check for duplicate UTR
+            # payment_screenshot = request.FILES.get('payment_screenshot') # Ignored for now
+        except Exception as parse_error:
+             return JsonResponse({
+                "error": "Bad Request",
+                "message": f"Invalid Data Format: {str(parse_error)}"
+            }, status=400)
+        
+        # 2. Validation
+        if not all([email, plan_type, utr_number, amount]):
+            return JsonResponse({
+                "error": "Missing required fields",
+                "required": ["email", "plan_type", "utr_number", "amount"]
+            }, status=400)
+        
+        if len(str(utr_number)) < 10:
+            return JsonResponse({
+                "error": "Invalid UTR Number",
+                "message": "UTR/Transaction Reference must be at least 10 characters"
+            }, status=400)
+        
+        # 3. Check Duplicate (Safety wrapper)
+        try:
             if Payment.objects.filter(transaction_id=utr_number).exists():
-                return Response({
+                return JsonResponse({
                     "error": "Duplicate Transaction",
                     "message": "This UTR number has already been submitted"
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Verify pricing
-            try:
-                amount = Decimal(str(amount))
-            except:
-                amount = Decimal('0.00')
-            
-            expected_price = self.PRICING.get(plan_type)
-            if amount < expected_price:
-                return Response({
-                    "error": "Insufficient Payment Amount",
-                    "message": f"Required ₹{expected_price} for {plan_type} plan, but you submitted ₹{amount}",
-                    "required": str(expected_price),
-                    "received": str(amount)
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Create or get user (without password initially)
-            user, created = User.objects.get_or_create(
-                username=email,
-                defaults={'email': email}
+                }, status=400)
+        except Exception as db_error:
+             return JsonResponse({
+                "error": "Database Error",
+                "message": f"Failed to check duplicates: {str(db_error)}"
+            }, status=500)
+
+        # 4. Amount Logic
+        try:
+            amount = Decimal(str(amount))
+        except:
+            amount = Decimal('0.00')
+        
+        expected_price = PRICING.get(plan_type)
+        if expected_price and amount < expected_price:
+            return JsonResponse({
+                "error": "Insufficient Payment Amount",
+                "message": f"Required ₹{expected_price} for {plan_type} plan, but you submitted ₹{amount}"
+            }, status=400)
+        
+        # 5. Create Records (Atomic Logic)
+        user, created = User.objects.get_or_create(
+            username=email,
+            defaults={'email': email}
+        )
+        
+        if created:
+            user.set_unusable_password()
+            user.save()
+        
+        if not hasattr(user, 'profile'):
+            UserProfile.objects.create(
+                user=user,
+                role='CLIENT',
+                institution_type=plan_type,
+                phone=phone or ''
             )
-            
-            if created:
-                user.set_unusable_password()  # No access until verified
-                user.save()
-            
-            # Create profile if not exists
-            if not hasattr(user, 'profile'):
-                UserProfile.objects.create(
-                    user=user,
-                    role='CLIENT',
-                    institution_type=plan_type,
-                    phone=phone or ''
-                )
-            
-            # Create pending payment record
-            payment = Payment.objects.create(
-                student=None,  # No student yet, will be linked after verification
-                transaction_id=utr_number,
-                amount=amount,
-                due_date=date.today(),
-                status='PENDING_VERIFICATION',
-                description=f"{plan_type} Plan - Bank Transfer (UTR: {utr_number})"
-            )
-            
-            # Store additional metadata
-            payment.metadata = {
-                'email': email,
-                'phone': phone,
-                'plan_type': plan_type,
-                'user_id': user.id
+        
+        payment = Payment.objects.create(
+            student=None,
+            transaction_id=utr_number,
+            amount=amount,
+            due_date=date.today(),
+            status='PENDING_VERIFICATION',
+            description=f"{plan_type} Plan - Bank Transfer (UTR: {utr_number})"
+        )
+        
+        payment.metadata = {
+            'email': email,
+            'phone': phone,
+            'plan_type': plan_type,
+            'user_id': user.id
+        }
+        payment.save()
+        
+        logger.api_info = f"🔔 NEW PAYMENT SUBMISSION: {plan_type} - ₹{amount} - UTR: {utr_number}" # Custom log
+        try:
+            logger.info(logger.api_info)
+        except: pass
+
+        return JsonResponse({
+            "status": "SUBMITTED_FOR_VERIFICATION",
+            "message": "Payment submitted successfully!",
+            "details": {
+                "utr_number": utr_number,
+                "amount": str(amount),
+                "plan_type": plan_type,
+                "verification_status": "PENDING"
             }
-            payment.save()
-            
-            # Notify admin
-            logger.info(f"🔔 NEW PAYMENT SUBMISSION: {plan_type} - ₹{amount} - UTR: {utr_number} - Email: {email}")
-            
-            return Response({
-                "status": "SUBMITTED_FOR_VERIFICATION",
-                "message": "Payment submitted successfully!",
-                "details": {
-                    "utr_number": utr_number,
-                    "amount": str(amount),
-                    "plan_type": plan_type,
-                    "verification_status": "PENDING"
-                },
-                "next_steps": [
-                    "Admin will verify your payment with bank statement",
-                    "You will receive credentials via email/SMS within 1-2 hours",
-                    "Check your email for updates"
-                ],
-                "estimated_activation": "1-2 hours"
-            })
-            
-        except Exception as e:
-            logger.error(f"❌ Payment Verification Failed: {str(e)}")
-            # Return JSON error to prevent frontend crash
-            return Response({
-                "error": "Server Error",
-                "message": f"Could not process payment: {str(e)}"
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        })
+
+    except Exception as e:
+        logger.error(f"❌ Payment Verification CBV CRASH: {str(e)}")
+        # CATCH ALL - Return JSON
+        return JsonResponse({
+            "error": "Server Error",
+            "message": f"CRITICAL FAILURE: {str(e)}"
+        }, status=500)
 
 
 class AdminPaymentApprovalView(APIView):

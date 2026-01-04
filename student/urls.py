@@ -36,7 +36,7 @@ from .manual_payment_views import ManualPaymentSubmitView
 
 from .subscription_views import (
     SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
-    SubscriptionPaymentVerifyView, AdminPaymentApprovalView, PendingPaymentsListView
+    verify_payment_api, AdminPaymentApprovalView, PendingPaymentsListView
 )
 from .admin_dashboard_views import SuperAdminDashboardView
 from .plan_features_views import UserPlanFeaturesView
@@ -138,7 +138,7 @@ urlpatterns = [
     
     # SUBSCRIPTION (MANUAL BANK TRANSFER)
     path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),  # Returns bank details
-    path('subscription/verify-payment/', SubscriptionPaymentVerifyView.as_view(), name='subscription-verify-payment'),  # Submit UTR
+    path('subscription/verify-payment/', verify_payment_api, name='subscription-verify-payment'),  # Submit UTR
     path('subscription/status/', SubscriptionStatusView.as_view(), name='subscription-status'),
     path('subscription/renew/', SubscriptionRenewView.as_view(), name='subscription-renew'),
     
