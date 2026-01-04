@@ -1638,7 +1638,16 @@ const DashboardApp = {
 
         if (isSuperuser) {
             // Load super admin overview instead
-            await this.loadSuperAdminSubscriptionOverview();
+            try {
+                if (typeof this.loadSuperAdminSubscriptionOverview === 'function') {
+                    await this.loadSuperAdminSubscriptionOverview();
+                } else {
+                    throw new Error("SuperAdmin Module not loaded properly.");
+                }
+            } catch (e) {
+                console.error("SuperAdmin Load Error:", e);
+                container.innerHTML = `<div class="module-card error"><h3>Error Loading Admin View</h3><p>${e.message}</p></div>`;
+            }
             return;
         }
 
