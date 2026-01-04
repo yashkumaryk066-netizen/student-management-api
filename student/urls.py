@@ -40,7 +40,8 @@ from .manual_payment_views import ManualPaymentSubmitView
 from .admin_dashboard_views import SuperAdminDashboardView, SuperAdminClientActionView
 from .subscription_views import (
     SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
-    verify_payment_api, AdminPaymentApprovalView, PendingPaymentsListView
+    verify_payment_api, AdminPaymentApprovalView, PendingPaymentsListView,
+    PublicSubscriptionSubmitView
 )
 from .plan_features_views import UserPlanFeaturesView
 from .report_views import ReportListView, ReportDownloadView
@@ -142,6 +143,7 @@ urlpatterns = [
     # SUBSCRIPTION (MANUAL BANK TRANSFER)
     path('subscription/status/', ClientSubscriptionView.as_view(), name='subscription-status'),
     path('subscription/renew/', SubscriptionRenewalView.as_view(), name='subscription-renew'),
+    path('subscription/submit/', PublicSubscriptionSubmitView.as_view(), name='subscription-submit-public'),
     
     # Old/Unused - Commenting out to avoid import errors
     # path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),  

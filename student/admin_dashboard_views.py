@@ -12,7 +12,159 @@ from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
-# ... (keep existing views: SubscriptionPurchaseView, SubscriptionPaymentVerifyView, AdminPaymentApprovalView, PendingPaymentsListView)
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework.permissions import AllowAny
+
+class PublicSubscriptionSubmitView(APIView):
+    """
+    Public endpoint for Clients to submit Manual Bank Transfer details for a new subscription.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        plan_type = request.data.get('plan_type')
+        amount = request.data.get('amount')
+        utr = request.data.get('utr')
+
+        if not all([email, plan_type, amount, utr]):
+            return Response({'error': 'All fields (email, plan_type, amount, utr) are required.'}, status=400)
+
+        # Check duplicate UTR
+        if Payment.objects.filter(transaction_id=utr).exists():
+            return Response({'error': 'This UTR/Transaction ID has already been submitted.'}, status=400)
+
+        # Create Payment Record
+        Payment.objects.create(
+            amount=amount,
+            transaction_id=utr,
+            plan_type=plan_type,
+            status='PENDING_VERIFICATION',
+            payment_type='SUBSCRIPTION',
+            metadata={'email': email} # Store email for user creation later
+        )
+
+        return Response({'message': 'Payment submitted successfully! Admin will verify and email your credentials.'})
+
+
+class PendingPaymentsListView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        payments = Payment.objects.filter(status='PENDING_VERIFICATION').order_by('-created_at')
+        data = []
+        for p in payments:
+            email = "Unknown"
+            if p.user:
+                email = p.user.email
+            elif p.metadata:
+                email = p.metadata.get('email', 'Unknown')
+                
+            data.append({
+                'id': p.id,
+                'email': email,
+                'amount': p.amount,
+                'utr': p.transaction_id,
+                'plan': p.plan_type,
+                'date': p.created_at
+            })
+        return Response(data)
+
+class AdminPaymentApprovalView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        payment_id = request.data.get('payment_id')
+        action = request.data.get('action') # 'approve' or 'reject'
+        notes = request.data.get('notes', '')
+
+        try:
+            payment = Payment.objects.get(id=payment_id)
+        except Payment.DoesNotExist:
+            return Response({'error': 'Payment not found'}, status=404)
+
+        if action == 'approve':
+            # 1. Create User if not exists
+            email = payment.metadata.get('email')
+            if not email and payment.user:
+                email = payment.user.email
+            
+            if not email:
+                return Response({'error': 'No email found for this payment'}, status=400)
+
+            user = None
+            password = None
+            created = False
+
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                # Create new user
+                username = email.split('@')[0]
+                # Ensure unique username
+                while User.objects.filter(username=username).exists():
+                    username = email.split('@')[0] + str(random.randint(1000, 9999))
+                
+                password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+                user = User.objects.create_user(username=username, email=email, password=password)
+                created = True
+
+            # 2. Create/Update Subscription
+            sub, _ = ClientSubscription.objects.get_or_create(user=user)
+            sub.plan_type = payment.plan_type or 'SCHOOL'
+            sub.transaction_id = payment.transaction_id
+            sub.amount_paid = payment.amount
+            sub.activate(days=30) # Activates and sets dates
+
+            # 3. Create Profile
+            if not hasattr(user, 'profile'):
+                UserProfile.objects.create(user=user, role='CLIENT', institution_type=sub.plan_type)
+
+            # 4. Update Payment
+            payment.status = 'APPROVED'
+            payment.user = user
+            payment.save()
+
+            # 5. Send Email with Credentials
+            if created:
+                subject = 'Welcome to NextGen ERP - Assessment Approved'
+                message = f"""
+                Congratulations! Your {sub.plan_type} subscription is approved.
+
+                Here are your login credentials:
+                URL: https://yashamishra.pythonanywhere.com/dashboard/login
+                Username: {user.username}
+                Password: {password}
+
+                Please login and change your password immediately.
+                """
+                try:
+                    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
+                except Exception as e:
+                    logger.error(f"Failed to send email: {e}")
+            else:
+                 # Existing user - just notify
+                 message = f"Your subscription for {sub.plan_type} has been renewed successfully."
+                 try:
+                    send_mail("Subscription Active", message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
+                 except: pass
+
+            return Response({'message': 'Approved and credentials sent.'})
+
+        elif action == 'reject':
+            payment.status = 'REJECTED'
+            payment.save()
+             # Notify rejection
+            email = payment.metadata.get('email')
+            if email:
+                try:
+                    send_mail("Subscription Rejected", f"Reason: {notes}", settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
+                except: pass
+            
+            return Response({'message': 'Payment rejected.'})
+
+        return Response({'error': 'Invalid action'}, status=400)
 
 class SuperAdminDashboardView(APIView):
     """
