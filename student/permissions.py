@@ -172,3 +172,57 @@ class StudentLimitPermission(permissions.BasePermission):
             return False
         
         return True
+
+class IsSuperAdminExclusive(permissions.BasePermission):
+    """
+    STRICTLY Allow ONLY Superusers.
+    No other role (Client, Teacher, etc.) can pass this.
+    """
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_superuser)
+
+class IsSchool(permissions.BasePermission):
+    """
+    Allow SCHOOL or INSTITUTE (Superset) plans.
+    Blocks COACHING plans.
+    """
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated: return False
+        if request.user.is_superuser: return True
+        
+        try:
+            plan = request.user.profile.institution_type
+            # Institute includes School features usually
+            return plan in ['SCHOOL', 'INSTITUTE']
+        except:
+            return False
+
+class IsCoaching(permissions.BasePermission):
+    """
+    Allow COACHING or INSTITUTE (Superset) plans.
+    Blocks SCHOOL plans.
+    """
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated: return False
+        if request.user.is_superuser: return True
+        
+        try:
+            plan = request.user.profile.institution_type
+            return plan in ['COACHING', 'INSTITUTE']
+        except:
+            return False
+
+class IsInstitute(permissions.BasePermission):
+    """
+    Allow ONLY INSTITUTE plans.
+    Blocks SCHOOL and COACHING plans.
+    """
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated: return False
+        if request.user.is_superuser: return True
+        
+        try:
+            plan = request.user.profile.institution_type
+            return plan == 'INSTITUTE'
+        except:
+            return False

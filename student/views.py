@@ -17,7 +17,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from .permissions import IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin, IsClient, StudentLimitPermission, HasPlanAccess
+from .permissions import (
+    IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin, IsClient, 
+    StudentLimitPermission, HasPlanAccess,
+    IsSuperAdminExclusive, IsSchool, IsCoaching, IsInstitute
+)
 from datetime import date, timedelta
 
 @extend_schema_view(
