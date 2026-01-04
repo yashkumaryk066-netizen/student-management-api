@@ -833,7 +833,7 @@ class ClientSubscriptionView(APIView):
             "status": sub.status,
             "start_date": sub.start_date,
             "end_date": sub.end_date,
-            "days_remaining": sub.days_remaining,
+            "days_left": sub.days_remaining,
             "auto_renew": sub.auto_renew,
             "amount_paid": sub.amount_paid
         })
