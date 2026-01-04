@@ -44,7 +44,20 @@ class SuperAdminAdvancedDashboardView(APIView):
         if expired_active > 0:
             alerts.append(f"⚠️ {expired_active} subscriptions are expired but marked ACTIVE.")
 
+        # 4. Aggregated Stats
+        total_revenue = Payment.objects.filter(status='COMPLETED').aggregate(Sum('amount'))['amount__sum'] or 0
+        total_clients = UserProfile.objects.filter(role='ADMIN').count()
+        active_subscriptions = ClientSubscription.objects.filter(status='ACTIVE').count()
+        
+        stats = {
+            "total_revenue": total_revenue,
+            "total_clients": total_clients,
+            "active_subscriptions": active_subscriptions,
+            "growth_rate": "12%" # Mocked for now
+        }
+
         return Response({
+            "stats": stats,
             "server_status": server_status,
             "peak_usage": peak_usage_graph,
             "alerts": alerts,
