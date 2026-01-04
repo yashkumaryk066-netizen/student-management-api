@@ -56,8 +56,36 @@ class WhatsAppService:
             except KeyError as e:
                 return {'status': 'error', 'error': f'Missing template variable: {e}'}
         
-        # If service is not enabled, return mock response
         if not self.enabled:
+            # --- INTERNAL SIMULATION FOR "ADVANCE LEVEL" DEMO ---
+            # Save to Database so it appears in Admin Panel as a "System Alert"
+            try:
+                from student.models import Notification, User
+                # Attempt to find user by phone number (reverse lookup) - simplified logic
+                recipient_user = None
+                
+                # If sending to Admin
+                from django.conf import settings
+                if to_number == settings.ADMIN_WHATSAPP_NUMBER or to_number == f"whatsapp:{settings.ADMIN_WHATSAPP_NUMBER}":
+                    recipient_user = User.objects.filter(is_superuser=True).first()
+                    title = "WhatsApp (Admin Alert)"
+                    
+                # Store in DB
+                if recipient_user:
+                    Notification.objects.create(
+                        recipient=recipient_user,
+                        recipient_type='ADMIN',
+                        title=title,
+                        message=message
+                    )
+                else:
+                    # Generic logging for unknown numbers (or client phones) purely for debug/demo
+                    # We might not have a clean way to link phone -> user here without more queries
+                    pass
+                    
+            except Exception as e:
+                print(f"Mock Notification DB Error: {e}")
+                
             print(f"[MOCK WhatsApp] To: {to_number}")
             print(f"[MOCK WhatsApp] Message: {message}")
             return {
@@ -74,6 +102,20 @@ class WhatsAppService:
                 body=message,
                 to=to_number
             )
+            
+            # Record Successful Verification in DB too for consistency
+            try:
+                from student.models import Notification, User
+                from django.conf import settings
+                if to_number == settings.ADMIN_WHATSAPP_NUMBER:
+                     recipient_user = User.objects.filter(is_superuser=True).first()
+                     if recipient_user:
+                        Notification.objects.create(
+                            recipient=recipient_user, recipient_type='ADMIN',
+                            title="WhatsApp Sent", message=message
+                        )
+            except:
+                pass
             
             return {
                 'status': 'sent',

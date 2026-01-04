@@ -2991,7 +2991,26 @@ const DashboardApp = {
 
                     ${pending_payments.length > 0 ? `<div class="module-card" style="margin-bottom: 24px;"><h2 style="margin-bottom: 16px;">⏳ Pending Approvals (${pending_payments.length})</h2><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: rgba(255,255,255,0.05);"><th style="padding: 12px; text-align: left;">Email</th><th style="padding: 12px; text-align: left;">Plan</th><th style="padding: 12px; text-align: left;">Amount</th><th style="padding: 12px; text-align: left;">UTR</th><th style="padding: 12px; text-align: left;">Date</th><th style="padding: 12px; text-align: center;">Action</th></tr></thead><tbody>${pending_payments.map(p => `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 12px;">${p.email}</td><td style="padding: 12px;"><span class="status-badge" style="background: #667eea44; color: #667eea;">${p.plan_type}</span></td><td style="padding: 12px; font-weight: 600;">₹${p.amount}</td><td style="padding: 12px; font-family: monospace; font-size: 0.85rem;">${p.utr}</td><td style="padding: 12px; font-size: 0.85rem;">${p.date}</td><td style="padding: 12px; text-align: center;"><button onclick="DashboardApp.approvePayment(${p.id})" class="btn-primary" style="padding: 6px 16px; font-size: 0.85rem; margin-right: 8px;">Approve</button><button onclick="DashboardApp.rejectPayment(${p.id})" class="btn-secondary" style="padding: 6px 16px; font-size: 0.85rem;">Reject</button></td></tr>`).join('')}</tbody></table></div></div>` : ''}
 
-                    <div class="clients-table"><h2 style="padding: 20px 20px 0 20px; margin: 0;">📋 All Client Subscriptions (${client_subscriptions.length})</h2><div style="overflow-x: auto;"><table><thead><tr><th>Username</th><th>Plan</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Days Left</th><th>Amount Paid</th></tr></thead><tbody>${client_subscriptions.length > 0 ? client_subscriptions.map(client => { const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe'; return `<tr><td style="font-weight: 600;">${client.username}</td><td><span class="status-badge" style="background: #667eea44; color: #667eea;">${client.plan_type}</span></td><td><span class="status-badge ${client.is_expired ? 'status-expired' : 'status-active'}">${client.is_expired ? 'EXPIRED' : client.status}</span></td><td>${client.start_date || '-'}</td><td>${client.end_date || '-'}</td><td><span class="days-badge ${daysClass}">${client.days_left} days</span></td><td style="font-weight: 600;">₹${client.amount_paid}</td></tr>`; }).join('') : '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
+                    <div class="clients-table"><h2 style="padding: 20px 20px 0 20px; margin: 0;">📋 All Client Subscriptions (${client_subscriptions.length})</h2><div style="overflow-x: auto;"><table><thead><tr><th>Username</th><th>Plan</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Days Left</th><th>Amount Paid</th><th>Action</th></tr></thead><tbody>${client_subscriptions.length > 0 ? client_subscriptions.map(client => {
+                const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe';
+                const isSuspended = client.status === 'SUSPENDED';
+                const isActive = client.status === 'ACTIVE';
+
+                return `<tr>
+                            <td style="font-weight: 600;">${client.username}</td>
+                            <td><span class="status-badge" style="background: #667eea44; color: #667eea;">${client.plan_type}</span></td>
+                            <td><span class="status-badge ${client.is_expired ? 'status-expired' : (isSuspended ? 'status-expired' : 'status-active')}">${client.is_expired ? 'EXPIRED' : client.status}</span></td>
+                            <td>${client.start_date || '-'}</td>
+                            <td>${client.end_date || '-'}</td>
+                            <td><span class="days-badge ${daysClass}">${client.days_left} days</span></td>
+                            <td style="font-weight: 600;">₹${client.amount_paid}</td>
+                            <td>
+                                ${isActive ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'SUSPEND')" class="btn-action btn-danger" style="margin-right:5px;">🚫 Block</button>` : ''}
+                                ${isSuspended ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'ACTIVATE')" class="btn-action" style="background:var(--success); margin-right:5px;">✅ Unblock</button>` : ''}
+                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'REDUCE_DAYS')" class="btn-action btn-secondary">📉 -7 Days</button>
+                            </td>
+                        </tr>`;
+            }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
                 </div>
             `;
 
@@ -3039,6 +3058,37 @@ const DashboardApp = {
             }
         } catch (error) {
             this.showAlert('Error', 'Failed to reject. Try again.', 'error');
+        }
+    },
+
+    async adminAction(userId, action) {
+        let confirmMsg = "";
+        if (action === 'SUSPEND') confirmMsg = "Are you sure you want to BLOCK this client? They will lose access immediately.";
+        if (action === 'ACTIVATE') confirmMsg = "Reactivate this client?";
+        if (action === 'REDUCE_DAYS') confirmMsg = "Penalty: Reduce 7 days from their validity?";
+
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/client-actions/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify({ client_id: userId, action: action })
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showAlert('Success', result.message, 'success');
+                // Reload to see changes
+                setTimeout(() => this.loadSubscriptionManagement(), 1000);
+            } else {
+                this.showAlert('Failed', result.error || 'Action failed', 'error');
+            }
+        } catch (error) {
+            this.showAlert('Error', 'Network error.', 'error');
         }
     },
 };

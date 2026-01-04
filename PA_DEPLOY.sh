@@ -60,7 +60,7 @@ python manage.py collectstatic --noinput
 
 # 6. Verify Import (Sanity Check)
 export DJANGO_SETTINGS_MODULE=manufatures.settings
-python -c "import django; django.setup(); from student import urls; print('✅ Syntax Check Passed')"
+python -c "import django; django.setup(); from student import urls; from notifications import whatsapp_service; print('✅ Syntax & Import Check Passed')"
 
 echo "---------------------------------------------------"
 echo "✅ DEPLOYMENT FINISHED SUCCESSFULLY!"

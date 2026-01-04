@@ -52,6 +52,7 @@ class SuperAdminDashboardView(APIView):
                 days_left = (sub.end_date - today).days
                 
             subscriptions.append({
+                'user_id': sub.user.id,
                 'username': sub.user.username,
                 'email': sub.user.email,
                 'plan_type': sub.plan_type,
@@ -68,11 +69,18 @@ class SuperAdminDashboardView(APIView):
         pending_pmts = Payment.objects.filter(status='PENDING_VERIFICATION').order_by('-created_at')[:10]
         
         for pmt in pending_pmts:
-            metadata = pmt.metadata or {}
+            user_name = "Unknown"
+            if pmt.user:
+                user_name = pmt.user.username
+            elif pmt.student:
+                user_name = pmt.student.name
+            elif pmt.metadata:
+                user_name = pmt.metadata.get('email', 'Unknown')
+                
             pending_list.append({
                 'id': pmt.id,
-                'email': metadata.get('email'),
-                'plan_type': metadata.get('plan_type'),
+                'user': user_name,
+                'type': pmt.payment_type, # Using new field
                 'amount': str(pmt.amount),
                 'utr': pmt.transaction_id,
                 'date': pmt.created_at.strftime('%Y-%m-%d %H:%M')
@@ -86,5 +94,50 @@ class SuperAdminDashboardView(APIView):
                 'total_revenue': str(total_revenue)
             },
             'pending_payments': pending_list,
-            'client_subscriptions': subscriptions
+            'client_subscriptions': subscriptions,
+            'recent_notifications': models.Notification.objects.filter(recipient_type='ADMIN').order_by('-created_at')[:5].values('title', 'message', 'created_at')
         })
+
+class SuperAdminClientActionView(APIView):
+    permission_classes = [permissions.IsAdminUser]  # Superuser only
+
+    def post(self, request):
+        client_id = request.data.get('client_id')
+        action = request.data.get('action') # SUSPEND, ACTIVATE, REDUCE_DAYS
+
+        try:
+            # We need to find the subscription. Client ID here is the User ID.
+            subscription = ClientSubscription.objects.get(user_id=client_id)
+            user_profile = UserProfile.objects.get(user_id=client_id)
+
+            if action == 'SUSPEND':
+                subscription.status = 'SUSPENDED'
+                subscription.save()
+                return Response({'message': 'Client account suspended successfully.'})
+
+            elif action == 'ACTIVATE':
+                subscription.status = 'ACTIVE'
+                subscription.save()
+                return Response({'message': 'Client account reactivated successfully.'})
+
+            elif action == 'REDUCE_DAYS':
+                if subscription.end_date:
+                    from datetime import timedelta
+                    subscription.end_date -= timedelta(days=7)
+                    subscription.save()
+                    # Sync Profile if exists
+                    if user_profile:
+                        user_profile.subscription_expiry = subscription.end_date
+                        user_profile.save()
+                    return Response({'message': 'Validity reduced by 7 days.'})
+                else:
+                    return Response({'error': 'Subscription has no end date.'}, status=400)
+
+            return Response({'error': 'Invalid action'}, status=400)
+
+        except ClientSubscription.DoesNotExist:
+            return Response({'error': 'Subscription not found for this user.'}, status=404)
+        except UserProfile.DoesNotExist:
+             return Response({'error': 'User Profile not found.'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

@@ -4,16 +4,58 @@ from .models import (
     Subject, Classroom, ClassSchedule,
     Hostel, Room, HostelAllocation,
     Event, EventParticipant,
-    DemoRequest
+    DemoRequest, ClientSubscription
 )
+
+@admin.register(ClientSubscription)
+class ClientSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['user', 'plan_type', 'status', 'start_date', 'end_date', 'days_remaining']
+    list_filter = ['status', 'plan_type', 'end_date']
+    search_fields = ['user__username', 'transaction_id']
+    actions = ['force_renew_subscription', 'suspend_account', 'reactivate_account', 'reduce_validity_7_days']
+    
+    def force_renew_subscription(self, request, queryset):
+        for sub in queryset:
+            sub.activate(days=30)
+        self.message_user(request, f"Renewed {queryset.count()} subscriptions for 30 days.")
+    force_renew_subscription.short_description = "⚡ Renew for 30 Days"
+
+    def suspend_account(self, request, queryset):
+        """Hard Block the Client"""
+        cnt = queryset.update(status='SUSPENDED')
+        self.message_user(request, f"🚫 Suspended {cnt} accounts. They generally cannot access any feature now.")
+    suspend_account.short_description = "🚫 Block/Suspend Access"
+
+    def reactivate_account(self, request, queryset):
+        """Unblock"""
+        cnt = queryset.update(status='ACTIVE')
+        self.message_user(request, f"✅ Reactivated {cnt} accounts.")
+    reactivate_account.short_description = "✅ Unblock/Activate"
+
+    def reduce_validity_7_days(self, request, queryset):
+        """Penalty: Reduce 7 days"""
+        from datetime import timedelta
+        success = 0
+        for sub in queryset:
+            if sub.end_date:
+                sub.end_date -= timedelta(days=7)
+                sub.save()
+                # Sync with UserProfile
+                if hasattr(sub.user, 'profile'):
+                    sub.user.profile.subscription_expiry = sub.end_date
+                    sub.user.profile.save()
+                success += 1
+        self.message_user(request, f"📉 Reduced 7 days from {success} subscriptions.")
+    reduce_validity_7_days.short_description = "📉 Reduce Validity by 7 Days"
+    force_renew_subscription.short_description = "Force Renew (30 Days)"
 
 
 # ==================== STUDENT MANAGEMENT ====================
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'age', 'gender', 'grade', 'dob', 'parent']
-    list_filter = ['gender', 'grade']
+    list_display = ['id', 'name', 'age', 'gender', 'grade', 'institution_type', 'parent']
+    list_filter = ['gender', 'grade', 'institution_type']
     search_fields = ['name', 'relation']
     list_per_page = 50
     ordering = ['-id']
@@ -30,19 +72,70 @@ class AttendenceAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'role', 'phone', 'created_at']
-    list_filter = ['role', 'created_at']
+    list_display = ['user', 'role', 'institution_type', 'subscription_status', 'days_left']
+    list_filter = ['role', 'institution_type', 'created_at']
     search_fields = ['user__username', 'user__email', 'phone']
+
+    def subscription_status(self, obj):
+        if obj.role == 'CLIENT':
+            return "Active" if obj.subscription_expiry and obj.subscription_expiry >= timezone.now().date() else "Expired"
+        return "-"
+    
+    def days_left(self, obj):
+        if obj.role == 'CLIENT' and obj.subscription_expiry:
+             delta = obj.subscription_expiry - timezone.now().date()
+             return f"{delta.days} days"
+        return "-"
 
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ['student', 'amount', 'status', 'due_date', 'paid_date', 'description']
-    list_filter = ['status', 'due_date', 'paid_date']
-    search_fields = ['student__name', 'description']
+    list_display = ['get_payment_reference', 'amount', 'status', 'payment_type', 'due_date', 'paid_date']
+    list_filter = ['status', 'payment_type', 'due_date']
+    search_fields = ['student__name', 'user__username', 'description', 'transaction_id']
     list_editable = ['status']
     date_hierarchy = 'due_date'
     ordering = ['-due_date']
+    actions = ['approve_payment_and_renew']
+
+    def get_payment_reference(self, obj):
+        if obj.payment_type == 'SUBSCRIPTION' and obj.user:
+            return f"{obj.user.username} (Sub Renewal)"
+        return obj.student.name if obj.student else "Unknown"
+    get_payment_reference.short_description = "Payer"
+
+    def approve_payment_and_renew(self, request, queryset):
+        """Approve payment and extend subscription if applicable"""
+        success_count = 0
+        for payment in queryset:
+            if payment.status == 'APPROVED':
+                continue
+            
+            # Update Status
+            payment.status = 'APPROVED'
+            payment.paid_date = timezone.now().date()
+            payment.save()
+            
+            # If Subscription, Extend Plan
+            if payment.payment_type == 'SUBSCRIPTION' and payment.user:
+                if hasattr(payment.user, 'subscription'):
+                    payment.user.subscription.activate(days=30)
+                    
+                    # Notify Client
+                    try:
+                        from notifications.whatsapp_service import whatsapp_service
+                        if hasattr(payment.user, 'profile') and payment.user.profile.phone:
+                            msg = f"✅ *Plan Renewed!*\n\nYour {payment.user.subscription.plan_type} plan has been extended by 30 days.\nEnjoy full access!"
+                            whatsapp_service.send_message(payment.user.profile.phone, msg)
+                    except Exception as e:
+                        print(f"Failed to notify client: {e}")
+                        
+                    self.message_user(request, f"Extended subscription for {payment.user.username} by 30 days.")
+            
+            success_count += 1
+        
+        self.message_user(request, f"Approved {success_count} payments.")
+    approve_payment_and_renew.short_description = "Approve Payment & Renew Subscription"
 
 
 @admin.register(Notification)
@@ -141,6 +234,117 @@ class DemoRequestAdmin(admin.ModelAdmin):
     list_editable = ['status']
     ordering = ['-created_at']
     readonly_fields = ['created_at']
+    actions = ['convert_to_client_and_notify']
+
+    def convert_to_client_and_notify(self, request, queryset):
+        """
+        Converts a DemoRequest into a full CLIENT User.
+        1. Creates User (if not exists)
+        2. Assigns CLIENT role
+        3. Creates Subscription (based on request)
+        4. Emails/WhatsApp credentials
+        """
+        from django.contrib.auth.models import User
+        from .models import UserProfile, ClientSubscription
+        from django.utils.crypto import get_random_string
+        from django.core.mail import send_mail
+        from django.conf import settings
+        from django.utils import timezone
+        from notifications.whatsapp_service import whatsapp_service
+        
+        success_count = 0
+        
+        for demo_req in queryset:
+            if demo_req.status == 'CONVERTED':
+                continue
+                
+            # 1. Generate Credentials
+            username = demo_req.email.split('@')[0].lower()[:15] + get_random_string(4)
+            password = get_random_string(10)
+            
+            # 2. Create User
+            if User.objects.filter(username=username).exists():
+                 username = username + get_random_string(3)
+            
+            user = User.objects.create_user(username=username, email=demo_req.email, password=password)
+            user.first_name = demo_req.name.split(' ')[0]
+            user.save()
+            
+            # 3. Create UserProfile (CLIENT Role)
+            # Default to SCHOOL if not specified clearly, or parse from institution_type
+            inst_type_map = {
+                'School': 'SCHOOL',
+                'College': 'INSTITUTE',
+                'University': 'INSTITUTE',
+                'Coaching': 'COACHING'
+            }
+            # Normalize key
+            inst_key = demo_req.institution_type.capitalize()
+            plan_type = inst_type_map.get(inst_key, 'SCHOOL')
+            
+            UserProfile.objects.create(
+                user=user, 
+                role='CLIENT', 
+                institution_type=plan_type,
+                phone=demo_req.phone
+            )
+            
+            # 4. Create Active Subscription (Trial 30 Days)
+            # Grants access ONLY to the purchased plan features
+            ClientSubscription.objects.create(
+                user=user,
+                plan_type=plan_type,
+                status='ACTIVE',
+                auto_renew=False
+            ).activate(days=30)
+            
+            # 5. Send Notifications (Email + WhatsApp)
+            message_body = f"""
+🎉 *Welcome to NextGen ERP!*
+
+Dear {demo_req.name},
+
+Your request for *{plan_type} Management System* has been approved!
+You have been granted access for **30 days** starting today.
+
+🔐 *Your Login Credentials:*
+URL: https://yashamishra.pythonanywhere.com/admin/
+Username: *{username}*
+Password: *{password}*
+
+⚠️ *Important:*
+- You only have access to **{plan_type}** features.
+- Please change your password after logging in.
+- To continue using the service after 30 days, please renew your plan from the dashboard.
+
+_Thank you for choosing NextGen ERP!_
+            """
+            
+            # WhatsApp
+            whatsapp_service.send_message(demo_req.phone, message_body)
+            
+            # Email
+            try:
+                send_mail(
+                    subject=f'Approved: {plan_type} Plan Access - NextGen ERP',
+                    message=message_body.replace('*', '').replace('⚠️', 'Note:').replace('🔐', ''), 
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[demo_req.email],
+                    fail_silently=True
+                )
+            except Exception as e:
+                print(f"Email failed: {e}")
+            
+            # Update Status
+            demo_req.status = 'CONVERTED'
+            demo_req.notes += f"\n[System] Converted to {plan_type} Client on {timezone.now()}. User: {username}"
+            demo_req.save()
+            
+            success_count += 1
+            
+        self.message_user(request, f"Successfully processed {success_count} approvals.")
+    
+    convert_to_client_and_notify.short_description = "Approve & Send Credentials (Convert to Client)"
     
     fieldsets = (
         ('Contact Information', {

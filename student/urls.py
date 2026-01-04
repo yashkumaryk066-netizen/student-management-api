@@ -23,22 +23,25 @@ from .views import (
     DemoRequestView,
     DeveloperProfileView,
     ResumeView,
-    # New Views
+    # New Views for Client Subscriptions
+    ClientSubscriptionView, SubscriptionRenewalView,
+    # New Module Views
     LibraryBookListCreateView, LibraryBookDetailView, BookIssueListCreateView,
     HostelListCreateView, RoomListCreateView, HostelAllocationListCreateView,
-    VehicleListCreateView, RouteListCreateView,
+    VehicleListCreateView, RouteListCreateView, TransportAllocationListCreateView,
     EmployeeListCreateView, LeaveRequestListCreateView,
     ExamListCreateView, EventListCreateView,
-    CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView
+    CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView
 )
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
 
+# Remove invalid imports - these are now part of views.py or no longer needed
+from .admin_dashboard_views import SuperAdminDashboardView, SuperAdminClientActionView
 from .subscription_views import (
     SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
     verify_payment_api, AdminPaymentApprovalView, PendingPaymentsListView
 )
-from .admin_dashboard_views import SuperAdminDashboardView
 from .plan_features_views import UserPlanFeaturesView
 from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView
@@ -137,10 +140,14 @@ urlpatterns = [
     path('payment/manual/submit/', ManualPaymentSubmitView.as_view(), name='payment-manual-submit'),
     
     # SUBSCRIPTION (MANUAL BANK TRANSFER)
-    path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),  # Returns bank details
-    path('subscription/verify-payment/', verify_payment_api, name='subscription-verify-payment'),  # Submit UTR
-    path('subscription/status/', SubscriptionStatusView.as_view(), name='subscription-status'),
-    path('subscription/renew/', SubscriptionRenewView.as_view(), name='subscription-renew'),
+    path('subscription/status/', ClientSubscriptionView.as_view(), name='subscription-status'),
+    path('subscription/renew/', SubscriptionRenewalView.as_view(), name='subscription-renew'),
+    
+    # Old/Unused - Commenting out to avoid import errors
+    # path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),  
+    # path('subscription/verify-payment/', verify_payment_api, name='subscription-verify-payment'),
+    # path('admin/payments/pending/', PendingPaymentsListView.as_view(), name='admin-pending-payments'),
+    # path('admin/payments/approve/', AdminPaymentApprovalView.as_view(), name='admin-approve-payment'),
     
     # ADMIN PAYMENT VERIFICATION
     path('admin/payments/pending/', PendingPaymentsListView.as_view(), name='admin-pending-payments'),
@@ -148,8 +155,12 @@ urlpatterns = [
     
     # SUPER ADMIN DASHBOARD
     path('admin/subscriptions/overview/', SuperAdminDashboardView.as_view(), name='superadmin-overview'),
+    path('admin/client-actions/', SuperAdminClientActionView.as_view(), name='admin-client-actions'),
 
     # REPORTS
     path('reports/', ReportListView.as_view(), name='report-list'),
-    path('reports/download/<int:pk>/', ReportDownloadView.as_view(), name='report-download'),
+    path('reports/download/', ReportDownloadView.as_view(), name='report-download'),
+    
+    # Invoice
+    path('invoice/<int:payment_id>/download/', InvoiceDownloadView.as_view(), name='invoice-download'),
 ]

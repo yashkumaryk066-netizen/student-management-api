@@ -260,12 +260,24 @@ SWAGGER_SETTINGS = {
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-if False: # DEBUG:
-    CORS_ALLOWED_ORIGINS = config(
-        'CORS_ALLOWED_ORIGINS',
-        default='https://yourdomain.com'
-    ).split(',')
-    CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# CSRF Trusted Origins (Crucial for Mobile/POST requests)
+CSRF_TRUSTED_ORIGINS = [
+    'https://yashamishra.pythonanywhere.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 
 
 
@@ -287,3 +299,9 @@ EAZYPAY_ENCRYPTION_KEY = config('EAZYPAY_ENCRYPTION_KEY', default='1234567890123
 EAZYPAY_SUB_MERCHANT_ID = config('EAZYPAY_SUB_MERCHANT_ID', default='1234')
 EAZYPAY_RETURN_URL = config('EAZYPAY_RETURN_URL', default='http://localhost:8000/api/payment/callback/')
 EAZYPAY_MODE = config('EAZYPAY_MODE', default='TEST')
+
+# Twilio Configuration (WhatsApp & SMS)
+TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
+TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
+TWILIO_WHATSAPP_NUMBER = config('TWILIO_WHATSAPP_NUMBER', default='whatsapp:+14155238886')
+ADMIN_WHATSAPP_NUMBER = config('ADMIN_WHATSAPP_NUMBER', default='+918356926231') # SuperAdmin Number for Alerts

@@ -10,10 +10,16 @@ class IsTeacher(permissions.BasePermission):
     def has_permission(self, request, view):
         return hasattr(request.user, 'profile') and request.user.profile.role == 'TEACHER'
 
+
 class IsParent(permissions.BasePermission):
     """Allow only users with PARENT role"""
     def has_permission(self, request, view):
+        # TODO: Implement strict check if the Institute's plan is expired?
+        # For now, simplistic role check.
+        # In a real world scenario, we'd link Parent -> Student -> Institute -> Expiry.
+        # Assuming current scope, we focus on Client access restrictions.
         return hasattr(request.user, 'profile') and request.user.profile.role == 'PARENT'
+
 
 
 class IsAdminRole(permissions.BasePermission):
@@ -27,27 +33,39 @@ class IsAdminRole(permissions.BasePermission):
 
 class IsClient(permissions.BasePermission):
     """
-    Custom permission for Subscription Clients (Schools/Coaching Owners).
-    They have FULL access but ONLY to their institution type data.
+    Custom permission for Subscription Clients.
+    - Active Plan: Full Access
+    - Expired Plan: Read Only (GET, HEAD, OPTIONS)
     """
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
             
-        # Superuser implicitly has client access too (god mode)
         if request.user.is_superuser:
             return True
             
-        # Check Role is CLIENT
         is_client = hasattr(request.user, 'profile') and request.user.profile.role == 'CLIENT'
         
         if is_client:
-            # Check Subscription Validity
+            # 1. Check for Hard Block/Suspension first
+            if hasattr(request.user, 'subscription'):
+                 if request.user.subscription.status in ['SUSPENDED', 'BLOCKED']:
+                     return False # Full Block (Security)
+
+            # 2. Check Subscription Validity (Expiry)
             from django.utils import timezone
             profile = request.user.profile
-            if profile.subscription_expiry and profile.subscription_expiry < timezone.now().date():
-                 return False # Expired
-            return True
+            is_active = not profile.subscription_expiry or profile.subscription_expiry >= timezone.now().date()
+            
+            if is_active:
+                return True
+            
+            # If Expired (but not Blocked), Allow Safe Methods Only
+            if request.method in permissions.SAFE_METHODS:
+                return True
+                
+            return False # Block Write operations
+            
         return False
 
 class IsTeacherOrAdmin(permissions.BasePermission):
@@ -71,7 +89,10 @@ class IsTeacherOrAdmin(permissions.BasePermission):
                  if role == 'CLIENT':
                      from django.utils import timezone
                      if request.user.profile.subscription_expiry and request.user.profile.subscription_expiry < timezone.now().date():
-                         return False # Expired
+                         # Expired: Allow Read Only
+                         if request.method in permissions.SAFE_METHODS:
+                             return True
+                         return False # Block Write
                  return True
         
         return False

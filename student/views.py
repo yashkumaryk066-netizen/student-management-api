@@ -17,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from .permissions import IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin, IsClient, StudentLimitPermission
+from .permissions import IsStudent, IsTeacher, IsParent, IsAdminRole, IsTeacherOrAdmin, IsClient, StudentLimitPermission, HasPlanAccess
 from datetime import date, timedelta
 
 @extend_schema_view(
@@ -760,6 +760,69 @@ class DeveloperProfileView(TemplateView):
 class ResumeView(TemplateView):
     template_name = "resume.html"
 
+class ClientSubscriptionView(APIView):
+    """
+    Get current subscription status for the client.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        if not hasattr(request.user, 'subscription'):
+             return Response({"status": "NO_SUBSCRIPTION"}, status=200)
+             
+        sub = request.user.subscription
+        return Response({
+            "plan_type": sub.plan_type,
+            "status": sub.status,
+            "start_date": sub.start_date,
+            "end_date": sub.end_date,
+            "days_remaining": sub.days_remaining,
+            "auto_renew": sub.auto_renew,
+            "amount_paid": sub.amount_paid
+        })
+
+class SubscriptionRenewalView(APIView):
+    """
+    Handle renewal requests. Creates a 'SUBSCRIPTION' type payment.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        if not hasattr(request.user, 'subscription'):
+             return Response({"error": "No active subscription found"}, status=400)
+             
+        # Create a Payment record for renewal
+        # Usually user would upload a transaction ID or just request
+        transaction_id = request.data.get('transaction_id', f'REQ-{timezone.now().timestamp()}')
+        
+        # Calculate Amount (Mock Logic)
+        amount_map = {'SCHOOL': 10000, 'COACHING': 5000, 'INSTITUTE': 25000}
+        amount = amount_map.get(request.user.subscription.plan_type, 5000)
+        
+        from .models import Payment
+        payment = Payment.objects.create(
+            user=request.user,
+            student=None,
+            amount=amount,
+            status='PENDING_VERIFICATION',
+            payment_type='SUBSCRIPTION',
+            transaction_id=transaction_id,
+            due_date=timezone.now().date(),
+            description=f"Renewal Request for {request.user.subscription.plan_type}"
+        )
+
+        # Notify Admin (WhatsApp)
+        try:
+            from notifications.whatsapp_service import whatsapp_service
+            from django.conf import settings
+            admin_phone = settings.ADMIN_WHATSAPP_NUMBER
+            msg = f"🔔 *New Renewal Request*\n\nUser: {request.user.username}\nPlan: {request.user.subscription.plan_type}\nAmount: {amount}\n\nCheck Admin Panel to Approve."
+            whatsapp_service.send_message(admin_phone, msg)
+        except Exception as e:
+            print(f"Failed to notify admin: {e}")
+        
+        return Response({"message": "Renewal Request Submitted", "payment_id": payment.id}, status=200)
+
 # ==================== NEW MODULE API VIEWS ====================
 
 from rest_framework import generics
@@ -773,57 +836,72 @@ from .Serializer import (
 from .models import (
     LibraryBook, BookIssue, Hostel, Room, HostelAllocation,
     Vehicle, Route, TransportAllocation, Employee, LeaveRequest, Department, Designation,
-    Exam, Event
+    Exam, Event, Course, Batch, Enrollment
 )
 
 # --- LIBRARY ---
 class LibraryBookListCreateView(generics.ListCreateAPIView):
     queryset = LibraryBook.objects.all()
     serializer_class = LibraryBookSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'library'
 
 class LibraryBookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = LibraryBook.objects.all()
     serializer_class = LibraryBookSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'library'
 
 class BookIssueListCreateView(generics.ListCreateAPIView):
     queryset = BookIssue.objects.all()
     serializer_class = BookIssueSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'library'
 
 # --- HOSTEL ---
 class HostelListCreateView(generics.ListCreateAPIView):
     queryset = Hostel.objects.all()
     serializer_class = HostelSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'hostel'
 
 class RoomListCreateView(generics.ListCreateAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'hostel'
 
 class HostelAllocationListCreateView(generics.ListCreateAPIView):
     queryset = HostelAllocation.objects.all()
     serializer_class = HostelAllocationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'hostel'
 
 # --- TRANSPORT ---
 class VehicleListCreateView(generics.ListCreateAPIView):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'transport'
 
 class RouteListCreateView(generics.ListCreateAPIView):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'transport'
+
+class TransportAllocationListCreateView(generics.ListCreateAPIView):
+    queryset = TransportAllocation.objects.all()
+    serializer_class = TransportAllocationSerializer
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'transport'
 
 # --- HR ---
 class EmployeeListCreateView(generics.ListCreateAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin, HasPlanAccess]
+    required_feature = 'teachers'
 
     def get_queryset(self):
         qs = Employee.objects.all()
@@ -934,3 +1012,34 @@ class EnrollmentListCreateView(generics.ListCreateAPIView):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+# --- INVOICE VIEW ---
+class InvoiceDownloadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, payment_id):
+        # Allow Access if: User owns payment OR is Admin OR is Client owning the student
+        try:
+            payment = Payment.objects.get(id=payment_id)
+        except Payment.DoesNotExist:
+            return Response({"error": "Invoice not found"}, status=404)
+            
+        has_access = False
+        if request.user.is_superuser:
+            has_access = True
+        elif payment.user == request.user:
+            has_access = True
+        elif payment.student and payment.student.created_by == request.user:
+            has_access = True
+            
+        if not has_access:
+             return Response({"error": "Permission Denied"}, status=403)
+             
+        from .utils.invoice_generator import generate_invoice_pdf
+        from django.http import HttpResponse
+
+        pdf_buffer = generate_invoice_pdf(payment)
+        
+        response = HttpResponse(pdf_buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{payment.id}.pdf"'
+        return response

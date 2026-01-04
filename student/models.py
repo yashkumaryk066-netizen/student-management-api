@@ -64,6 +64,18 @@ class ClientSubscription(models.Model):
             self.user.profile.subscription_expiry = self.end_date
             self.user.profile.save()
 
+    @property
+    def days_remaining(self):
+        if not self.end_date:
+            return 0
+        delta = self.end_date - timezone.now().date()
+        return max(0, delta.days)
+
+    def request_renewal(self):
+        """Creates a pending payment/request for renewal"""
+        # Logic can be handled in view, but helper is good
+        pass
+
 class Student(models.Model):
         created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_students', null=True, blank=True)
         name = models.CharField(max_length=20)
@@ -148,7 +160,16 @@ class Payment(models.Model):
         ('APPROVED', 'Approved'),
         ('REJECTED', 'Rejected'),
     ]
+    
+    PAYMENT_TYPES = [
+        ('FEE', 'Student Fee'),
+        ('SUBSCRIPTION', 'Client Subscription Renewal'),
+    ]
+    
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments', null=True, blank=True) # For Clients
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='FEE')
+    
     transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     due_date = models.DateField()
