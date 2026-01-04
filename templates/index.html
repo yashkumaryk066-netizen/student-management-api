@@ -1118,7 +1118,7 @@
                                 action: () => {
                                     closePremiumModal();
                                     // Directly trigger bank transfer flow
-                                    goToPaymentStep();
+                                    showManualPaymentStep();
                                 }
                             },
                             {
@@ -1144,6 +1144,54 @@
                 btn.innerText = "Proceed to Payment";
                 btn.disabled = false;
             }
+        }
+
+        function showManualPaymentStep() {
+            // Hide Email Step
+            document.getElementById('step1').style.display = 'none';
+            // Show new QR UI in Step 2 container
+            const step2 = document.getElementById('step2');
+            step2.style.display = 'block';
+
+            // Generate a temporary reference ID
+            const manualOrderId = 'MANUAL-' + Date.now().toString().slice(-6);
+
+            step2.innerHTML = `
+            <div style="text-align:center; padding: 20px;">
+                <h3 style="margin-bottom:5px; font-family:'Space Grotesk'">Scan & Pay</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Use any UPI App to pay securely</p>
+                
+                <div style="background:white; padding:15px; border-radius:15px; display:inline-block; margin-bottom:20px; box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);">
+                    <img src="/static/images/payment_qr.jpg" alt="Payment QR"
+                        style="width:220px; height:220px; object-fit:contain;">
+                </div>
+                
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:1.5rem; font-weight:700; color:var(--primary);">₹${selectedAmount.toLocaleString('en-IN')}</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Ref: ${manualOrderId}</div>
+                </div>
+                
+                <div style="margin-bottom:20px; text-align:left;">
+                    <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.9rem;">Transaction ID / UTR (Required)</label>
+                    <input type="text" id="txnUtrInput" placeholder="Enter 12-digit UTR No." maxlength="12"
+                        style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; font-family:monospace; letter-spacing:1px;">
+                    <div id="utrError" style="color:#ef4444; font-size:0.8rem; margin-top:5px; display:none;"></div>
+                </div>
+
+                <div style="background:rgba(255,193,7,0.1); border:1px solid rgba(255,193,7,0.3); padding:10px; border-radius:8px; margin-bottom:20px; text-align:left;">
+                    <p style="margin:0; color:var(--text-muted); font-size:0.8rem;">
+                        <strong style="color:#ffc107;">⚠️ Important:</strong> Credentials will be sent to your email <strong>${document.getElementById('userEmail').value}</strong> after admin approval (1-2 hours).
+                    </p>
+                </div>
+
+                <button id="verifyBtn" onclick="verifyManualPayment('${manualOrderId}')" class="btn-primary" style="width:100%; margin-bottom:10px;">
+                    SUBMIT FOR VERIFICATION
+                </button>
+                <button onclick="location.reload()" class="btn-secondary" style="width:100%;">
+                    CANCEL
+                </button>
+            </div>
+        `;
         }
 
         function showQRScanner(orderData) {
@@ -1439,15 +1487,16 @@
 </body>
 
 </html>
-        // Premium Modal Functions with 3D Animation
-        function showPremiumModal(options) {
-            // Remove any existing modal
-            const existing = document.getElementById('premiumModal');
-            if (existing) existing.remove();
+<script>
+    // Premium Modal Functions with 3D Animation
+    function showPremiumModal(options) {
+        // Remove any existing modal
+        const existing = document.getElementById('premiumModal');
+        if (existing) existing.remove();
 
-            const modal = document.createElement('div');
-            modal.id = 'premiumModal';
-            modal.innerHTML = `
+        const modal = document.createElement('div');
+        modal.id = 'premiumModal';
+        modal.innerHTML = `
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap');
                     
@@ -1598,17 +1647,18 @@
                     </div>
                 </div>
             `;
-            
-            // Store button actions globally
-            window.premiumModalActions = options.buttons.map(btn => btn.action);
-            
-            document.body.appendChild(modal);
+
+        // Store button actions globally
+        window.premiumModalActions = options.buttons.map(btn => btn.action);
+
+        document.body.appendChild(modal);
+    }
+
+    function closePremiumModal() {
+        const modal = document.getElementById('premiumModal');
+        if (modal) {
+            modal.style.animation = 'modalFadeIn 0.2s ease reverse';
+            setTimeout(() => modal.remove(), 200);
         }
-        
-        function closePremiumModal() {
-            const modal = document.getElementById('premiumModal');
-            if (modal) {
-                modal.style.animation = 'modalFadeIn 0.2s ease reverse';
-                setTimeout(() => modal.remove(), 200);
-            }
-        }
+    }
+</script>
