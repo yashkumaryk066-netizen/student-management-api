@@ -1266,7 +1266,14 @@
                     })
                 });
 
-                const result = await response.json();
+                const text = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    console.warn("Server returned non-JSON response:", text);
+                    throw new Error("Server Error: " + (text.length > 50 ? text.substring(0, 50) + "..." : text));
+                }
 
                 if (response.ok) {
                     // Success - Show waiting for approval message
@@ -1338,7 +1345,7 @@
             } catch (error) {
                 console.error(error);
                 errDiv.style.display = 'block';
-                errDiv.innerText = "Network error. Please check your connection and try again.";
+                errDiv.innerText = error.message || "Network error. Please check your connection.";
                 btn.disabled = false;
                 btn.innerHTML = "VERIFY PAYMENT";
             }
