@@ -2,7 +2,8 @@
 # PA_DEPLOY.sh - Robust PythonAnywhere Deployment Script
 # Usage: bash PA_DEPLOY.sh
 
-echo "🚀 Starting PythonAnywhere Deployment..."
+echo "🚀 Starting PythonAnywhere Deployment (PREMIUM EDITION 💎)..."
+echo "✨ Deploying Advanced 3D UI & Security Hardening..."
 
 # 0. Ensure we are in the project root
 if [ -f "manage.py" ]; then
