@@ -1153,32 +1153,79 @@
             const utr = document.getElementById('txnUtrInput').value.trim();
             const errDiv = document.getElementById('utrError');
             const btn = document.getElementById('verifyBtn');
+            const email = document.getElementById('userEmail').value;
+            const phone = document.getElementById('userPhone').value;
 
-            // 1. Strict UTR Validation (Must be 12 digits)
-            if (!/^\d{12}$/.test(utr)) {
+            // 1. Strict UTR Validation (Minimum 10 characters)
+            if (!utr || utr.length < 10) {
                 errDiv.style.display = 'block';
-                errDiv.innerText = "Invalid UTR! Please enter correct 12-digit Transaction ID from your UPI App.";
+                errDiv.innerText = "Invalid UTR! Please enter a valid Transaction ID (minimum 10 characters).";
                 return;
             }
             errDiv.style.display = 'none';
 
             // 2. Show Advanced Verification Animation
             btn.disabled = true;
-            btn.innerHTML = `<span class="pulse-dot"></span> Connecting to Bank Server...`;
+            btn.innerHTML = `<span class="pulse-dot"></span> Submitting for verification...`;
 
-            // Simulate checks
-            await new Promise(r => setTimeout(r, 1500));
-            btn.innerHTML = `<span class="pulse-dot"></span> Verifying Amount...`;
-            await new Promise(r => setTimeout(r, 1500));
-            btn.innerHTML = `<span class="pulse-dot"></span> Validating Merchant...`;
-            await new Promise(r => setTimeout(r, 1000));
+            try {
+                // Call new subscription verify API
+                const response = await fetch('/api/subscription/verify-payment/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        phone: phone,
+                        plan_type: selectedPlan,
+                        utr_number: utr,
+                        amount: selectedAmount.toString()
+                    })
+                });
 
-            // 3. Success -> Calls Backend
-            verifyAndOnboard({
-                razorpay_payment_id: utr, // Use UTR as ID
-                razorpay_order_id: orderId,
-                razorpay_signature: "manual_verified_utr"
-            });
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Success - Show submitted message
+                    document.getElementById('step2').innerHTML = `
+                        <div style="padding:40px; text-align:center;">
+                            <div style="font-size:3rem; margin-bottom:20px;">✅</div>
+                            <h3 style="margin-bottom:10px; color:#10b981;">Payment Submitted Successfully!</h3>
+                            <p style="color:var(--text-muted); margin-bottom:20px;">Your payment is under verification.</p>
+                            
+                            <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-bottom:20px; text-align:left;">
+                                <div style="margin-bottom:12px;"><strong>UTR:</strong> ${utr}</div>
+                                <div style="margin-bottom:12px;"><strong>Amount:</strong> ₹${selectedAmount.toLocaleString('en-IN')}</div>
+                                <div style="margin-bottom:12px;"><strong>Plan:</strong> ${selectedPlan}</div>
+                                <div style="margin-bottom:12px;"><strong>Email:</strong> ${email}</div>
+                            </div>
+
+                            <div style="background:rgba(16,185,129,0.1); border-left:4px solid #10b981; padding:16px; border-radius:8px; margin-bottom:20px; text-align:left;">
+                                <h4 style="margin:0 0 8px 0; color:#10b981;">What's Next?</h4>
+                                <ul style="margin:0; padding-left:20px; color:var(--text-muted); line-height:1.8;">
+                                    <li>Admin will verify your payment with bank statement</li>
+                                    <li>You'll receive login credentials via email within 1-2 hours</li>
+                                    <li>Check your inbox (${email}) for updates</li>
+                                </ul>
+                            </div>
+
+                            <button onclick="location.href='/login/'" class="btn-primary" style="width:100%;">Go to Login Page</button>
+                        </div>
+                    `;
+                } else {
+                    // Error
+                    errDiv.style.display = 'block';
+                    errDiv.innerText = result.error || result.message || "Verification failed. Please try again.";
+                    btn.disabled = false;
+                    btn.innerHTML = "VERIFY PAYMENT";
+                }
+
+            } catch (error) {
+                console.error(error);
+                errDiv.style.display = 'block';
+                errDiv.innerText = "Network error. Please check your connection and try again.";
+                btn.disabled = false;
+                btn.innerHTML = "VERIFY PAYMENT";
+            }
         }
 
         async function verifyAndOnboard(paymentResponse) {
