@@ -10,7 +10,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 2. Verify Database (Crucial Check)
+## 2. Verify Database (REQUIRED: Performance Updates)
 ```bash
 python manage.py makemigrations
 python manage.py migrate

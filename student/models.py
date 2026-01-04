@@ -19,8 +19,8 @@ class ClientSubscription(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='subscription')
-    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', db_index=True)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     auto_renew = models.BooleanField(default=True)
@@ -123,14 +123,14 @@ class UserProfile(models.Model):
         ('CLIENT', 'Client'), # Subscription Owner (School/Coaching Owner)
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, db_index=True)
     
     INSTITUTION_TYPES = [
         ('SCHOOL', 'School'),
         ('COACHING', 'Coaching'),
         ('INSTITUTE', 'Institute/University'),
     ]
-    institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL')
+    institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL', db_index=True)
     phone = models.CharField(max_length=15, blank=True)
     subscription_expiry = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
