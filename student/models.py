@@ -144,14 +144,18 @@ class Payment(models.Model):
         ('PENDING', 'Pending'),
         ('PAID', 'Paid'),
         ('OVERDUE', 'Overdue'),
+        ('PENDING_VERIFICATION', 'Pending Verification'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
     ]
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
     transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     due_date = models.DateField()
     paid_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='PENDING')
     description = models.CharField(max_length=200)
+    metadata = models.JSONField(null=True, blank=True, default=dict)  # Store additional payment data
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -159,7 +163,8 @@ class Payment(models.Model):
         ordering = ['-due_date']
     
     def __str__(self):
-        return f"{self.student.name} - ₹{self.amount} - {self.status}"
+        student_name = self.student.name if self.student else "No Student"
+        return f"{student_name} - ₹{self.amount} - {self.status}"
     
     def save(self, *args, **kwargs):
         # Auto-update status based on due date

@@ -2,92 +2,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.contrib.auth.models import User
-from .models import ClientSubscription, UserProfile
+from .models import ClientSubscription, UserProfile, Payment
 from datetime import date, timedelta
 import random
 import string
 import logging
-
 from decimal import Decimal
+
+logger = logging.getLogger(__name__)
 
 class SubscriptionPurchaseView(APIView):
     """
-    Endpoint for purchasing a new subscription (School, Coaching, Institute).
-    Enforces strict pricing and delays credential generation until payment success.
-    """
-    permission_classes = [permissions.AllowAny] 
-
-    PRICING = {
-        'SCHOOL': Decimal('1000.00'),
-        'COACHING': Decimal('500.00'),
-        'INSTITUTE': Decimal('1500.00')
-    }
-
-    def post(self, request):
-        plan_type = request.data.get('plan_type') 
-        email = request.data.get('email')
-        phone = request.data.get('phone')
-        try:
-            amount = Decimal(str(request.data.get('amount', 0)))
-        except:
-            amount = Decimal('0.00')
-        
-        if not plan_type or not email:
-             return Response({"error": "Plan Type and Email are required"}, status=status.HTTP_400_BAD_REQUEST)
-             
-        # Strict Pricing Check
-        expected_price = self.PRICING.get(plan_type)
-        if not expected_price:
-            return Response({"error": "Invalid Plan Type"}, status=status.HTTP_400_BAD_REQUEST)
-            
-        # STRICT VERIFICATION: If amount is LESS than price (even by 1 rupee), REJECT.
-        if amount < expected_price:
-             return Response({
-                 "error": "Payment Verification Failed: Amount is less than required plan price.",
-                 "required": str(expected_price),
-                 "received": str(amount),
-                 "message": "Full payment required. Username/Password will NOT be issued."
-             }, status=status.HTTP_400_BAD_REQUEST)
-
-        # 1. Create or Get User (Without Password initially if new)
-        user, created = User.objects.get_or_create(username=email, defaults={'email': email})
-        
-        if created:
-            user.set_unusable_password() # No access yet
-            user.save()
-        
-        # 2. Create Profile if not exists
-        if not hasattr(user, 'profile'):
-            UserProfile.objects.create(
-                user=user, 
-                role='CLIENT', 
-                institution_type=plan_type,
-                phone=phone or ''
-            )
-        else:
-            # Update intended plan
-            user.profile.institution_type = plan_type
-            user.profile.save()
-
-        # 3. Create Subscription Record (Pending Payment)
-        sub, sub_created = ClientSubscription.objects.get_or_create(user=user)
-        sub.plan_type = plan_type
-        sub.amount_paid = amount
-        sub.status = 'PENDING'
-        sub.save()
-        
-        # 4. Return Payment Link
-        return Response({
-            "status": "INITIATED",
-            "message": "Payment amount verified. Proceeding to gateway...",
-            "payment_url": f"/api/subscription/success/?email={email}&amount={amount}&plan={plan_type}" 
-        })
-
-
-class SubscriptionSuccessView(APIView):
-    """
-    Callback/Success handler. 
-    Verifies payment again and ONLY THEN generates credentials.
+    Returns bank payment details for manual transfer.
+    User will transfer money and submit UTR for verification.
     """
     permission_classes = [permissions.AllowAny]
 
@@ -97,72 +24,286 @@ class SubscriptionSuccessView(APIView):
         'INSTITUTE': Decimal('1500.00')
     }
 
-    def get(self, request):
-        email = request.query_params.get('email')
-        try:
-            received_amount = Decimal(str(request.query_params.get('amount', 0)))
-        except:
-             received_amount = Decimal('0.00')
-             
-        plan_type = request.query_params.get('plan')
+    def post(self, request):
+        plan_type = request.data.get('plan_type')
+        email = request.data.get('email')
+        phone = request.data.get('phone')
         
-        try:
-            user = User.objects.get(email=email)
-            sub = user.subscription
-        except (User.DoesNotExist, AttributeError):
-             return Response({"error": "Subscription request not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        # DOUBLE CHECK: Strict Pricing Verification
-        expected_price = self.PRICING.get(plan_type, Decimal('999999.00')) # Default high to fail if unknown
+        if not plan_type or not email:
+            return Response({"error": "Plan Type and Email are required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        # CRITICAL SECURITY CHECK
-        # If amount is less than expected price, DO NOT ISSUE CREDENTIALS.
-        if received_amount < expected_price:
-             # Transaction Failed or Manipulation Attempt
-             sub.status = 'FAILED'
-             sub.save()
-             return Response({
-                 "status": "FAILED", 
-                 "error": "Strict Pricing Check Failed: Talk to Admin.",
-                 "details": "Credential generation blocked due to insufficient payment."
-             }, status=status.HTTP_402_PAYMENT_REQUIRED)
-
-        # SUCCESS PATH
+        # Get pricing
+        expected_price = self.PRICING.get(plan_type)
+        if not expected_price:
+            return Response({"error": "Invalid Plan Type"}, status=status.HTTP_400_BAD_REQUEST)
         
-        # 1. Activate Subscription
-        sub.plan_type = plan_type
-        sub.amount_paid = received_amount
-        sub.activate(days=30) 
-        
-        # 2. Generate Credentials (ONLY NOW)
-        credentials_generated = False
-        plain_password = None
-        
-        if not user.has_usable_password():
-             # Generate secure password
-             plain_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
-             user.set_password(plain_password)
-             user.save()
-             credentials_generated = True
-        
-        # 3. Return Success Details
+        # Return bank payment details
         return Response({
-            "status": "SUCCESS",
-            "message": f"Plan {sub.plan_type} Activated Successfully! Payment Verified.",
-            "credentials": {
-                "username": user.username,
-                "password": plain_password if credentials_generated else "****** (Existing)",
-                "note": "Please save these credentials immediately."
+            "status": "PAYMENT_PENDING",
+            "plan_type": plan_type,
+            "amount_to_pay": str(expected_price),
+            "payment_method": "BANK_TRANSFER",
+            "bank_details": {
+                "account_name": "Your Institute Name",
+                "account_number": "1234567890",
+                "ifsc_code": "SBIN0001234",
+                "bank_name": "State Bank of India",
+                "branch": "Main Branch",
+                "upi_id": "yourinstitute@sbi"
             },
-            "dashboard_url": "/dashboard/"
+            "qr_code_url": "/static/images/payment_qr.png",  # Upload QR code image
+            "instructions": [
+                f"Transfer exactly ₹{expected_price} to the above account",
+                "Save your payment screenshot",
+                "Note down the UTR/Transaction Reference Number",
+                "Submit UTR in next step for verification",
+                "Admin will verify and activate your account within 1-2 hours"
+            ],
+            "next_step": "/api/subscription/verify-payment/"
         })
+
+
+class SubscriptionPaymentVerifyView(APIView):
+    """
+    User submits UTR and payment screenshot for admin verification.
+    Creates a pending payment record.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    PRICING = {
+        'SCHOOL': Decimal('1000.00'),
+        'COACHING': Decimal('500.00'),
+        'INSTITUTE': Decimal('1500.00')
+    }
+
+    def post(self, request):
+        email = request.data.get('email')
+        phone = request.data.get('phone')
+        plan_type = request.data.get('plan_type')
+        utr_number = request.data.get('utr_number')  # UTR/Transaction Reference
+        amount = request.data.get('amount')
+        payment_screenshot = request.FILES.get('payment_screenshot')  # Optional
+        
+        if not all([email, plan_type, utr_number, amount]):
+            return Response({
+                "error": "Missing required fields",
+                "required": ["email", "plan_type", "utr_number", "amount"]
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verify minimum length for UTR
+        if len(str(utr_number)) < 10:
+            return Response({
+                "error": "Invalid UTR Number",
+                "message": "UTR/Transaction Reference must be at least 10 characters"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check for duplicate UTR
+        if Payment.objects.filter(transaction_id=utr_number).exists():
+            return Response({
+                "error": "Duplicate Transaction",
+                "message": "This UTR number has already been submitted"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verify pricing
+        try:
+            amount = Decimal(str(amount))
+        except:
+            amount = Decimal('0.00')
+        
+        expected_price = self.PRICING.get(plan_type)
+        if amount < expected_price:
+            return Response({
+                "error": "Insufficient Payment Amount",
+                "message": f"Required ₹{expected_price} for {plan_type} plan, but you submitted ₹{amount}",
+                "required": str(expected_price),
+                "received": str(amount)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create or get user (without password initially)
+        user, created = User.objects.get_or_create(
+            username=email,
+            defaults={'email': email}
+        )
+        
+        if created:
+            user.set_unusable_password()  # No access until verified
+            user.save()
+        
+        # Create profile if not exists
+        if not hasattr(user, 'profile'):
+            UserProfile.objects.create(
+                user=user,
+                role='CLIENT',
+                institution_type=plan_type,
+                phone=phone or ''
+            )
+        
+        # Create pending payment record
+        payment = Payment.objects.create(
+            student=None,  # No student yet, will be linked after verification
+            transaction_id=utr_number,
+            amount=amount,
+            due_date=date.today(),
+            status='PENDING_VERIFICATION',
+            description=f"{plan_type} Plan - Bank Transfer (UTR: {utr_number})"
+        )
+        
+        # Store additional metadata
+        payment.metadata = {
+            'email': email,
+            'phone': phone,
+            'plan_type': plan_type,
+            'user_id': user.id
+        }
+        payment.save()
+        
+        # Notify admin
+        logger.info(f"🔔 NEW PAYMENT SUBMISSION: {plan_type} - ₹{amount} - UTR: {utr_number} - Email: {email}")
+        
+        return Response({
+            "status": "SUBMITTED_FOR_VERIFICATION",
+            "message": "Payment submitted successfully!",
+            "details": {
+                "utr_number": utr_number,
+                "amount": str(amount),
+                "plan_type": plan_type,
+                "verification_status": "PENDING"
+            },
+            "next_steps": [
+                "Admin will verify your payment with bank statement",
+                "You will receive credentials via email/SMS within 1-2 hours",
+                "Check your email for updates"
+            ],
+            "estimated_activation": "1-2 hours"
+        })
+
+
+class AdminPaymentApprovalView(APIView):
+    """
+    Admin verifies payment from bank statement and approves/rejects.
+    Only admin can access this endpoint.
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        payment_id = request.data.get('payment_id')
+        action = request.data.get('action')  # 'approve' or 'reject'
+        admin_notes = request.data.get('notes', '')
+        
+        if not payment_id or not action:
+            return Response({"error": "payment_id and action required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            payment = Payment.objects.get(id=payment_id, status='PENDING_VERIFICATION')
+        except Payment.DoesNotExist:
+            return Response({"error": "Payment not found or already processed"}, status=status.HTTP_404_NOT_FOUND)
+        
+        metadata = payment.metadata or {}
+        email = metadata.get('email')
+        phone = metadata.get('phone')
+        plan_type = metadata.get('plan_type')
+        amount = payment.amount
+        
+        if action == 'approve':
+            # APPROVE AND ACTIVATE SUBSCRIPTION
+            try:
+                user = User.objects.get(email=email)
+                
+                # Generate password
+                password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+                user.set_password(password)
+                user.is_active = True
+                user.save()
+                
+                # Update profile
+                profile = user.profile
+                profile.subscription_expiry = date.today() + timedelta(days=30)
+                profile.institution_type = plan_type
+                profile.save()
+                
+                # Create/update subscription
+                sub, sub_created = ClientSubscription.objects.get_or_create(user=user)
+                sub.plan_type = plan_type
+                sub.amount_paid = amount
+                sub.activate(days=30)
+                
+                # Update payment status
+                payment.status = 'APPROVED'
+                payment.description += f" | VERIFIED by {request.user.username}"
+                payment.save()
+                
+                logger.info(f"✅ PAYMENT APPROVED: {email} - {plan_type} - ₹{amount}")
+                
+                # TODO: Send email/SMS with credentials
+                
+                return Response({
+                    "status": "APPROVED",
+                    "message": "Payment verified and account activated",
+                    "credentials": {
+                        "username": user.username,
+                        "password": password,
+                        "login_url": "https://yashamishra.pythonanywhere.com/login/",
+                        "valid_until": profile.subscription_expiry
+                    }
+                })
+                
+            except Exception as e:
+                logger.error(f"❌ Approval Error: {e}")
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        elif action == 'reject':
+            # REJECT PAYMENT
+            payment.status = 'REJECTED'
+            payment.description += f" | REJECTED by {request.user.username}: {admin_notes}"
+            payment.save()
+            
+            logger.info(f"❌ PAYMENT REJECTED: {email} - Reason: {admin_notes}")
+            
+            return Response({
+                "status": "REJECTED",
+                "message": "Payment rejected",
+                "reason": admin_notes
+            })
+        
+        else:
+            return Response({"error": "Invalid action. Use 'approve' or 'reject'"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PendingPaymentsListView(APIView):
+    """
+    Admin can view all pending payments for verification.
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        pending_payments = Payment.objects.filter(status='PENDING_VERIFICATION').order_by('-created_at')
+        
+        payments_data = []
+        for payment in pending_payments:
+            metadata = payment.metadata or {}
+            payments_data.append({
+                'id': payment.id,
+                'utr_number': payment.transaction_id,
+                'amount': str(payment.amount),
+                'email': metadata.get('email'),
+                'phone': metadata.get('phone'),
+                'plan_type': metadata.get('plan_type'),
+                'submitted_date': payment.due_date,
+                'description': payment.description
+            })
+        
+        return Response({
+            "total_pending": len(payments_data),
+            "payments": payments_data
+        })
+
 
 class SubscriptionStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         if not hasattr(request.user, 'subscription'):
-             return Response({"status": "NO_SUBSCRIPTION", "message": "No active plan found."})
+            return Response({"status": "NO_SUBSCRIPTION", "message": "No active plan found."})
         
         sub = request.user.subscription
         today = date.today()
@@ -183,8 +324,7 @@ class SubscriptionStatusView(APIView):
 
 class SubscriptionRenewView(APIView):
     """
-    Renew an existing subscription for 30 days.
-    Requires authentication and valid payment.
+    Same manual bank transfer flow for renewals.
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -195,67 +335,31 @@ class SubscriptionRenewView(APIView):
     }
 
     def post(self, request):
-        # Check if user has a subscription
         if not hasattr(request.user, 'subscription'):
             return Response({
-                "error": "No existing subscription found",
-                "message": "Please purchase a plan first"
+                "error": "No existing subscription found"
             }, status=status.HTTP_404_NOT_FOUND)
 
         sub = request.user.subscription
-        
-        # Get plan type (from request or use current plan)
         plan_type = request.data.get('plan_type', sub.plan_type)
-        
-        # Get payment amount
-        try:
-            amount = Decimal(str(request.data.get('amount', 0)))
-        except:
-            amount = Decimal('0.00')
-
-        # Verify pricing
         expected_price = self.PRICING.get(plan_type)
-        if not expected_price:
-            return Response({"error": "Invalid Plan Type"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # STRICT PRICING CHECK
-        if amount < expected_price:
-            return Response({
-                "error": "Payment Verification Failed",
-                "required": str(expected_price),
-                "received": str(amount),
-                "message": "Full payment required for renewal"
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # RENEWAL LOGIC
-        today = date.today()
-        
-        # If subscription is active, extend from end_date
-        # If expired, start from today
-        if sub.end_date and sub.end_date > today:
-            new_end_date = sub.end_date + timedelta(days=30)
-        else:
-            sub.start_date = today
-            new_end_date = today + timedelta(days=30)
-
-        sub.end_date = new_end_date
-        sub.status = 'ACTIVE'
-        sub.plan_type = plan_type
-        sub.amount_paid = amount
-        sub.save()
-
-        # Calculate new days left
-        days_left = (new_end_date - today).days
-
+        # Return same bank details for renewal
         return Response({
-            "status": "SUCCESS",
-            "message": f"{plan_type} Plan renewed successfully for 30 days!",
-            "subscription": {
-                "plan_type": sub.plan_type,
-                "status": sub.status,
-                "start_date": sub.start_date,
-                "end_date": sub.end_date,
-                "days_left": days_left,
-                "amount_paid": str(sub.amount_paid)
-            }
+            "status": "RENEWAL_PAYMENT_PENDING",
+            "plan_type": plan_type,
+            "amount_to_pay": str(expected_price),
+            "payment_method": "BANK_TRANSFER",
+            "bank_details": {
+                "account_name": "Your Institute Name",
+                "account_number": "1234567890",
+                "ifsc_code": "SBIN0001234",
+                "bank_name": "State Bank of India",
+                "upi_id": "yourinstitute@sbi"
+            },
+            "instructions": [
+                f"Transfer exactly ₹{expected_price} for renewal",
+                "Submit UTR at /api/subscription/verify-payment/",
+                "Use same email: {request.user.email}"
+            ]
         })

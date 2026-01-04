@@ -34,7 +34,10 @@ from .views import (
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
 
-from .subscription_views import SubscriptionPurchaseView, SubscriptionSuccessView, SubscriptionStatusView, SubscriptionRenewView
+from .subscription_views import (
+    SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
+    SubscriptionPaymentVerifyView, AdminPaymentApprovalView, PendingPaymentsListView
+)
 from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
@@ -128,11 +131,15 @@ urlpatterns = [
     # MANUAL PAYMENT
     path('payment/manual/submit/', ManualPaymentSubmitView.as_view(), name='payment-manual-submit'),
     
-    # SUBSCRIPTION (CLIENT ONBOARDING)
-    path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),
-    path('subscription/success/', SubscriptionSuccessView.as_view(), name='subscription-success'),
+    # SUBSCRIPTION (MANUAL BANK TRANSFER)
+    path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),  # Returns bank details
+    path('subscription/verify-payment/', SubscriptionPaymentVerifyView.as_view(), name='subscription-verify-payment'),  # Submit UTR
     path('subscription/status/', SubscriptionStatusView.as_view(), name='subscription-status'),
     path('subscription/renew/', SubscriptionRenewView.as_view(), name='subscription-renew'),
+    
+    # ADMIN PAYMENT VERIFICATION
+    path('admin/payments/pending/', PendingPaymentsListView.as_view(), name='admin-pending-payments'),
+    path('admin/payments/approve/', AdminPaymentApprovalView.as_view(), name='admin-approve-payment'),
 
     # REPORTS
     path('reports/', ReportListView.as_view(), name='report-list'),
