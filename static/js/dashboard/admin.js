@@ -3031,7 +3031,7 @@ const DashboardApp = {
             const result = await response.json();
             if (response.ok) {
                 this.showAlert('✅ Approved!', 'Account activated. Credentials emailed.', 'success');
-                setTimeout(() => this.loadSubscriptionManagement(), 1500);
+                setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1500);
             } else {
                 this.showAlert('Failed', result.error || 'Could not approve', 'error');
             }
@@ -3052,7 +3052,7 @@ const DashboardApp = {
             const result = await response.json();
             if (response.ok) {
                 this.showAlert('Rejected', 'Payment rejected.', 'success');
-                setTimeout(() => this.loadSubscriptionManagement(), 1500);
+                setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1500);
             } else {
                 this.showAlert('Failed', result.error || 'Could not reject', 'error');
             }
@@ -3083,7 +3083,7 @@ const DashboardApp = {
             if (response.ok) {
                 this.showAlert('Success', result.message, 'success');
                 // Reload to see changes
-                setTimeout(() => this.loadSubscriptionManagement(), 1000);
+                setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1000);
             } else {
                 this.showAlert('Failed', result.error || 'Action failed', 'error');
             }
