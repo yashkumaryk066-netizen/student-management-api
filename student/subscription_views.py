@@ -8,6 +8,7 @@ import random
 import string
 import logging
 from decimal import Decimal
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,16 @@ class SubscriptionPaymentVerifyView(APIView):
     }
 
     authentication_classes = [] # Disable auth to prevent CSRF errors on public endpoint
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"❌ Dispatch Error: {str(e)}")
+            return JsonResponse({
+                "error": "Server Error",
+                "message": f"Server failed to process request: {str(e)}"
+            }, status=500)
 
     def post(self, request):
         try:
