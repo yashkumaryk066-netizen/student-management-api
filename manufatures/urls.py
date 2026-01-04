@@ -55,8 +55,9 @@ urlpatterns = [
     path('api/', include('student.urls')),
 
     # API Documentation  
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
+    # API Documentation - HIDDEN FOR SECURITY
+    # path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    # path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
 ]
 
 # Admin Panel Customization
