@@ -219,6 +219,7 @@ class AdminPaymentApprovalView(APIView):
                 profile = user.profile
                 profile.subscription_expiry = date.today() + timedelta(days=30)
                 profile.institution_type = plan_type
+                profile.role = 'ADMIN'  # Client gets ADMIN role, NOT superuser
                 profile.save()
                 
                 # Create/update subscription
@@ -234,17 +235,64 @@ class AdminPaymentApprovalView(APIView):
                 
                 logger.info(f"✅ PAYMENT APPROVED: {email} - {plan_type} - ₹{amount}")
                 
-                # TODO: Send email/SMS with credentials
+                # Send credentials via email
+                try:
+                    from django.core.mail import send_mail
+                    from django.conf import settings
+                    
+                    subject = f"🎉 {plan_type} Plan Activated - Login Credentials"
+                    message = f"""
+Hello!
+
+Your {plan_type} Plan has been successfully activated!
+
+🔐 Login Credentials:
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Username: {user.username}
+Password: {password}
+Login URL: https://yashamishra.pythonanywhere.com/login/
+
+📅 Subscription Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Plan: {plan_type}
+Valid Until: {profile.subscription_expiry}
+Amount Paid: ₹{amount}
+
+⚠️ IMPORTANT:
+• Save these credentials immediately
+• Change your password after first login
+• Contact support for any issues
+
+Thank you for choosing our platform!
+
+Best regards,
+Team
+                    """
+                    
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False
+                    )
+                    
+                    logger.info(f"📧 Credentials emailed to {email}")
+                    
+                except Exception as email_error:
+                    logger.error(f"📧 Email sending failed: {email_error}")
+                    # Don't fail the approval if email fails
                 
                 return Response({
                     "status": "APPROVED",
-                    "message": "Payment verified and account activated",
+                    "message": "Payment verified and account activated. Credentials sent via email.",
                     "credentials": {
                         "username": user.username,
                         "password": password,
                         "login_url": "https://yashamishra.pythonanywhere.com/login/",
                         "valid_until": profile.subscription_expiry
-                    }
+                    },
+                    "email_sent": True
                 })
                 
             except Exception as e:
