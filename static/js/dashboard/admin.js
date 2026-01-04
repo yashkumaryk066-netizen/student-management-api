@@ -2373,68 +2373,45 @@ const DashboardApp = {
         }
 
         try {
-            // Get user email from profile or storage
-            const userEmail = localStorage.getItem('userEmail') || document.getElementById('profileEmail')?.value;
-            const userPhone = localStorage.getItem('userPhone') || '';
-
-            if (!userEmail) {
-                this.showAlert("Error", "User email not found. Please refresh and try again.", "error");
-                return;
-            }
-
             this.showAlert("Processing...", "Submitting payment for verification", "info");
 
-            // Submit to verification API
-            const response = await fetch(`${this.apiBaseUrl}/subscription/verify-payment/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({
-                    email: userEmail,
-                    phone: userPhone,
-                    plan_type: planType,
-                    utr_number: utr,
-                    amount: amount.toString()
-                })
-            });
+            // Use the updated SubscriptionAPI which calls /subscription/renew/
+            const result = await SubscriptionAPI.renew(planType, amount, utr);
 
-            const result = await response.json();
-
-            // Close modal
+            // If we get here, it means success (apiCall throws on error)
             document.querySelector('.custom-modal')?.remove();
 
-            if (response.ok) {
-                this.showAlert(
-                    "✅ Payment Submitted!",
-                    `Your renewal request has been submitted successfully. Admin will verify and extend your ${planType} plan within 1-2 hours. You'll receive an email confirmation.`,
-                    "success"
-                );
+            this.showAlert(
+                "✅ Payment Submitted!",
+                "Your renewal request is pending Admin approval. You will receive an email once approved.",
+                "success"
+            );
 
-                // Reload subscription view after 2 seconds
-                setTimeout(() => this.loadSubscriptionManagement(), 2000);
-            } else {
-                this.showAlert(
-                    "Submission Failed",
-                    result.error || result.message || "Could not submit payment. Please try again.",
-                    "error"
+            // Reload to update status
+            setTimeout(() => this.loadSubscriptionManagement(), 2000);
+
+        } catch (error) {
+            console.error(error);
+            this.showAlert("Submission Failed", error.message || "Failed to submit request", "error");
+        }
+    },
+    "error"
                 );
             }
 
         } catch (error) {
-            console.error('Renewal error:', error);
-            this.showAlert(
-                "Error",
-                "Failed to submit renewal request. Please check your connection and try again.",
-                "error"
-            );
-        }
+    console.error('Renewal error:', error);
+    this.showAlert(
+        "Error",
+        "Failed to submit renewal request. Please check your connection and try again.",
+        "error"
+    );
+}
     },
 
-    loadSettings() {
-        const container = document.getElementById('dashboardView');
-        container.innerHTML = `
+loadSettings() {
+    const container = document.getElementById('dashboardView');
+    container.innerHTML = `
     <div class="module-header">
         <div>
             <h1 class="page-title">⚙️ Settings</h1>
@@ -2504,75 +2481,75 @@ const DashboardApp = {
         </div>
         `;
 
-        // Fetch and populate data
-        this.fetchProfileSettings();
-    },
+    // Fetch and populate data
+    this.fetchProfileSettings();
+},
 
     async fetchProfileSettings() {
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/profile/`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                document.getElementById('profileName').value = data.first_name || '';
-                document.getElementById('profileLastName').value = data.last_name || '';
-                document.getElementById('profileEmail').value = data.email || '';
-                document.getElementById('profilePhone').value = data.phone || '';
-                document.getElementById('profileRole').value = (data.role || 'USER').toUpperCase();
+    try {
+        const response = await fetch(`${this.apiBaseUrl}/profile/`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
-        } catch (error) {
-            console.error('Failed to load profile settings', error);
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('profileName').value = data.first_name || '';
+            document.getElementById('profileLastName').value = data.last_name || '';
+            document.getElementById('profileEmail').value = data.email || '';
+            document.getElementById('profilePhone').value = data.phone || '';
+            document.getElementById('profileRole').value = (data.role || 'USER').toUpperCase();
         }
-    },
+    } catch (error) {
+        console.error('Failed to load profile settings', error);
+    }
+},
 
     async handleProfileUpdate(event) {
-        const form = event.target;
-        const btn = form.querySelector('button[type="submit"]');
-        const originalText = btn.innerText;
-        btn.innerText = 'Saving...';
-        btn.disabled = true;
+    const form = event.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    btn.innerText = 'Saving...';
+    btn.disabled = true;
 
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/profile/`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify(data)
-            });
+    try {
+        const response = await fetch(`${this.apiBaseUrl}/profile/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify(data)
+        });
 
-            if (response.ok) {
-                alert('Profile updated successfully!');
-            } else {
-                throw new Error('Failed to update profile');
-            }
-        } catch (error) {
-            alert('Error updating profile: ' + error.message);
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
+        if (response.ok) {
+            alert('Profile updated successfully!');
+        } else {
+            throw new Error('Failed to update profile');
         }
-    },
+    } catch (error) {
+        alert('Error updating profile: ' + error.message);
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+},
 
-    logout() {
-        if (confirm('Are you sure you want to logout?')) {
-            localStorage.removeItem('authToken');
-            sessionStorage.clear();
-            window.location.href = '/';
-        }
-    },
+logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('authToken');
+        sessionStorage.clear();
+        window.location.href = '/';
+    }
+},
 
-    // Placeholder functions for actions
-    showAddStudentForm() {
-        const modalHtml = `
+// Placeholder functions for actions
+showAddStudentForm() {
+    const modalHtml = `
     <div class="modal-overlay" id="addStudentModal">
         <div class="modal-card">
             <h2>Add New Student</h2>
@@ -2626,65 +2603,65 @@ const DashboardApp = {
         </div>
     </div>
     `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
-    toggleStudentFields(type) {
-        // Logic to show/hide specific fields based on type if needed
-        // For now keeping it simple as per prompt requirements
-    },
+toggleStudentFields(type) {
+    // Logic to show/hide specific fields based on type if needed
+    // For now keeping it simple as per prompt requirements
+},
 
     async handleStudentSubmit(event) {
-        const form = event.target;
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-        // Disable button
-        const btn = form.querySelector('button[type="submit"]');
-        const originalText = btn.innerText;
-        btn.innerText = 'Saving...';
-        btn.disabled = true;
+    // Disable button
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    btn.innerText = 'Saving...';
+    btn.disabled = true;
 
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/students/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify(data)
-            });
+    try {
+        const response = await fetch(`${this.apiBaseUrl}/students/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify(data)
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(Object.values(errorData).flat().join(', ') || 'Failed to add student');
-            }
-
-            // Success
-            document.getElementById('addStudentModal').remove();
-            this.fetchStudents(); // Refresh list
-            // Simple toast
-            alert('Student added successfully!');
-
-        } catch (error) {
-            alert('Error: ' + error.message);
-            btn.innerText = originalText;
-            btn.disabled = false;
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(Object.values(errorData).flat().join(', ') || 'Failed to add student');
         }
-    },
 
-    editStudent(id) {
-        showToast('Redirecting to Secure Editor...', 'info');
-        setTimeout(() => {
-            window.open(`/admin/student/student/${id}/change/`, '_blank');
-        }, 500);
-    },
+        // Success
+        document.getElementById('addStudentModal').remove();
+        this.fetchStudents(); // Refresh list
+        // Simple toast
+        alert('Student added successfully!');
+
+    } catch (error) {
+        alert('Error: ' + error.message);
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+},
+
+editStudent(id) {
+    showToast('Redirecting to Secure Editor...', 'info');
+    setTimeout(() => {
+        window.open(`/admin/student/student/${id}/change/`, '_blank');
+    }, 500);
+},
 
 
 
-    // --- ATTENDANCE ---
-    markAttendance() {
-        const modalHtml = `
+// --- ATTENDANCE ---
+markAttendance() {
+    const modalHtml = `
         <div class="modal-overlay" id="attendanceModal">
             <div class="modal-card">
                 <h2>Mark Attendance</h2>
@@ -2713,16 +2690,16 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
     async handleAttendanceSubmit(event) {
-        this.submitForm(event, '/attendence/', 'attendanceModal', 'Attendance marked successfully!');
-    },
+    this.submitForm(event, '/attendence/', 'attendanceModal', 'Attendance marked successfully!');
+},
 
-    // --- FINANCE ---
-    addPayment() {
-        const modalHtml = `
+// --- FINANCE ---
+addPayment() {
+    const modalHtml = `
         <div class="modal-overlay" id="paymentModal">
             <div class="modal-card">
                 <h2>Create Fee Record</h2>
@@ -2755,16 +2732,16 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
     async handlePaymentSubmit(event) {
-        this.submitForm(event, '/payment/', 'paymentModal', 'Payment record created successfully!');
-    },
+    this.submitForm(event, '/payment/', 'paymentModal', 'Payment record created successfully!');
+},
 
-    // --- HOSTEL ---
-    allocateRoom() {
-        const modalHtml = `
+// --- HOSTEL ---
+allocateRoom() {
+    const modalHtml = `
         <div class="modal-overlay" id="hostelModal">
             <div class="modal-card">
                 <h2>Allocate Hostel Room</h2>
@@ -2789,21 +2766,21 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
     async handleHostelSubmit(event) {
-        this.submitForm(event, '/hostel/allocations/', 'hostelModal', 'Room allocated successfully!');
-    },
+    this.submitForm(event, '/hostel/allocations/', 'hostelModal', 'Room allocated successfully!');
+},
 
-    // --- EXAMS ---
-    // --- EXAMS (Uses context-aware modals above) ---
-    // Legacy functions removed to avoid conflicts.
-    // See openCreateExamModal and submitCreateExam.
+// --- EXAMS ---
+// --- EXAMS (Uses context-aware modals above) ---
+// Legacy functions removed to avoid conflicts.
+// See openCreateExamModal and submitCreateExam.
 
-    // --- EVENTS ---
-    createEvent() {
-        const modalHtml = `
+// --- EVENTS ---
+createEvent() {
+    const modalHtml = `
         <div class="modal-overlay" id="eventModal">
             <div class="modal-card">
                 <h2>Create New Event</h2>
@@ -2832,16 +2809,16 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
     async handleEventSubmit(event) {
-        this.submitForm(event, '/events/', 'eventModal', 'Event created successfully!');
-    },
+    this.submitForm(event, '/events/', 'eventModal', 'Event created successfully!');
+},
 
-    // --- LIBRARY ---
-    addBook() {
-        const modalHtml = `
+// --- LIBRARY ---
+addBook() {
+    const modalHtml = `
         <div class="modal-overlay" id="addBookModal">
             <div class="modal-card">
                 <h2>Add New Book</h2>
@@ -2890,16 +2867,16 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
     async handleBookSubmit(event) {
-        this.submitForm(event, '/library/books/', 'addBookModal', 'Book added successfully!');
-    },
+    this.submitForm(event, '/library/books/', 'addBookModal', 'Book added successfully!');
+},
 
-    // --- TRANSPORT ---
-    addVehicle() {
-        const modalHtml = `
+// --- TRANSPORT ---
+addVehicle() {
+    const modalHtml = `
         <div class="modal-overlay" id="addVehicleModal">
             <div class="modal-card">
                 <h2>Add New Vehicle</h2>
@@ -2935,16 +2912,16 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
     async handleVehicleSubmit(event) {
-        this.submitForm(event, '/transport/vehicles/', 'addVehicleModal', 'Vehicle added successfully!');
-    },
+    this.submitForm(event, '/transport/vehicles/', 'addVehicleModal', 'Vehicle added successfully!');
+},
 
-    // --- HR ---
-    addStaff() {
-        const modalHtml = `
+// --- HR ---
+addStaff() {
+    const modalHtml = `
         <div class="modal-overlay" id="addStaffModal">
             <div class="modal-card">
                 <h2>Add New Staff/Employee</h2>
@@ -2977,17 +2954,17 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
     async handleStaffSubmit(event) {
-        this.submitForm(event, '/hr/employees/', 'addStaffModal', 'Staff member added successfully!');
-    },
+    this.submitForm(event, '/hr/employees/', 'addStaffModal', 'Staff member added successfully!');
+},
 
-    // --- COURSES & BATCHES ---
-    loadCourseManagement() {
-        const container = document.getElementById('dashboardView');
-        container.innerHTML = `
+// --- COURSES & BATCHES ---
+loadCourseManagement() {
+    const container = document.getElementById('dashboardView');
+    container.innerHTML = `
         <div class="module-header">
             <div>
                 <h1 class="page-title">🎓 Courses & Batches</h1>
@@ -3056,32 +3033,32 @@ const DashboardApp = {
         </div>
         `;
 
-        this.fetchCoursesAndBatches();
-    },
+    this.fetchCoursesAndBatches();
+},
 
     async fetchCoursesAndBatches() {
-        try {
-            // Fetch Courses
-            const courseRes = await fetch(`${this.apiBaseUrl}/courses/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const courses = await courseRes.json();
+    try {
+        // Fetch Courses
+        const courseRes = await fetch(`${this.apiBaseUrl}/courses/`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        });
+        const courses = await courseRes.json();
 
-            // Fetch Batches
-            const batchRes = await fetch(`${this.apiBaseUrl}/batches/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const batches = await batchRes.json();
+        // Fetch Batches
+        const batchRes = await fetch(`${this.apiBaseUrl}/batches/`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        });
+        const batches = await batchRes.json();
 
-            // Update Stats
-            document.getElementById('totalCourses').innerText = courses.length;
-            document.getElementById('totalBatches').innerText = batches.length;
-            // Assuming we get enrollments count from somewhere else or just sum up for now
-            // document.getElementById('totalEnrollments').innerText = batches.reduce((acc, b) => acc + b.student_count, 0);
+        // Update Stats
+        document.getElementById('totalCourses').innerText = courses.length;
+        document.getElementById('totalBatches').innerText = batches.length;
+        // Assuming we get enrollments count from somewhere else or just sum up for now
+        // document.getElementById('totalEnrollments').innerText = batches.reduce((acc, b) => acc + b.student_count, 0);
 
-            // Populate Courses
-            const courseBody = document.getElementById('courseTableBody');
-            courseBody.innerHTML = courses.map(c => `
+        // Populate Courses
+        const courseBody = document.getElementById('courseTableBody');
+        courseBody.innerHTML = courses.map(c => `
         <tr class="hover-row">
             <td><span style="font-family:monospace; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">${c.code}</span></td>
             <td style="font-weight:600; color:white;">${c.name}</td>
@@ -3092,9 +3069,9 @@ const DashboardApp = {
         </tr>
         `).join('');
 
-            // Populate Batches
-            const batchBody = document.getElementById('batchTableBody');
-            batchBody.innerHTML = batches.map(b => `
+        // Populate Batches
+        const batchBody = document.getElementById('batchTableBody');
+        batchBody.innerHTML = batches.map(b => `
         <tr class="hover-row">
             <td style="font-weight:600; color:white;">${b.name}</td>
             <td>${b.course_name}</td>
@@ -3104,13 +3081,13 @@ const DashboardApp = {
         </tr>
         `).join('');
 
-        } catch (error) {
-            console.error('Error fetching course data:', error);
-        }
-    },
+    } catch (error) {
+        console.error('Error fetching course data:', error);
+    }
+},
 
-    addCourse() {
-        const modalHtml = `
+addCourse() {
+    const modalHtml = `
         <div class="modal-overlay" id="addCourseModal">
             <div class="modal-card">
                 <h2>Add New Course</h2>
@@ -3151,17 +3128,17 @@ const DashboardApp = {
             </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+},
 
-    addBatch() {
-        // We need to fetch courses first to populate select
-        fetch(`${this.apiBaseUrl}/courses/`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-        }).then(res => res.json()).then(courses => {
-            const options = courses.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join('');
+addBatch() {
+    // We need to fetch courses first to populate select
+    fetch(`${this.apiBaseUrl}/courses/`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+    }).then(res => res.json()).then(courses => {
+        const options = courses.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join('');
 
-            const modalHtml = `
+        const modalHtml = `
                 <div class="modal-overlay" id="addBatchModal">
                     <div class="modal-card">
                         <h2>Start New Batch</h2>
@@ -3196,110 +3173,112 @@ const DashboardApp = {
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        });
-    },
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    });
+},
 
     async handleCourseSubmit(event) {
-        this.submitForm(event, '/courses/', 'addCourseModal', 'Course created successfully!');
-    },
+    this.submitForm(event, '/courses/', 'addCourseModal', 'Course created successfully!');
+},
 
     async handleBatchSubmit(event) {
-        this.submitForm(event, '/batches/', 'addBatchModal', 'Batch launched successfully!');
-    },
+    this.submitForm(event, '/batches/', 'addBatchModal', 'Batch launched successfully!');
+},
 
 
     // --- GENERIC SUBMIT HELPER ---
     async submitForm(event, endpoint, modalId, successMessage) {
-        const form = event.target;
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-        // Ensure availability of 'available_copies' matching 'total_copies' for books
-        if (data.total_copies && !data.available_copies) {
-            data.available_copies = data.total_copies;
+    // Ensure availability of 'available_copies' matching 'total_copies' for books
+    if (data.total_copies && !data.available_copies) {
+        data.available_copies = data.total_copies;
+    }
+
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    btn.innerText = 'Saving...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(Object.values(errorData).flat().join(', ') || 'Operation failed');
         }
 
-        const btn = form.querySelector('button[type="submit"]');
-        const originalText = btn.innerText;
-        btn.innerText = 'Saving...';
-        btn.disabled = true;
+        document.getElementById(modalId).remove();
+        this.showAlert('Success', successMessage, 'success');
+        // Refresh current module if needed
+        const currentModule = this.currentModule;
+        this.loadModule(currentModule);
 
-        try {
-            const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(Object.values(errorData).flat().join(', ') || 'Operation failed');
-            }
-
-            document.getElementById(modalId).remove();
-            this.showAlert('Success', successMessage, 'success');
-            // Refresh current module if needed
-            const currentModule = this.currentModule;
-            this.loadModule(currentModule);
-
-        } catch (error) {
-            this.showAlert('Error', error.message, 'error');
-            btn.innerText = originalText;
-            btn.disabled = false;
+    } catch (error) {
+        this.showAlert('Error', error.message, 'error');
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+},
+deleteStudent(id, name) {
+    this.showConfirm(
+        "Delete Student?",
+        `Are you sure you want to permanently delete student "${name}" (ID: ${id})? This action cannot be undone.`,
+        () => {
+            this._processDeleteStudent(id);
         }
-    },
-    deleteStudent(id, name) {
-        this.showConfirm(
-            "Delete Student?",
-            `Are you sure you want to permanently delete student "${name}" (ID: ${id})? This action cannot be undone.`,
-            () => {
-                this._processDeleteStudent(id);
-            }
-        );
-    },
+    );
+},
 
     async _processDeleteStudent(id) {
-        try {
-            const res = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (res.ok) {
-                this.showAlert('Deleted!', 'Student record has been successfully deleted.', 'success');
-                this.fetchStudents(); // Refresh list
-            } else {
-                this.showAlert('Error', 'Failed to delete student.', 'error');
+    try {
+        const res = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
-        } catch (e) {
-            this.showAlert('Error', 'Network error occurred.', 'error');
+        });
+
+        if (res.ok) {
+            this.showAlert('Deleted!', 'Student record has been successfully deleted.', 'success');
+            this.fetchStudents(); // Refresh list
+        } else {
+            this.showAlert('Error', 'Failed to delete student.', 'error');
         }
-    },
+    } catch (e) {
+        this.showAlert('Error', 'Network error occurred.', 'error');
+    }
+},
 
     async loadSuperAdminSubscriptionOverview() {
-        const container = document.getElementById('dashboardView');
+    const container = document.getElementById('dashboardView');
 
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/admin/subscriptions/overview/`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load overview');
+    try {
+        const response = await fetch(`${this.apiBaseUrl}/admin/subscriptions/overview/`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
+        });
 
-            const data = await response.json();
-            const { stats, pending_payments, client_subscriptions } = data;
+        if (!response.ok) {
+            const err = await response.json();
+            console.error("Server Error:", err);
+            throw new Error(err.details || err.error || 'Failed to load overview');
+        }
 
-            container.innerHTML = `
+        const data = await response.json();
+        const { stats, pending_payments, client_subscriptions } = data;
+
+        container.innerHTML = `
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
                     .superadmin-overview { font-family: 'Inter', sans-serif; padding: 20px; }
@@ -3337,11 +3316,11 @@ const DashboardApp = {
                     ${pending_payments.length > 0 ? `<div class="module-card" style="margin-bottom: 24px;"><h2 style="margin-bottom: 16px;">⏳ Pending Approvals (${pending_payments.length})</h2><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: rgba(255,255,255,0.05);"><th style="padding: 12px; text-align: left;">Email</th><th style="padding: 12px; text-align: left;">Plan</th><th style="padding: 12px; text-align: left;">Amount</th><th style="padding: 12px; text-align: left;">UTR</th><th style="padding: 12px; text-align: left;">Date</th><th style="padding: 12px; text-align: center;">Action</th></tr></thead><tbody>${pending_payments.map(p => `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 12px;">${p.email}</td><td style="padding: 12px;"><span class="status-badge" style="background: #667eea44; color: #667eea;">${p.plan_type}</span></td><td style="padding: 12px; font-weight: 600;">₹${p.amount}</td><td style="padding: 12px; font-family: monospace; font-size: 0.85rem;">${p.utr}</td><td style="padding: 12px; font-size: 0.85rem;">${p.date}</td><td style="padding: 12px; text-align: center;"><button onclick="DashboardApp.approvePayment(${p.id})" class="btn-primary" style="padding: 6px 16px; font-size: 0.85rem; margin-right: 8px;">Approve</button><button onclick="DashboardApp.rejectPayment(${p.id})" class="btn-secondary" style="padding: 6px 16px; font-size: 0.85rem;">Reject</button></td></tr>`).join('')}</tbody></table></div></div>` : ''}
 
                     <div class="clients-table"><h2 style="padding: 20px 20px 0 20px; margin: 0;">📋 All Client Subscriptions (${client_subscriptions.length})</h2><div style="overflow-x: auto;"><table><thead><tr><th>Username</th><th>Plan</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Days Left</th><th>Amount Paid</th><th>Action</th></tr></thead><tbody>${client_subscriptions.length > 0 ? client_subscriptions.map(client => {
-                const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe';
-                const isSuspended = client.status === 'SUSPENDED';
-                const isActive = client.status === 'ACTIVE';
+            const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe';
+            const isSuspended = client.status === 'SUSPENDED';
+            const isActive = client.status === 'ACTIVE';
 
-                return `<tr>
+            return `<tr>
                             <td style="font-weight: 600;">${client.username}</td>
                             <td><span class="status-badge" style="background: #667eea44; color: #667eea;">${client.plan_type}</span></td>
                             <td><span class="status-badge ${client.is_expired ? 'status-expired' : (isSuspended ? 'status-expired' : 'status-active')}">${client.is_expired ? 'EXPIRED' : client.status}</span></td>
@@ -3357,89 +3336,89 @@ const DashboardApp = {
                                 <button onclick="DashboardApp.adminAction(${client.user_id}, 'DELETE')" class="btn-action btn-danger">🗑️</button>
                             </td>
                         </tr>`;
-            }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
+        }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
                 </div>
             `;
 
-        } catch (error) {
-            console.error('Error loading super admin overview:', error);
-            container.innerHTML = `<div class="module-header"><h1 class="page-title">👑 Super Admin</h1></div><div class="module-card" style="text-align: center; padding: 40px;"><p style="color: var(--text-muted);">Failed to load overview. ${error.message}</p><button class="btn-primary" onclick="DashboardApp.loadSubscriptionManagement()">Try Again</button></div>`;
-        }
-    },
+    } catch (error) {
+        console.error('Error loading super admin overview:', error);
+        container.innerHTML = `<div class="module-header"><h1 class="page-title">👑 Super Admin</h1></div><div class="module-card" style="text-align: center; padding: 40px;"><p style="color: var(--text-muted);">Failed to load overview. ${error.message}</p><button class="btn-primary" onclick="DashboardApp.loadSubscriptionManagement()">Try Again</button></div>`;
+    }
+},
 
     async approvePayment(paymentId) {
-        if (!confirm('Approve this payment? Credentials will be emailed.')) return;
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
-                body: JSON.stringify({ payment_id: paymentId, action: 'approve' })
-            });
-            const result = await response.json();
-            if (response.ok) {
-                this.showAlert('✅ Approved!', 'Account activated. Credentials emailed.', 'success');
-                setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1500);
-            } else {
-                this.showAlert('Failed', result.error || 'Could not approve', 'error');
-            }
-        } catch (error) {
-            this.showAlert('Error', 'Failed to approve. Try again.', 'error');
+    if (!confirm('Approve this payment? Credentials will be emailed.')) return;
+    try {
+        const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+            body: JSON.stringify({ payment_id: paymentId, action: 'approve' })
+        });
+        const result = await response.json();
+        if (response.ok) {
+            this.showAlert('✅ Approved!', 'Account activated. Credentials emailed.', 'success');
+            setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1500);
+        } else {
+            this.showAlert('Failed', result.error || 'Could not approve', 'error');
         }
-    },
+    } catch (error) {
+        this.showAlert('Error', 'Failed to approve. Try again.', 'error');
+    }
+},
 
     async rejectPayment(paymentId) {
-        const reason = prompt('Enter rejection reason:');
-        if (!reason) return;
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
-                body: JSON.stringify({ payment_id: paymentId, action: 'reject', notes: reason })
-            });
-            const result = await response.json();
-            if (response.ok) {
-                this.showAlert('Rejected', 'Payment rejected.', 'success');
-                setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1500);
-            } else {
-                this.showAlert('Failed', result.error || 'Could not reject', 'error');
-            }
-        } catch (error) {
-            this.showAlert('Error', 'Failed to reject. Try again.', 'error');
+    const reason = prompt('Enter rejection reason:');
+    if (!reason) return;
+    try {
+        const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+            body: JSON.stringify({ payment_id: paymentId, action: 'reject', notes: reason })
+        });
+        const result = await response.json();
+        if (response.ok) {
+            this.showAlert('Rejected', 'Payment rejected.', 'success');
+            setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1500);
+        } else {
+            this.showAlert('Failed', result.error || 'Could not reject', 'error');
         }
-    },
+    } catch (error) {
+        this.showAlert('Error', 'Failed to reject. Try again.', 'error');
+    }
+},
 
     async adminAction(userId, action) {
-        let confirmMsg = "";
-        if (action === 'SUSPEND') confirmMsg = "Are you sure you want to BLOCK this client? They will lose access immediately.";
-        if (action === 'ACTIVATE') confirmMsg = "Reactivate this client?";
-        if (action === 'REDUCE_DAYS') confirmMsg = "Penalty: Reduce 7 days from their validity?";
-        if (action === 'EXTEND_DAYS') confirmMsg = "Grant 30 days extension to this client?";
-        if (action === 'DELETE') confirmMsg = "CRITICAL: Permanently delete this client and all their data? This cannot be undone.";
+    let confirmMsg = "";
+    if (action === 'SUSPEND') confirmMsg = "Are you sure you want to BLOCK this client? They will lose access immediately.";
+    if (action === 'ACTIVATE') confirmMsg = "Reactivate this client?";
+    if (action === 'REDUCE_DAYS') confirmMsg = "Penalty: Reduce 7 days from their validity?";
+    if (action === 'EXTEND_DAYS') confirmMsg = "Grant 30 days extension to this client?";
+    if (action === 'DELETE') confirmMsg = "CRITICAL: Permanently delete this client and all their data? This cannot be undone.";
 
-        if (!confirm(confirmMsg)) return;
+    if (!confirm(confirmMsg)) return;
 
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/admin/client-actions/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({ client_id: userId, action: action })
-            });
-            const result = await response.json();
+    try {
+        const response = await fetch(`${this.apiBaseUrl}/admin/client-actions/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify({ client_id: userId, action: action })
+        });
+        const result = await response.json();
 
-            if (response.ok) {
-                this.showAlert('Success', result.message, 'success');
-                // Reload to see changes
-                setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1000);
-            } else {
-                this.showAlert('Failed', result.error || 'Action failed', 'error');
-            }
-        } catch (error) {
-            this.showAlert('Error', 'Network error.', 'error');
+        if (response.ok) {
+            this.showAlert('Success', result.message, 'success');
+            // Reload to see changes
+            setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1000);
+        } else {
+            this.showAlert('Failed', result.error || 'Action failed', 'error');
         }
-    },
+    } catch (error) {
+        this.showAlert('Error', 'Network error.', 'error');
+    }
+},
 };
 
 // Mobile Menu Toggle

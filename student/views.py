@@ -849,12 +849,16 @@ class SubscriptionRenewalView(APIView):
              return Response({"error": "No active subscription found"}, status=400)
              
         # Create a Payment record for renewal
-        # Usually user would upload a transaction ID or just request
-        transaction_id = request.data.get('transaction_id', f'REQ-{timezone.now().timestamp()}')
+        transaction_id = request.data.get('transaction_id')
+        if not transaction_id:
+            return Response({"error": "Transaction ID (UTR) is required"}, status=400)
+
+        plan_type = request.user.subscription.plan_type
         
-        # Calculate Amount (Mock Logic)
+        # Calculate Amount
         amount_map = {'SCHOOL': 10000, 'COACHING': 5000, 'INSTITUTE': 25000}
-        amount = amount_map.get(request.user.subscription.plan_type, 5000)
+        # Allow client to send amount (if they paid differently), else default
+        amount = request.data.get('amount') or amount_map.get(plan_type, 5000)
         
         from .models import Payment
         payment = Payment.objects.create(
@@ -865,16 +869,18 @@ class SubscriptionRenewalView(APIView):
             payment_type='SUBSCRIPTION',
             transaction_id=transaction_id,
             due_date=timezone.now().date(),
-            description=f"Renewal Request for {request.user.subscription.plan_type}"
+            description=f"Renewal Request for {plan_type}",
+            metadata={'email': request.user.email, 'plan_type': plan_type}
         )
 
         # Notify Admin (WhatsApp)
         try:
             from notifications.whatsapp_service import whatsapp_service
             from django.conf import settings
-            admin_phone = settings.ADMIN_WHATSAPP_NUMBER
-            msg = f"🔔 *New Renewal Request*\n\nUser: {request.user.username}\nPlan: {request.user.subscription.plan_type}\nAmount: {amount}\n\nCheck Admin Panel to Approve."
-            whatsapp_service.send_message(admin_phone, msg)
+            # admin_phone = settings.ADMIN_WHATSAPP_NUMBER # Ensure this exists or use fallback
+            # msg = f"🔔 *New Renewal Request*\n\nUser: {request.user.username}\nPlan: {plan_type}\nAmount: {amount}\nUTR: {transaction_id}\n\nCheck Admin Panel."
+            # whatsapp_service.send_message(admin_phone, msg)
+            pass 
         except Exception as e:
             print(f"Failed to notify admin: {e}")
         

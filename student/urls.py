@@ -40,7 +40,7 @@ from .manual_payment_views import ManualPaymentSubmitView
 # Remove invalid imports - these are now part of views.py or no longer needed
 from .admin_dashboard_views import (
     AdminPaymentApprovalView, PendingPaymentsListView, PublicSubscriptionSubmitView,
-    SuperAdminClientActionView
+    SuperAdminClientActionView, SuperAdminDashboardView
 )
 from .super_admin_views import SuperAdminAdvancedDashboardView, AuditLogView
 from .subscription_views import (
@@ -163,7 +163,7 @@ urlpatterns = [
     path('admin/payments/approve/', AdminPaymentApprovalView.as_view(), name='admin-approve-payment'),
     
     # SUPER ADMIN DASHBOARD
-    path('admin/subscriptions/overview/', SuperAdminAdvancedDashboardView.as_view(), name='superadmin-overview'),
+    path('admin/subscriptions/overview/', SuperAdminDashboardView.as_view(), name='superadmin-overview'),
     path('admin/client-actions/', SuperAdminClientActionView.as_view(), name='admin-client-actions'),
     path('admin/advanced/dashboard/', SuperAdminAdvancedDashboardView.as_view(), name='superadmin-advanced-dashboard'),
     path('admin/audit-logs/', AuditLogView.as_view(), name='admin-audit-logs'),

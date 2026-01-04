@@ -218,10 +218,10 @@ const EventAPI = {
 // Subscription APIs
 const SubscriptionAPI = {
     async getStatus() { return apiCall('/subscription/status/'); },
-    async renew(planType, amount) {
+    async renew(planType, amount, transactionId) {
         return apiCall('/subscription/renew/', {
             method: 'POST',
-            body: JSON.stringify({ plan_type: planType, amount: amount })
+            body: JSON.stringify({ plan_type: planType, amount: amount, transaction_id: transactionId })
         });
     }
 };
