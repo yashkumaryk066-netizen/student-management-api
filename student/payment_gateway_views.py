@@ -4,7 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 import razorpay
 import uuid
+import logging
 from rest_framework.permissions import AllowAny
+
+logger = logging.getLogger(__name__)
 
 # Initialize Razorpay Client
 # Use test keys if real ones aren't available yet
@@ -26,19 +29,15 @@ class CreateOrderView(APIView):
             if not amount:
                  return Response({'error': 'Amount is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Check if keys are configured. If not, return a MOCK order for testing flow.
-            # Real keys would start with 'rzp_live' or 'rzp_test' and not be the placeholder 'YourKeyHere'
-            if 'YourKeyHere' in KEY_ID or len(KEY_ID) < 10:
-                # MOCK MODE
+            # Check if Razorpay keys are properly configured
+            if not KEY_ID or not KEY_SECRET or 'YourKeyHere' in KEY_ID or len(KEY_ID) < 10:
                 return Response({
-                    'mock_order': True,
-                    'order_id': f"order_mock_{uuid.uuid4().hex[:10]}",
-                    'amount': int(amount) * 100,
-                    'currency': currency,
-                    'key_id': 'mock_key'
-                }, status=status.HTTP_201_CREATED)
+                    'error': 'Payment Gateway Not Configured',
+                    'message': 'Payment processing is currently unavailable. Please contact administrator to configure Razorpay.',
+                    'status': 'service_unavailable'
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-            # REAL RAZORPAY MODE
+            # REAL RAZORPAY ORDER CREATION
             # Razorpay expects amount in paise (1 INR = 100 paise)
             data = {
                 "amount": int(amount) * 100,
@@ -50,20 +49,25 @@ class CreateOrderView(APIView):
             order = client.order.create(data=data)
             
             return Response({
-                'mock_order': False,
                 'order_id': order['id'],
                 'amount': order['amount'],
                 'currency': order['currency'],
-                'key_id': KEY_ID
+                'key_id': KEY_ID,
+                'receipt': order['receipt']
             }, status=status.HTTP_201_CREATED)
             
-        except Exception as e:
-            # Fallback to mock if Razorpay connection fails strictly for demo continuity
-            print(f"Razorpay Error: {e}, falling back to mock.")
+        except razorpay.errors.BadRequestError as e:
+            logger.error(f"Razorpay BadRequest: {e}")
             return Response({
-                    'mock_order': True,
-                    'order_id': f"order_mock_{uuid.uuid4().hex[:10]}",
-                    'amount': int(request.data.get('amount', 500)) * 100,
-                    'currency': "INR",
-                    'key_id': 'mock_key_fallback'
-            }, status=status.HTTP_201_CREATED)
+                'error': 'Invalid Payment Request',
+                'message': 'Payment order creation failed. Please check amount and try again.',
+                'details': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            logger.error(f"Razorpay Error: {e}")
+            return Response({
+                'error': 'Payment Gateway Error',
+                'message': 'Unable to create payment order. Please try again later.',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -12,3 +12,4 @@ twilio
 requests
 pycryptodome
 reportlab
+razorpay

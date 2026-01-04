@@ -42,45 +42,106 @@ class OnboardingPaymentView(APIView):
         import time
         time.sleep(2)  # 2 seconds delay to simulate checking with Bank Server
         
-        # 1. Bank-Grade Verification Logic
-        is_payment_verified = False
         
+        # Bank-Grade Triple-Layer Verification
         razorpay_payment_id = request.data.get('razorpay_payment_id')
         razorpay_order_id = request.data.get('razorpay_order_id')
         razorpay_signature = request.data.get('razorpay_signature')
         
-        # Verify Manual UTR (Mock Mode for Demo) or Real Razorpay
-        if razorpay_signature == 'manual_verified_utr':
-             # Admin Bypass / Manual UTR Check
-             if razorpay_payment_id and len(str(razorpay_payment_id)) == 12:
-                 is_payment_verified = True
-             else:
-                 return Response({'error': 'Invalid Transaction ID (UTR). Must be 12 digits.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Require ALL three parameters - no bypass allowed
+        if not (razorpay_payment_id and razorpay_order_id and razorpay_signature):
+            return Response({
+                'error': 'Payment Verification Failed',
+                'message': 'Complete payment through official payment gateway. Manual entries are not accepted.',
+                'required_fields': ['razorpay_payment_id', 'razorpay_order_id', 'razorpay_signature']
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        elif razorpay_payment_id and razorpay_order_id and razorpay_signature:
-            # REAL RAZORPAY VERIFICATION
+        # STRICT RAZORPAY VERIFICATION - Three Security Layers
+        is_payment_verified = False
+        
+        try:
+            import razorpay
+            # Load credentials from settings
+            key_id = getattr(settings, 'RAZORPAY_KEY_ID', '')
+            key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', '')
+            
+            # Check if keys are configured
+            if not key_id or not key_secret or 'YourKeyHere' in key_id or 'test_key' in key_id:
+                return Response({
+                    'error': 'Payment Gateway Not Configured',
+                    'message': 'Payment processing is currently unavailable. Please contact support.'
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            
+            client = razorpay.Client(auth=(key_id, key_secret))
+            
+            # === LAYER 1: Signature Verification ===
+            # Prevents tampering with payment data
             try:
-                import razorpay
-                # Note: These must be in settings.py for production
-                key_id = getattr(settings, 'RAZORPAY_KEY_ID', 'test_key')
-                key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', 'test_secret')
-                
-                client = razorpay.Client(auth=(key_id, key_secret))
-                
-                # Dynamic Verification
                 client.utility.verify_payment_signature({
                     'razorpay_order_id': razorpay_order_id,
                     'razorpay_payment_id': razorpay_payment_id,
                     'razorpay_signature': razorpay_signature
                 })
-                is_payment_verified = True
-                
+                logger.info(f"✅ Layer 1 Passed: Signature verified for {razorpay_payment_id}")
+            except razorpay.errors.SignatureVerificationError as e:
+                logger.error(f"❌ Layer 1 Failed: Signature verification failed - {e}")
+                return Response({
+                    'error': 'Security Alert: Payment Signature Invalid',
+                    'message': 'Payment verification failed. This transaction appears to be tampered with.',
+                    'action': 'Please retry payment or contact support'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # === LAYER 2: Fetch Payment Details from Bank ===
+            # Cross-check with actual bank/Razorpay server
+            try:
+                payment_details = client.payment.fetch(razorpay_payment_id)
+                logger.info(f"✅ Layer 2: Fetched payment details from bank - Status: {payment_details.get('status')}")
             except Exception as e:
-                logger.error(f"Payment Signature Verification Failed: {e}")
-                return Response({'error': 'Security Alert: Payment Verification Failed'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        else:
-             return Response({'error': 'Payment Details Missing'}, status=status.HTTP_400_BAD_REQUEST)
+                logger.error(f"❌ Layer 2 Failed: Could not fetch payment from bank - {e}")
+                return Response({
+                    'error': 'Bank Verification Failed',
+                    'message': 'Unable to verify payment with bank. Please try again.',
+                    'details': str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # === LAYER 3: Payment Status Verification ===
+            # Ensure payment was actually captured (completed)
+            payment_status = payment_details.get('status')
+            if payment_status != 'captured':
+                logger.error(f"❌ Layer 3 Failed: Payment not captured - Status: {payment_status}")
+                return Response({
+                    'error': 'Payment Not Confirmed by Bank',
+                    'message': f'Payment status is "{payment_status}". Only captured payments are accepted.',
+                    'current_status': payment_status,
+                    'action': 'Please complete the payment or try again'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # === LAYER 4: Amount Verification ===
+            # Ensure paid amount matches expected amount (strict pricing)
+            paid_amount_paise = payment_details.get('amount', 0)
+            paid_amount = paid_amount_paise / 100  # Convert paise to rupees
+            
+            if int(paid_amount) < expected_amount:
+                logger.error(f"❌ Layer 4 Failed: Amount mismatch - Expected: ₹{expected_amount}, Received: ₹{paid_amount}")
+                return Response({
+                    'error': 'Payment Amount Insufficient',
+                    'message': f'Required ₹{expected_amount} for {plan_type} plan, but received ₹{paid_amount}',
+                    'required': expected_amount,
+                    'received': int(paid_amount)
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # === ALL LAYERS PASSED ===
+            is_payment_verified = True
+            logger.info(f"✅✅✅ All Security Layers Passed for payment {razorpay_payment_id}")
+            
+        except Exception as e:
+            logger.error(f"❌ Payment Verification Error: {str(e)}")
+            return Response({
+                'error': 'Payment Verification Failed',
+                'message': 'An error occurred during bank verification.',
+                'details': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 
         if is_payment_verified:
             # 2. Generate Credentials based on Plan (Advanced: Separate accounts for separate businesses)
