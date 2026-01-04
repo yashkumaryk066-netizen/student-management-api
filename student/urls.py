@@ -37,11 +37,13 @@ from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
 
 # Remove invalid imports - these are now part of views.py or no longer needed
-from .admin_dashboard_views import SuperAdminDashboardView, SuperAdminClientActionView
+from .admin_dashboard_views import (
+    SuperAdminDashboardView, SuperAdminClientActionView,
+    AdminPaymentApprovalView, PendingPaymentsListView, PublicSubscriptionSubmitView
+)
 from .subscription_views import (
     SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
-    verify_payment_api, AdminPaymentApprovalView, PendingPaymentsListView,
-    PublicSubscriptionSubmitView
+    verify_payment_api
 )
 from .plan_features_views import UserPlanFeaturesView
 from .report_views import ReportListView, ReportDownloadView
