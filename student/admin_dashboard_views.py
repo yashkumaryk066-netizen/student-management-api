@@ -183,77 +183,98 @@ class SuperAdminDashboardView(APIView):
                 "error": "Access denied. Super admin only."
             }, status=status.HTTP_403_FORBIDDEN)
 
-        # Get stats
-        total_users = User.objects.filter(is_superuser=False).count()
-        active_subscriptions = ClientSubscription.objects.filter(status='ACTIVE').count()
-        pending_payments = Payment.objects.filter(status='PENDING_VERIFICATION').count()
-        
-        # Revenue stats
-        total_revenue = Payment.objects.filter(status='APPROVED').aggregate(
-            total=models.Sum('amount')
-        )['total'] or 0
-        
-        # Get all client subscriptions
-        subscriptions = []
-        # Removed user__profile from select_related as it might not exist for all users or invalid lookup
-        all_subs = ClientSubscription.objects.select_related('user').all()
-        
-        for sub in all_subs:
-            if sub.user.is_superuser:
-                continue  # Skip super admin
-                
-            today = date.today()
-            days_left = 0
-            if sub.end_date:
-                days_left = (sub.end_date - today).days
-                
-            subscriptions.append({
-                'user_id': sub.user.id,
-                'username': sub.user.username,
-                'email': sub.user.email,
-                'plan_type': sub.plan_type,
-                'status': sub.status,
-                'start_date': sub.start_date,
-                'end_date': sub.end_date,
-                'days_left': days_left if days_left > 0 else 0,
-                'amount_paid': str(sub.amount_paid),
-                'is_expired': days_left <= 0
+        try:
+            # Get stats
+            total_users = User.objects.filter(is_superuser=False).count()
+            active_subscriptions = ClientSubscription.objects.filter(status='ACTIVE').count()
+            pending_payments = Payment.objects.filter(status='PENDING_VERIFICATION').count()
+            
+            # Revenue stats
+            total_revenue = Payment.objects.filter(status='APPROVED').aggregate(
+                total=models.Sum('amount')
+            )['total'] or 0
+            
+            # Get all client subscriptions
+            subscriptions = []
+            # Removed user__profile from select_related as it might not exist for all users or invalid lookup
+            all_subs = ClientSubscription.objects.select_related('user').all()
+            
+            for sub in all_subs:
+                if sub.user.is_superuser:
+                    continue  # Skip super admin
+                    
+                today = date.today()
+                days_left = 0
+                if sub.end_date:
+                    days_left = (sub.end_date - today).days
+                    
+                subscriptions.append({
+                    'user_id': sub.user.id,
+                    'username': sub.user.username,
+                    'email': sub.user.email,
+                    'plan_type': sub.plan_type,
+                    'status': sub.status,
+                    'start_date': sub.start_date,
+                    'end_date': sub.end_date,
+                    'days_left': days_left if days_left > 0 else 0,
+                    'amount_paid': str(sub.amount_paid),
+                    'is_expired': days_left <= 0
+                })
+            
+            # Get pending payment details
+            pending_list = []
+            pending_pmts = Payment.objects.filter(status='PENDING_VERIFICATION').order_by('-created_at')[:10]
+            
+            for pmt in pending_pmts:
+                user_name = "Unknown"
+                if pmt.user:
+                    user_name = pmt.user.username
+                elif pmt.student:
+                    user_name = pmt.student.name
+                elif pmt.metadata:
+                    # Safer get
+                    user_name = pmt.metadata.get('email', 'Unknown') if pmt.metadata else 'Unknown'
+                    
+                pending_list.append({
+                    'id': pmt.id,
+                    'user': user_name,
+                    'type': getattr(pmt, 'payment_type', 'FEE'), # Safety for older schema
+                    'amount': str(pmt.amount),
+                    'utr': pmt.transaction_id,
+                    'date': pmt.created_at.strftime('%Y-%m-%d %H:%M') if pmt.created_at else ''
+                })
+            
+            # Get Notifications safely
+            notifs = []
+            recent_notifs = Notification.objects.filter(recipient_type='ADMIN').order_by('-created_at')[:5]
+            for n in recent_notifs:
+                notifs.append({
+                    'title': n.title,
+                    'message': n.message,
+                    'date': n.created_at.strftime('%Y-%m-%d %H:%M') if n.created_at else ''
+                })
+
+            return Response({
+                'stats': {
+                    'total_clients': total_users,
+                    'active_subscriptions': active_subscriptions,
+                    'pending_approvals': pending_payments,
+                    'total_revenue': str(total_revenue)
+                },
+                'pending_payments': pending_list,
+                'client_subscriptions': subscriptions,
+                'recent_notifications': notifs
             })
-        
-        # Get pending payment details
-        pending_list = []
-        pending_pmts = Payment.objects.filter(status='PENDING_VERIFICATION').order_by('-created_at')[:10]
-        
-        for pmt in pending_pmts:
-            user_name = "Unknown"
-            if pmt.user:
-                user_name = pmt.user.username
-            elif pmt.student:
-                user_name = pmt.student.name
-            elif pmt.metadata:
-                # Safer get
-                user_name = pmt.metadata.get('email', 'Unknown') if pmt.metadata else 'Unknown'
-                
-            pending_list.append({
-                'id': pmt.id,
-                'user': user_name,
-                'type': pmt.payment_type, # Using new field
-                'amount': str(pmt.amount),
-                'utr': pmt.transaction_id,
-                'date': pmt.created_at.strftime('%Y-%m-%d %H:%M')
-            })
-        
-        return Response({
-            'stats': {
-                'total_clients': total_users,
-                'active_subscriptions': active_subscriptions,
-                'pending_approvals': pending_payments,
-                'total_revenue': str(total_revenue)
-            },
-            'pending_payments': pending_list,
-            'client_subscriptions': subscriptions,
-            'recent_notifications': Notification.objects.filter(recipient_type='ADMIN').order_by('-created_at')[:5].values('title', 'message', 'created_at')
-        })
+
+        except Exception as e:
+            import traceback
+            logger.error(f"SuperAdmin Dashboard Error: {str(e)}")
+            logger.error(traceback.format_exc())
+            return Response({
+                'error': 'Failed to load overview',
+                'details': str(e),
+                'trace': traceback.format_exc()
+            }, status=500)
 
 class SuperAdminClientActionView(APIView):
     permission_classes = [permissions.IsAdminUser]  # Superuser only
@@ -289,6 +310,34 @@ class SuperAdminClientActionView(APIView):
                     return Response({'message': 'Validity reduced by 7 days.'})
                 else:
                     return Response({'error': 'Subscription has no end date.'}, status=400)
+
+            elif action == 'EXTEND_DAYS':
+                if subscription.end_date:
+                    from datetime import timedelta
+                    current_end = subscription.end_date
+                    # If expired, start from today? Or extend from expiry?
+                    # Generally extend from expiry if valid, or from today if long expired?
+                    # Simple logic: Add 30 days to current end_date (even if in past, it moves forward)
+                    # If it's way in past, maybe set to today + 30?
+                    # Let's just add 30 days to existing end_date to keep it simple and predicable
+                    subscription.end_date += timedelta(days=30)
+                    subscription.save()
+                    if user_profile:
+                        user_profile.subscription_expiry = subscription.end_date
+                        user_profile.save()
+                    return Response({'message': 'Validity extended by 30 days.'})
+                else:
+                    # If None, set to Today + 30
+                    from datetime import date, timedelta
+                    subscription.end_date = date.today() + timedelta(days=30)
+                    subscription.save()
+                    return Response({'message': 'Validity initialized to 30 days.'})
+
+            elif action == 'DELETE':
+                user = subscription.user
+                username = user.username
+                user.delete()
+                return Response({'message': f'Client {username} and all data deleted successfully.'})
 
             return Response({'error': 'Invalid action'}, status=400)
 

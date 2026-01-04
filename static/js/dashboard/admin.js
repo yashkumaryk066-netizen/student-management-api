@@ -122,9 +122,39 @@ const DashboardApp = {
     applyPermissions() {
         if (!this.currentUser) return;
 
-        // Example: Only show relevant tabs in sidebars if we were rendering sidebar dynamically
-        // Since sidebar is static HTML, we might hide/show items here if needed.
-        // But mainly we want to control the 'inner' views like Students/Attendance.
+        // Hide/Show Sidebar Items based on Plan
+        const plan = (this.currentUser.institution_type || 'SCHOOL').toUpperCase();
+        const role = this.currentUser.role;
+
+        // Helper to hide nav item
+        const hide = (href) => {
+            const el = document.querySelector(`a[href="#${href}"]`);
+            if (el) el.closest('li').style.display = 'none';
+        };
+        const show = (href) => {
+            const el = document.querySelector(`a[href="#${href}"]`);
+            if (el) el.closest('li').style.display = 'block';
+        };
+
+        // Reset first (Show all)
+        ['hostel', 'transport', 'library', 'hr', 'exams', 'live-classes'].forEach(show);
+
+        // SUPER ADMIN: Show Everything
+        if (role === 'ADMIN' && this.currentUser.is_superuser) return;
+
+        // COACHING PLAN: Hide Hostel, Transport
+        if (plan === 'COACHING') {
+            hide('hostel');
+            hide('transport');
+        }
+
+        // SPECIFIC BLOCKS
+        if (plan === 'BASIC') {
+            hide('events');
+            hide('live-classes');
+        }
+
+        console.log(`Permissions Applied for ${plan}`);
     },
 
     setupNavigation() {
@@ -402,7 +432,7 @@ const DashboardApp = {
                 <td>${student.relation || 'N/A'}</td>
                 <td>
                     <button class="btn-action" onclick="DashboardApp.editStudent(${student.id})" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
-                    <button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(${student.id})" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
+                    <button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(${student.id}, '${student.name}')" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
                 </td>
             </tr>
         `).join('');
@@ -1903,148 +1933,7 @@ const DashboardApp = {
         document.body.insertAdjacentHTML('beforeend', modalHtml);
     },
 
-    async loadSuperAdminSubscriptionOverview() {
-        const container = document.getElementById('dashboardView');
-        container.innerHTML = '<div class="loading-spinner"></div>';
-        try {
-            const res = await fetch(`${this.apiBaseUrl}/admin/subscriptions/overview/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            });
-            const data = await res.json();
 
-            container.innerHTML = `
-            <div class="module-header">
-                <div>
-                   <h1 class="page-title" style="background: linear-gradient(to right, #ffd700, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">👑 Super Admin Control</h1>
-                   <p class="page-subtitle">Master Overview of All Institutes & Revenue</p>
-                </div>
-            </div>
-
-            <!-- Stats Row -->
-            <div class="stats-grid">
-                <div class="stat-card" style="border-bottom: 3px solid #f59e0b;">
-                    <div class="stat-header"><div class="stat-icon" style="background:rgba(245,158,11,0.2); color:#f59e0b">💰</div></div>
-                    <div class="stat-value">₹${data.stats.total_revenue}</div>
-                    <div class="stat-label">Total Revenue</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header"><div class="stat-icon">🏢</div></div>
-                    <div class="stat-value">${data.stats.total_clients}</div>
-                    <div class="stat-label">Total Clients</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header"><div class="stat-icon" style="background:rgba(16,185,129,0.2); color:#10b981">✅</div></div>
-                    <div class="stat-value">${data.stats.active_subscriptions}</div>
-                    <div class="stat-label">Active Plans</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header"><div class="stat-icon" style="background:rgba(239,68,68,0.2); color:#ef4444">⚠️</div></div>
-                    <div class="stat-value">${data.stats.pending_approvals}</div>
-                    <div class="stat-label">Pending Approval</div>
-                </div>
-            </div>
-
-            <!-- Client List -->
-            <div class="data-table-container" style="margin-top:30px;">
-                <h3 style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.1);">Manage Clients</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Institute / User</th>
-                            <th>Current Plan</th>
-                            <th>Status</th>
-                            <th>Expires In</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.clients.length ? data.clients.map(client => `
-                        <tr>
-                            <td>
-                                <div><strong>${client.username}</strong></div>
-                                <small style="color:var(--text-muted)">${client.email}</small>
-                            </td>
-                            <td><span class="status-badge" style="background:rgba(59,130,246,0.2); color:#3b82f6">${client.plan_type || 'N/A'}</span></td>
-                            <td><span class="status-badge ${client.is_expired ? 'status-inactive' : 'status-active'}">${client.status}</span></td>
-                            <td>${client.days_left} Days</td>
-                            <td>
-                                <button class="btn-action" onclick="DashboardApp.handleClientAction(${client.user_id}, 'extend')">Extend 30 Days</button>
-                                <button class="btn-action" style="background:rgba(239,68,68,0.2); color:#ef4444;" onclick="DashboardApp.handleClientAction(${client.user_id}, 'deactivate')">Deactivate</button>
-                            </td>
-                        </tr>
-                        `).join('') : '<tr><td colspan="5" class="text-center">No clients found</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
-            `;
-        } catch (e) {
-            console.error(e);
-            container.innerHTML = '<div class="module-card error"><p>Error loading super admin data</p></div>';
-        }
-    },
-
-    async handleClientAction(userId, action) {
-        if (!confirm(`Are you sure you want to ${action} this client?`)) return;
-        try {
-            const res = await fetch(`${this.apiBaseUrl}/admin/client-actions/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({ user_id: userId, action: action })
-            });
-            if (res.ok) {
-                alert("Action Successful");
-                this.loadSuperAdminSubscriptionOverview();
-            } else {
-                alert("Action Failed");
-            }
-        } catch (e) { console.error(e); alert("Error"); }
-    },
-
-    applyPermissions() {
-        if (!this.currentUser) return;
-
-        // Hide/Show Sidebar Items based on Plan
-        const plan = (this.currentUser.institution_type || 'SCHOOL').toUpperCase();
-        const role = this.currentUser.role;
-
-        // Helper to hide nav item
-        const hide = (href) => {
-            const el = document.querySelector(`a[href="#${href}"]`);
-            if (el) el.closest('li').style.display = 'none';
-        };
-        const show = (href) => {
-            const el = document.querySelector(`a[href="#${href}"]`);
-            if (el) el.closest('li').style.display = 'block';
-        };
-
-        // Reset first (Show all)
-        ['hostel', 'transport', 'library', 'hr', 'exams', 'live-classes'].forEach(show);
-
-        // SUPER ADMIN: Show Everything
-        if (role === 'ADMIN' && this.currentUser.is_superuser) return;
-
-        // COACHING PLAN: Hide Hostel, Transport
-        if (plan === 'COACHING') {
-            hide('hostel');
-            hide('transport');
-            // Library? User didn't specify, but Coaching usually has library. Keeping it.
-        }
-
-        // SCHOOL PLAN: Show Everything (Maybe hide HR if basic school?) -> Keeping all for School.
-
-        // INSTITUTE PLAN: Show Everything + Advanced HR. (All shown).
-
-        // SPECIFIC BLOCKS
-        if (plan === 'BASIC') { // hypothetical
-            hide('events');
-            hide('live-classes');
-        }
-
-        console.log(`Permissions Applied for ${plan}`);
-    },
 
     async createLiveClass(form) {
         const btn = form.querySelector('button[type="submit"]');
@@ -2088,8 +1977,7 @@ const DashboardApp = {
         container.innerHTML = '<div class="loading-spinner"></div>';
 
         // Check if super admin
-        const userRole = localStorage.getItem('userRole');
-        const isSuperuser = localStorage.getItem('isSuperuser') === 'true';
+        const isSuperuser = (this.currentUser && this.currentUser.is_superuser) || localStorage.getItem('isSuperuser') === 'true';
 
         if (isSuperuser) {
             // Load super admin overview instead
@@ -2792,14 +2680,7 @@ const DashboardApp = {
         }, 500);
     },
 
-    deleteStudent(id) {
-        if (confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-            showToast('Requesting secure deletion approval...', 'warning');
-            setTimeout(() => {
-                window.open(`/admin/student/student/${id}/delete/`, '_blank');
-            }, 1000);
-        }
-    },
+
 
     // --- ATTENDANCE ---
     markAttendance() {
@@ -3471,7 +3352,9 @@ const DashboardApp = {
                             <td>
                                 ${isActive ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'SUSPEND')" class="btn-action btn-danger" style="margin-right:5px;">🚫 Block</button>` : ''}
                                 ${isSuspended ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'ACTIVATE')" class="btn-action" style="background:var(--success); margin-right:5px;">✅ Unblock</button>` : ''}
-                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'REDUCE_DAYS')" class="btn-action btn-secondary">📉 -7 Days</button>
+                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'REDUCE_DAYS')" class="btn-action btn-secondary" style="margin-right:5px;">📉 -7d</button>
+                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'EXTEND_DAYS')" class="btn-action btn-primary" style="margin-right:5px;">📈 +30d</button>
+                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'DELETE')" class="btn-action btn-danger">🗑️</button>
                             </td>
                         </tr>`;
             }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
@@ -3530,6 +3413,8 @@ const DashboardApp = {
         if (action === 'SUSPEND') confirmMsg = "Are you sure you want to BLOCK this client? They will lose access immediately.";
         if (action === 'ACTIVATE') confirmMsg = "Reactivate this client?";
         if (action === 'REDUCE_DAYS') confirmMsg = "Penalty: Reduce 7 days from their validity?";
+        if (action === 'EXTEND_DAYS') confirmMsg = "Grant 30 days extension to this client?";
+        if (action === 'DELETE') confirmMsg = "CRITICAL: Permanently delete this client and all their data? This cannot be undone.";
 
         if (!confirm(confirmMsg)) return;
 
