@@ -1520,7 +1520,7 @@ const DashboardApp = {
                 <p class="page-subtitle">Real-time performance metrics and detailed reports.</p>
             </div>
             <div style="display:flex; gap:10px;">
-                <button class="btn-action" onclick="DashboardApp.generateReport('GENERAL_PDF')">📥 Export PDF</button>
+                <button id="btnExportPdf" class="btn-action" onclick="DashboardApp.exportAnalyticsPDF()">📥 Export PDF</button>
                 <button class="btn-primary" onclick="DashboardApp.generateReport()">⚡ Generate New Report</button>
             </div>
         </div>
@@ -1664,6 +1664,48 @@ const DashboardApp = {
             }
         } catch (e) {
             alert('Error: ' + e.message);
+        }
+    },
+
+    async exportAnalyticsPDF() {
+        const btn = document.getElementById('btnExportPdf');
+        const originalText = btn ? btn.innerText : 'Export PDF';
+        if (btn) {
+            btn.innerText = "Generating...";
+            btn.disabled = true;
+        }
+
+        try {
+            // 1. Generate Report (Summary Type)
+            const response = await fetch(`${this.apiBaseUrl}/reports/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify({ type: 'ANALYTICS_SUMMARY' })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.report && data.report.id) {
+                // 2. Auto Download
+                if (btn) btn.innerText = "Downloading...";
+                await this.downloadReport(data.report.id, data.report.name);
+
+                // 3. Refresh Table
+                this.loadReportsAnalytics();
+            } else {
+                alert('Export failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Export Error: " + e.message);
+        } finally {
+            if (btn) {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
     },
 
