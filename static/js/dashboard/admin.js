@@ -2034,144 +2034,241 @@ const DashboardApp = {
 
             container.innerHTML = `
                 <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
-                    
-                    .subscription-container {
-                        font-family: 'Inter', sans-serif;
+                    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Rajdhani:wght@500;700&display=swap');
+
+                    :root {
+                        --neon-purple: #b0fb5d;
+                        --neon-blue: #2de2e6;
+                        --glass-bg: rgba(255, 255, 255, 0.05);
+                        --card-bg: linear-gradient(145deg, rgba(20, 20, 30, 0.9), rgba(10, 10, 20, 0.95));
                     }
-                    
+
+                    .subscription-container {
+                        font-family: 'Outfit', sans-serif;
+                        perspective: 1000px;
+                        padding: 20px;
+                        animation: fadeIn 0.8s ease-out;
+                    }
+
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(20px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+
                     .premium-card {
-                        background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
-                        border: 1px solid rgba(148, 163, 184, 0.1);
+                        background: var(--card-bg);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
                         border-radius: 24px;
                         padding: 40px;
                         position: relative;
                         overflow: hidden;
-                        backdrop-filter: blur(10px);
+                        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+                        transform-style: preserve-3d;
+                        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
                     }
-                    
+
+                    .premium-card:hover {
+                        transform: rotateX(2deg) rotateY(2deg) scale(1.02);
+                        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.2);
+                        border-color: rgba(139, 92, 246, 0.4);
+                    }
+
+                    /* Holographic Glow */
                     .premium-card::before {
                         content: '';
                         position: absolute;
                         top: -50%;
-                        right: -50%;
+                        left: -50%;
                         width: 200%;
                         height: 200%;
-                        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
-                        animation: rotate 20s linear infinite;
+                        background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 60%);
+                        z-index: 0;
+                        pointer-events: none;
+                        animation: holoSpin 15s linear infinite;
                     }
-                    
-                    @keyframes rotate {
-                        from { transform: rotate(0deg); }
-                        to { transform: rotate(360deg); }
+
+                    @keyframes holoSpin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
                     }
-                    
+
+                    .content-layer {
+                        position: relative;
+                        z-index: 2;
+                        transform: translateZ(20px);
+                    }
+
                     .plan-header {
                         display: flex;
-                        align-items: center;
                         justify-content: space-between;
-                        margin-bottom: 32px;
-                        position: relative;
-                        z-index: 1;
+                        align-items: flex-start;
+                        margin-bottom: 30px;
                     }
-                    
-                    .plan-icon {
-                        font-size: 64px;
-                        filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.3));
-                    }
-                    
+
                     .plan-title {
-                        font-family: 'Outfit', sans-serif;
-                        font-size: 2.25rem;
-                        font-weight: 800;
-                        background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        margin: 0 0 8px 0;
-                    }
-                    
-                    .days-remaining {
-                        font-family: 'Outfit', sans-serif;
-                        font-size: 4rem;
-                        font-weight: 900;
-                        line-height: 1;
-                        background: linear-gradient(135deg, ${daysColor} 0%, ${daysColor}dd 100%);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        text-shadow: 0 0 30px ${daysColor}50;
-                    }
-                    
-                    .progress-bar-container {
-                        width: 100%;
-                        height: 12px;
-                        background: rgba(255, 255, 255, 0.1);
-                        border-radius: 999px;
-                        overflow: hidden;
-                        position: relative;
-                        margin: 24px 0;
-                    }
-                    
-                    .progress-bar-fill {
-                        height: 100%;
-                        background: linear-gradient(90deg, ${daysColor} 0%, ${daysColor}cc 100%);
-                        border-radius: 999px;
-                        transition: width 1s ease;
-                        box-shadow: 0 0 20px ${daysColor}80;
-                    }
-                    
-                    .renew-btn {
-                        width: 100%;
-                        padding: 18px 32px;
-                        font-size: 1.1rem;
+                        font-family: 'Rajdhani', sans-serif;
+                        font-size: 3rem;
                         font-weight: 700;
-                        font-family: 'Outfit', sans-serif;
-                        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-                        border: none;
-                        border-radius: 16px;
-                        color: white;
-                        cursor: pointer;
-                        transition: all 0.3s ease;
-                        position: relative;
-                        overflow: hidden;
-                        z-index: 1;
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                        background: linear-gradient(90deg, #fff, #a78bfa, #ec4899);
+                        background-size: 200% auto;
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        animation: shineText 5s linear infinite;
+                    }
+
+                    @keyframes shineText {
+                        to { background-position: 200% center; }
+                    }
+
+                    .status-badge {
+                        padding: 8px 16px;
+                        border-radius: 50px;
+                        font-size: 0.85rem;
+                        font-weight: 700;
+                        letter-spacing: 1px;
+                        text-transform: uppercase;
+                        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+                        backdrop-filter: blur(10px);
+                    }
+
+                    .status-active {
+                        background: rgba(16, 185, 129, 0.2);
+                        color: #34d399;
+                        border: 1px solid #10b981;
+                        box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
                     }
                     
-                    .renew-btn::before {
+                    .status-inactive {
+                        background: rgba(239, 68, 68, 0.2);
+                        color: #f87171;
+                        border: 1px solid #ef4444;
+                    }
+
+                    .days-circle-container {
+                        display: flex;
+                        justify-content: center;
+                        margin: 40px 0;
+                        position: relative;
+                    }
+
+                    .days-text-wrapper {
+                        text-align: center;
+                    }
+
+                    .days-number {
+                        font-family: 'Outfit', sans-serif;
+                        font-size: 5rem;
+                        font-weight: 800;
+                        line-height: 1;
+                        color: white;
+                        text-shadow: 0 0 40px ${daysColor}80;
+                    }
+                    
+                    .days-label {
+                        font-size: 1.1rem;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                        margin-top: 10px;
+                    }
+
+                    .progress-bar {
+                        height: 8px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 10px;
+                        overflow: hidden;
+                        margin: 30px 0;
+                        position: relative;
+                    }
+
+                    .progress-fill {
+                        height: 100%;
+                        background: linear-gradient(90deg, ${daysColor}, #ec4899);
+                        width: ${progressPercent}%;
+                        border-radius: 10px;
+                        box-shadow: 0 0 20px ${daysColor};
+                        position: relative;
+                    }
+                    
+                    .progress-fill::after {
                         content: '';
                         position: absolute;
                         top: 0;
-                        left: -100%;
-                        width: 100%;
+                        right: 0;
                         height: 100%;
-                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-                        transition: left 0.5s;
+                        width: 5px;
+                        background: white;
+                        box-shadow: 0 0 15px white;
                     }
-                    
-                    .renew-btn:hover::before {
-                        left: 100%;
+
+                    .info-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 20px;
+                        margin-bottom: 30px;
                     }
-                    
+
+                    .info-item {
+                        background: rgba(255, 255, 255, 0.03);
+                        padding: 20px;
+                        border-radius: 16px;
+                        border: 1px solid rgba(255, 255, 255, 0.05);
+                        backdrop-filter: blur(10px);
+                    }
+
+                    .info-label {
+                        font-size: 0.8rem;
+                        color: #94a3b8;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        margin-bottom: 6px;
+                    }
+
+                    .info-value {
+                        font-size: 1.2rem;
+                        font-weight: 700;
+                        color: white;
+                    }
+
+                    .renew-btn {
+                        width: 100%;
+                        padding: 22px;
+                        font-size: 1.2rem;
+                        font-weight: 700;
+                        font-family: 'Rajdhani', sans-serif;
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                        background: linear-gradient(90deg, #8b5cf6, #ec4899, #8b5cf6);
+                        background-size: 200% auto;
+                        color: white;
+                        border: none;
+                        border-radius: 16px;
+                        cursor: pointer;
+                        transition: all 0.4s;
+                        position: relative;
+                        overflow: hidden;
+                        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+                        animation: gradientMove 3s linear infinite;
+                    }
+
+                    @keyframes gradientMove {
+                        0% { background-position: 0% center; }
+                        100% { background-position: 200% center; }
+                    }
+
                     .renew-btn:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 20px 40px rgba(139, 92, 246, 0.4);
+                        transform: translateY(-3px) scale(1.02);
+                        box-shadow: 0 20px 40px rgba(139, 92, 246, 0.6);
                     }
                     
-                    .info-row {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 16px;
-                        background: rgba(255, 255, 255, 0.05);
-                        border-radius: 12px;
-                        margin-bottom: 12px;
-                        backdrop-filter: blur(5px);
-                    }
-                    
-                    .billing-card {
-                        background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
-                        border: 1px solid rgba(148, 163, 184, 0.1);
+                    .billing-history-card {
+                        background: rgba(15, 23, 42, 0.6);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
                         border-radius: 20px;
-                        padding: 32px;
+                        padding: 30px;
+                        height: 100%;
                     }
                 </style>
                 
@@ -3280,63 +3377,299 @@ deleteStudent(id, name) {
 
         container.innerHTML = `
                 <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-                    .superadmin-overview { font-family: 'Inter', sans-serif; padding: 20px; }
-                    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-                    .stat-card { background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; text-align: center; }
-                    .stat-value { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 12px 0; }
-                    .stat-label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-                    .clients-table { background: rgba(255,255,255,0.05); border-radius: 16px; overflow: hidden; margin-top: 20px; }
-                    .clients-table table { width: 100%; border-collapse: collapse; }
-                    .clients-table th { background: rgba(255,255,255,0.1); padding: 16px; text-align: left; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid rgba(255,255,255,0.2); }
-                    .clients-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-                    .clients-table tr:hover { background: rgba(255,255,255,0.03); }
-                    .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
-                    .status-active { background: #10b98144; color: #10b981; }
-                    .status-expired { background: #ef444444; color: #ef4444; }
-                    .days-badge { padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
-                    .days-danger { background: #ef4444; color: white; }
-                    .days-warning { background: #f59e0b; color: white; }
-                    .days-safe { background: #10b981; color: white; }
+                    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap');
+                    
+                    :root {
+                        --neon-accent: #6366f1;
+                        --neon-success: #10b981;
+                        --neon-warning: #f59e0b;
+                        --neon-danger: #ef4444;
+                        --glass-panel: rgba(15, 23, 42, 0.6);
+                    }
+
+                    .superadmin-overview {
+                        font-family: 'Outfit', sans-serif;
+                        padding: 20px;
+                        animation: fadeIn 0.8s ease-out;
+                    }
+                    
+                    .section-title {
+                        font-family: 'Rajdhani', sans-serif;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 1.5px;
+                        margin-bottom: 20px;
+                        color: #fff;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    
+                    .section-title::before {
+                        content: '';
+                        display: block;
+                        width: 4px;
+                        height: 24px;
+                        background: var(--neon-accent);
+                        box-shadow: 0 0 10px var(--neon-accent);
+                        border-radius: 2px;
+                    }
+
+                    /* 3D Stat Cards */
+                    .stats-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                        gap: 24px;
+                        margin-bottom: 40px;
+                    }
+                    
+                    .stat-card {
+                        background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 20px;
+                        padding: 24px;
+                        position: relative;
+                        overflow: hidden;
+                        backdrop-filter: blur(12px);
+                        transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    }
+                    
+                    .stat-card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(99, 102, 241, 0.3);
+                        border-color: rgba(99, 102, 241, 0.5);
+                    }
+                    
+                    .stat-value {
+                        font-family: 'Rajdhani', sans-serif;
+                        font-size: 3rem;
+                        font-weight: 700;
+                        color: white;
+                        line-height: 1;
+                        margin: 10px 0;
+                        text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+                    }
+                    
+                    .stat-label {
+                        color: #94a3b8;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    }
+                    
+                    /* Neon Accent for Stat Cards */
+                    .stat-card::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 3px;
+                        background: linear-gradient(90deg, transparent, var(--neon-accent), transparent);
+                        opacity: 0.5;
+                    }
+
+                    /* Advanced Tables */
+                    .neo-table-container {
+                        background: rgba(15, 23, 42, 0.4);
+                        border: 1px solid rgba(255, 255, 255, 0.05);
+                        border-radius: 20px;
+                        overflow: hidden;
+                        backdrop-filter: blur(10px);
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                        margin-bottom: 30px;
+                    }
+                    
+                    .neo-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    
+                    .neo-table th {
+                        background: rgba(30, 41, 59, 0.8);
+                        padding: 16px 20px;
+                        text-align: left;
+                        color: #94a3b8;
+                        font-size: 0.75rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    }
+                    
+                    .neo-table td {
+                        padding: 16px 20px;
+                        color: #f8fafc;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                        font-size: 0.95rem;
+                    }
+                    
+                    .neo-table tr:last-child td {
+                        border-bottom: none;
+                    }
+                    
+                    .neo-table tr {
+                        transition: background 0.2s;
+                    }
+                    
+                    .neo-table tr:hover {
+                        background: rgba(255, 255, 255, 0.02);
+                    }
+
+                    /* Badges & Buttons */
+                    .neo-badge {
+                        padding: 6px 12px;
+                        border-radius: 6px;
+                        font-size: 0.75rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    
+                    .badge-active { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+                    .badge-expired { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+                    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+                    
+                    .action-btn {
+                        padding: 6px 12px;
+                        border-radius: 8px;
+                        border: none;
+                        background: rgba(255, 255, 255, 0.1);
+                        color: white;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        margin-right: 6px;
+                    }
+                    
+                    .action-btn:hover {
+                        background: var(--neon-accent);
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+                    }
+                    
+                    .btn-delete:hover { background: var(--neon-danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); }
+                    .btn-submit { background: linear-gradient(135deg, var(--neon-accent), #a855f7); color: white; border: none; }
                 </style>
 
                 <div class="superadmin-overview">
-                    <div class="module-header">
-                        <h1 class="page-title">👑 Super Admin - Subscription Overview</h1>
-                        <p class="page-subtitle">Manage all client subscriptions and approvals</p>
+                    <div class="module-header" style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <h1 class="page-title" style="font-family: 'Rajdhani', sans-serif; font-size: 2.8rem; margin-bottom: 5px;">COMMAND CENTER</h1>
+                            <p class="page-subtitle">Global Subscription Management System</p>
+                        </div>
+                        <div style="font-family: 'Rajdhani', monospace; font-size: 1.2rem; color: var(--neon-accent);">
+                            SYSTEM STATUS: ONLINE
+                        </div>
                     </div>
 
+                    <!-- Holographic Stats Grid -->
                     <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">👥 Total Clients</div><div class="stat-value">${stats.total_clients}</div></div>
-                        <div class="stat-card"><div class="stat-label">✅ Active Subscriptions</div><div class="stat-value">${stats.active_subscriptions}</div></div>
-                        <div class="stat-card"><div class="stat-label">⏳ Pending Approvals</div><div class="stat-value">${stats.pending_approvals}</div></div>
-                        <div class="stat-card"><div class="stat-label">💰 Total Revenue</div><div class="stat-value">₹${parseFloat(stats.total_revenue).toLocaleString('en-IN')}</div></div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-value" style="color: #a78bfa;">₹${parseFloat(stats.total_revenue).toLocaleString('en-IN')}</div>
+                            <div style="font-size: 0.8rem; color: #a78bfa; opacity: 0.7;">Lifetime</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Active Subscriptions</div>
+                            <div class="stat-value" style="color: #34d399;">${stats.active_subscriptions}</div>
+                            <div style="font-size: 0.8rem; color: #34d399; opacity: 0.7;">Platform Wide</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total Clients</div>
+                            <div class="stat-value" style="color: #60a5fa;">${stats.total_clients}</div>
+                            <div style="font-size: 0.8rem; color: #60a5fa; opacity: 0.7;">Onboarded</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Pending Approvals</div>
+                            <div class="stat-value" style="color: #fbbf24;">${stats.pending_approvals}</div>
+                            <div style="font-size: 0.8rem; color: #fbbf24; opacity: 0.7;">Action Required</div>
+                        </div>
                     </div>
 
-                    ${pending_payments.length > 0 ? `<div class="module-card" style="margin-bottom: 24px;"><h2 style="margin-bottom: 16px;">⏳ Pending Approvals (${pending_payments.length})</h2><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: rgba(255,255,255,0.05);"><th style="padding: 12px; text-align: left;">Email</th><th style="padding: 12px; text-align: left;">Plan</th><th style="padding: 12px; text-align: left;">Amount</th><th style="padding: 12px; text-align: left;">UTR</th><th style="padding: 12px; text-align: left;">Date</th><th style="padding: 12px; text-align: center;">Action</th></tr></thead><tbody>${pending_payments.map(p => `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 12px;">${p.email}</td><td style="padding: 12px;"><span class="status-badge" style="background: #667eea44; color: #667eea;">${p.plan_type}</span></td><td style="padding: 12px; font-weight: 600;">₹${p.amount}</td><td style="padding: 12px; font-family: monospace; font-size: 0.85rem;">${p.utr}</td><td style="padding: 12px; font-size: 0.85rem;">${p.date}</td><td style="padding: 12px; text-align: center;"><button onclick="DashboardApp.approvePayment(${p.id})" class="btn-primary" style="padding: 6px 16px; font-size: 0.85rem; margin-right: 8px;">Approve</button><button onclick="DashboardApp.rejectPayment(${p.id})" class="btn-secondary" style="padding: 6px 16px; font-size: 0.85rem;">Reject</button></td></tr>`).join('')}</tbody></table></div></div>` : ''}
+                    <!-- Pending Approvals Section -->
+                    ${pending_payments.length > 0 ? `
+                    <div class="neo-table-container">
+                        <div style="padding: 20px; background: rgba(245, 158, 11, 0.1); border-bottom: 1px solid rgba(245, 158, 11, 0.2);">
+                            <h2 class="section-title" style="margin: 0; font-size: 1.2rem; color: #fbbf24;">⚠️ Pending Payment Approvals</h2>
+                        </div>
+                        <table class="neo-table">
+                            <thead>
+                                <tr>
+                                    <th>Client Email</th>
+                                    <th>Plan Type</th>
+                                    <th>Amount</th>
+                                    <th>UTR Transaction ID</th>
+                                    <th>Date</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${pending_payments.map(p => `
+                                <tr>
+                                    <td style="font-family: monospace;">${p.email}</td>
+                                    <td><span class="neo-badge badge-pending">${p.plan_type}</span></td>
+                                    <td style="font-weight: 700; color: #fbbf24;">₹${p.amount}</td>
+                                    <td style="font-family: monospace; letter-spacing: 1px; color: #f8fafc;">${p.utr}</td>
+                                    <td style="color: var(--text-muted);">${p.date}</td>
+                                    <td style="text-align: right;">
+                                        <button onclick="DashboardApp.approvePayment(${p.id})" class="action-btn btn-submit">✅ Approve</button>
+                                        <button onclick="DashboardApp.rejectPayment(${p.id})" class="action-btn btn-delete">❌ Reject</button>
+                                    </td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>` : ''}
 
-                    <div class="clients-table"><h2 style="padding: 20px 20px 0 20px; margin: 0;">📋 All Client Subscriptions (${client_subscriptions.length})</h2><div style="overflow-x: auto;"><table><thead><tr><th>Username</th><th>Plan</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Days Left</th><th>Amount Paid</th><th>Action</th></tr></thead><tbody>${client_subscriptions.length > 0 ? client_subscriptions.map(client => {
-            const daysClass = client.days_left < 7 ? 'days-danger' : client.days_left < 15 ? 'days-warning' : 'days-safe';
+                    <!-- All Clients Table -->
+                    <div class="neo-table-container">
+                        <div style="padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                            <h2 class="section-title" style="margin: 0; font-size: 1.2rem;">📋 Client Registry</h2>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="neo-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Current Plan</th>
+                                        <th>Status</th>
+                                        <th>Start Date</th>
+                                        <th>Expiry Date</th>
+                                        <th>Access Days</th>
+                                        <th>Total Paid</th>
+                                        <th style="text-align: right;">Management</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${client_subscriptions.length > 0 ? client_subscriptions.map(client => {
+            const daysClass = client.days_left < 7 ? 'color: #ef4444;' : client.days_left < 15 ? 'color: #fbbf24;' : 'color: #34d399;';
             const isSuspended = client.status === 'SUSPENDED';
             const isActive = client.status === 'ACTIVE';
+            const isExpired = client.is_expired;
 
             return `<tr>
-                            <td style="font-weight: 600;">${client.username}</td>
-                            <td><span class="status-badge" style="background: #667eea44; color: #667eea;">${client.plan_type}</span></td>
-                            <td><span class="status-badge ${client.is_expired ? 'status-expired' : (isSuspended ? 'status-expired' : 'status-active')}">${client.is_expired ? 'EXPIRED' : client.status}</span></td>
-                            <td>${client.start_date || '-'}</td>
-                            <td>${client.end_date || '-'}</td>
-                            <td><span class="days-badge ${daysClass}">${client.days_left} days</span></td>
-                            <td style="font-weight: 600;">₹${client.amount_paid}</td>
-                            <td>
-                                ${isActive ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'SUSPEND')" class="btn-action btn-danger" style="margin-right:5px;">🚫 Block</button>` : ''}
-                                ${isSuspended ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'ACTIVATE')" class="btn-action" style="background:var(--success); margin-right:5px;">✅ Unblock</button>` : ''}
-                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'REDUCE_DAYS')" class="btn-action btn-secondary" style="margin-right:5px;">📉 -7d</button>
-                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'EXTEND_DAYS')" class="btn-action btn-primary" style="margin-right:5px;">📈 +30d</button>
-                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'DELETE')" class="btn-action btn-danger">🗑️</button>
-                            </td>
-                        </tr>`;
-        }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No client subscriptions found</td></tr>'}</tbody></table></div></div>
+                                            <td style="font-weight: 600;">${client.username}</td>
+                                            <td><span style="color: #a78bfa; font-weight: 600;">${client.plan_type}</span></td>
+                                            <td><span class="neo-badge ${isExpired ? 'badge-expired' : (isActive ? 'badge-active' : 'badge-pending')}">${isExpired ? 'EXPIRED' : client.status}</span></td>
+                                            <td style="color: var(--text-muted);">${client.start_date || '-'}</td>
+                                            <td style="color: var(--text-muted);">${client.end_date || '-'}</td>
+                                            <td style="font-weight: 700; font-family: monospace; ${daysClass}">${client.days_left} D</td>
+                                            <td style="font-weight: 600;">₹${client.amount_paid}</td>
+                                            <td style="text-align: right;">
+                                                ${isActive ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'SUSPEND')" class="action-btn" title="Suspend Access">🚫</button>` : ''}
+                                                ${isSuspended ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'ACTIVATE')" class="action-btn" style="color: #34d399;" title="Restore Access">✅</button>` : ''}
+                                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'REDUCE_DAYS')" class="action-btn" title="Reduce 7 Days">📉</button>
+                                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'EXTEND_DAYS')" class="action-btn" title="Extend 30 Days" style="color: #60a5fa;">📈</button>
+                                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'DELETE')" class="action-btn btn-delete" title="Delete Client">🗑️</button>
+                                            </td>
+                                        </tr>`;
+        }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No active client subscriptions found in the registry.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             `;
 
