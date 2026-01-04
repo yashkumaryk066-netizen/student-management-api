@@ -1185,30 +1185,62 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    // Success - Show submitted message
+                    // Success - Show waiting for approval message
                     document.getElementById('step2').innerHTML = `
                         <div style="padding:40px; text-align:center;">
-                            <div style="font-size:3rem; margin-bottom:20px;">✅</div>
-                            <h3 style="margin-bottom:10px; color:#10b981;">Payment Submitted Successfully!</h3>
-                            <p style="color:var(--text-muted); margin-bottom:20px;">Your payment is under verification.</p>
+                            <div style="font-size:3rem; margin-bottom:20px;">⏳</div>
+                            <h3 style="margin-bottom:10px; color:#f59e0b;">Waiting for Admin Approval</h3>
+                            <p style="color:var(--text-muted); margin-bottom:20px;">Your payment has been submitted successfully!</p>
+                            
+                            <div style="background:rgba(245,158,11,0.1); border-left:4px solid #f59e0b; padding:20px; border-radius:12px; margin-bottom:20px; text-align:left;">
+                                <h4 style="margin:0 0 12px 0; color:#f59e0b; font-size:1rem;">⚠️ Important Notice</h4>
+                                <p style="margin:0; color:var(--text-muted); line-height:1.6;">
+                                    Your payment is under verification. You will <strong>NOT receive login credentials</strong> until the admin approves your payment.
+                                </p>
+                            </div>
                             
                             <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-bottom:20px; text-align:left;">
-                                <div style="margin-bottom:12px;"><strong>UTR:</strong> ${utr}</div>
-                                <div style="margin-bottom:12px;"><strong>Amount:</strong> ₹${selectedAmount.toLocaleString('en-IN')}</div>
-                                <div style="margin-bottom:12px;"><strong>Plan:</strong> ${selectedPlan}</div>
-                                <div style="margin-bottom:12px;"><strong>Email:</strong> ${email}</div>
+                                <h4 style="margin:0 0 12px 0; font-size:0.9rem; color:var(--text-muted);">Payment Details Submitted:</h4>
+                                <div style="display:grid; gap:8px;">
+                                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                        <span style="color:var(--text-muted);">UTR Number:</span>
+                                        <strong style="font-family:monospace;">${utr}</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                        <span style="color:var(--text-muted);">Amount Paid:</span>
+                                        <strong>₹${selectedAmount.toLocaleString('en-IN')}</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                        <span style="color:var(--text-muted);">Plan Selected:</span>
+                                        <strong>${selectedPlan}</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:8px 0;">
+                                        <span style="color:var(--text-muted);">Email Address:</span>
+                                        <strong>${email}</strong>
+                                    </div>
+                                </div>
                             </div>
 
                             <div style="background:rgba(16,185,129,0.1); border-left:4px solid #10b981; padding:16px; border-radius:8px; margin-bottom:20px; text-align:left;">
-                                <h4 style="margin:0 0 8px 0; color:#10b981;">What's Next?</h4>
-                                <ul style="margin:0; padding-left:20px; color:var(--text-muted); line-height:1.8;">
-                                    <li>Admin will verify your payment with bank statement</li>
-                                    <li>You'll receive login credentials via email within 1-2 hours</li>
-                                    <li>Check your inbox (${email}) for updates</li>
-                                </ul>
+                                <h4 style="margin:0 0 8px 0; color:#10b981; font-size:1rem;">📋 What Happens Next?</h4>
+                                <ol style="margin:0; padding-left:20px; color:var(--text-muted); line-height:1.8;">
+                                    <li><strong>Admin Verification</strong> - Super admin will verify your payment with bank statement</li>
+                                    <li><strong>Approval Process</strong> - Usually takes 1-2 hours during business hours</li>
+                                    <li><strong>Email Notification</strong> - Once approved, you'll receive an email at <strong>${email}</strong></li>
+                                    <li><strong>Login Credentials</strong> - Email will contain your username, password, and ${selectedPlan} plan access</li>
+                                    <li><strong>Account Activation</strong> - You can then login and start using the system</li>
+                                </ol>
                             </div>
 
-                            <button onclick="location.href='/login/'" class="btn-primary" style="width:100%;">Go to Login Page</button>
+                            <div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); padding:16px; border-radius:8px; margin-bottom:20px;">
+                                <p style="margin:0; color:var(--text-muted); font-size:0.9rem; line-height:1.6;">
+                                    <strong style="color:#6366f1;">📧 Check Your Email:</strong> Keep an eye on your inbox (and spam folder). 
+                                    Your credentials will be sent automatically once the admin approves your payment.
+                                </p>
+                            </div>
+
+                            <button onclick="location.href='/'" class="btn-primary" style="width:100%; margin-bottom:10px;">Back to Home</button>
+                            <button onclick="location.href='/login/'" class="btn-secondary" style="width:100%;">Go to Login Page</button>
                         </div>
                     `;
                 } else {
