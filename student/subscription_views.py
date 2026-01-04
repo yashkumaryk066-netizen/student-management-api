@@ -79,49 +79,49 @@ class SubscriptionPaymentVerifyView(APIView):
     authentication_classes = [] # Disable auth to prevent CSRF errors on public endpoint
 
     def post(self, request):
-        email = request.data.get('email')
-        phone = request.data.get('phone')
-        plan_type = request.data.get('plan_type')
-        utr_number = request.data.get('utr_number')  # UTR/Transaction Reference
-        amount = request.data.get('amount')
-        payment_screenshot = request.FILES.get('payment_screenshot')  # Optional
-        
-        if not all([email, plan_type, utr_number, amount]):
-            return Response({
-                "error": "Missing required fields",
-                "required": ["email", "plan_type", "utr_number", "amount"]
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Verify minimum length for UTR
-        if len(str(utr_number)) < 10:
-            return Response({
-                "error": "Invalid UTR Number",
-                "message": "UTR/Transaction Reference must be at least 10 characters"
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Check for duplicate UTR
-        if Payment.objects.filter(transaction_id=utr_number).exists():
-            return Response({
-                "error": "Duplicate Transaction",
-                "message": "This UTR number has already been submitted"
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Verify pricing
         try:
-            amount = Decimal(str(amount))
-        except:
-            amount = Decimal('0.00')
-        
-        expected_price = self.PRICING.get(plan_type)
-        if amount < expected_price:
-            return Response({
-                "error": "Insufficient Payment Amount",
-                "message": f"Required ₹{expected_price} for {plan_type} plan, but you submitted ₹{amount}",
-                "required": str(expected_price),
-                "received": str(amount)
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
+            email = request.data.get('email')
+            phone = request.data.get('phone')
+            plan_type = request.data.get('plan_type')
+            utr_number = request.data.get('utr_number')  # UTR/Transaction Reference
+            amount = request.data.get('amount')
+            payment_screenshot = request.FILES.get('payment_screenshot')  # Optional
+            
+            if not all([email, plan_type, utr_number, amount]):
+                return Response({
+                    "error": "Missing required fields",
+                    "required": ["email", "plan_type", "utr_number", "amount"]
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Verify minimum length for UTR
+            if len(str(utr_number)) < 10:
+                return Response({
+                    "error": "Invalid UTR Number",
+                    "message": "UTR/Transaction Reference must be at least 10 characters"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check for duplicate UTR
+            if Payment.objects.filter(transaction_id=utr_number).exists():
+                return Response({
+                    "error": "Duplicate Transaction",
+                    "message": "This UTR number has already been submitted"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Verify pricing
+            try:
+                amount = Decimal(str(amount))
+            except:
+                amount = Decimal('0.00')
+            
+            expected_price = self.PRICING.get(plan_type)
+            if amount < expected_price:
+                return Response({
+                    "error": "Insufficient Payment Amount",
+                    "message": f"Required ₹{expected_price} for {plan_type} plan, but you submitted ₹{amount}",
+                    "required": str(expected_price),
+                    "received": str(amount)
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
             # Create or get user (without password initially)
             user, created = User.objects.get_or_create(
                 username=email,
@@ -182,6 +182,7 @@ class SubscriptionPaymentVerifyView(APIView):
             
         except Exception as e:
             logger.error(f"❌ Payment Verification Failed: {str(e)}")
+            # Return JSON error to prevent frontend crash
             return Response({
                 "error": "Server Error",
                 "message": f"Could not process payment: {str(e)}"
