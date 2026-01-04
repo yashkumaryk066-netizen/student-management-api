@@ -10,7 +10,7 @@ from .models import (
 )
 from .Serializer import (
     StudentSerializer, AttendenceSerializer, UserProfileSerializer, PaymentSerializer, NotificationSerializer,
-    CourseSerializer, BatchSerializer, EnrollmentSerializer
+    CourseSerializer, BatchSerializer, EnrollmentSerializer, LiveClassSerializer
 )
 from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated
@@ -691,6 +691,59 @@ class PaymentDetailsView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Payment.DoesNotExist:
             return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# ==================== LIVE CLASS VIEWS (ADVANCED) ====================
+
+@extend_schema_view(
+    get=extend_schema(
+        tags=['Live Class'],
+        summary='List live classes',
+        description='List live classes for the day. Returns professional error if none found or plan restricted.',
+    )
+)
+class LiveClassListView(APIView):
+    permission_classes = [IsAuthenticated, HasPlanAccess]
+    required_feature = 'coaching_classes' # Example feature key
+    
+    def get(self, request):
+        today = timezone.now().date()
+        
+        # 1. Filter by Plan/Institute
+        if hasattr(request.user, 'profile'):
+             # If student/teacher, get classes for their batch
+             pass # Logic to refine
+             
+        classes = LiveClass.objects.filter(start_time__date=today, is_active=True)
+        
+        if not classes.exists():
+            # PROFESSIONAL ERROR HANDLING (AS REQUESTED)
+            return Response({
+                "error": "No Classes Scheduled",
+                "code": "NO_LIVE_CLASSES",
+                "message": "No live classes scheduled for today. Enjoy your break!",
+                "suggestion": "Check the schedule for upcoming classes."
+            }, status=status.HTTP_200_OK) # 200 OK because empty list is not a server error, but we want structured info
+            
+        serializer = LiveClassSerializer(classes, many=True)
+        return Response(serializer.data)
+
+class LiveClassCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+    
+    def post(self, request):
+        # Professional Limit Handling
+        if LiveClass.objects.filter(created_by=request.user, date=date.today()).count() > 5:
+             return Response({
+                 "error": "Daily Limit Reached",
+                 "code": "LIMIT_EXCEEDED", 
+                 "message": "You have reached the limit of 5 live classes per day."
+             }, status=status.HTTP_403_FORBIDDEN)
+             
+        serializer = LiveClassSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(created_by=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ==================== NOTIFICATION VIEWS ====================
 

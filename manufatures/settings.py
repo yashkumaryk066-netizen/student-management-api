@@ -85,6 +85,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'student.middleware.SubscriptionMiddleware', # Custom SaaS Middleware
 ]
 
 ROOT_URLCONF = 'manufatures.urls'
@@ -303,5 +304,11 @@ EAZYPAY_MODE = config('EAZYPAY_MODE', default='TEST')
 # Twilio Configuration (WhatsApp & SMS)
 TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
 TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
+TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='+12203561251')
 TWILIO_WHATSAPP_NUMBER = config('TWILIO_WHATSAPP_NUMBER', default='whatsapp:+14155238886')
 ADMIN_WHATSAPP_NUMBER = config('ADMIN_WHATSAPP_NUMBER', default='+918356926231') # SuperAdmin Number for Alerts
+
+# SMS Settings
+SMS_GATEWAY = config('SMS_GATEWAY', default='twilio')
+SMS_API_KEY = config('SMS_API_KEY', default='') # Optional if using Twilio
+

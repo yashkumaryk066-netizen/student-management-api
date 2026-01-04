@@ -258,6 +258,23 @@ class OnboardingPaymentView(APIView):
                 self.send_whatsapp_mock(phone, client_msg, "CLIENT")
                 self.send_whatsapp_mock('8356926231', super_admin_msg, "SUPER_ADMIN")
                 
+                # Send SMS (Real Twilio)
+                try:
+                    from notifications.sms_service import sms_service
+                    # Prepare short SMS content
+                    sms_content = (
+                         f"Welcome to IMS Premium! Plan: {plan_type}. "
+                         f"ID: {username} Pass: {password} "
+                         f"Login: {login_url}"
+                    )
+                    sms_response = sms_service.send_message(phone, sms_content)
+                    if sms_response.get('status') == 'sent':
+                        logger.info(f"📱 [SMS Sent] to {phone} via {sms_response.get('gateway')}")
+                    else:
+                        logger.error(f"📱 [SMS Failed] to {phone}: {sms_response.get('error')}")
+                except Exception as sms_err:
+                    logger.error(f"📱 [SMS Error]: {str(sms_err)}")
+
                 # Send Email (Real SMTP)
                 try:
                     send_mail(

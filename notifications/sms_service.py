@@ -11,20 +11,31 @@ from datetime import datetime
 class SMSService:
     """
     SMS notification service
-    Configure with environment variables:
+    Configure with Django Settings:
     - SMS_GATEWAY (msg91, twilio, textlocal)
     - SMS_API_KEY
     - SMS_SENDER_ID
+    - TWILIO_ACCOUNT_SID
+    - TWILIO_AUTH_TOKEN
+    - TWILIO_PHONE_NUMBER
     """
     
     def __init__(self):
-        self.gateway = os.getenv('SMS_GATEWAY', 'msg91').lower()
-        self.api_key = os.getenv('SMS_API_KEY', '')
-        self.sender_id = os.getenv('SMS_SENDER_ID', 'NXTERP')
-        self.enabled = bool(self.api_key)
+        from django.conf import settings
+        self.gateway = getattr(settings, 'SMS_GATEWAY', 'msg91').lower()
+        self.api_key = getattr(settings, 'SMS_API_KEY', '')
+        self.sender_id = getattr(settings, 'SMS_SENDER_ID', 'NXTERP')
+        
+        # Twilio specific
+        self.twilio_sid = getattr(settings, 'TWILIO_ACCOUNT_SID', None)
+        self.twilio_token = getattr(settings, 'TWILIO_AUTH_TOKEN', None)
+        self.twilio_number = getattr(settings, 'TWILIO_PHONE_NUMBER', None)
+        
+        # Enabled if basic API key present OR Twilio creds present
+        self.enabled = bool(self.api_key) or (bool(self.twilio_sid) and bool(self.twilio_token))
         
         if not self.enabled:
-            print("SMS service disabled. Configure SMS_API_KEY to enable.")
+            print("SMS service disabled. Configure SMS variables in settings to enable.")
     
     def send_message(self, to_number: str, message: str, template_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -103,15 +114,22 @@ class SMSService:
         try:
             from twilio.rest import Client
             
-            account_sid = os.getenv('TWILIO_ACCOUNT_SID')
-            auth_token = os.getenv('TWILIO_AUTH_TOKEN')
-            from_number = os.getenv('TWILIO_PHONE_NUMBER')
+            if not (self.twilio_sid and self.twilio_token and self.twilio_number):
+                return {'status': 'error', 'error': 'Twilio credentials missing', 'to': to_number}
+                
+            client = Client(self.twilio_sid, self.twilio_token)
             
-            client = Client(account_sid, auth_token)
+            # Twilio requires E.164 format (+[countryCode][number])
+            # Assuming input is Indian 10 digit or already has +91
+            if not to_number.startswith('+'):
+                formatted_number = f'+91{to_number}'
+            else:
+                formatted_number = to_number
+
             message_obj = client.messages.create(
-                from_=from_number,
+                from_=self.twilio_number,
                 body=message,
-                to=f'+91{to_number}'
+                to=formatted_number
             )
             
             return {

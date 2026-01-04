@@ -4,7 +4,7 @@ from .models import (
     LibraryBook, BookIssue, Hostel, Room, HostelAllocation,
     Vehicle, Route, TransportAllocation, Employee, Department, Designation,
     LeaveRequest, Payroll, Exam, Grade, Event,
-    Course, Batch, Enrollment
+    Course, Batch, Enrollment, LiveClass
 )
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -173,4 +173,9 @@ class EnrollmentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Enrollment
+        fields = '__all__'
+
+class LiveClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LiveClass
         fields = '__all__'
