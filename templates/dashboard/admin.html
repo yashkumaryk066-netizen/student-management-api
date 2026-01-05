@@ -415,6 +415,20 @@
             });
         });
 
+
+
+        // Fallback Navigation Handler
+        window.navigateTo = function (module) {
+            if (window.DashboardApp && typeof DashboardApp.loadModule === 'function') {
+                DashboardApp.loadModule(module);
+            } else {
+                console.warn("DashboardApp loading... Redirecting to hash");
+                window.location.hash = module;
+                // If app is broken, reloading might help if it was a transient loading issue
+                // But if it's syntax error, this won't help much other than changing URL.
+            }
+        };
+
         // navigateTo function is now handled by /static/js/dashboard/admin.js
         // which provides full SPA functionality
 

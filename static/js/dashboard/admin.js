@@ -77,8 +77,9 @@ const DashboardApp = {
 
     async fetchCurrentUser() {
         try {
-            const res = await fetch(`${this.apiBaseUrl}/profile/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            const token = localStorage.getItem('authToken');
+            const res = await fetch(this.apiBaseUrl + '/profile/', {
+                headers: { 'Authorization': 'Bearer ' + token }
             });
             if (res.ok) {
                 this.currentUser = await res.json();
