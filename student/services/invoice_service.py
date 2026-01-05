@@ -13,31 +13,40 @@ from datetime import date
 def draw_header_footer(canvas, doc):
     canvas.saveState()
     
-    # --- HEADER BACKGROUND ---
-    canvas.setFillColorRGB(0.1, 0.1, 0.25) # Dark Premium Navy
-    canvas.rect(0, A4[1] - 120, A4[0], 120, fill=1, stroke=0)
+    # --- HEADER BACKGROUND (Deep Professional Navy) ---
+    canvas.setFillColorRGB(0.05, 0.05, 0.15) # Very Dark Navy
+    canvas.rect(0, A4[1] - 140, A4[0], 140, fill=1, stroke=0)
+    
+    # Accent Gold Strip
+    canvas.setFillColorRGB(0.85, 0.65, 0.1) # Gold
+    canvas.rect(0, A4[1] - 142, A4[0], 2, fill=1, stroke=0)
     
     # --- LOGO IMAGE (Official Y.S.M Logo) ---
     logo_path = os.path.join(settings.BASE_DIR, 'static/img/ysm_logo.png')
     if os.path.exists(logo_path):
-        canvas.drawImage(logo_path, 40, A4[1] - 100, width=60, height=60, mask='auto', preserveAspectRatio=True)
+        # Larger logo, better placement
+        canvas.drawImage(logo_path, 40, A4[1] - 110, width=80, height=80, mask='auto', preserveAspectRatio=True)
     
     # --- BRANDING TEXT ---
     canvas.setFillColorRGB(1, 1, 1) # White text
-    canvas.setFont("Helvetica-Bold", 24)
-    canvas.drawString(110, A4[1] - 50, "Y.S.M ADVANCE EDUCATION")
+    canvas.setFont("Helvetica-Bold", 26)
+    canvas.drawString(140, A4[1] - 65, "Y.S.M")
     
-    canvas.setFont("Helvetica", 12)
-    canvas.setFillColorRGB(0.8, 0.8, 0.9)
-    canvas.drawString(110, A4[1] - 70, "Advanced Institute Management System")
+    canvas.setFont("Helvetica-Bold", 14)
+    canvas.setFillColorRGB(0.9, 0.7, 0.2) # Golden Subtitle
+    canvas.drawString(140, A4[1] - 85, "ADVANCE EDUCATION SYSTEM")
     
-    # --- INVOICE BADGE ---
+    canvas.setFont("Helvetica", 10)
+    canvas.setFillColorRGB(0.7, 0.7, 0.85)
+    canvas.drawString(140, A4[1] - 115, "Advanced Institute Management System")
+    
+    # --- INVOICE BADGE (Top Right) ---
     canvas.setFillColorRGB(0.3, 0.8, 0.4) # Accent Green
-    canvas.roundRect(A4[0] - 150, A4[1] - 60, 110, 30, 6, fill=1, stroke=0)
+    canvas.roundRect(A4[0] - 120, A4[1] - 70, 80, 28, 6, fill=1, stroke=0)
     
     canvas.setFillColorRGB(1, 1, 1)
-    canvas.setFont("Helvetica-Bold", 14)
-    canvas.drawCentredString(A4[0] - 95, A4[1] - 53, "PAID")
+    canvas.setFont("Helvetica-Bold", 10)
+    canvas.drawCentredString(A4[0] - 80, A4[1] - 59, "PAID")
 
 
     # --- ACCENT FOOTER BAR ---

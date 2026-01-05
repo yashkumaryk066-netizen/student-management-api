@@ -130,41 +130,54 @@ class ReportDownloadView(APIView):
             p = canvas.Canvas(buffer, pagesize=letter)
             width, height = letter
 
-            # ===== PREMIUM HEADER (Navy Blue Background) =====
-            p.setFillColorRGB(0.1, 0.1, 0.25) # Dark Navy
-            p.rect(0, height - 130, width, 130, fill=1, stroke=0)
+            # ===== PREMIUM HEADER (Deep Professional Navy) =====
+            p.setFillColorRGB(0.05, 0.05, 0.15) # Very Dark Navy
+            p.rect(0, height - 160, width, 160, fill=1, stroke=0)
+            
+            # Accent Gold Strip
+            p.setFillColorRGB(0.85, 0.65, 0.1) # Gold
+            p.rect(0, height - 162, width, 2, fill=1, stroke=0)
             
             # Logo Image (Official Y.S.M Logo)
             logo_path = os.path.join(settings.BASE_DIR, 'static/img/ysm_logo.png')
             if os.path.exists(logo_path):
-                p.drawImage(logo_path, 40, height - 100, width=60, height=60, mask='auto', preserveAspectRatio=True)
+                # Larger logo, better placement
+                p.drawImage(logo_path, 40, height - 110, width=80, height=80, mask='auto', preserveAspectRatio=True)
             
-            # Title
+            # Title Group (Y.S.M ADVANCE EDUCATION SYSTEM)
             p.setFillColorRGB(1, 1, 1) # White
-            p.setFont("Helvetica-Bold", 24)
-            p.drawString(110, height - 55, "Y.S.M ADVANCE EDUCATION SYSTEM")
+            p.setFont("Helvetica-Bold", 26)
+            p.drawString(140, height - 65, "Y.S.M")
             
-            # Report Type Badge
-            p.setFillColorRGB(0.4, 0.5, 0.9) # Indigo
-            p.roundRect(width - 200, height - 70, 150, 35, 8, fill=1, stroke=0)
+            p.setFont("Helvetica-Bold", 14)
+            p.setFillColorRGB(0.9, 0.7, 0.2) # Golden Subtitle
+            p.drawString(140, height - 85, "ADVANCE EDUCATION SYSTEM")
+            
+            # Report Meta Badge (Top Right)
+            badge_text = report.report_type.upper().replace('_', ' ')
+            badge_width = p.stringWidth(badge_text, "Helvetica-Bold", 10) + 30
+            p.setFillColorRGB(0.2, 0.4, 0.8) # Premium Blue
+            p.roundRect(width - badge_width - 40, height - 70, badge_width, 28, 6, fill=1, stroke=0)
             p.setFillColorRGB(1, 1, 1)
-            p.setFont("Helvetica-Bold", 12)
-            p.drawCentredString(width - 125, height - 58, report.report_type.upper())
+            p.setFont("Helvetica-Bold", 10)
+            p.drawCentredString(width - (badge_width/2) - 40, height - 59, badge_text)
             
-            # Report Details (Below header)
-            p.setFont("Helvetica", 11)
-            p.setFillColorRGB(0.9, 0.9, 1.0) # Light blue
-            p.drawString(50, height - 95, f"Report: {report.name}")
-            p.drawString(50, height - 115, f"Generated For: {request.user.email}")
+            # Report Details (Below branding)
+            p.setFont("Helvetica-Oblique", 10)
+            p.setFillColorRGB(0.7, 0.7, 0.85) # Slate blue
+            p.drawString(140, height - 110, f"Document: {report.name}")
+            p.drawString(140, height - 125, f"Issued To: {request.user.email}")
+            p.drawRightString(width - 40, height - 125, f"Date: {timezone.now().strftime('%d %b, %Y')}")
 
             # ===== CONTENT AREA =====
-            # Section Title Background
-            p.setFillColorRGB(0.95, 0.95, 0.97) # Light gray
-            p.rect(40, height - 180, width - 80, 40, fill=1, stroke=0)
+            # Section Header with Thin Border
+            p.setStrokeColorRGB(0.8, 0.8, 0.9)
+            p.setLineWidth(0.5)
+            p.line(40, height - 190, width - 40, height - 190)
             
-            p.setFillColorRGB(0.2, 0.2, 0.4) # Dark text
-            p.setFont("Helvetica-Bold", 16)
-            p.drawString(50, height - 165, "Report Summary")
+            p.setFillColorRGB(0.1, 0.1, 0.3) # Dark text
+            p.setFont("Helvetica-Bold", 18)
+            p.drawString(50, height - 180, "Report Summary")
             
             # Data Table
             y = height - 210
