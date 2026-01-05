@@ -138,39 +138,104 @@ const DashboardApp = {
     applyPermissions() {
         if (!this.currentUser) return;
 
-        // Hide/Show Sidebar Items based on Plan
-        const plan = (this.currentUser.institution_type || 'SCHOOL').toUpperCase();
-        const role = this.currentUser.role;
+        // Get user's available features from API
+        const availableFeatures = this.currentUser.available_features || [];
+        const plan = (this.currentUser.institution_type || 'COACHING').toUpperCase();
 
-        // Helper to hide nav item
-        const hide = (href) => {
-            const el = document.querySelector(`a[href="#${href}"]`);
-            if (el) el.closest('li').style.display = 'none';
+        console.log(`🔐 Applying Permissions | Plan: ${plan} | Features:`, availableFeatures);
+
+        // Feature to sidebar mapping
+        const featureMenuMap = {
+            'students': 'students',
+            'attendance': 'attendance',
+            'live_classes': 'live-classes',
+            'notifications': 'notifications',
+            'reports': 'reports',
+            'exams': 'exams',
+            'finance': 'finance',
+            'departments': 'departments',
+            'hostel': 'hostel',
+            'lab': 'lab',
+            'transport': 'transport',
+            'hr': 'hr'
         };
-        const show = (href) => {
+
+        // Helper functions
+        const hideMenuItem = (href) => {
             const el = document.querySelector(`a[href="#${href}"]`);
-            if (el) el.closest('li').style.display = 'block';
+            if (el) {
+                const listItem = el.closest('li');
+                if (listItem) {
+                    listItem.style.display = 'none';
+                    listItem.setAttribute('data-locked', 'true');
+                }
+            }
         };
 
-        // Reset first (Show all)
-        ['hostel', 'transport', 'library', 'hr', 'exams', 'live-classes'].forEach(show);
+        const showMenuItem = (href) => {
+            const el = document.querySelector(`a[href="#${href}"]`);
+            if (el) {
+                const listItem = el.closest('li');
+                if (listItem) {
+                    listItem.style.display = 'block';
+                    listItem.removeAttribute('data-locked');
+                }
+            }
+        };
 
-        // SUPER ADMIN: Show Everything
-        if (role === 'ADMIN' && this.currentUser.is_superuser) return;
-
-        // COACHING PLAN: Hide Hostel, Transport
-        if (plan === 'COACHING') {
-            hide('hostel');
-            hide('transport');
+        // Super admin bypass
+        if (this.currentUser.is_superuser) {
+            console.log('✅ Super Admin - Full Access Granted');
+            return; // Super admin sees everything
         }
 
-        // SPECIFIC BLOCKS
-        if (plan === 'BASIC') {
-            hide('events');
-            hide('live-classes');
-        }
+        // Hide all features first
+        Object.values(featureMenuMap).forEach(hideMenuItem);
 
-        console.log("Permissions Applied for " + plan);
+        // Show only available features
+        availableFeatures.forEach(feature => {
+            const menuHref = featureMenuMap[feature];
+            if (menuHref) {
+                showMenuItem(menuHref);
+            }
+        });
+
+        // Add upgrade prompts for locked features
+        document.querySelectorAll('[data-locked="true"]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showUpgradeModal(plan);
+            });
+        });
+
+        console.log(`✅ Permissions Applied | Visible Features: ${availableFeatures.length}`);
+    },
+
+    showUpgradeModal(currentPlan) {
+        const upgradeInfo = {
+            'COACHING': 'SCHOOL (₹1000) or INSTITUTE (₹1500)',
+            'SCHOOL': 'INSTITUTE (₹1500)',
+            'INSTITUTE': 'You have full access already!'
+        };
+
+        const modal = `
+            <div class="modal-overlay" style="z-index: 10000; background: rgba(0,0,0,0.9);">
+                <div class="modal-card" style="max-width: 500px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #f59e0b; box-shadow: 0 0 40px rgba(245, 158, 11, 0.3);">
+                    <div style="text-align: center; padding: 30px;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
+                        <h2 style="color: #fbbf24; font-family: 'Rajdhani', sans-serif; font-size: 2rem; margin: 0 0 15px 0;">Premium Feature Locked</h2>
+                        <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 25px;">This feature is available in:</p>
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                            <p style="color: #fbbf24; font-size: 1.3rem; font-weight: 700; margin: 0;">${upgradeInfo[currentPlan] || 'Higher Plans'}</p>
+                        </div>
+                        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 30px;">Contact Super Admin to upgrade your subscription.</p>
+                        <button onclick="this.closest('.modal-overlay').remove()" class="btn-primary" style="padding: 12px 30px; font-size: 1rem;">Got It</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
     },
 
     setupNavigation() {

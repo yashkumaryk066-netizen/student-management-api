@@ -419,6 +419,8 @@ class LiveClassListCreateView(generics.ListCreateAPIView):
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
+        from .plan_permissions import get_user_features
+        
         user = request.user
         data = {
             "username": user.username,
@@ -426,7 +428,8 @@ class ProfileView(APIView):
             "role": user.profile.role if hasattr(user, 'profile') else 'UNKNOWN',
             "id": user.id,
             "is_superuser": user.is_superuser,
-            "user_full_name": user.get_full_name()
+            "user_full_name": user.get_full_name(),
+            "available_features": list(get_user_features(user).keys())
         }
         if hasattr(user, 'profile'):
              data.update(UserProfileSerializer(user.profile).data)
