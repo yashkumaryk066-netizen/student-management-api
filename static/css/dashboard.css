@@ -410,31 +410,149 @@ button,
         margin-left: 0;
     }
 
+    /* ===========================================
+       PREMIUM MENU TOGGLE (Advanced Level)
+       =========================================== */
     .menu-toggle {
         display: block !important;
         position: fixed;
-        top: 20px;
-        left: 20px;
+        top: 24px;
+        left: 24px;
         z-index: 1001;
-        background: rgba(239, 68, 68, 0.2);
-        border: 1px solid rgba(239, 68, 68, 0.4);
-        color: #fecaca;
-        font-size: 1.5rem;
-        padding: 8px 14px;
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        border: none;
+        background: linear-gradient(145deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.15));
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 16px;
+        border: 2px solid rgba(239, 68, 68, 0.4);
         cursor: pointer;
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
-        animation: neonPulseRed 2s infinite alternate;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow:
+            0 8px 32px rgba(239, 68, 68, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+            0 0 60px rgba(239, 68, 68, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: menuPulse 3s ease-in-out infinite;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        overflow: hidden;
+    }
+
+    .menu-toggle::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .menu-toggle:hover::before {
+        opacity: 1;
+        animation: shimmer 1.5s infinite;
+    }
+
+    /* Hamburger Bars */
+    .menu-bar {
+        width: 28px;
+        height: 3px;
+        background: linear-gradient(90deg, #fecaca, #ef4444);
+        border-radius: 4px;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+        position: relative;
+    }
+
+    .menu-bar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: white;
+        border-radius: 4px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .menu-toggle:hover .menu-bar {
+        background: linear-gradient(90deg, #ffffff, #fecaca);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        transform: scaleX(1.1);
+    }
+
+    .menu-toggle:hover .menu-bar:nth-child(1) {
+        transform: translateX(-3px) scaleX(1.1);
+    }
+
+    .menu-toggle:hover .menu-bar:nth-child(3) {
+        transform: translateX(3px) scaleX(1.1);
+    }
+
+    .menu-toggle:active {
+        transform: scale(0.92);
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Open State Animation */
+    .menu-toggle.open .menu-bar:nth-child(1) {
+        transform: translateY(9px) rotate(45deg);
+    }
+
+    .menu-toggle.open .menu-bar:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    .menu-toggle.open .menu-bar:nth-child(3) {
+        transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* Pulse Animation */
+    @keyframes menuPulse {
+
+        0%,
+        100% {
+            box-shadow:
+                0 8px 32px rgba(239, 68, 68, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                0 0 60px rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        50% {
+            box-shadow:
+                0 8px 32px rgba(239, 68, 68, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                0 0 80px rgba(239, 68, 68, 0.4);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+    }
+
+    /* Shimmer Effect */
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%) rotate(20deg);
+        }
+
+        100% {
+            transform: translateX(200%) rotate(20deg);
+        }
     }
 }
 
-.menu-toggle:hover {
-    transform: scale(1.1) rotate(90deg);
-    background: #ef4444;
-    color: white;
-    box-shadow: 0 0 30px #ef4444;
+/* Legacy hover for non-mobile */
+@media (min-width: 1025px) {
+    .menu-toggle:hover {
+        transform: scale(1.08);
+        background: linear-gradient(145deg, rgba(239, 68, 68, 0.4), rgba(220, 38, 38, 0.3));
+        box-shadow:
+            0 12px 40px rgba(239, 68, 68, 0.5),
+            0 0 100px rgba(239, 68, 68, 0.3);
+    }
 }
 
 @keyframes neonPulseRed {
