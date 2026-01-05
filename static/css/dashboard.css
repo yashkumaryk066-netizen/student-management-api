@@ -1305,7 +1305,7 @@ body {
 .header-search {
     flex: 1;
     max-width: 400px;
-    margin: 0 30px;
+    margin: 0 30px 0 8px;
 }
 
 .search-input {
