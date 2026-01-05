@@ -2537,3 +2537,345 @@ screen and (min-resolution: 192dpi) {
         -webkit-overflow-scrolling: touch;
     }
 }
+
+/* ============================================
+   ULTIMATE MENU TOGGLE - CROSS-PLATFORM FIX
+   Supports: Desktop, Laptop, MacBook, Mobile,
+   iOS (Safari), Android, Tablet
+   ============================================ */
+
+/* Reset any conflicting styles */
+.menu-toggle {
+    /* Core Structure */
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    /* Sizing - Touch-friendly for all devices */
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    padding: 0;
+    margin: 0;
+    margin-right: 16px;
+
+    /* Premium Red Glass Design */
+    background: linear-gradient(145deg,
+            rgba(239, 68, 68, 0.25) 0%,
+            rgba(185, 28, 28, 0.15) 50%,
+            rgba(127, 29, 29, 0.2) 100%) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    /* Border & Shape */
+    border: 2px solid rgba(239, 68, 68, 0.5) !important;
+    border-radius: 14px;
+
+    /* 3D Box Shadow */
+    box-shadow:
+        0 8px 25px rgba(239, 68, 68, 0.35),
+        0 4px 10px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 0 40px rgba(239, 68, 68, 0.15) !important;
+
+    /* Cursor & Interaction */
+    cursor: pointer;
+    position: relative;
+    z-index: 1001;
+    overflow: hidden;
+
+    /* Smooth Transitions */
+    transition:
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s ease !important;
+
+    /* Animation */
+    animation: premiumMenuPulse 3s ease-in-out infinite;
+
+    /* Touch Optimization */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Premium Menu Bars (Hamburger Lines) */
+.menu-toggle .menu-bar {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background: linear-gradient(90deg, #f87171, #ef4444) !important;
+    border-radius: 3px;
+    position: relative;
+    transition:
+        transform 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+        opacity 0.25s ease,
+        width 0.25s ease !important;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+/* Shimmer Shine Effect */
+.menu-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.15) 50%,
+            transparent 100%);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+/* Hover States - Desktop/Laptop/MacBook */
+@media (hover: hover) and (pointer: fine) {
+    .menu-toggle:hover {
+        transform: scale(1.08) translateY(-2px);
+        border-color: rgba(239, 68, 68, 0.8) !important;
+        box-shadow:
+            0 12px 35px rgba(239, 68, 68, 0.5),
+            0 6px 15px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 0 60px rgba(239, 68, 68, 0.25) !important;
+    }
+
+    .menu-toggle:hover::before {
+        left: 100%;
+    }
+
+    .menu-toggle:hover .menu-bar {
+        background: linear-gradient(90deg, #ffffff, #fca5a5) !important;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    }
+
+    .menu-toggle:hover .menu-bar:nth-child(1) {
+        transform: translateX(-2px);
+    }
+
+    .menu-toggle:hover .menu-bar:nth-child(3) {
+        transform: translateX(2px);
+    }
+}
+
+/* Active/Pressed State */
+.menu-toggle:active {
+    transform: scale(0.95) !important;
+    box-shadow:
+        0 4px 12px rgba(239, 68, 68, 0.4),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Open State - X Animation */
+.menu-toggle.active .menu-bar:nth-child(1),
+.menu-toggle.open .menu-bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.menu-toggle.active .menu-bar:nth-child(2),
+.menu-toggle.open .menu-bar:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.menu-toggle.active .menu-bar:nth-child(3),
+.menu-toggle.open .menu-bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Premium Pulse Animation */
+@keyframes premiumMenuPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 8px 25px rgba(239, 68, 68, 0.35),
+            0 4px 10px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15),
+            0 0 40px rgba(239, 68, 68, 0.15);
+    }
+
+    50% {
+        box-shadow:
+            0 8px 30px rgba(239, 68, 68, 0.5),
+            0 4px 12px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 0 60px rgba(239, 68, 68, 0.25);
+    }
+}
+
+/* ===== RESPONSIVE DEVICE ADJUSTMENTS ===== */
+
+/* Large Desktop (1440px+) */
+@media screen and (min-width: 1440px) {
+    .menu-toggle {
+        width: 56px;
+        height: 56px;
+    }
+
+    .menu-toggle .menu-bar {
+        width: 26px;
+    }
+}
+
+/* Standard Desktop - Show always */
+@media screen and (min-width: 1025px) {
+    .menu-toggle {
+        display: flex !important;
+    }
+}
+
+/* Tablet Landscape (1024px) */
+@media screen and (max-width: 1024px) {
+    .menu-toggle {
+        display: flex !important;
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Tablet Portrait & Large Mobile (768px - 1023px) */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+    .menu-toggle {
+        width: 52px;
+        height: 52px;
+        margin-right: 12px;
+    }
+}
+
+/* Mobile Devices (up to 767px) */
+@media screen and (max-width: 767px) {
+    .menu-toggle {
+        position: fixed !important;
+        top: 12px;
+        left: 12px;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        min-height: 48px;
+        margin: 0 !important;
+        z-index: 1100;
+
+        /* Slightly reduced effects for performance */
+        box-shadow:
+            0 6px 20px rgba(239, 68, 68, 0.4),
+            0 2px 8px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .menu-toggle .menu-bar {
+        width: 22px;
+        height: 3px;
+    }
+
+    /* Adjust main content padding for fixed button */
+    .main-content {
+        padding-top: 70px !important;
+    }
+
+    .top-header {
+        padding-left: 70px !important;
+    }
+}
+
+/* Small Mobile (up to 375px - iPhone SE, etc) */
+@media screen and (max-width: 375px) {
+    .menu-toggle {
+        top: 10px;
+        left: 10px;
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        min-height: 46px;
+        border-radius: 12px;
+    }
+
+    .menu-toggle .menu-bar {
+        width: 20px;
+        height: 2.5px;
+    }
+}
+
+/* iOS Safari Specific Fixes */
+@supports (-webkit-touch-callout: none) {
+    .menu-toggle {
+        /* Ensure proper rendering on iOS */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+
+    /* Fix for iOS Safari backdrop-filter issues */
+    @media screen and (max-width: 767px) {
+        .menu-toggle {
+            background: linear-gradient(145deg,
+                    rgba(239, 68, 68, 0.35) 0%,
+                    rgba(185, 28, 28, 0.25) 100%) !important;
+        }
+    }
+}
+
+/* MacBook/Safari High-Resolution Display */
+@media screen and (-webkit-min-device-pixel-ratio: 2) and (min-width: 1024px),
+screen and (min-resolution: 192dpi) and (min-width: 1024px) {
+    .menu-toggle {
+        /* Sharper rendering on Retina displays */
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .menu-toggle .menu-bar {
+        /* Crisp lines on high-DPI */
+        height: 2.5px;
+    }
+}
+
+/* Touch Device Optimizations (tablets, phones) */
+@media (pointer: coarse) {
+    .menu-toggle {
+        /* Larger touch target for touch screens */
+        min-width: 48px !important;
+        min-height: 48px !important;
+    }
+}
+
+/* Landscape Mobile */
+@media screen and (max-height: 450px) and (orientation: landscape) {
+    .menu-toggle {
+        position: fixed !important;
+        top: 8px;
+        left: 8px;
+        width: 44px;
+        height: 44px;
+    }
+
+    .main-content {
+        padding-top: 60px !important;
+    }
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+    .menu-toggle {
+        animation: none !important;
+        transition: transform 0.1s ease !important;
+    }
+
+    .menu-toggle .menu-bar {
+        transition: transform 0.1s ease, opacity 0.1s ease !important;
+    }
+}
+
+/* Print - Hide menu */
+@media print {
+    .menu-toggle {
+        display: none !important;
+    }
+}
