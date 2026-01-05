@@ -181,17 +181,17 @@ class SMSService:
         Returns:
             Dict with status
         """
-        message = f"Your NextGen ERP verification code is: {otp}. Valid for 10 minutes. Do not share this code."
+        message = f"Your Y.S.M ERP verification code is: {otp}. Valid for 10 minutes. Do not share this code."
         return self.send_message(to_number, message)
     
     def send_fee_reminder(self, to_number: str, student_name: str, amount: float, due_date: str) -> Dict[str, Any]:
         """Send fee payment reminder"""
-        message = f"Fee Reminder: {student_name}'s pending fee of Rs.{amount:.2f} is due on {due_date}. Please pay soon. -NextGen ERP"
+        message = f"Fee Reminder: {student_name}'s pending fee of Rs.{amount:.2f} is due on {due_date}. Please pay soon. -Y.S.M ERP"
         return self.send_message(to_number, message)
     
     def send_attendance_alert(self, to_number: str, student_name: str, date: str) -> Dict[str, Any]:
         """Send attendance alert"""
-        message = f"Attendance Alert: {student_name} was absent on {date}. Please contact school if unexpected. -NextGen ERP"
+        message = f"Attendance Alert: {student_name} was absent on {date}. Please contact school if unexpected. -Y.S.M ERP"
         return self.send_message(to_number, message)
 
 

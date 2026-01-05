@@ -146,7 +146,7 @@ class WhatsAppService:
         """
         admin_number = '+918356926231'
         
-        message = f"""🎓 *New Demo Request - NextGen ERP*
+        message = f"""🎓 *New Demo Request - Y.S.M ERP*
 
 👤 Name: {requester_name}
 📞 Phone: {requester_phone}
@@ -187,7 +187,7 @@ Please make the payment at your earliest convenience to avoid late fees.
 
 For any queries, contact the accounts department.
 
-_NextGen ERP - Institute Management System_"""
+_Y.S.M ERP - Institute Management System_"""
         
         return self.send_message(parent_number, message)
     
@@ -211,7 +211,7 @@ Dear Parent,
 
 If this is unexpected, please contact the class teacher immediately.
 
-_NextGen ERP - Institute Management System_"""
+_Y.S.M ERP - Institute Management System_"""
         
         return self.send_message(parent_number, message)
 

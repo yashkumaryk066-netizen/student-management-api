@@ -21,12 +21,12 @@ def draw_header_footer(canvas, doc):
     canvas.circle(logo_x, logo_y, 22, fill=1, stroke=0)
     canvas.setFillColorRGB(1, 1, 1)  # White text
     canvas.setFont("Helvetica-Bold", 18)
-    canvas.drawCentredString(logo_x, logo_y - 6, "NG")
+    canvas.drawCentredString(logo_x, logo_y - 6, "YSM")
     
     # --- BRANDING TEXT ---
     canvas.setFillColorRGB(1, 1, 1) # White text
-    canvas.setFont("Helvetica-Bold", 28)
-    canvas.drawString(100, A4[1] - 50, "NEXTGEN ERP")
+    canvas.setFont("Helvetica-Bold", 20)
+    canvas.drawString(100, A4[1] - 50, "Y.S.M ADVANCE EDUCATION")
     
     canvas.setFont("Helvetica", 12)
     canvas.setFillColorRGB(0.8, 0.8, 0.9)
@@ -49,7 +49,7 @@ def draw_header_footer(canvas, doc):
     canvas.setFont("Helvetica", 9)
     canvas.setFillColorRGB(1, 1, 1)
     # Left side
-    canvas.drawString(40, 20, "Generated via NextGen ERP System")
+    canvas.drawString(40, 20, "Generated via Y.S.M Advance Education System")
     # Right Side (Branding)
     branding_text = "Visionary Architect & Developed by: Yash A Mishra"
     canvas.drawRightString(A4[0] - 40, 20, branding_text)
@@ -184,7 +184,7 @@ def generate_invoice_pdf(user, subscription, payment):
     elements.append(Paragraph("1. This is a computer-generated invoice and requires no signature.<br/>2. Payment is non-refundable once the license is activated.<br/>3. For support, contact support@nextgen-erp.com.", ParagraphStyle('Small', parent=styles['Normal'], fontSize=9, textColor=colors.gray)))
     
     elements.append(Spacer(1, 20))
-    elements.append(Paragraph("Thank you for choosing NextGen ERP!", ParagraphStyle('ThankYou', parent=styles['Normal'], fontSize=12, alignment=TA_CENTER, textColor=colors.HexColor('#1a1a2e'), fontName='Helvetica-Oblique')))
+    elements.append(Paragraph("Thank you for choosing Y.S.M Advance Education System!", ParagraphStyle('ThankYou', parent=styles['Normal'], fontSize=12, alignment=TA_CENTER, textColor=colors.HexColor('#1a1a2e'), fontName='Helvetica-Oblique')))
 
     # Build PDF with Header/Footer
     doc.build(elements, onFirstPage=draw_header_footer, onLaterPages=draw_header_footer)

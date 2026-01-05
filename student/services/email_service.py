@@ -21,7 +21,7 @@ Password: {password}
 Please find your tax invoice attached with this email.
 
 Regards,
-NextGen ERP Team
+Y.S.M ERP Team
 """
     else:
         body = f"""
@@ -34,7 +34,7 @@ Your login credentials remain the same.
 Please find your tax invoice attached with this email.
 
 Regards,
-NextGen ERP Team
+Y.S.M ERP Team
 """
 
     try:

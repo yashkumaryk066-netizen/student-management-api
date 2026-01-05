@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSmoothScroll();
     setup3DHover();
 
-    console.log('✨ NextGen ERP - Premium animations loaded');
+    console.log('✨ Y.S.M ERP - Premium animations loaded');
 });
 
 // Export functions for inline use
