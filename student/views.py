@@ -58,6 +58,10 @@ class StudentListCreateView(APIView):
         search = request.query_params.get("search")
         batch_id = request.query_params.get("batch_id")
         grade = request.query_params.get("grade")
+        department_id = request.query_params.get("department_id")
+
+        if department_id:
+            students = students.filter(department_id=department_id)
 
         if grade:
             students = students.filter(grade=grade)
@@ -523,3 +527,8 @@ class DeveloperProfileView(TemplateView):
 
 class ResumeView(TemplateView):
     template_name = "resume.html"
+
+class DepartmentListCreateView(generics.ListCreateAPIView):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+    permission_classes = [permissions.IsAuthenticated]

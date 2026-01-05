@@ -93,6 +93,7 @@ class Student(models.Model):
             ('INSTITUTE', 'Institute/College'),
         ]
         institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL')
+        department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
         
         def __str__(self):
             return self.name

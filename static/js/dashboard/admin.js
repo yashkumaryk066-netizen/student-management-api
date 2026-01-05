@@ -431,28 +431,7 @@ const DashboardApp = {
             });
     },
 
-    renderStudents(students) {
-        const tbody = document.getElementById('studentsTableBody');
-        if (!students || students.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 40px;">No students found</td></tr>';
-            return;
-        }
 
-        tbody.innerHTML = students.map(student => `
-            <tr>
-                <td><span style="font-family: monospace; color: var(--primary);">#${student.id}</span></td>
-                <td style="font-weight: 500;">${student.name}</td>
-                <td><span class="status-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">Class ${student.grade}</span></td>
-                <td>${student.age}</td>
-                <td>${student.gender}</td>
-                <td>${student.relation || 'N/A'}</td>
-                <td>
-                    <button class="btn-action" onclick="DashboardApp.editStudent(${student.id})" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
-                    <button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(${student.id}, '${student.name}')" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
-                </td>
-            </tr>
-        `).join('');
-    },
 
     loadAttendanceSystem() {
         const container = document.getElementById('dashboardView');
@@ -507,7 +486,8 @@ const DashboardApp = {
             // Load Batches
             this.fetchAttendanceBatches();
         } else {
-            container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">Institute Management coming soon...</div>`;
+            // Load Departments
+            this.fetchAttendanceDepartments();
         }
     },
 
@@ -555,13 +535,57 @@ const DashboardApp = {
         }
     },
 
+    async fetchAttendanceDepartments() {
+        const container = document.getElementById('attendanceContainer');
+        container.innerHTML = `
+        <div id="attendanceBatchList" class="cards-grid">
+            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
+                <span class="loader"></span> Loading Departments...
+            </div>
+        </div>
+        `;
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/departments/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const depts = await res.json();
+
+            const list = document.getElementById('attendanceBatchList');
+            if (!Array.isArray(depts) || depts.length === 0) {
+                list.innerHTML = `<div style="grid-column: 1/-1; padding:40px; text-align:center; color:white;">No departments found. Please create a department first.</div>`;
+                return;
+            }
+
+            list.innerHTML = depts.map(dept => `
+            <div class="module-card" onclick="DashboardApp.openBatchAttendance(${dept.id}, '${dept.name}', 10, null, true)">
+                <div class="module-icon" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6;">🏛️</div>
+                <h3 class="module-title">${dept.name}</h3>
+                <p class="module-description">
+                    Head: ${dept.head_of_department || 'N/A'}<br>
+                    ${dept.description ? dept.description.substring(0, 30) + '...' : ''}
+                </p>
+                <div class="module-stats">
+                    <button class="btn-action" style="width:100%; margin-top:10px;">
+                        Mark Attendance
+                    </button>
+                </div>
+            </div>
+            `).join('');
+
+        } catch (error) {
+            console.error('Failed to load departments:', error);
+            container.innerHTML = '<div style="color:red; text-align:center;">Failed to load departments.</div>';
+        }
+    },
+
     // Placeholder for School Class Attendance
     openClassAttendance(grade) {
         // Reuse the same logic as batch attendance but filter by grade
         this.openBatchAttendance(null, `Class ${grade}`, 0, grade);
     },
 
-    async openBatchAttendance(batchId, batchName, studentCount, grade = null) {
+    async openBatchAttendance(batchId, batchName, studentCount, grade = null, isDepartment = false) {
         if (!studentCount && !grade) { // Adjusted condition to handle grade-based attendance
             alert('No students enrolled in this batch/class! Please enroll students first.');
             return;
@@ -581,7 +605,7 @@ const DashboardApp = {
                      </div>
                 </div>
                 <!-- We pass null for batchId if it's class based, but function signature expects it. It's just a variable name. We can pass 'SCHOOL' or null. -->
-                <button class="btn-action" onclick="DashboardApp.submitBulkAttendance('${batchId || 'CLASS'}')">💾 Save Attendance</button>
+                <button class="btn-action" onclick="DashboardApp.submitBulkAttendance('${batchId || 'CLASS'}', ${isDepartment})">💾 Save Attendance</button>
             </div>
             
             <div class="data-table-container">
@@ -604,6 +628,8 @@ const DashboardApp = {
         let url = `${this.apiBaseUrl}/students/`;
         if (grade) {
             url += `?grade=${grade}&institution_type=SCHOOL`; // Assume grade matches school
+        } else if (isDepartment) {
+            url += `?department_id=${batchId}`;
         } else if (batchId) {
             url += `?batch_id=${batchId}`;
         }

@@ -32,7 +32,7 @@ from .views import (
     EmployeeListCreateView, LeaveRequestListCreateView,
     ExamListCreateView, EventListCreateView,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
-    LiveClassListCreateView
+    LiveClassListCreateView, DepartmentListCreateView
 )
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
@@ -130,6 +130,9 @@ urlpatterns = [
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
     path('batches/', BatchListCreateView.as_view(), name='batch-list'),
     path('enrollments/', EnrollmentListCreateView.as_view(), name='enrollment-list'),
+    
+    # INSTITUTE
+    path('departments/', DepartmentListCreateView.as_view(), name='department-list'),
     
     # ONBOARDING
     path('onboarding/pay/', OnboardingPaymentView.as_view(), name='onboarding-pay'),
