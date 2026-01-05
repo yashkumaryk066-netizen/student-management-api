@@ -253,6 +253,18 @@ class SuperAdminDashboardView(APIView):
                 'amount_paid': str(sub.amount_paid)
             })
 
+        # Fetch Pending Payments Details
+        pending_payments_list = []
+        for p in Payment.objects.filter(status=PAYMENT_PENDING).order_by('-created_at'):
+            pending_payments_list.append({
+                'id': p.id,
+                'email': (p.metadata or {}).get('email') or (p.user.email if p.user else 'Unknown'),
+                'plan_type': (p.metadata or {}).get('plan_type', 'N/A'),
+                'amount': str(p.amount),
+                'utr': p.transaction_id,
+                'date': p.created_at.strftime('%Y-%m-%d')
+            })
+
         return Response({
             'stats': {
                 'total_clients': total_clients,
@@ -260,6 +272,7 @@ class SuperAdminDashboardView(APIView):
                 'pending_approvals': pending,
                 'total_revenue': str(total_revenue)
             },
+            'pending_payments': pending_payments_list,
             'client_subscriptions': subs_data
         })
 
