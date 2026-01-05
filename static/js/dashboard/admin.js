@@ -78,9 +78,24 @@ const DashboardApp = {
     async fetchCurrentUser() {
         try {
             const token = localStorage.getItem('authToken');
+
+            if (!token) {
+                console.warn("No token found, redirecting to login");
+                window.location.href = "/login/";
+                return;
+            }
+
             const res = await fetch(this.apiBaseUrl + '/profile/', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
+
+            if (res.status === 401) {
+                console.warn("Token expired or invalid");
+                localStorage.removeItem('authToken');
+                window.location.href = "/login/";
+                return;
+            }
+
             if (res.ok) {
                 this.currentUser = await res.json();
                 console.log("Logged in as:", this.currentUser.role, this.currentUser.institution_type);
@@ -95,7 +110,7 @@ const DashboardApp = {
                 if (nameEl) nameEl.textContent = this.currentUser.user_full_name || this.currentUser.username || 'User';
                 if (roleEl) {
                     if (this.currentUser.role === 'CLIENT') {
-                        roleEl.textContent = `${this.currentUser.institution_type} Admin`;
+                        roleEl.textContent = this.currentUser.institution_type + " Admin";
                     } else if (this.currentUser.role === 'ADMIN' && this.currentUser.is_superuser) {
                         roleEl.textContent = "Super Admin";
                     } else {
@@ -112,7 +127,7 @@ const DashboardApp = {
                 // Update Welcome Message
                 if (welcomeEl) {
                     const title = this.currentUser.role === 'CLIENT' ? this.currentUser.institution_type : 'Institute';
-                    welcomeEl.textContent = `Welcome Back, ${title} Admin! 👋`;
+                    welcomeEl.textContent = "Welcome Back, " + title + " Admin! 👋";
                 }
             }
         } catch (e) {
@@ -1765,7 +1780,25 @@ const DashboardApp = {
             const response = await fetch(`${this.apiBaseUrl}/live-classes/`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            const classes = await response.json();
+
+            if (response.status === 401) {
+                const grid = document.getElementById('liveClassGrid');
+                grid.innerHTML = `
+                    <div class="module-card" style="grid-column:1/-1; text-align:center; padding:40px;">
+                        <h3>Session Expired</h3>
+                        <p>Please login again to access Live Classes.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = await response.json();
+            const classes = Array.isArray(data) ? data : data.results || [];
+
+            if (!Array.isArray(classes)) {
+                console.error("Invalid response for live classes", data);
+                return;
+            }
 
             const grid = document.getElementById('liveClassGrid');
             if (classes.length === 0) {
