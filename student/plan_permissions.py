@@ -6,7 +6,7 @@ Centralized permission system for different subscription tiers
 # Feature definitions for each plan
 PLAN_FEATURES = {
     'COACHING': {
-        'students', 'attendance', 'live_classes', 'notifications', 'reports'
+        'students', 'attendance', 'live_classes', 'notifications', 'reports', 'exams'
     },
     'SCHOOL': {
         'students', 'attendance', 'live_classes', 'notifications', 'reports',

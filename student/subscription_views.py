@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 # CONSTANTS (Single Source)
 # =========================
 PLAN_PRICING = {
-    'SCHOOL': Decimal('1000.00'),
+    'SCHOOL': Decimal('1500.00'),
     'COACHING': Decimal('500.00'),
-    'INSTITUTE': Decimal('1500.00')
+    'INSTITUTE': Decimal('3000.00')
 }
 
 PAYMENT_PENDING = 'PENDING_VERIFICATION'

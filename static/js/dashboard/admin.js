@@ -214,8 +214,8 @@ const DashboardApp = {
 
     showUpgradeModal(currentPlan) {
         const upgradeInfo = {
-            'COACHING': 'SCHOOL (₹1000) or INSTITUTE (₹1500)',
-            'SCHOOL': 'INSTITUTE (₹1500)',
+            'COACHING': 'SCHOOL (₹1500) or INSTITUTE (₹3000)',
+            'SCHOOL': 'INSTITUTE (₹3000)',
             'INSTITUTE': 'You have full access already!'
         };
 
