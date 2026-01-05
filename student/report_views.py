@@ -132,10 +132,13 @@ class ReportDownloadView(APIView):
             p.setFillColorRGB(0.1, 0.1, 0.25) # Dark Navy
             p.rect(0, height - 130, width, 130, fill=1, stroke=0)
             
-            # Logo Emoji
-            p.setFont("Helvetica", 36)
-            p.setFillColorRGB(0.4, 0.6, 1.0) # Blue glow
-            p.drawString(50, height - 60, "🎓")
+            # Logo Circle with "NG" initials (replaces emoji)
+            logo_x, logo_y = 70, height - 60
+            p.setFillColorRGB(0.3, 0.5, 0.9)  # Blue
+            p.circle(logo_x, logo_y, 22, fill=1, stroke=0)
+            p.setFillColorRGB(1, 1, 1)  # White text
+            p.setFont("Helvetica-Bold", 18)
+            p.drawCentredString(logo_x, logo_y - 6, "NG")
             
             # Title
             p.setFillColorRGB(1, 1, 1) # White

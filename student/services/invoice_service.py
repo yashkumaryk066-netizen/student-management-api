@@ -15,10 +15,13 @@ def draw_header_footer(canvas, doc):
     canvas.setFillColorRGB(0.1, 0.1, 0.25) # Dark Premium Navy
     canvas.rect(0, A4[1] - 120, A4[0], 120, fill=1, stroke=0)
     
-    # --- LOGO EMOJI ---
-    canvas.setFont("Helvetica", 36)
-    canvas.setFillColorRGB(0.4, 0.6, 1.0) # Blue glow
-    canvas.drawString(40, A4[1] - 55, "🎓")
+    # --- LOGO CIRCLE with "NG" initials (replaces emoji) ---
+    logo_x, logo_y = 60, A4[1] - 55
+    canvas.setFillColorRGB(0.3, 0.5, 0.9)  # Blue
+    canvas.circle(logo_x, logo_y, 22, fill=1, stroke=0)
+    canvas.setFillColorRGB(1, 1, 1)  # White text
+    canvas.setFont("Helvetica-Bold", 18)
+    canvas.drawCentredString(logo_x, logo_y - 6, "NG")
     
     # --- BRANDING TEXT ---
     canvas.setFillColorRGB(1, 1, 1) # White text
