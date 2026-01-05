@@ -155,7 +155,7 @@ const DashboardApp = {
             hide('live-classes');
         }
 
-        console.log(`Permissions Applied for ${plan}`);
+        console.log("Permissions Applied for " + plan);
     },
 
     setupNavigation() {
@@ -343,7 +343,7 @@ const DashboardApp = {
             // Hide All tabs first
             document.querySelectorAll('.filter-tab').forEach(t => t.style.display = 'none');
             // Show only relevant tab
-            const tab = document.getElementById(`tab-${defaultType}`);
+            const tab = document.getElementById("tab-" + defaultType);
             if (tab) {
                 tab.style.display = 'inline-block';
                 tab.click(); // Trigger click to set active logic
@@ -364,15 +364,15 @@ const DashboardApp = {
 
     fetchStudents() {
         const search = document.getElementById('studentSearch') ? document.getElementById('studentSearch').value : '';
-        let url = `${this.apiBaseUrl}/students/?search=${search}`;
+        let url = this.apiBaseUrl + "/students/?search=" + search;
 
         if (this.currentInstitutionType) {
-            url += `&institution_type=${this.currentInstitutionType}`;
+            url += "&institution_type=" + this.currentInstitutionType;
         }
 
         fetch(url, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                'Authorization': 'Bearer ' + localStorage.getItem('authToken')
             }
         })
             .then(res => res.json())
@@ -385,24 +385,24 @@ const DashboardApp = {
                     return;
                 }
 
-                tbody.innerHTML = students.map(student => `
-                <tr>
-                    <td>#${student.id}</td>
-                    <td>
-                        <div style="font-weight: 600; color: white;">${student.name}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">${student.email || ''}</div>
-                    </td>
-                    <td><span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">${student.institution_type || 'General'}</span></td>
-                    <td>${student.grade}</td>
-                    <td>${student.age}</td>
-                    <td>${student.gender}</td>
-                    <td>${student.relation}</td>
-                    <td>
-                        <button class="btn-action" onclick="DashboardApp.editStudent(${student.id})" style="padding: 4px 10px; font-size: 0.8rem; margin-right:5px;">✏️ Edit</button>
-                        <button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(${student.id}, '${student.name}')" style="padding: 4px 10px; font-size: 0.8rem;">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
+                tbody.innerHTML = students.map(student =>
+                    '<tr>' +
+                    '<td>#' + student.id + '</td>' +
+                    '<td>' +
+                    '<div style="font-weight: 600; color: white;">' + student.name + '</div>' +
+                    '<div style="font-size: 0.8rem; color: var(--text-muted);">' + (student.email || '') + '</div>' +
+                    '</td>' +
+                    '<td><span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">' + (student.institution_type || 'General') + '</span></td>' +
+                    '<td>' + student.grade + '</td>' +
+                    '<td>' + student.age + '</td>' +
+                    '<td>' + student.gender + '</td>' +
+                    '<td>' + student.relation + '</td>' +
+                    '<td>' +
+                    '<button class="btn-action" onclick="DashboardApp.editStudent(' + student.id + ')" style="padding: 4px 10px; font-size: 0.8rem; margin-right:5px;">✏️ Edit</button>' +
+                    '<button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" style="padding: 4px 10px; font-size: 0.8rem;">🗑️</button>' +
+                    '</td>' +
+                    '</tr>'
+                ).join('');
             })
             .catch(err => {
                 console.error('Error fetching students:', err);
