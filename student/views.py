@@ -424,7 +424,9 @@ class ProfileView(APIView):
             "username": user.username,
             "email": user.email,
             "role": user.profile.role if hasattr(user, 'profile') else 'UNKNOWN',
-            "id": user.id
+            "id": user.id,
+            "is_superuser": user.is_superuser,
+            "user_full_name": user.get_full_name()
         }
         if hasattr(user, 'profile'):
              data.update(UserProfileSerializer(user.profile).data)
