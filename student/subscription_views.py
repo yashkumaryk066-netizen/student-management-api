@@ -254,10 +254,12 @@ class SubscriptionStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        if not hasattr(request.user, 'subscription'):
+        try:
+            # Use the correct reverse relationship
+            sub = ClientSubscription.objects.get(user=request.user)
+        except ClientSubscription.DoesNotExist:
             return Response({"status": "NO_SUBSCRIPTION"})
 
-        sub = request.user.subscription
         today = date.today()
         days_left = (sub.end_date - today).days if sub.end_date else 0
 
@@ -265,7 +267,9 @@ class SubscriptionStatusView(APIView):
             "plan_type": sub.plan_type,
             "status": sub.status,
             "days_left": max(days_left, 0),
-            "is_expired": days_left <= 0
+            "is_expired": days_left <= 0,
+            "start_date": sub.start_date.strftime('%Y-%m-%d') if sub.start_date else None,
+            "end_date": sub.end_date.strftime('%Y-%m-%d') if sub.end_date else None
         })
 
 
