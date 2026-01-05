@@ -244,6 +244,7 @@ class SuperAdminDashboardView(APIView):
             days_left = (sub.end_date - today).days if sub.end_date else 0
 
             subs_data.append({
+                'id': sub.user.id,
                 'username': sub.user.username,
                 'email': sub.user.email,
                 'plan_type': sub.plan_type,

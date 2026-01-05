@@ -3606,23 +3606,27 @@ const DashboardApp = {
                 const isSuspended = client.status === 'SUSPENDED';
                 const isActive = client.status === 'ACTIVE';
                 const isExpired = client.is_expired;
+                const rowStyle = isSuspended ? 'background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444;' : isActive ? 'background: rgba(16, 185, 129, 0.05); border-left: 3px solid #10b981;' : '';
 
-                return `<tr>
-                                            <td style="font-weight: 600;">${client.username}</td>
-                                            <td><span style="color: #a78bfa; font-weight: 600;">${client.plan_type}</span></td>
-                                            <td><span class="neo-badge ${isExpired ? 'badge-expired' : (isActive ? 'badge-active' : 'badge-pending')}">${isExpired ? 'EXPIRED' : client.status}</span></td>
-                                            <td style="color: var(--text-muted);">${client.start_date || '-'}</td>
-                                            <td style="color: var(--text-muted);">${client.end_date || '-'}</td>
-                                            <td style="font-weight: 700; font-family: monospace; ${daysClass}">${client.days_left} D</td>
-                                            <td style="font-weight: 600;">₹${client.amount_paid}</td>
-                                            <td style="text-align: right;">
-                                                ${isActive ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'SUSPEND')" class="action-btn" title="Suspend Access">🚫</button>` : ''}
-                                                ${isSuspended ? `<button onclick="DashboardApp.adminAction(${client.user_id}, 'ACTIVATE')" class="action-btn" style="color: #34d399;" title="Restore Access">✅</button>` : ''}
-                                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'REDUCE_DAYS')" class="action-btn" title="Reduce 7 Days">📉</button>
-                                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'EXTEND_DAYS')" class="action-btn" title="Extend 30 Days" style="color: #60a5fa;">📈</button>
-                                                <button onclick="DashboardApp.adminAction(${client.user_id}, 'DELETE')" class="action-btn btn-delete" title="Delete Client">🗑️</button>
-                                            </td>
-                                        </tr>`;
+                return `<tr style="${rowStyle}">
+                            <td style="font-weight: 600; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; color: white;">
+                                ${client.username}
+                                ${isSuspended ? '<span style="display:block; font-size:0.7rem; color: #ef4444;">⛔ BLACK PENALTY APPLIED</span>' : ''}
+                            </td>
+                            <td><span style="color: #a78bfa; font-weight: 600;">${client.plan_type}</span></td>
+                            <td><span class="neo-badge ${isSuspended ? 'badge-expired' : (isActive ? 'badge-active' : 'badge-pending')}">${isSuspended ? 'SUSPENDED' : client.status}</span></td>
+                            <td style="color: var(--text-muted);">${client.start_date || '-'}</td>
+                            <td style="color: var(--text-muted);">${client.end_date || '-'}</td>
+                            <td style="font-weight: 700; font-family: monospace; ${daysClass}">${client.days_left} D</td>
+                            <td style="font-weight: 600;">₹${client.amount_paid}</td>
+                            <td style="text-align: right;">
+                                ${isActive ? `<button onclick="DashboardApp.adminAction(${client.id}, 'SUSPEND')" class="action-btn" title="Black Penalty (Block Access)" style="color: #ef4444; border-color: #ef4444;">⛔ Block</button>` : ''}
+                                ${isSuspended ? `<button onclick="DashboardApp.adminAction(${client.id}, 'ACTIVATE')" class="action-btn" title="Remove Penalty (Unblock)" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: #34d399;">✅ Unblock</button>` : ''}
+                                <button onclick="DashboardApp.adminAction(${client.id}, 'REDUCE_DAYS')" class="action-btn" title="Reduce 7 Days">📉</button>
+                                <button onclick="DashboardApp.adminAction(${client.id}, 'EXTEND_DAYS')" class="action-btn" title="Extend 30 Days" style="color: #60a5fa;">📈</button>
+                                <button onclick="DashboardApp.adminAction(${client.id}, 'DELETE')" class="action-btn btn-delete" title="Delete ClientPermanently">🗑️</button>
+                            </td>
+                        </tr>`;
             }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No active client subscriptions found in the registry.</td></tr>'}
                                 </tbody>
                             </table>
