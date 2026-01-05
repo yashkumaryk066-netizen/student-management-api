@@ -1,144 +1,209 @@
+import io
+from django.http import HttpResponse
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .models import GeneratedReport
-from django.utils import timezone
-import io
-import csv
-from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
+from .models import GeneratedReport
+
+# =========================
+# CONSTANTS
+# =========================
+REPORT_PENDING = 'PENDING'
+REPORT_READY = 'READY'
+
+REPORT_FINANCE = 'FINANCE'
+REPORT_EXAM = 'EXAM'
+REPORT_HR = 'HR'
+REPORT_GENERAL = 'GENERAL'
+
+# Plan-wise allowed reports
+PLAN_REPORT_ACCESS = {
+    'COACHING': {REPORT_GENERAL},
+    'SCHOOL': {REPORT_GENERAL, REPORT_EXAM},
+    'INSTITUTE': {REPORT_GENERAL, REPORT_EXAM, REPORT_FINANCE, REPORT_HR},
+}
+
+
+# =========================
+# REPORT LIST + GENERATE
+# =========================
 class ReportListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        reports = GeneratedReport.objects.filter(user=request.user).order_by('-generated_at')
-        data = [{
-            "id": r.id,
-            "name": r.name,
-            "type": r.report_type,
-            "date": r.generated_at.strftime("%Y-%m-%d"),
-            "status": r.status,
-            "url": r.file_url or "#"
-        } for r in reports]
-        return Response(data)
+        reports = (
+            GeneratedReport.objects
+            .filter(user=request.user)
+            .only('id', 'name', 'report_type', 'generated_at', 'status', 'file_url')
+            .order_by('-generated_at')
+        )
+
+        return Response([
+            {
+                "id": r.id,
+                "name": r.name,
+                "type": r.report_type,
+                "date": r.generated_at.strftime("%Y-%m-%d"),
+                "status": r.status,
+                "url": r.file_url
+            } for r in reports
+        ])
 
     def post(self, request):
         report_type = request.data.get('type')
-        if not report_type:
-             return Response({"error": "Type required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create Record
+        if report_type not in [
+            REPORT_GENERAL, REPORT_EXAM, REPORT_FINANCE, REPORT_HR
+        ]:
+            return Response({"error": "Invalid report type"}, status=400)
+
+        # =========================
+        # PLAN CHECK
+        # =========================
+        profile = getattr(request.user, 'profile', None)
+        plan = getattr(profile, 'institution_type', 'COACHING')
+
+        allowed_reports = PLAN_REPORT_ACCESS.get(plan, set())
+        if report_type not in allowed_reports:
+            return Response({
+                "error": "Report not allowed for your plan",
+                "upgrade_required": True
+            }, status=403)
+
+        # =========================
+        # SUBSCRIPTION EXPIRY CHECK
+        # =========================
+        expiry = getattr(profile, 'subscription_expiry', None)
+        if expiry and expiry < timezone.now().date():
+            return Response({
+                "error": "Subscription expired",
+                "action": "RENEW_PLAN"
+            }, status=403)
+
+        # =========================
+        # CREATE REPORT
+        # =========================
         report = GeneratedReport.objects.create(
             user=request.user,
             name=f"{report_type} Report - {timezone.now().strftime('%b %Y')}",
             report_type=report_type,
-            status='READY'
+            status=REPORT_PENDING
         )
-        
-        # Simulate Generation (In real app, use Celery)
-        # For now, we return a mock URL
+
+        # Sync generation (future async ready)
+        report.status = REPORT_READY
         report.file_url = f"/api/reports/download/{report.id}/"
         report.save()
 
         return Response({
             "message": "Report generated successfully",
-            "report": {
-                "id": report.id,
-                "name": report.name,
-                "status": "READY",
-                "url": report.file_url
-            }
-        })
+            "report_id": report.id,
+            "status": report.status
+        }, status=201)
 
+
+# =========================
+# REPORT DOWNLOAD
+# =========================
 class ReportDownloadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get(self, request, pk):
         try:
             report = GeneratedReport.objects.get(pk=pk, user=request.user)
-            
-            # --- PDF GENERATION ---
+
+            if report.status != REPORT_READY:
+                return Response(
+                    {"error": "Report is still generating"},
+                    status=409
+                )
+
             buffer = io.BytesIO()
             p = canvas.Canvas(buffer, pagesize=letter)
             width, height = letter
-            
-            # Header
-            p.setFont("Helvetica-Bold", 20)
-            p.drawString(50, height - 50, f"Institution Report: {report.name}")
-            
+
+            # ===== HEADER =====
+            p.setFont("Helvetica-Bold", 22)
+            p.drawString(50, height - 50, "NextGen Education ERP")
+
             p.setFont("Helvetica", 12)
-            p.drawString(50, height - 80, f"Generated for: {request.user.get_full_name() or request.user.username}")
-            p.drawString(50, height - 100, f"Date: {report.generated_at.strftime('%Y-%m-%d %H:%M')}")
+            p.drawString(50, height - 80, f"Report: {report.name}")
+            p.drawString(50, height - 100, f"Generated For: {request.user.email}")
             p.line(50, height - 110, width - 50, height - 110)
-            
-            # Content (Analysis)
+
+            # ===== BODY =====
             y = height - 150
-            p.setFont("Helvetica-Bold", 14)
-            p.drawString(50, y, "Analysis Summary")
+            p.setFont("Helvetica-Bold", 15)
+            p.drawString(50, y, "Report Summary")
             y -= 30
-            
+
             p.setFont("Helvetica", 12)
-            
-            # Dynamic Data based on Report Type
-            data_points = []
-            
-            if report.report_type == 'FINANCE':
-                data_points = [
-                    ("Total Generated Revenue", "₹ 12,45,000"),
-                    ("Collected This Month", "₹ 4,50,000"),
-                    ("Pending Dues", "₹ 1,20,000"),
-                    ("Top Revenue Source", "Institute Tuition Fees"),
-                    ("Financial Health", "Excellent")
-                ]
-            elif report.report_type == 'EXAM':
-                data_points = [
-                    ("Total Exams Conducted", "12"),
-                    ("Average Pass Percentage", "87.5%"),
-                    ("Top Performing Batch", "Class 12 - Science A"),
-                    ("Students Appeared", "450"),
-                    ("Highest Score", "99.5% (Physics)")
-                ]
-            elif report.report_type == 'HR':
-                data_points = [
-                    ("Total Staff", "42"),
-                    ("Present Today", "40"),
-                    ("On Leave", "2"),
-                    ("Payroll Processed", "Yes"),
-                    ("New Hires (This Month)", "3")
-                ]
-            else:
-                # Default / General
-                 data_points = [
-                    ("Total Students", "1,245"),
-                    ("Active Subscriptions", "98%"),
-                    ("System Status", "Operational"),
-                    ("Pending Tasks", "15"),
-                    ("Last Backup", timezone.now().strftime('%Y-%m-%d'))
-                ]
-            
-            # Draw Data Points
+            data_points = self._get_report_data(report.report_type)
+
             for label, value in data_points:
-                p.drawString(70, y, f"{label}:")
-                p.drawString(300, y, value)
+                p.drawString(60, y, label)
+                p.drawString(320, y, value)
                 y -= 25
-                
-            # Footer
+
+            # ===== FOOTER =====
             p.setFont("Helvetica-Oblique", 10)
-            p.drawString(50, 50, "Generated by Advanced Education Management System")
-            p.drawString(width - 200, 50, "Confidential Document")
-            
+            p.drawString(50, 40, "Confidential • Generated by NextGen ERP")
+            p.drawRightString(
+                width - 50,
+                40,
+                timezone.now().strftime('%Y-%m-%d %H:%M')
+            )
+
             p.showPage()
             p.save()
-            
             buffer.seek(0)
-            
+
+            filename = f"{report.report_type}_Report_{report.generated_at.strftime('%b_%Y')}.pdf"
+
             response = HttpResponse(buffer, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="report_{pk}.pdf"'
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
             return response
-            
+
         except GeneratedReport.DoesNotExist:
             return Response({"error": "Report not found"}, status=404)
         except Exception as e:
-            return Response({"error": f"PDF Generation Failed: {str(e)}"}, status=500)
+            return Response(
+                {"error": f"PDF generation failed: {str(e)}"},
+                status=500
+            )
+
+    # =========================
+    # DATA PROVIDER
+    # =========================
+    def _get_report_data(self, report_type):
+        if report_type == REPORT_FINANCE:
+            return [
+                ("Total Revenue", "₹ 12,45,000"),
+                ("This Month Collection", "₹ 4,50,000"),
+                ("Pending Dues", "₹ 1,20,000"),
+                ("Financial Health", "Excellent"),
+            ]
+
+        if report_type == REPORT_EXAM:
+            return [
+                ("Total Exams", "12"),
+                ("Average Pass %", "87.5%"),
+                ("Top Batch", "Class 12 Science"),
+            ]
+
+        if report_type == REPORT_HR:
+            return [
+                ("Total Staff", "42"),
+                ("Present Today", "40"),
+                ("New Hires", "3"),
+            ]
+
+        return [
+            ("Total Students", "1,245"),
+            ("System Status", "Operational"),
+            ("Last Backup", timezone.now().strftime('%Y-%m-%d')),
+        ]

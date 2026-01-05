@@ -1,25 +1,46 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from rest_framework.permissions import AllowAny
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
+from django.utils import timezone
+from django.conf import settings
+from django.core.mail import send_mail
+
 from .models import ClientSubscription, UserProfile, Payment, Notification
+from .services.invoice_service import generate_invoice_pdf
+from .services.email_service import send_credentials_with_invoice
+
 from datetime import date, timedelta
-import random
-import string
-import logging
 from decimal import Decimal
+import random, string, logging
 
 logger = logging.getLogger(__name__)
 
-from django.core.mail import send_mail
-from django.conf import settings
-from rest_framework.permissions import AllowAny
+# =========================
+# CONSTANTS (ADVANCE)
+# =========================
+PAYMENT_PENDING = 'PENDING_VERIFICATION'
+PAYMENT_APPROVED = 'APPROVED'
+PAYMENT_REJECTED = 'REJECTED'
 
+SUB_ACTIVE = 'ACTIVE'
+SUB_SUSPENDED = 'SUSPENDED'
+
+
+# =========================
+# UTIL
+# =========================
+def generate_password(length=10):
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
+
+
+# =========================
+# PUBLIC PAYMENT SUBMIT
+# =========================
 class PublicSubscriptionSubmitView(APIView):
-    """
-    Public endpoint for Clients to submit Manual Bank Transfer details for a new subscription.
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -29,321 +50,263 @@ class PublicSubscriptionSubmitView(APIView):
         utr = request.data.get('utr')
 
         if not all([email, plan_type, amount, utr]):
-            return Response({'error': 'All fields (email, plan_type, amount, utr) are required.'}, status=400)
+            return Response(
+                {'error': 'email, plan_type, amount, utr are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Check duplicate UTR
         if Payment.objects.filter(transaction_id=utr).exists():
-            return Response({'error': 'This UTR/Transaction ID has already been submitted.'}, status=400)
+            return Response(
+                {'error': 'Duplicate UTR detected'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Create Payment Record
-        # Payment model does not have 'plan_type', so we store it in metadata
         Payment.objects.create(
-            amount=amount,
+            amount=Decimal(str(amount)),
             transaction_id=utr,
-            # plan_type=plan_type,  <-- REMOVED (Field doesn't exist)
-            status='PENDING_VERIFICATION',
+            status=PAYMENT_PENDING,
             payment_type='SUBSCRIPTION',
-            due_date=date.today(), # Required field
+            due_date=date.today(),
             description=f"Subscription: {plan_type}",
-            metadata={'email': email, 'plan_type': plan_type} # Store plan here
+            metadata={
+                'email': email,
+                'plan_type': plan_type
+            }
         )
 
-        return Response({'message': 'Payment submitted successfully! Admin will verify and email your credentials.'})
+        logger.info(f"New payment submitted | {email} | {utr}")
+
+        return Response(
+            {'message': 'Payment submitted. Admin will verify.'},
+            status=status.HTTP_201_CREATED
+        )
 
 
+# =========================
+# ADMIN – PENDING PAYMENTS
+# =========================
 class PendingPaymentsListView(APIView):
     permission_classes = [permissions.IsAdminUser]
 
     def get(self, request):
-        payments = Payment.objects.filter(status='PENDING_VERIFICATION').order_by('-created_at')
+        payments = Payment.objects.filter(
+            status=PAYMENT_PENDING
+        ).order_by('-created_at')
+
         data = []
         for p in payments:
-            email = "Unknown"
-            if p.user:
-                email = p.user.email
-            elif p.metadata:
-                email = p.metadata.get('email', 'Unknown')
-                
+            email = (
+                p.user.email if p.user else
+                (p.metadata or {}).get('email', 'Unknown')
+            )
+
             data.append({
                 'id': p.id,
                 'email': email,
-                'amount': p.amount,
+                'amount': str(p.amount),
                 'utr': p.transaction_id,
-                'plan': p.plan_type,
+                'plan': (p.metadata or {}).get('plan_type'),
                 'date': p.created_at
             })
-        return Response(data)
 
+        return Response(data, status=status.HTTP_200_OK)
+
+
+# =========================
+# ADMIN – APPROVE / REJECT
+# =========================
 class AdminPaymentApprovalView(APIView):
     permission_classes = [permissions.IsAdminUser]
 
     def post(self, request):
         payment_id = request.data.get('payment_id')
-        action = request.data.get('action') # 'approve' or 'reject'
+        action = request.data.get('action')
         notes = request.data.get('notes', '')
 
+        if not payment_id or action not in ['approve', 'reject']:
+            return Response({'error': 'Invalid request'}, status=400)
+
         try:
-            payment = Payment.objects.get(id=payment_id)
+            with transaction.atomic():
+                payment = Payment.objects.select_for_update().get(id=payment_id)
+
+                email = (
+                    (payment.metadata or {}).get('email') or
+                    (payment.user.email if payment.user else None)
+                )
+
+                if not email:
+                    return Response({'error': 'Email not found'}, status=400)
+
+                if action == 'approve':
+                    user, created = User.objects.get_or_create(
+                        email=email,
+                        defaults={
+                            'username': self._generate_username(email)
+                        }
+                    )
+
+                    password = None
+                    if created:
+                        password = generate_password()
+                        user.set_password(password)
+                        user.is_active = True
+                        user.save()
+
+                    sub, _ = ClientSubscription.objects.get_or_create(user=user)
+                    sub.plan_type = (payment.metadata or {}).get('plan_type', 'SCHOOL')
+                    sub.transaction_id = payment.transaction_id
+                    sub.amount_paid = payment.amount
+                    sub.activate(days=30)
+
+                    UserProfile.objects.get_or_create(
+                        user=user,
+                        defaults={
+                            'role': 'CLIENT',
+                            'institution_type': sub.plan_type,
+                            'subscription_expiry': sub.end_date
+                        }
+                    )
+
+                    payment.status = PAYMENT_APPROVED
+                    payment.user = user
+                    payment.save()
+
+                    
+                    # Generate Invoice & Send Email
+                    try:
+                        invoice_pdf = generate_invoice_pdf(user, sub, payment)
+                        send_credentials_with_invoice(user, password, sub.plan_type, invoice_pdf)
+                    except Exception as e:
+                        logger.error(f"Error sending invoice: {e}")
+
+
+                    return Response({'message': 'Payment approved'}, status=200)
+
+                # REJECT
+                payment.status = PAYMENT_REJECTED
+                payment.save()
+
+                if email:
+                    try:
+                        send_mail(
+                            "Subscription Rejected",
+                            f"Reason: {notes}",
+                            settings.DEFAULT_FROM_EMAIL,
+                            [email],
+                            fail_silently=True
+                        )
+                    except:
+                        pass
+
+                return Response({'message': 'Payment rejected'}, status=200)
+
         except Payment.DoesNotExist:
             return Response({'error': 'Payment not found'}, status=404)
+        except Exception as e:
+            logger.exception("Approval error")
+            return Response({'error': 'Server error'}, status=500)
 
-        if action == 'approve':
-            # 1. Create User if not exists
-            email = payment.metadata.get('email')
-            if not email and payment.user:
-                email = payment.user.email
-            
-            if not email:
-                return Response({'error': 'No email found for this payment'}, status=400)
+    def _generate_username(self, email):
+        base = email.split('@')[0]
+        username = base
+        while User.objects.filter(username=username).exists():
+            username = f"{base}{random.randint(1000,9999)}"
+        return username
 
-            user = None
-            password = None
-            created = False
 
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                # Create new user
-                username = email.split('@')[0]
-                # Ensure unique username
-                while User.objects.filter(username=username).exists():
-                    username = email.split('@')[0] + str(random.randint(1000, 9999))
-                
-                password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-                user = User.objects.create_user(username=username, email=email, password=password)
-                created = True
 
-            # 2. Create/Update Subscription
-            sub, _ = ClientSubscription.objects.get_or_create(user=user)
-            sub.plan_type = payment.metadata.get('plan_type', 'SCHOOL')
-            sub.transaction_id = payment.transaction_id
-            sub.amount_paid = payment.amount
-            sub.activate(days=30) # Activates and sets dates
-
-            # 3. Create Profile
-            if not hasattr(user, 'profile'):
-                UserProfile.objects.create(user=user, role='CLIENT', institution_type=sub.plan_type)
-
-            # 4. Update Payment
-            payment.status = 'APPROVED'
-            payment.user = user
-            payment.save()
-
-            # 5. Send Email with Credentials
-            if created:
-                subject = 'Welcome to NextGen ERP - Assessment Approved'
-                message = f"""
-                Congratulations! Your {sub.plan_type} subscription is approved.
-
-                Here are your login credentials:
-                URL: https://yashamishra.pythonanywhere.com/dashboard/login
-                Username: {user.username}
-                Password: {password}
-
-                Please login and change your password immediately.
-                """
-                try:
-                    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
-                except Exception as e:
-                    logger.error(f"Failed to send email: {e}")
-            else:
-                 # Existing user - just notify
-                 message = f"Your subscription for {sub.plan_type} has been renewed successfully."
-                 try:
-                    send_mail("Subscription Active", message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
-                 except: pass
-
-            return Response({'message': 'Approved and credentials sent.'})
-
-        elif action == 'reject':
-            payment.status = 'REJECTED'
-            payment.save()
-             # Notify rejection
-            email = payment.metadata.get('email')
-            if email:
-                try:
-                    send_mail("Subscription Rejected", f"Reason: {notes}", settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
-                except: pass
-            
-            return Response({'message': 'Payment rejected.'})
-
-        return Response({'error': 'Invalid action'}, status=400)
-
+# =========================
+# SUPER ADMIN DASHBOARD
+# =========================
 class SuperAdminDashboardView(APIView):
-    """
-    Super admin overview of all client subscriptions.
-    Shows stats, pending approvals, and all client subscriptions.
-    """
     permission_classes = [permissions.IsAdminUser]
 
     def get(self, request):
-        # Only allow superusers
         if not request.user.is_superuser:
-            return Response({
-                "error": "Access denied. Super admin only."
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'Access denied'}, status=403)
 
-        try:
-            # Get stats
-            total_users = User.objects.filter(is_superuser=False).count()
-            active_subscriptions = ClientSubscription.objects.filter(status='ACTIVE').count()
-            pending_payments = Payment.objects.filter(status='PENDING_VERIFICATION').count()
-            
-            # Revenue stats
-            total_revenue = Payment.objects.filter(status='APPROVED').aggregate(
-                total=models.Sum('amount')
-            )['total'] or 0
-            
-            # Get all client subscriptions
-            subscriptions = []
-            # Removed user__profile from select_related as it might not exist for all users or invalid lookup
-            all_subs = ClientSubscription.objects.select_related('user').all()
-            
-            for sub in all_subs:
-                if sub.user.is_superuser:
-                    continue  # Skip super admin
-                    
-                today = date.today()
-                days_left = 0
-                if sub.end_date:
-                    days_left = (sub.end_date - today).days
-                    
-                subscriptions.append({
-                    'user_id': sub.user.id,
-                    'username': sub.user.username,
-                    'email': sub.user.email,
-                    'plan_type': sub.plan_type,
-                    'status': sub.status,
-                    'start_date': sub.start_date,
-                    'end_date': sub.end_date,
-                    'days_left': days_left if days_left > 0 else 0,
-                    'amount_paid': str(sub.amount_paid),
-                    'is_expired': days_left <= 0
-                })
-            
-            # Get pending payment details
-            pending_list = []
-            pending_pmts = Payment.objects.filter(status='PENDING_VERIFICATION').order_by('-created_at')[:10]
-            
-            for pmt in pending_pmts:
-                user_name = "Unknown"
-                if pmt.user:
-                    user_name = pmt.user.username
-                elif pmt.student:
-                    user_name = pmt.student.name
-                elif pmt.metadata:
-                    # Safer get
-                    user_name = pmt.metadata.get('email', 'Unknown') if pmt.metadata else 'Unknown'
-                    
-                pending_list.append({
-                    'id': pmt.id,
-                    'user': user_name,
-                    'type': getattr(pmt, 'payment_type', 'FEE'), # Safety for older schema
-                    'amount': str(pmt.amount),
-                    'utr': pmt.transaction_id,
-                    'date': pmt.created_at.strftime('%Y-%m-%d %H:%M') if pmt.created_at else ''
-                })
-            
-            # Get Notifications safely
-            notifs = []
-            recent_notifs = Notification.objects.filter(recipient_type='ADMIN').order_by('-created_at')[:5]
-            for n in recent_notifs:
-                notifs.append({
-                    'title': n.title,
-                    'message': n.message,
-                    'date': n.created_at.strftime('%Y-%m-%d %H:%M') if n.created_at else ''
-                })
+        today = date.today()
 
-            return Response({
-                'stats': {
-                    'total_clients': total_users,
-                    'active_subscriptions': active_subscriptions,
-                    'pending_approvals': pending_payments,
-                    'total_revenue': str(total_revenue)
-                },
-                'pending_payments': pending_list,
-                'client_subscriptions': subscriptions,
-                'recent_notifications': notifs
+        total_clients = User.objects.filter(is_superuser=False).count()
+        active_subs = ClientSubscription.objects.filter(status=SUB_ACTIVE).count()
+        pending = Payment.objects.filter(status=PAYMENT_PENDING).count()
+
+        total_revenue = Payment.objects.filter(
+            status=PAYMENT_APPROVED
+        ).aggregate(total=models.Sum('amount'))['total'] or 0
+
+        subs_data = []
+        for sub in ClientSubscription.objects.select_related('user'):
+            if sub.user.is_superuser:
+                continue
+
+            days_left = (sub.end_date - today).days if sub.end_date else 0
+
+            subs_data.append({
+                'username': sub.user.username,
+                'email': sub.user.email,
+                'plan_type': sub.plan_type,
+                'status': sub.status,
+                'days_left': max(days_left, 0),
+                'amount_paid': str(sub.amount_paid)
             })
 
-        except Exception as e:
-            import traceback
-            logger.error(f"SuperAdmin Dashboard Error: {str(e)}")
-            logger.error(traceback.format_exc())
-            return Response({
-                'error': 'Failed to load overview',
-                'details': str(e),
-                'trace': traceback.format_exc()
-            }, status=500)
+        return Response({
+            'stats': {
+                'total_clients': total_clients,
+                'active_subscriptions': active_subs,
+                'pending_approvals': pending,
+                'total_revenue': str(total_revenue)
+            },
+            'client_subscriptions': subs_data
+        })
 
+
+# =========================
+# SUPER ADMIN CLIENT ACTION
+# =========================
 class SuperAdminClientActionView(APIView):
-    permission_classes = [permissions.IsAdminUser]  # Superuser only
+    permission_classes = [permissions.IsAdminUser]
 
     def post(self, request):
         client_id = request.data.get('client_id')
-        action = request.data.get('action') # SUSPEND, ACTIVATE, REDUCE_DAYS
+        action = request.data.get('action')
 
         try:
-            # We need to find the subscription. Client ID here is the User ID.
-            subscription = ClientSubscription.objects.get(user_id=client_id)
-            user_profile = UserProfile.objects.get(user_id=client_id)
+            with transaction.atomic():
+                sub = ClientSubscription.objects.select_for_update().get(user_id=client_id)
+                profile = UserProfile.objects.get(user_id=client_id)
 
-            if action == 'SUSPEND':
-                subscription.status = 'SUSPENDED'
-                subscription.save()
-                return Response({'message': 'Client account suspended successfully.'})
+                if action == 'SUSPEND':
+                    sub.status = SUB_SUSPENDED
 
-            elif action == 'ACTIVATE':
-                subscription.status = 'ACTIVE'
-                subscription.save()
-                return Response({'message': 'Client account reactivated successfully.'})
+                elif action == 'ACTIVATE':
+                    sub.status = SUB_ACTIVE
 
-            elif action == 'REDUCE_DAYS':
-                if subscription.end_date:
-                    from datetime import timedelta
-                    subscription.end_date -= timedelta(days=7)
-                    subscription.save()
-                    # Sync Profile if exists
-                    if user_profile:
-                        user_profile.subscription_expiry = subscription.end_date
-                        user_profile.save()
-                    return Response({'message': 'Validity reduced by 7 days.'})
+                elif action == 'REDUCE_DAYS' and sub.end_date:
+                    sub.end_date -= timedelta(days=7)
+
+                elif action == 'EXTEND_DAYS':
+                    sub.end_date = (sub.end_date or date.today()) + timedelta(days=30)
+
+                elif action == 'DELETE':
+                    sub.user.delete()
+                    return Response({'message': 'Client deleted'})
+
                 else:
-                    return Response({'error': 'Subscription has no end date.'}, status=400)
+                    return Response({'error': 'Invalid action'}, status=400)
 
-            elif action == 'EXTEND_DAYS':
-                if subscription.end_date:
-                    from datetime import timedelta
-                    current_end = subscription.end_date
-                    # If expired, start from today? Or extend from expiry?
-                    # Generally extend from expiry if valid, or from today if long expired?
-                    # Simple logic: Add 30 days to current end_date (even if in past, it moves forward)
-                    # If it's way in past, maybe set to today + 30?
-                    # Let's just add 30 days to existing end_date to keep it simple and predicable
-                    subscription.end_date += timedelta(days=30)
-                    subscription.save()
-                    if user_profile:
-                        user_profile.subscription_expiry = subscription.end_date
-                        user_profile.save()
-                    return Response({'message': 'Validity extended by 30 days.'})
-                else:
-                    # If None, set to Today + 30
-                    from datetime import date, timedelta
-                    subscription.end_date = date.today() + timedelta(days=30)
-                    subscription.save()
-                    return Response({'message': 'Validity initialized to 30 days.'})
+                sub.save()
+                profile.subscription_expiry = sub.end_date
+                profile.save()
 
-            elif action == 'DELETE':
-                user = subscription.user
-                username = user.username
-                user.delete()
-                return Response({'message': f'Client {username} and all data deleted successfully.'})
-
-            return Response({'error': 'Invalid action'}, status=400)
+                return Response({'message': f'Action {action} completed'})
 
         except ClientSubscription.DoesNotExist:
-            return Response({'error': 'Subscription not found for this user.'}, status=404)
+            return Response({'error': 'Subscription not found'}, status=404)
         except UserProfile.DoesNotExist:
-             return Response({'error': 'User Profile not found.'}, status=404)
+            return Response({'error': 'Profile not found'}, status=404)
         except Exception as e:
-            return Response({'error': str(e)}, status=500)
+            logger.exception("Client action error")
+            return Response({'error': 'Server error'}, status=500)
