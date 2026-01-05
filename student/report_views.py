@@ -1,4 +1,6 @@
 import io
+import os
+from django.conf import settings
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework.views import APIView
@@ -132,17 +134,14 @@ class ReportDownloadView(APIView):
             p.setFillColorRGB(0.1, 0.1, 0.25) # Dark Navy
             p.rect(0, height - 130, width, 130, fill=1, stroke=0)
             
-            # Logo Circle with "NG" initials (replaces emoji)
-            logo_x, logo_y = 70, height - 60
-            p.setFillColorRGB(0.3, 0.5, 0.9)  # Blue
-            p.circle(logo_x, logo_y, 22, fill=1, stroke=0)
-            p.setFillColorRGB(1, 1, 1)  # White text
-            p.setFont("Helvetica-Bold", 18)
-            p.drawCentredString(logo_x, logo_y - 6, "YSM")
+            # Logo Image (Official Y.S.M Logo)
+            logo_path = os.path.join(settings.BASE_DIR, 'static/img/ysm_logo.png')
+            if os.path.exists(logo_path):
+                p.drawImage(logo_path, 40, height - 100, width=60, height=60, mask='auto', preserveAspectRatio=True)
             
             # Title
             p.setFillColorRGB(1, 1, 1) # White
-            p.setFont("Helvetica-Bold", 22)
+            p.setFont("Helvetica-Bold", 24)
             p.drawString(110, height - 55, "Y.S.M ADVANCE EDUCATION SYSTEM")
             
             # Report Type Badge

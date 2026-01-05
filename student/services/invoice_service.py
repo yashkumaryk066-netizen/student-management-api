@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
@@ -15,22 +17,19 @@ def draw_header_footer(canvas, doc):
     canvas.setFillColorRGB(0.1, 0.1, 0.25) # Dark Premium Navy
     canvas.rect(0, A4[1] - 120, A4[0], 120, fill=1, stroke=0)
     
-    # --- LOGO CIRCLE with "NG" initials (replaces emoji) ---
-    logo_x, logo_y = 60, A4[1] - 55
-    canvas.setFillColorRGB(0.3, 0.5, 0.9)  # Blue
-    canvas.circle(logo_x, logo_y, 22, fill=1, stroke=0)
-    canvas.setFillColorRGB(1, 1, 1)  # White text
-    canvas.setFont("Helvetica-Bold", 18)
-    canvas.drawCentredString(logo_x, logo_y - 6, "YSM")
+    # --- LOGO IMAGE (Official Y.S.M Logo) ---
+    logo_path = os.path.join(settings.BASE_DIR, 'static/img/ysm_logo.png')
+    if os.path.exists(logo_path):
+        canvas.drawImage(logo_path, 40, A4[1] - 100, width=60, height=60, mask='auto', preserveAspectRatio=True)
     
     # --- BRANDING TEXT ---
     canvas.setFillColorRGB(1, 1, 1) # White text
-    canvas.setFont("Helvetica-Bold", 20)
-    canvas.drawString(100, A4[1] - 50, "Y.S.M ADVANCE EDUCATION")
+    canvas.setFont("Helvetica-Bold", 24)
+    canvas.drawString(110, A4[1] - 50, "Y.S.M ADVANCE EDUCATION")
     
     canvas.setFont("Helvetica", 12)
     canvas.setFillColorRGB(0.8, 0.8, 0.9)
-    canvas.drawString(100, A4[1] - 70, "Advanced Institute Management System")
+    canvas.drawString(110, A4[1] - 70, "Advanced Institute Management System")
     
     # --- INVOICE BADGE ---
     canvas.setFillColorRGB(0.3, 0.8, 0.4) # Accent Green

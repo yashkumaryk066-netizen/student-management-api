@@ -2879,3 +2879,227 @@ screen and (min-resolution: 192dpi) and (min-width: 1024px) {
         display: none !important;
     }
 }
+
+/* ============================================
+   Y.S.M ADVANCE EDUCATION SYSTEM
+   Premium 3D Golden Branding Styles
+   ============================================ */
+
+/* Logo Image in Sidebar */
+.sidebar-logo-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(218, 165, 32, 0.6));
+    animation: logoFloat 4s ease-in-out infinite, logoGlow 3s ease-in-out infinite;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-logo-img:hover {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 0 20px rgba(218, 165, 32, 0.9));
+}
+
+/* Y.S.M Brand Container */
+.ysm-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: linear-gradient(145deg,
+            rgba(218, 165, 32, 0.15) 0%,
+            rgba(184, 134, 11, 0.1) 50%,
+            rgba(139, 90, 43, 0.05) 100%);
+    border: 1px solid rgba(218, 165, 32, 0.3);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ysm-brand::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(218, 165, 32, 0.2),
+            transparent);
+    animation: shimmerGold 3s infinite;
+}
+
+/* Brand Text Container */
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Y.S.M Title - Premium 3D Gold */
+.ysm-title {
+    font-size: 1.8rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg,
+            #ffd700 0%,
+            #daa520 25%,
+            #ffd700 50%,
+            #b8860b 75%,
+            #daa520 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: goldShine 3s ease infinite;
+    text-shadow: none;
+    position: relative;
+    margin: 0 !important;
+}
+
+/* 3D Shadow Effect for Title */
+.ysm-title::after {
+    content: 'Y.S.M';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    z-index: -1;
+    background: linear-gradient(135deg, #8b6914, #5c4a1f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Subtitle Styling */
+.sidebar-subtitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #b8860b;
+    opacity: 0.9;
+    text-shadow: 0 0 10px rgba(218, 165, 32, 0.3);
+}
+
+/* Animations */
+@keyframes logoFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes logoGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 10px rgba(218, 165, 32, 0.6));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 20px rgba(218, 165, 32, 0.9));
+    }
+}
+
+@keyframes goldShine {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes shimmerGold {
+    0% {
+        left: -100%;
+    }
+
+    50%,
+    100% {
+        left: 100%;
+    }
+}
+
+/* Header Y.S.M Badge */
+.ysm-header-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg,
+            rgba(218, 165, 32, 0.2) 0%,
+            rgba(184, 134, 11, 0.15) 100%);
+    border: 1px solid rgba(218, 165, 32, 0.4);
+    border-radius: 30px;
+    animation: badgePulse 3s ease-in-out infinite;
+}
+
+.ysm-header-badge img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.ysm-header-badge span {
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, #ffd700, #daa520);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(218, 165, 32, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(218, 165, 32, 0.5);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+    .sidebar-logo-img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .ysm-title {
+        font-size: 1.4rem !important;
+    }
+
+    .sidebar-subtitle {
+        font-size: 0.6rem;
+        letter-spacing: 1px;
+    }
+
+    .ysm-brand {
+        padding: 12px;
+        gap: 10px;
+    }
+}
+
+/* Report/Invoice Logo Container */
+.report-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(218, 165, 32, 0.5));
+}
