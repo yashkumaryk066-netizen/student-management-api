@@ -127,90 +127,139 @@ class ReportDownloadView(APIView):
                 )
 
             buffer = io.BytesIO()
+            # letter size is 612 x 792 points
             p = canvas.Canvas(buffer, pagesize=letter)
             width, height = letter
 
-            # ===== PREMIUM HEADER (Deep Professional Navy) =====
-            p.setFillColorRGB(0.05, 0.05, 0.15) # Very Dark Navy
-            p.rect(0, height - 160, width, 160, fill=1, stroke=0)
+            # ==========================================
+            # PAGE 1: CINEMATIC COVER PAGE
+            # ==========================================
+            # Deep Galaxy/Navy Background
+            p.setFillColorRGB(0.02, 0.02, 0.1) 
+            p.rect(0, 0, width, height, fill=1, stroke=0)
             
-            # Accent Gold Strip
+            # Sublte Glow/Gradient pattern (simulated with rects)
+            p.setFillColorRGB(0.04, 0.04, 0.15)
+            p.rect(0, height*0.4, width, height*0.6, fill=1, stroke=0)
+
+            # Central Branding Circle
             p.setFillColorRGB(0.85, 0.65, 0.1) # Gold
-            p.rect(0, height - 162, width, 2, fill=1, stroke=0)
+            p.setStrokeColorRGB(0.85, 0.65, 0.1)
+            p.setLineWidth(1)
+            p.circle(width/2, height/2 + 100, 70, fill=0, stroke=1)
             
-            # Logo Image (Official Y.S.M Logo)
+            # Official Logo
             logo_path = os.path.join(settings.BASE_DIR, 'static/img/ysm_logo.png')
             if os.path.exists(logo_path):
-                # Larger logo, better placement
-                p.drawImage(logo_path, 40, height - 110, width=80, height=80, mask='auto', preserveAspectRatio=True)
-            
-            # Title Group (Y.S.M ADVANCE EDUCATION SYSTEM)
-            p.setFillColorRGB(1, 1, 1) # White
-            p.setFont("Helvetica-Bold", 26)
-            p.drawString(140, height - 65, "Y.S.M")
-            
-            p.setFont("Helvetica-Bold", 14)
-            p.setFillColorRGB(0.9, 0.7, 0.2) # Golden Subtitle
-            p.drawString(140, height - 85, "ADVANCE EDUCATION SYSTEM")
-            
-            # Report Meta Badge (Top Right)
-            badge_text = report.report_type.upper().replace('_', ' ')
-            badge_width = p.stringWidth(badge_text, "Helvetica-Bold", 10) + 30
-            p.setFillColorRGB(0.2, 0.4, 0.8) # Premium Blue
-            p.roundRect(width - badge_width - 40, height - 70, badge_width, 28, 6, fill=1, stroke=0)
+                p.drawImage(logo_path, width/2 - 50, height/2 + 50, width=100, height=100, mask='auto', preserveAspectRatio=True)
+
+            # Main Title - Cover
             p.setFillColorRGB(1, 1, 1)
-            p.setFont("Helvetica-Bold", 10)
-            p.drawCentredString(width - (badge_width/2) - 40, height - 59, badge_text)
+            p.setFont("Helvetica-Bold", 32)
+            p.drawCentredString(width/2, height/2 - 30, "Y.S.M")
             
-            # Report Details (Below branding)
-            p.setFont("Helvetica-Oblique", 10)
-            p.setFillColorRGB(0.7, 0.7, 0.85) # Slate blue
-            p.drawString(140, height - 110, f"Document: {report.name}")
-            p.drawString(140, height - 125, f"Issued To: {request.user.email}")
-            p.drawRightString(width - 40, height - 125, f"Date: {timezone.now().strftime('%d %b, %Y')}")
-
-            # ===== CONTENT AREA =====
-            # Section Header with Thin Border
-            p.setStrokeColorRGB(0.8, 0.8, 0.9)
-            p.setLineWidth(0.5)
-            p.line(40, height - 190, width - 40, height - 190)
-            
-            p.setFillColorRGB(0.1, 0.1, 0.3) # Dark text
             p.setFont("Helvetica-Bold", 18)
-            p.drawString(50, height - 180, "Report Summary")
+            p.setFillColorRGB(0.9, 0.7, 0.2) # Gold
+            p.drawCentredString(width/2, height/2 - 60, "ADVANCE EDUCATION SYSTEM")
             
-            # Data Table
-            y = height - 210
-            p.setFont("Helvetica", 12)
-            data_points = self._get_report_data(report.report_type)
-            
-            # Table rows with alternating colors
-            for i, (label, value) in enumerate(data_points):
-                # Alternate row background
-                if i % 2 == 0:
-                    p.setFillColorRGB(0.98, 0.98, 1.0) # Very light blue
-                    p.rect(40, y - 5, width - 80, 30, fill=1, stroke=0)
-                
-                p.setFillColorRGB(0.3, 0.3, 0.5) # Dark gray text
-                p.setFont("Helvetica-Bold", 11)
-                p.drawString(60, y + 8, label)
-                
-                p.setFillColorRGB(0.1, 0.1, 0.3)
-                p.setFont("Helvetica", 11)
-                p.drawString(350, y + 8, value)
-                y -= 30
-
-            # ===== PREMIUM FOOTER (Navy Blue) =====
-            p.setFillColorRGB(0.1, 0.1, 0.25) # Dark Navy
-            p.rect(0, 0, width, 60, fill=1, stroke=0)
+            # Report Category
+            p.setStrokeColorRGB(1, 1, 1)
+            p.setLineWidth(0.5)
+            p.line(width/2 - 100, height/2 - 100, width/2 + 100, height/2 - 100)
             
             p.setFillColorRGB(0.8, 0.8, 0.9)
-            p.setFont("Helvetica", 9)
-            p.drawString(50, 30, "Confidential • Generated by Y.S.M Advance Education System")
-            p.drawRightString(width - 50, 30, timezone.now().strftime('%d %b, %Y %H:%M'))
+            p.setFont("Helvetica", 16)
+            p.drawCentredString(width/2, height/2 - 130, f"{report.report_type.replace('_', ' ').upper()}")
             
+            # Footer Branding - Cover
+            p.setFont("Helvetica-Oblique", 10)
+            p.setFillColorRGB(0.6, 0.6, 0.7)
+            p.drawCentredString(width/2, 80, f"Generated on: {timezone.now().strftime('%d %B, %Y')}")
+            p.drawCentredString(width/2, 60, "Confidential • Proprietary Intelligence")
+            
+            p.showPage() # End Cover Page
+
+            # ==========================================
+            # PAGE 2: ANALYTICS DASHBOARD PAGE
+            # ==========================================
+            # Premium Header (Dark Navy)
+            header_h = 100
+            p.setFillColorRGB(0.02, 0.02, 0.12)
+            p.rect(0, height - header_h, width, header_h, fill=1, stroke=0)
+            
+            # Logo in Header
+            if os.path.exists(logo_path):
+                p.drawImage(logo_path, 30, height - 85, width=60, height=60, mask='auto', preserveAspectRatio=True)
+            
+            # Brand Text in Header
+            p.setFillColorRGB(1, 1, 1)
+            p.setFont("Helvetica-Bold", 18)
+            p.drawString(100, height - 55, "Y.S.M ADVANCE")
+            p.setFont("Helvetica", 10)
+            p.setFillColorRGB(0.9, 0.7, 0.2)
+            p.drawString(100, height - 70, "EDUCATION MANAGEMENT SYSTEM")
+
+            # Report Meta (Right Side)
+            p.setFillColorRGB(1, 1, 1)
+            p.setFont("Helvetica-Bold", 10)
+            p.drawRightString(width - 30, height - 45, report.name)
+            p.setFont("Helvetica", 9)
+            p.drawRightString(width - 30, height - 60, f"Issued To: {request.user.email}")
+            
+            # Data Visual Section Header
+            y = height - 160
+            p.setFillColorRGB(0.1, 0.1, 0.3)
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(30, y, "Performance Insights")
+            
+            # Horizontal Divider with gold accents
+            p.setStrokeColorRGB(0.85, 0.65, 0.1)
+            p.setLineWidth(2)
+            p.line(30, y - 10, 80, y - 10)
+            p.setStrokeColorRGB(0.9, 0.9, 0.9)
+            p.setLineWidth(0.5)
+            p.line(80, y - 10, width - 30, y - 10)
+
+            # --- KPI CARDS GRID ---
+            y -= 60
+            data_points = self._get_report_data(report.report_type)
+            
+            # Grid config: 2 columns
+            col_width = (width - 90) / 2
+            card_h = 80
+            
+            for i, (label, value) in enumerate(data_points):
+                # Calculate pos
+                row = i // 2
+                col = i % 2
+                card_x = 30 + (col * (col_width + 30))
+                card_y = y - (row * (card_h + 20))
+                
+                # Card Background (Soft Slate Gradient feel)
+                p.setFillColorRGB(0.96, 0.97, 1.0)
+                p.roundRect(card_x, card_y, col_width, card_h, 8, fill=1, stroke=1)
+                
+                # Card Decorative Left Border (Vibrant)
+                colors_grad = [ (0.2, 0.4, 0.8), (0.1, 0.6, 0.4), (0.8, 0.3, 0.2), (0.4, 0.2, 0.7) ]
+                p.setFillColorRGB(*colors_grad[i % len(colors_grad)])
+                p.roundRect(card_x, card_y, 5, card_h, 4, fill=1, stroke=0)
+                
+                # Label
+                p.setFillColorRGB(0.4, 0.4, 0.5)
+                p.setFont("Helvetica-Bold", 9)
+                p.drawString(card_x + 20, card_y + card_h - 25, label.upper())
+                
+                # Value
+                p.setFillColorRGB(0.1, 0.1, 0.2)
+                p.setFont("Helvetica-Bold", 18)
+                p.drawString(card_x + 20, card_y + 20, value)
+
+            # Footer
+            p.setFillColorRGB(0.05, 0.05, 0.15)
+            p.rect(0, 0, width, 40, fill=1, stroke=0)
+            p.setFillColorRGB(1, 1, 1)
             p.setFont("Helvetica-Oblique", 8)
-            p.drawString(50, 15, "Visionary Architect & Developed by: Yash A Mishra")
+            p.drawCentredString(width/2, 15, "Official Y.S.M Intelligence Document • Visionary Architect: Yash A Mishra")
 
             p.showPage()
             p.save()
@@ -221,6 +270,14 @@ class ReportDownloadView(APIView):
             response = HttpResponse(buffer, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
             return response
+
+        except GeneratedReport.DoesNotExist:
+            return Response({"error": "Report not found"}, status=404)
+        except Exception as e:
+            return Response(
+                {"error": f"PDF generation failed: {str(e)}"},
+                status=500
+            )
 
         except GeneratedReport.DoesNotExist:
             return Response({"error": "Report not found"}, status=404)
