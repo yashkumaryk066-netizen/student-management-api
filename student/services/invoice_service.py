@@ -12,18 +12,22 @@ def draw_header_footer(canvas, doc):
     canvas.saveState()
     
     # --- HEADER BACKGROUND ---
-    # Create a premium top banner
     canvas.setFillColorRGB(0.1, 0.1, 0.25) # Dark Premium Navy
     canvas.rect(0, A4[1] - 120, A4[0], 120, fill=1, stroke=0)
     
-    # --- LOGO / BRANDING ---
+    # --- LOGO EMOJI ---
+    canvas.setFont("Helvetica", 36)
+    canvas.setFillColorRGB(0.4, 0.6, 1.0) # Blue glow
+    canvas.drawString(40, A4[1] - 55, "🎓")
+    
+    # --- BRANDING TEXT ---
     canvas.setFillColorRGB(1, 1, 1) # White text
     canvas.setFont("Helvetica-Bold", 28)
-    canvas.drawString(40, A4[1] - 50, "NEXTGEN ERP")
+    canvas.drawString(100, A4[1] - 50, "NEXTGEN ERP")
     
     canvas.setFont("Helvetica", 12)
     canvas.setFillColorRGB(0.8, 0.8, 0.9)
-    canvas.drawString(40, A4[1] - 70, "Advanced Institute Management System")
+    canvas.drawString(100, A4[1] - 70, "Advanced Institute Management System")
     
     # --- INVOICE BADGE ---
     canvas.setFillColorRGB(0.3, 0.8, 0.4) # Accent Green
