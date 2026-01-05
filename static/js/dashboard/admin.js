@@ -3593,6 +3593,7 @@ const DashboardApp = {
                                 <thead>
                                     <tr>
                                         <th>Username</th>
+                                        <th>Email</th>
                                         <th>Current Plan</th>
                                         <th>Status</th>
                                         <th>Start Date</th>
@@ -3615,6 +3616,7 @@ const DashboardApp = {
                                 ${client.username}
                                 ${isSuspended ? '<span style="display:block; font-size:0.7rem; color: #ef4444;">⛔ BLACK PENALTY APPLIED</span>' : ''}
                             </td>
+                            <td style="font-family: monospace; font-size: 0.9rem; color: #94a3b8;">${client.email || 'N/A'}</td>
                             <td><span style="color: #a78bfa; font-weight: 600;">${client.plan_type}</span></td>
                             <td><span class="neo-badge ${isSuspended ? 'badge-expired' : (isActive ? 'badge-active' : 'badge-pending')}">${isSuspended ? 'SUSPENDED' : client.status}</span></td>
                             <td style="color: var(--text-muted);">${client.start_date || '-'}</td>
@@ -3622,6 +3624,7 @@ const DashboardApp = {
                             <td style="font-weight: 700; font-family: monospace; ${daysClass}">${client.days_left} D</td>
                             <td style="font-weight: 600;">₹${client.amount_paid}</td>
                             <td style="text-align: right;">
+                                <button onclick="DashboardApp.showCredentials('${client.username}', '${client.email}')" class="action-btn" title="View Login Details" style="color: #3b82f6; border-color: #3b82f6;">🔑 Credentials</button>
                                 ${isActive ? `<button onclick="DashboardApp.adminAction(${client.id}, 'SUSPEND')" class="action-btn" title="Black Penalty (Block Access)" style="color: #ef4444; border-color: #ef4444;">⛔ Block</button>` : ''}
                                 ${isSuspended ? `<button onclick="DashboardApp.adminAction(${client.id}, 'ACTIVATE')" class="action-btn" title="Remove Penalty (Unblock)" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: #34d399;">✅ Unblock</button>` : ''}
                                 <button onclick="DashboardApp.adminAction(${client.id}, 'REDUCE_DAYS')" class="action-btn" title="Reduce 7 Days">📉</button>
@@ -3629,7 +3632,7 @@ const DashboardApp = {
                                 <button onclick="DashboardApp.adminAction(${client.id}, 'DELETE')" class="action-btn btn-delete" title="Delete ClientPermanently">🗑️</button>
                             </td>
                         </tr>`;
-            }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">No active client subscriptions found in the registry.</td></tr>'}
+            }).join('') : '<tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">No active client subscriptions found in the registry.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -3715,6 +3718,52 @@ const DashboardApp = {
         } catch (error) {
             this.showAlert('Error', 'Network error.', 'error');
         }
+    },
+
+    showCredentials(username, email) {
+        const loginUrl = window.location.origin + '/login/';
+
+        // Create premium modal to display credentials
+        const modal = `
+            <div class="modal-overlay" style="z-index: 10000; background: rgba(0, 0, 0, 0.85);">
+                <div class="modal-card" style="max-width: 500px; background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98)); border: 1px solid rgba(99, 102, 241, 0.3); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);">
+                    <div style="text-align: center; padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <h2 style="color: #6366f1; font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; margin: 0;">🔑 Client Login Credentials</h2>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="background: rgba(99, 102, 241, 0.1); padding: 20px; border-radius: 12px; border-left: 4px solid #6366f1; margin-bottom: 20px;">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Username</label>
+                                <input type="text" value="${username}" readonly style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: white; font-family: monospace; font-size: 1.1rem; cursor: text;" onclick="this.select()">
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Email</label>
+                                <input type="text" value="${email}" readonly style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: white; font-family: monospace; font-size: 0.95rem; cursor: text;" onclick="this.select()">
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Login URL</label>
+                                <input type="text" value="${loginUrl}" readonly style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #3b82f6; font-family: monospace; font-size: 0.9rem; cursor: text;" onclick="this.select()">
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid #f59e0b; margin-bottom: 20px;">
+                            <p style="margin: 0; color: #fbbf24; font-size: 0.85rem; line-height: 1.5;">
+                                ⚠️ <strong>Note:</strong> Passwords are encrypted and cannot be retrieved. If the client forgot their password, use the "Reset Password" option or ask them to use "Forgot Password" on the login page.
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button onclick="this.closest('.modal-overlay').remove()" class="btn-secondary" style="padding: 10px 20px;">Close</button>
+                            <button onclick="navigator.clipboard.writeText('Username: ${username}\\nEmail: ${email}\\nLogin: ${loginUrl}').then(() => DashboardApp.showAlert('Copied', 'Credentials copied to clipboard', 'success'))" class="btn-primary" style="padding: 10px 20px;">📋 Copy All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modal);
     },
 };
 
