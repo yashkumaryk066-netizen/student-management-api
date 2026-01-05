@@ -1716,7 +1716,7 @@ const DashboardApp = {
     },
 
     async generateReport() {
-        const type = prompt("Enter Report Type (FINANCE, ACADEMIC, ATTENDANCE, HR):", "FINANCE");
+        const type = prompt("Enter Report Type (FINANCE, EXAM, ATTENDANCE, HR):", "FINANCE");
         if (!type) return;
 
         try {

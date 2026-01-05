@@ -19,12 +19,14 @@ REPORT_FINANCE = 'FINANCE'
 REPORT_EXAM = 'EXAM'
 REPORT_HR = 'HR'
 REPORT_GENERAL = 'GENERAL'
+REPORT_ATTENDANCE = 'ATTENDANCE'
+REPORT_ANALYTICS = 'ANALYTICS_SUMMARY'
 
 # Plan-wise allowed reports
 PLAN_REPORT_ACCESS = {
-    'COACHING': {REPORT_GENERAL},
-    'SCHOOL': {REPORT_GENERAL, REPORT_EXAM},
-    'INSTITUTE': {REPORT_GENERAL, REPORT_EXAM, REPORT_FINANCE, REPORT_HR},
+    'COACHING': {REPORT_GENERAL, REPORT_ATTENDANCE, REPORT_ANALYTICS},
+    'SCHOOL': {REPORT_GENERAL, REPORT_EXAM, REPORT_ATTENDANCE, REPORT_ANALYTICS},
+    'INSTITUTE': {REPORT_GENERAL, REPORT_EXAM, REPORT_FINANCE, REPORT_HR, REPORT_ATTENDANCE, REPORT_ANALYTICS},
 }
 
 
@@ -57,7 +59,7 @@ class ReportListView(APIView):
         report_type = request.data.get('type')
 
         if report_type not in [
-            REPORT_GENERAL, REPORT_EXAM, REPORT_FINANCE, REPORT_HR
+            REPORT_GENERAL, REPORT_EXAM, REPORT_FINANCE, REPORT_HR, REPORT_ATTENDANCE, REPORT_ANALYTICS
         ]:
             return Response({"error": "Invalid report type"}, status=400)
 
@@ -200,6 +202,20 @@ class ReportDownloadView(APIView):
                 ("Total Staff", "42"),
                 ("Present Today", "40"),
                 ("New Hires", "3"),
+            ]
+
+        if report_type == REPORT_ATTENDANCE:
+            return [
+                ("Average Attendance", "85%"),
+                ("Most Present Class", "Class 10-A"),
+                ("Absentees Today", "15"),
+            ]
+
+        if report_type == REPORT_ANALYTICS:
+            return [
+                ("User Engagement", "High"),
+                ("Active Sessions", "120"),
+                ("Performance Score", "9.2/10"),
             ]
 
         return [
