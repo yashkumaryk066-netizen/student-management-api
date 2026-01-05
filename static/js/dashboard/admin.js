@@ -3331,7 +3331,9 @@ const DashboardApp = {
             }
 
             const data = await response.json();
-            const { stats, pending_payments, client_subscriptions } = data;
+            const stats = data.stats || { total_revenue: 0, active_subscriptions: 0, total_clients: 0, pending_approvals: 0 };
+            const pending_payments = Array.isArray(data.pending_payments) ? data.pending_payments : [];
+            const client_subscriptions = Array.isArray(data.client_subscriptions) ? data.client_subscriptions : [];
 
             container.innerHTML = `
                 <style>
