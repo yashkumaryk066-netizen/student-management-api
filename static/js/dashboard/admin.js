@@ -1804,129 +1804,39 @@ const DashboardApp = {
     },
 
     openLiveClassModal() {
-        // High-End Premium 3D Glass Modal
         const modalHtml = `
-        <div class="modal-overlay" id="liveClassModal" style="z-index: 9999; backdrop-filter: blur(20px); background: rgba(0,0,0,0.6);">
-            <div class="modal-card" style="
-                max-width: 500px; 
-                background: linear-gradient(160deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-                border: 1px solid rgba(255, 255, 255, 0.1); 
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.1);
-                border-radius: 24px;
-                padding: 32px;
-                transform: scale(1);
-                animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            ">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 16px;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <span style="font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));">🔴</span>
-                        <div>
-                            <h2 style="font-size: 1.5rem; font-weight: 800; color: white; margin:0; letter-spacing:-0.5px;">Schedule Live Class</h2>
-                            <p style="margin:0; font-size: 0.85rem; color: #94a3b8;">Create a new interactive session</p>
-                        </div>
-                    </div>
-                    <button onclick="document.getElementById('liveClassModal').remove()" style="
-                        background: rgba(255,255,255,0.05); 
-                        border: 1px solid rgba(255,255,255,0.1); 
-                        color: white; 
-                        width: 36px; 
-                        height: 36px; 
-                        border-radius: 50%; 
-                        font-size: 1.2rem; 
-                        cursor: pointer; 
-                        transition: all 0.2s;
-                        display: flex; align-items: center; justify-content: center;
-                    " onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'; this.style.borderColor='rgba(239, 68, 68, 0.5)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'">
-                        ×
-                    </button>
-                </div>
+        <div class="modal-overlay" id="liveClassModal">
+            <div class="modal-card">
+                <h2>Schedule Live Class</h2>
 
-                <form onsubmit="event.preventDefault(); DashboardApp.createLiveClass(this);">
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="color: #cbd5e1; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; display: block;">Class Title / Topic</label>
-                        <input type="text" name="title" required placeholder="e.g. Advanced Physics: Quantum Mechanics" 
-                            style="
-                                width: 100%; 
-                                background: rgba(15, 23, 42, 0.6); 
-                                border: 1px solid rgba(255, 255, 255, 0.1); 
-                                color: white; 
-                                padding: 14px 16px; 
-                                border-radius: 14px;
-                                font-size: 1rem;
-                                outline: none;
-                                transition: all 0.3s;
-                                box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-                            "
-                            onfocus="this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.2), inset 0 2px 4px rgba(0,0,0,0.2)'"
-                            onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.2)'"
-                        >
+                <form onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label>Class Title</label>
+                        <input type="text" class="form-input" placeholder="Live Physics Class" required>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="color: #cbd5e1; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; display: block;">Meeting URL (Zoom/Meet)</label>
-                        <div style="position: relative;">
-                            <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.7;">🔗</span>
-                            <input type="url" name="url" required placeholder="https://zoom.us/j/..." 
-                                style="
-                                    width: 100%; 
-                                    background: rgba(15, 23, 42, 0.6); 
-                                    border: 1px solid rgba(255, 255, 255, 0.1); 
-                                    color: #38bdf8; 
-                                    padding: 14px 16px 14px 48px; 
-                                    border-radius: 14px;
-                                    font-size: 1rem;
-                                    outline: none;
-                                    transition: all 0.3s;
-                                    font-family: monospace;
-                                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-                                "
-                                onfocus="this.style.borderColor='#38bdf8'; this.style.boxShadow='0 0 0 3px rgba(56, 189, 248, 0.2), inset 0 2px 4px rgba(0,0,0,0.2)'"
-                                onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.2)'"
-                            >
-                        </div>
+                    <div class="form-group">
+                        <label>Platform</label>
+                        <select class="form-input">
+                            <option>Zoom</option>
+                            <option>Google Meet</option>
+                        </select>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 32px;">
-                        <label style="color: #cbd5e1; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; display: block;">Start Time</label>
-                        <input type="datetime-local" name="start_time" required 
-                            style="
-                                width: 100%; 
-                                background: rgba(15, 23, 42, 0.6); 
-                                border: 1px solid rgba(255, 255, 255, 0.1); 
-                                color: white; 
-                                padding: 14px 16px; 
-                                border-radius: 14px;
-                                font-size: 1rem;
-                                outline: none;
-                                transition: all 0.3s;
-                                box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-                                color-scheme: dark;
-                            "
-                            onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.2), inset 0 2px 4px rgba(0,0,0,0.2)'"
-                            onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.2)'"
-                        >
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="datetime-local" class="form-input" required>
                     </div>
 
-                    <button type="submit" class="btn-primary" style="
-                        width: 100%; 
-                        padding: 16px; 
-                        font-size: 1.1rem; 
-                        font-weight: 700; 
-                        border-radius: 14px; 
-                        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-                        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-                        display: flex; align-items: center; justify-content: center; gap: 10px;
-                        transition: all 0.3s;
-                    "
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(239, 68, 68, 0.5)'"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.4)'"
-                    >
-                        <span>🚀</span> Schedule Class Now
-                    </button>
-                    <p style="text-align: center; margin-top: 16px; color: #64748b; font-size: 0.8rem;">
-                        <span style="display:inline-block; width:8px; height:8px; background:#10b981; border-radius:50%; margin-right:6px;"></span>
-                        Secure SSL Connection
-                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary"
+                            onclick="document.getElementById('liveClassModal').remove()">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            Schedule
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -3774,44 +3684,53 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Add Pulse Animation Style for Live Badge
+// -------------------------------
+// Add Pulse Animation Style
+// -------------------------------
 const style = document.createElement('style');
 style.innerHTML = `
-        @keyframes pulse {
-            0 % { transform: scale(0.95); opacity: 0.8; }
-        50% {transform: scale(1.05); opacity: 1; }
-        100% {transform: scale(0.95); opacity: 0.8; }
-    }
-        .loading-spinner {
-            display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 300px;
-        color: var(--primary);
-        font-size: 1.2rem;
-        gap: 10px;
-    }
-        .loading-spinner::after {
-            content: '';
-        width: 30px;
-        height: 30px;
-        border: 3px solid var(--primary);
-        border-top-color: transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-        @keyframes spin {to {transform: rotate(360deg); } }
-        `;
-document.head.appendChild(style);
-
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-
-    document.addEventListener('DOMContentLoaded', () => DashboardApp.init());
-} else {
-    DashboardApp.init();
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
 }
 
-// Make it globally accessible
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    color: var(--primary);
+    font-size: 1.2rem;
+    gap: 10px;
+}
+
+.loading-spinner::after {
+    content: '';
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+`;
+document.head.appendChild(style);
+
+// -------------------------------
+// Make DashboardApp Global FIRST
+// -------------------------------
 window.DashboardApp = DashboardApp;
 window.navigateTo = (module) => DashboardApp.loadModule(module);
+
+// -------------------------------
+// Initialize App Safely
+// -------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DashboardApp loading...");
+    DashboardApp.init();
+});
