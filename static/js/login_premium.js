@@ -5,17 +5,34 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- CURSOR GLOW LOGIC ---
+    // --- ENTERPRISE: CLEANUP & PERFORMANCE ---
+    window.addEventListener('beforeunload', () => {
+        gsap.globalTimeline.clear(); // Prevent memory leaks in SaaS
+    });
+
+    // --- ACCESSIBILITY: REDUCED MOTION ---
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+        gsap.globalTimeline.timeScale(4); // Speed up everything for accessibility
+    }
+
+    // --- CURSOR GLOW LOGIC (MOBILE OPTIMIZED) ---
     const cursorGlow = document.getElementById('cursorGlow');
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
     if (cursorGlow) {
-        window.addEventListener('mousemove', (e) => {
-            gsap.to(cursorGlow, {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.8,
-                ease: "power2.out"
+        if (isTouchDevice) {
+            cursorGlow.style.display = 'none';
+        } else {
+            window.addEventListener('mousemove', (e) => {
+                gsap.to(cursorGlow, {
+                    x: e.clientX,
+                    y: e.clientY,
+                    duration: 0.8,
+                    ease: "power2.out"
+                });
             });
-        });
+        }
     }
 
     // --- INITIALIZATION ANIMATIONS ---
@@ -56,7 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    initAnimations();
+    if (!prefersReducedMotion) initAnimations();
+    else {
+        // Instant show for reduced motion
+        gsap.set('.login-card', { y: 0, opacity: 1 });
+        gsap.set('.branding-footer', { y: 0, opacity: 1 });
+    }
 
     // --- INPUT FIELD MICRO-INTERACTIONS ---
     const inputs = document.querySelectorAll('.form-group input');
@@ -83,10 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
             togglePassword.classList.toggle('fa-eye-slash');
 
             // Satisfying Pulse Animation
-            gsap.fromTo(togglePassword,
-                { scale: 1.5, rotation: 10 },
-                { scale: 1, rotation: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" }
-            );
+            if (!prefersReducedMotion) {
+                gsap.fromTo(togglePassword,
+                    { scale: 1.5, rotation: 10 },
+                    { scale: 1, rotation: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" }
+                );
+            }
         });
     }
 
@@ -117,15 +141,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // --- SUCCESS SEQUENCE (THE VIDEO MOMENT) ---
 
-                // Button Transforms to Green Verified
+                // Button Transforms to Green Verified (ANIMATED GRADIENT)
                 gsap.to(loginBtn, {
-                    backgroundColor: '#10b981',
+                    backgroundImage: 'linear-gradient(135deg, #10b981, #34d399, #10b981)',
+                    backgroundSize: '200% 200%',
                     scale: 1.05,
-                    duration: 0.4,
+                    duration: 0.6,
                     onStart: () => {
                         loginBtn.innerHTML = '<span><i class="fas fa-check-circle"></i> Verified</span>';
                     }
                 });
+
+                // Animate Gradient Position
+                gsap.to(loginBtn, { backgroundPosition: '200% center', duration: 1, repeat: -1, ease: 'linear' });
 
                 // Cinematic Card Dissolve
                 gsap.to('.login-card', {
@@ -133,15 +161,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     opacity: 0,
                     y: -20,
                     duration: 0.8,
-                    delay: 0.4,
+                    delay: 0.6,
                     ease: "power4.in"
                 });
 
                 // Branding Dissolve
-                gsap.to('.branding-footer', { opacity: 0, duration: 0.5, delay: 0.4 });
+                gsap.to('.branding-footer', { opacity: 0, duration: 0.5, delay: 0.6 });
 
                 // Start Transition Sequence
-                setTimeout(() => showCinematicTransition(response), 1000);
+                setTimeout(() => showCinematicTransition(response), 1200);
 
             } catch (error) {
                 // --- FAILURE SEQUENCE (SOFT PREMIUM UX) ---
@@ -166,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     loginText.innerText = "Sign In";
                     if (loginLoader) loginLoader.style.display = 'none';
                     inputFields.forEach(input => input.classList.remove('border-error'));
-                    gsap.to(loginBtn, { scale: 1, backgroundColor: '', duration: 0.2 });
+                    gsap.to(loginBtn, { scale: 1, backgroundImage: '', duration: 0.2 });
                     gsap.to('.bg-blobs', { filter: 'blur(80px)', opacity: 0.6, duration: 0.8 });
                 }, 1500);
 
@@ -231,5 +259,6 @@ function showToast(message, type) {
     if (window.showToast) {
         window.showToast(message, type);
     } else {
+        console.log(`[Toast ${type}]: ${message}`);
     }
 }
