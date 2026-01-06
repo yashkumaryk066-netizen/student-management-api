@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         touchMultiplier: 2,
         easing: t => 1 - Math.pow(1 - t, 4),
     });
+    window.lenis = lenis; // Expose for global use (e.g. href="#id" scrolling)
 
     function raf(time) {
         lenis.raf(time);

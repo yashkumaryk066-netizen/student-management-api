@@ -417,10 +417,12 @@
         /* Premium Pricing Section */
         .pricing-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
             padding-top: 20px;
             align-items: stretch;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         .pricing-card {
@@ -991,14 +993,12 @@
                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                 </svg>
                             </button>
-                            <button class="btn-premium btn-pricing-action"
-                                onclick="document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})"
+                            <button class="btn-premium btn-pricing-action" onclick="window.lenis.scrollTo('#pricing')"
                                 style="background: linear-gradient(135deg, #10b981, #059669) !important; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4) !important;">
                                 <span>BUY NOW</span>
                                 <span style="font-size: 1.2rem;">💰</span>
                             </button>
-                            <button class="btn-premium btn-dev-action"
-                                onclick="document.getElementById('developer').scrollIntoView({behavior: 'smooth'})">
+                            <button class="btn-premium btn-dev-action" onclick="window.lenis.scrollTo('#developer')">
                                 <span>MEET DEVELOPER</span>
                                 <span style="font-size: 1.5rem;">👨‍💻</span>
                             </button>
@@ -1184,7 +1184,7 @@
                         <div class="pricing-card featured">
                             <div class="featured-badge">MOST POPULAR</div>
                             <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Modern School</h3>
-                            <div class="price-tag">₹10,000<span>/month</span></div>
+                            <div class="price-tag">₹2,000<span>/month</span></div>
                             <ul class="pricing-features">
                                 <li style="color: white !important;">Unlimited Students</li>
                                 <li style="color: white !important;">Exam & Grading System</li>
@@ -1192,7 +1192,7 @@
                                 <li style="color: white !important;">Transport Management</li>
                                 <li style="color: white !important;">Priority Support</li>
                             </ul>
-                            <button class="btn-pricing btn-pricing-primary" onclick="openPaymentModal('School', 10000)">
+                            <button class="btn-pricing btn-pricing-primary" onclick="openPaymentModal('School', 2000)">
                                 BUY NOW
                             </button>
                         </div>
@@ -1201,7 +1201,7 @@
                         <div class="pricing-card">
                             <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Institute / University
                             </h3>
-                            <div class="price-tag">₹15,000<span>/month</span></div>
+                            <div class="price-tag">₹5,000<span>/month</span></div>
                             <ul class="pricing-features">
                                 <li>Multi-Branch Support</li>
                                 <li>HR & Payroll</li>
@@ -1210,7 +1210,7 @@
                                 <li>Dedicated Account Manager</li>
                             </ul>
                             <button class="btn-pricing btn-pricing-secondary"
-                                onclick="openPaymentModal('Institute', 15000)">
+                                onclick="openPaymentModal('Institute', 5000)">
                                 BUY NOW
                             </button>
                         </div>
@@ -1924,6 +1924,24 @@
                         setTimeout(() => modal.remove(), 200);
                     }
                 }
+            </script>
+            <!-- Smooth Scroll Handler -->
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                        anchor.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            const targetId = this.getAttribute('href');
+                            if (targetId === '#') return;
+                            if (window.lenis) {
+                                window.lenis.scrollTo(targetId);
+                            } else {
+                                const target = document.querySelector(targetId);
+                                if (target) target.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        });
+                    });
+                });
             </script>
             <!-- Premium Motion JS -->
             <script src="{% static 'js/premium_motion.js' %}"></script>
