@@ -157,6 +157,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     console.log("🚀 Y.S.M Motion Engine Active");
-
-    console.log("🚀 Y.S.M Motion Engine Active");
 });
