@@ -1693,12 +1693,16 @@
 
             <script>
                 // Remove preloader after 2 seconds
+                // Remove preloader after 2 seconds
                 window.addEventListener('load', () => {
                     setTimeout(() => {
-                        document.getElementById('preloader').classList.add('fade-out');
-                        setTimeout(() => {
-                            document.getElementById('preloader').style.display = 'none';
-                        }, 800);
+                        const preloader = document.getElementById('preloader');
+                        if (preloader) {
+                            preloader.classList.add('fade-out');
+                            setTimeout(() => {
+                                preloader.style.display = 'none';
+                            }, 800);
+                        }
                     }, 2000);
                 });
 
