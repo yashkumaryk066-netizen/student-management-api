@@ -14,7 +14,7 @@ const ModalSystem = (() => {
         initialized = true;
 
         const modalHTML = `
-        <div id="premium-modal-overlay" class="premium-modal-overlay" aria-hidden="true">
+        <div id="premium-modal-overlay" class="premium-modal-overlay">
             <div id="premium-modal-box" class="premium-modal-box" role="dialog" aria-modal="true">
                 <div id="premium-modal-icon" class="premium-modal-icon">✨</div>
                 <h2 id="premium-modal-title" class="premium-modal-title">Notification</h2>
@@ -75,7 +75,7 @@ const ModalSystem = (() => {
         }
 
         overlay.classList.add('active');
-        overlay.setAttribute('aria-hidden', 'false');
+
 
         // Accessibility: Move focus to button
         setTimeout(() => btn.focus(), 50);
@@ -84,7 +84,6 @@ const ModalSystem = (() => {
     function close() {
         const overlay = document.getElementById('premium-modal-overlay');
         overlay.classList.remove('active');
-        overlay.setAttribute('aria-hidden', 'true');
 
         setTimeout(() => {
             isOpen = false;
