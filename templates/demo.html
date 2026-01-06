@@ -190,25 +190,143 @@
                     </div>
                 </div>
 
-                <!-- Video Modal -->
+                <!-- Video Modal (Replaced with Custom Motion Graphic Tour) -->
                 <div id="demoVideoModal"
-                    style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
+                    style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; backdrop-filter: blur(10px);">
                     <div
-                        style="position: relative; width: 80%; max-width: 900px; aspect-ratio: 16/9; background: black; border-radius: 12px; overflow: hidden; box-shadow: 0 0 50px rgba(59, 130, 246, 0.3);">
-                        <button onclick="document.getElementById('demoVideoModal').style.display='none'"
-                            style="position: absolute; top: -40px; right: 0; color: white; background: none; border: none; font-size: 2rem; cursor: pointer;">&times;</button>
-                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0"
-                            title="Product Demo" frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen></iframe>
+                        style="position: relative; width: 90%; max-width: 1000px; aspect-ratio: 16/9; background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 0 100px rgba(59, 130, 246, 0.4); border: 1px solid #334155;">
+                        <button onclick="closeVideoModal()"
+                            style="position: absolute; top: 20px; right: 20px; color: white; background: rgba(0,0,0,0.5); border: 1px solid white; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer; z-index: 100;">&times;</button>
+
+                        <!-- Motion Graphic Container -->
+                        <div id="motionTourContainer" style="width: 100%; height: 100%; position: relative;">
+
+                            <!-- Slide 1: Introduction -->
+                            <div class="tour-slide" id="slide1"
+                                style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);">
+                                <div class="slide-icon" style="font-size: 5rem; margin-bottom: 20px;">🎓</div>
+                                <h1 style="font-size: 3rem; color: white; font-weight: 800; text-align: center;">NEXTGEN
+                                    ERP</h1>
+                                <p style="font-size: 1.2rem; color: #94a3b8; letter-spacing: 2px;">THE FUTURE OF
+                                    EDUCATION</p>
+                            </div>
+
+                            <!-- Slide 2: Analytics -->
+                            <div class="tour-slide" id="slide2"
+                                style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #0f172a; opacity: 0;">
+                                <div style="display: flex; gap: 40px; align-items: center;">
+                                    <div
+                                        style="width: 300px; height: 300px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center;">
+                                        <div id="animChart"
+                                            style="width: 200px; height: 200px; border-radius: 50%; border: 15px solid #3b82f6; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg);">
+                                        </div>
+                                        <div
+                                            style="position: absolute; font-size: 2rem; color: white; font-weight: bold;">
+                                            98%</div>
+                                    </div>
+                                    <div>
+                                        <h2 style="font-size: 2.5rem; color: #60a5fa; margin-bottom: 15px;">AI-Driven
+                                            Analytics</h2>
+                                        <p
+                                            style="color: #cbd5e1; font-size: 1.1rem; max-width: 400px; line-height: 1.6;">
+                                            Real-time insights into student performance, attendance trends, and
+                                            financial health.
+                                        </p>
+                                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                            <span
+                                                style="background: #1e293b; padding: 5px 15px; border-radius: 20px; color: #10b981; font-size: 0.9rem;">▲
+                                                Growth</span>
+                                            <span
+                                                style="background: #1e293b; padding: 5px 15px; border-radius: 20px; color: #f59e0b; font-size: 0.9rem;">★
+                                                Accuracy</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Slide 3: Secure Payments -->
+                            <div class="tour-slide" id="slide3"
+                                style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; opacity: 0;">
+                                <div
+                                    style="font-size: 6rem; margin-bottom: 30px; color: #10b981; filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.5));">
+                                    🛡️</div>
+                                <h2 style="font-size: 2.5rem; color: white; margin-bottom: 20px;">Bank-Grade Security
+                                </h2>
+                                <div style="display: flex; gap: 20px;">
+                                    <div class="feature-box"
+                                        style="background: #1e293b; padding: 20px; border-radius: 8px; width: 200px; text-align: center; border: 1px solid #334155;">
+                                        <div style="font-size: 2rem; margin-bottom: 10px;">🔒</div>
+                                        <div style="color: #cbd5e1;">End-to-End Encrypted</div>
+                                    </div>
+                                    <div class="feature-box"
+                                        style="background: #1e293b; padding: 20px; border-radius: 8px; width: 200px; text-align: center; border: 1px solid #334155;">
+                                        <div style="font-size: 2rem; margin-bottom: 10px;">💳</div>
+                                        <div style="color: #cbd5e1;">Instant Transfers</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Slide 4: CTA -->
+                            <div class="tour-slide" id="slide4"
+                                style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; opacity: 0;">
+                                <h2 style="font-size: 3rem; color: white; margin-bottom: 30px;">Ready to Upgrade?</h2>
+                                <button onclick="window.location.href='/#pricing'"
+                                    style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; font-size: 1.5rem; padding: 15px 50px; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); transition: transform 0.2s;">
+                                    Get Started Now
+                                </button>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div style="position: absolute; bottom: 0; left: 0; height: 5px; background: #3b82f6; width: 0%;"
+                                id="tourProgress"></div>
+                        </div>
                     </div>
                 </div>
 
                 <script>
+                    let tourTimeline = null;
+
                     function openVideoModal() {
                         const modal = document.getElementById('demoVideoModal');
                         modal.style.display = 'flex';
-                        gsap.from(modal.querySelector('div'), { scale: 0.8, opacity: 0, duration: 0.4, ease: "back.out(1.7)" });
+
+                        // Initialize Tour Timeline
+                        if (!tourTimeline) {
+                            tourTimeline = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+
+                            // Slide 1: Intro
+                            tourTimeline.fromTo("#slide1 .slide-icon", { scale: 0, rotation: -180 }, { scale: 1, rotation: 0, duration: 1, ease: "back.out" })
+                                .fromTo("#slide1 h1", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, "-=0.5")
+                                .fromTo("#slide1 p", { opacity: 0 }, { opacity: 1, duration: 0.8 }, "-=0.5")
+                                .to("#slide1", { opacity: 0, scale: 1.1, duration: 0.8, delay: 2 });
+
+                            // Slide 2: Analytics
+                            tourTimeline.to("#slide2", { opacity: 1, duration: 0.8 })
+                                .fromTo("#animChart", { rotation: 0 }, { rotation: 360, duration: 2, ease: "power2.inOut" }, "-=0.4")
+                                .fromTo("#slide2 h2", { x: 50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8 }, "-=1.8")
+                                .to("#slide2", { opacity: 0, y: -50, duration: 0.8, delay: 2 });
+
+                            // Slide 3: Security
+                            tourTimeline.to("#slide3", { opacity: 1, duration: 0.8 })
+                                .fromTo(".feature-box", { y: 50, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.2, duration: 0.8 }, "-=0.4")
+                                .to("#slide3", { opacity: 0, scale: 0.9, duration: 0.8, delay: 2 });
+
+                            // Slide 4: CTA
+                            tourTimeline.to("#slide4", { opacity: 1, duration: 0.8 })
+                                .fromTo("#slide4 button", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "elastic.out(1, 0.3)" })
+                                .to("#slide4", { opacity: 0, duration: 0.8, delay: 3 });
+
+                            // Progress Bar
+                            gsap.to("#tourProgress", { width: "100%", duration: 18, ease: "none", repeat: -1 });
+                        } else {
+                            tourTimeline.restart();
+                        }
+                    }
+
+                    function closeVideoModal() {
+                        const modal = document.getElementById('demoVideoModal');
+                        modal.style.display = 'none';
+                        if (tourTimeline) tourTimeline.pause();
                     }
                 </script>
 
