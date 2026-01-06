@@ -1,497 +1,203 @@
-/* ADVANCED HOLOGRAPHIC ANIMATIONS & 3D CSS */
+/* ======================================================
+   Y.S.M – HOLOGRAPHIC ENGINE V3 (ELITE / FLAGSHIP)
+   Apple-Grade | Tesla-Style | SaaS Authority
+   ====================================================== */
 
-/* Force Flexbox Grid Structure for Small Screens */
+/* ---------------- CORE VARIABLES ---------------- */
+:root {
+  --holo-primary: #6366f1;
+  --holo-secondary: #4f46e5;
+  --holo-accent: #22d3ee;
+  --holo-success: #10b981;
+  --holo-bg: #020617;
+}
+
+/* ---------------- GLOBAL SAFETY ---------------- */
+* {
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ======================================================
+   HERO RESPONSIVE STRUCTURE
+   ====================================================== */
 @media (max-width: 1200px) {
-    .hero-content-wrapper {
-        display: flex !important;
-        flex-direction: column-reverse;
-        /* Put text on top in mobile usually, but here text is Left so reverse? No. Left=Text, Right=Holo. Column = Stack. Text top? Default column puts Left first. */
-        flex-direction: column !important;
-        gap: 60px !important;
-        text-align: center;
-    }
+  .hero-content-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 60px;
+    text-align: center;
+  }
 
-    .hero-left {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+  .hero-right {
+    height: 360px;
+  }
 
-    .hero-right {
-        width: 100%;
-        height: 400px !important;
-        margin-top: -50px;
-    }
-
-    .holo-container {
-        transform: scale(0.8);
-    }
+  .holo-container {
+    transform: scale(0.75);
+  }
 }
 
-/* 1. Holographic Floor */
+/* ======================================================
+   1. HOLOGRAPHIC FLOOR (GPU SAFE)
+   ====================================================== */
 .holo-floor {
-    position: absolute;
-    bottom: -150px;
-    left: -50%;
-    width: 200%;
-    height: 600px;
-    background:
-        linear-gradient(transparent 50%, rgba(99, 102, 241, 0.1) 50%),
-        linear-gradient(90deg, transparent 50%, rgba(99, 102, 241, 0.1) 50%);
-    background-size: 60px 60px;
-    transform: rotateX(75deg);
-    animation: moveFloor 10s linear infinite;
-    pointer-events: none;
-    z-index: 1;
-    mask-image: linear-gradient(to top, rgba(0, 0, 0, 1), transparent 80%);
+  position: absolute;
+  inset: auto -50% -140px -50%;
+  height: 520px;
+  background:
+    linear-gradient(transparent 50%, rgba(99,102,241,.12) 50%),
+    linear-gradient(90deg, transparent 50%, rgba(99,102,241,.12) 50%);
+  background-size: 60px 60px;
+  transform: rotateX(72deg);
+  animation: holoFloorMove 16s linear infinite;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, #000, transparent 85%);
+  will-change: transform;
 }
 
-@keyframes moveFloor {
-    from {
-        transform: rotateX(75deg) translateY(0);
-    }
-
-    to {
-        transform: rotateX(75deg) translateY(60px);
-    }
+@keyframes holoFloorMove {
+  to {
+    transform: rotateX(72deg) translateY(60px);
+  }
 }
 
-/* 2. Holographic Text Effects */
+/* ======================================================
+   2. GLITCH TEXT (ELITE – LOW COST)
+   ====================================================== */
 .glitch-text {
-    font-size: 3.5rem;
-    font-weight: 800;
-    line-height: 1.1;
-    position: relative;
-    color: white;
-    text-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 800;
+  position: relative;
+  color: #fff;
+  text-shadow: 0 0 14px rgba(99,102,241,.6);
 }
 
 .glitch-text::before,
 .glitch-text::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #020617;
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 .glitch-text::before {
-    left: 2px;
-    text-shadow: -1px 0 #ff00c1;
-    clip: rect(44px, 450px, 56px, 0);
-    animation: glitch-anim 5s infinite linear alternate-reverse;
+  color: #ff00c1;
+  transform: translateX(2px);
+  animation: glitchShift 3s infinite steps(1);
 }
 
 .glitch-text::after {
-    left: -2px;
-    text-shadow: -1px 0 #00fff9;
-    clip: rect(44px, 450px, 56px, 0);
-    animation: glitch-anim2 5s infinite linear alternate-reverse;
+  color: #00fff9;
+  transform: translateX(-2px);
+  animation: glitchShift 2.5s infinite steps(1) reverse;
 }
 
-@keyframes glitch-anim {
-    0% {
-        clip: rect(33px, 9999px, 11px, 0);
-    }
-
-    20% {
-        clip: rect(89px, 9999px, 13px, 0);
-    }
-
-    40% {
-        clip: rect(4px, 9999px, 86px, 0);
-    }
-
-    60% {
-        clip: rect(25px, 9999px, 95px, 0);
-    }
-
-    80% {
-        clip: rect(9px, 9999px, 25px, 0);
-    }
-
-    100% {
-        clip: rect(56px, 9999px, 63px, 0);
-    }
+@keyframes glitchShift {
+  0% { clip-path: inset(10% 0 80% 0); }
+  25% { clip-path: inset(40% 0 40% 0); }
+  50% { clip-path: inset(20% 0 60% 0); }
+  75% { clip-path: inset(70% 0 10% 0); }
+  100% { clip-path: inset(0 0 0 0); }
 }
 
-@keyframes glitch-anim2 {
-    0% {
-        clip: rect(22px, 9999px, 81px, 0);
-    }
-
-    20% {
-        clip: rect(49px, 9999px, 83px, 0);
-    }
-
-    40% {
-        clip: rect(8px, 9999px, 16px, 0);
-    }
-
-    60% {
-        clip: rect(45px, 9999px, 95px, 0);
-    }
-
-    80% {
-        clip: rect(19px, 9999px, 5px, 0);
-    }
-
-    100% {
-        clip: rect(76px, 9999px, 93px, 0);
-    }
-}
-
-.holo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid var(--primary);
-    border-radius: 4px;
-    color: var(--primary);
-    font-family: monospace;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
-}
-
-.pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    border-radius: 50%;
-    box-shadow: 0 0 10px #10b981;
-    animation: pulse 1s infinite;
-}
-
-/* 3. Cyber Buttons */
+/* ======================================================
+   3. CYBER BUTTONS (FLAGSHIP FEEL)
+   ====================================================== */
 .btn-cyber {
-    position: relative;
-    padding: 18px 40px;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%);
-    background: linear-gradient(90deg, #6366f1, #4f46e5);
-    transition: all 0.3s;
-    overflow: hidden;
+  padding: 16px 38px;
+  background: linear-gradient(90deg,var(--holo-primary),var(--holo-secondary));
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: 0;
+  cursor: pointer;
+  clip-path: polygon(15% 0,100% 0,100% 85%,85% 100%,0 100%,0 15%);
+  transition: transform .25s ease, box-shadow .25s ease;
+  will-change: transform;
 }
 
 .btn-cyber:hover {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
-    transform: scale(1.05);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 30px rgba(99,102,241,.6);
 }
 
-.btn-cyber .cybr-btn__glitch {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #ec4899;
-    filter: drop-shadow(-2px 3px #67e3f3) drop-shadow(-1px -3px #02d8f3) drop-shadow(2px 1px #02d8f3);
-    clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%);
-    transform: translate(-5px, -5px);
-    display: none;
-}
-
-.btn-cyber:hover .cybr-btn__glitch {
-    display: block;
-    animation: glitch-anim 0.3s infinite;
-    mix-blend-mode: hard-light;
-}
-
-.btn-holo {
-    position: relative;
-    padding: 16px 36px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    text-transform: uppercase;
-    text-decoration: none;
-    font-weight: 600;
-    letter-spacing: 1px;
-    clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
-    overflow: hidden;
-    display: inline-block;
-}
-
-.btn-holo:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
-}
-
-.scan-line {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 20px;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.5);
-    transform: skewX(-30deg);
-    animation: scan 3s infinite ease-in-out;
-}
-
-@keyframes scan {
-    0% {
-        left: -100%;
-    }
-
-    20% {
-        left: 200%;
-    }
-
-    100% {
-        left: 200%;
-    }
-}
-
-/* 4. 3D Stat Cubes */
-.hero-stats-3d {
-    display: flex;
-    gap: 30px;
-    margin-top: 50px;
-    justify-content: center;
-}
-
-@media (min-width: 1200px) {
-    .hero-stats-3d {
-        justify-content: flex-start;
-    }
-}
-
+/* ======================================================
+   4. 3D STAT CUBES (CONTROLLED MOTION)
+   ====================================================== */
 .stat-cube {
-    width: 100px;
-    height: 100px;
-    position: relative;
-    transform-style: preserve-3d;
-    transform: rotateX(-15deg) rotateY(25deg);
-    animation: rotateCube 10s infinite linear;
+  width: 90px;
+  height: 90px;
+  transform-style: preserve-3d;
+  animation: cubeRotate 16s linear infinite;
+  will-change: transform;
 }
 
-.face {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: white;
-    backdrop-filter: blur(2px);
-    box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.2);
+@keyframes cubeRotate {
+  to {
+    transform: rotateX(-15deg) rotateY(360deg);
+  }
 }
 
-.face span {
-    font-size: 0.6rem;
-    color: #94a3b8;
-    letter-spacing: 1px;
-}
-
-.front {
-    transform: translateZ(50px);
-}
-
-.back {
-    transform: rotateY(180deg) translateZ(50px);
-}
-
-.right {
-    transform: rotateY(90deg) translateZ(50px);
-}
-
-.left {
-    transform: rotateY(-90deg) translateZ(50px);
-}
-
-.top {
-    transform: rotateX(90deg) translateZ(50px);
-}
-
-.bottom {
-    transform: rotateX(-90deg) translateZ(50px);
-}
-
-@keyframes rotateCube {
-    0% {
-        transform: rotateX(-15deg) rotateY(0deg);
-    }
-
-    100% {
-        transform: rotateX(-15deg) rotateY(360deg);
-    }
-}
-
-/* 5. Holographic Core (The Main Event) */
+/* ======================================================
+   5. HOLOGRAPHIC CORE – MAIN SIGNATURE
+   ====================================================== */
 .holo-container {
-    position: relative;
-    width: 400px;
-    height: 400px;
-    perspective: 1000px;
-    transform-style: preserve-3d;
+  width: 380px;
+  height: 380px;
+  perspective: 1200px;
+  transform-style: preserve-3d;
 }
 
 .ring {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: var(--primary);
-    border-bottom-color: var(--secondary);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-    animation: spinRing 4s infinite linear;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--holo-primary);
+  border-bottom-color: var(--holo-secondary);
+  animation: ringSpin 10s linear infinite;
+  will-change: transform;
 }
 
-.ring-outer {
-    width: 380px;
-    height: 380px;
-    border-width: 4px;
-    animation-duration: 8s;
-}
-
-.ring-middle {
-    width: 280px;
-    height: 280px;
-    border-width: 2px;
-    border-left-color: var(--accent);
-    animation-duration: 6s;
-    animation-direction: reverse;
-}
-
-.ring-inner {
-    width: 180px;
-    height: 180px;
-    border-width: 6px;
-    border-right-color: #fff;
-    animation-duration: 4s;
-}
-
-@keyframes spinRing {
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
+@keyframes ringSpin {
+  to { transform: rotate(360deg); }
 }
 
 .core-sphere {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(circle at 30% 30%, #fff, var(--primary));
-    border-radius: 50%;
-    box-shadow: 0 0 60px var(--primary);
-    animation: pulseCore 2s infinite ease-in-out;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: radial-gradient(circle,#fff,var(--holo-primary));
+  animation: corePulse 3.2s ease-in-out infinite;
+  will-change: transform;
 }
 
-@keyframes pulseCore {
-
-    0%,
-    100% {
-        transform: translate(-50%, -50%) scale(1);
-        box-shadow: 0 0 60px var(--primary);
-    }
-
-    50% {
-        transform: translate(-50%, -50%) scale(1.2);
-        box-shadow: 0 0 100px var(--primary), 0 0 200px var(--secondary);
-    }
+@keyframes corePulse {
+  50% {
+    transform: scale(1.18);
+    box-shadow: 0 0 90px var(--holo-primary);
+  }
 }
 
-.scanner-beam {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    background: linear-gradient(to bottom, rgba(99, 102, 241, 0.2), transparent);
-    animation: scanVertical 3s infinite linear;
-    border-bottom: 2px solid var(--primary);
-    clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
-    filter: drop-shadow(0 0 10px var(--primary));
-}
-
-@keyframes scanVertical {
-    0% {
-        top: -20%;
-        opacity: 0;
-    }
-
-    20% {
-        opacity: 1;
-    }
-
-    80% {
-        opacity: 1;
-    }
-
-    100% {
-        top: 100%;
-        opacity: 0;
-    }
-}
-
+/* ======================================================
+   6. FLOATING DATA POINTS (PREMIUM DETAIL)
+   ====================================================== */
 .data-point {
-    position: absolute;
-    padding: 8px 16px;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-family: monospace;
-    font-size: 0.8rem;
-    border-radius: 4px;
-    pointer-events: none;
-    animation: floatData 4s infinite ease-in-out;
-}
-
-.p1 {
-    top: 20%;
-    left: -10%;
-    animation-delay: 0s;
-}
-
-.p2 {
-    bottom: 20%;
-    right: -10%;
-    animation-delay: 1.5s;
-    border-color: var(--secondary);
-    color: var(--secondary);
-}
-
-.p3 {
-    top: 10%;
-    right: 10%;
-    animation-delay: 3s;
-    border-color: var(--success);
-    color: var(--success);
+  animation: floatData 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes floatData {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-20px);
-    }
+  50% { transform: translateY(-18px); }
 }

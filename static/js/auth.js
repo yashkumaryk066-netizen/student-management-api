@@ -1,193 +1,143 @@
-// Authentication Logic
+/* =====================================================
+   ENTERPRISE AUTH ENGINE – V2
+   Secure | JWT | Django SaaS Ready
+   ===================================================== */
 
-// Check if user is already logged in (on page load)
-// Check if user is already logged in (on page load)
-async function checkAuth() {
-    const token = localStorage.getItem('authToken');
-    const currentPage = window.location.pathname;
+const AuthEngine = (() => {
+    let isChecking = false;
 
-    // 1. If no token, redirect to login if on protected page
-    if (!token) {
-        if (currentPage.includes('dashboard')) {
-            window.location.href = '/login/';
-        }
-        return;
-    }
+    /* ---------- TOKEN HELPERS ---------- */
+    const getAccessToken = () => TokenStore.access;
+    const getRefreshToken = () => TokenStore.refresh;
 
-    // 2. If token exists, VERIFY it with the backend (Secure Check)
-    try {
-        const response = await fetch('/api/profile/', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+    const clearAuth = () => TokenStore.clear();
+
+    /* ---------- PROFILE VERIFY ---------- */
+    async function fetchProfile() {
+        const token = getAccessToken();
+        if (!token) throw new Error('No token');
+
+        const res = await fetch('/api/profile/', {
+            headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (!response.ok) {
-            throw new Error('Token invalid or expired');
-        }
+        if (res.status === 401) throw new Error('TOKEN_EXPIRED');
+        if (!res.ok) throw new Error('PROFILE_FAILED');
 
-        const profile = await response.json();
+        return res.json();
+    }
 
-        // Update local storage with fresh data
-        localStorage.setItem('userRole', (profile.role || 'student').toLowerCase());
+    /* ---------- REFRESH TOKEN ---------- */
+    async function refreshAccessToken() {
+        const refresh = getRefreshToken();
+        if (!refresh) throw new Error('NO_REFRESH');
 
-        // CRITICAL: Store superuser status
-        localStorage.setItem('isSuperuser', profile.is_superuser);
+        const res = await fetch('/api/token/refresh/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh })
+        });
 
-        // If on login page, redirect to dashboard *after* verification
-        if (currentPage.includes('/login/') || currentPage === '/login') {
-            const role = localStorage.getItem('userRole');
-            redirectToDashboard(role);
-        }
+        if (!res.ok) throw new Error('REFRESH_FAILED');
 
-    } catch (error) {
-        console.error('Auth verification failed:', error);
+        const data = await res.json();
+        TokenStore.access = data.access;
+        return data.access;
+    }
 
-        // FAILSAFE: If user is admin (check local storage), allow them to stay briefly to fix setup
-        if (localStorage.getItem('username') === 'admin') {
-            console.warn('Admin profile missing, but bypassing auth check to allow setup.');
+    /* ---------- AUTH CHECK ---------- */
+    async function checkAuth() {
+        if (isChecking) return;
+        isChecking = true;
+
+        const page = location.pathname;
+        const isProtected = page.includes('/dashboard');
+
+        if (!getAccessToken()) {
+            if (isProtected) location.href = '/login/';
+            isChecking = false;
             return;
         }
 
-        // Clear invalid token
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userRole');
-
-        // Redirect to login if needed
-        if (currentPage.includes('dashboard')) {
-            window.location.href = '/login/';
-        }
-    }
-}
-
-// Redirect to appropriate dashboard based on role
-function redirectToDashboard(role) {
-    console.log('Redirecting for role:', role);
-    const dashboards = {
-        'admin': '/dashboard/admin/',
-        'client': '/dashboard/admin/', // Clients use Admin Dashboard (Restricted view)
-        'teacher': '/dashboard/teacher/',
-        'parent': '/dashboard/parent/',
-        'student': '/dashboard/student/',
-    };
-
-    // Force admin redirect for admin username
-    if (localStorage.getItem('username') === 'admin' || role === 'admin') {
-        window.location.href = '/dashboard/admin/';
-        return;
-    }
-
-    const dashboardUrl = dashboards[role] || '/dashboard/student/';
-    window.location.href = dashboardUrl;
-}
-
-// Handle login form submission
-if (document.getElementById('loginForm')) {
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        const rememberMe = document.getElementById('rememberMe').checked;
-
-        const errorAlert = document.getElementById('errorAlert');
-        const errorMessage = document.getElementById('errorMessage');
-        const loginBtn = document.getElementById('loginBtn');
-        const loginText = document.getElementById('loginText');
-        const loginLoader = document.getElementById('loginLoader');
-
-        // Hide previous errors
-        errorAlert.style.display = 'none';
-
-        // Show loading
-        loginBtn.disabled = true;
-        loginText.style.display = 'none';
-        loginLoader.style.display = 'inline-block';
-
         try {
-            // Call login API
-            const response = await AuthAPI.login(username, password);
-
-            // Store token
-            localStorage.setItem('authToken', response.access || response.token);
-            localStorage.setItem('refreshToken', response.refresh);
-            localStorage.setItem('username', username);
-
-            // Get user profile to determine role
-            try {
-                const profile = await AuthAPI.getProfile();
-                const role = (profile.role || 'student').toLowerCase();
-                localStorage.setItem('userRole', role);
-                localStorage.setItem('userId', profile.id);
-                localStorage.setItem('userFullName', profile.full_name || username);
-
-                // CRITICAL: Store superuser status
-                localStorage.setItem('isSuperuser', profile.is_superuser);
-
-                // Remember me
-                if (rememberMe) {
-                    localStorage.setItem('rememberMe', 'true');
+            const profile = await fetchProfile();
+            syncProfile(profile);
+            if (page.includes('/login')) redirect(profile.role);
+        } catch (err) {
+            if (err.message === 'TOKEN_EXPIRED') {
+                try {
+                    await refreshAccessToken();
+                    const profile = await fetchProfile();
+                    syncProfile(profile);
+                } catch {
+                    clearAuth();
+                    if (isProtected) location.href = '/login/';
                 }
-
-                // Redirect to dashboard
-                redirectToDashboard(role);
-            } catch (profileError) {
-                // If profile API fails, try to determine role from token or default to student
-                console.warn('Profile fetch failed, using default role');
-
-                // Check if user is admin by username
-                if (username.toLowerCase() === 'admin') {
-                    localStorage.setItem('userRole', 'admin');
-                } else if (username.toLowerCase().includes('teacher')) {
-                    localStorage.setItem('userRole', 'teacher');
-                } else if (username.toLowerCase().includes('parent')) {
-                    localStorage.setItem('userRole', 'parent');
-                } else {
-                    localStorage.setItem('userRole', 'student');
-                }
-
-                redirectToDashboard(localStorage.getItem('userRole'));
+            } else {
+                clearAuth();
+                if (isProtected) location.href = '/login/';
             }
-
-        } catch (error) {
-            // Show error
-            errorMessage.textContent = error.message || 'Invalid username or password';
-            errorAlert.style.display = 'block';
-
-            // Hide loading
-            loginBtn.disabled = false;
-            loginText.style.display = 'inline';
-            loginLoader.style.display = 'none';
         }
-    });
-}
 
-// Logout function
-function logout() {
-    if (typeof DashboardApp !== 'undefined' && DashboardApp.showConfirm) {
-        DashboardApp.showConfirm("Logout?", "Are you sure you want to log out securely?", () => {
-            localStorage.clear();
-            window.location.href = '/login/';
-        });
-    } else {
-        // Fallback for non-dashboard pages
-        if (confirm('Are you sure you want to logout?')) {
-            localStorage.clear();
-            window.location.href = '/login/';
-        }
+        isChecking = false;
     }
-}
 
-// Get current user info
-function getCurrentUser() {
-    return {
-        username: localStorage.getItem('username'),
-        role: localStorage.getItem('userRole'),
-        id: localStorage.getItem('userId'),
-        fullName: localStorage.getItem('userFullName'),
-        token: localStorage.getItem('authToken'),
-    };
-}
+    /* ---------- SYNC PROFILE ---------- */
+    function syncProfile(profile) {
+        localStorage.setItem('userId', profile.id);
+        localStorage.setItem('userFullName', profile.full_name || '');
+        localStorage.setItem('username', profile.username);
+        localStorage.setItem('userRole', profile.role);
+        localStorage.setItem('isSuperuser', profile.is_superuser);
+    }
 
-// Check auth on page load
-document.addEventListener('DOMContentLoaded', checkAuth);
+    /* ---------- REDIRECT ---------- */
+    function redirect(role) {
+        const routes = {
+            admin: '/dashboard/admin/',
+            client: '/dashboard/admin/',
+            teacher: '/dashboard/teacher/',
+            parent: '/dashboard/parent/',
+            student: '/dashboard/student/'
+        };
+        location.href = routes[role] || routes.student;
+    }
+
+    /* ---------- LOGIN ---------- */
+    async function login(username, password, rememberMe) {
+        const res = await AuthAPI.login(username, password);
+
+        // API.js handles token storage in login method, 
+        // but we explicitly sync here for clarity
+        TokenStore.access = res.access;
+        localStorage.setItem('refreshToken', res.refresh);
+        localStorage.setItem('username', username);
+
+        if (rememberMe) localStorage.setItem('rememberMe', 'true');
+
+        const profile = await fetchProfile();
+        syncProfile(profile);
+        redirect(profile.role);
+    }
+
+    /* ---------- LOGOUT ---------- */
+    function logout() {
+        clearAuth();
+        location.href = '/login/';
+    }
+
+    /* ---------- CURRENT USER ---------- */
+    function currentUser() {
+        return {
+            id: localStorage.getItem('userId'),
+            username: localStorage.getItem('username'),
+            role: localStorage.getItem('userRole'),
+            isSuperuser: localStorage.getItem('isSuperuser') === 'true'
+        };
+    }
+
+    return { checkAuth, login, logout, currentUser };
+})();
+
+/* ---------- AUTO CHECK ---------- */
+document.addEventListener('DOMContentLoaded', AuthEngine.checkAuth);

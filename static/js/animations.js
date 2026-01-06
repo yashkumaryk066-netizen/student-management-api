@@ -1,135 +1,131 @@
-// Welcome Popup Functionality
+/* =====================================================
+   Y.S.M ERP – Premium Landing Interaction Engine V2
+   Stable | Accessible | Performance-Optimized
+   ===================================================== */
+
+const prefersReducedMotion =
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- WELCOME POPUP ---------- */
 function showWelcomePopup() {
     const popup = document.getElementById('welcome-popup');
-    if (popup && !sessionStorage.getItem('welcomeShown')) {
-        setTimeout(() => {
-            popup.style.display = 'block';
-            sessionStorage.setItem('welcomeShown', 'true');
-        }, 2000); // Show after 2 seconds
-    }
+    if (!popup || sessionStorage.getItem('welcomeShown')) return;
+
+    setTimeout(() => {
+        popup.classList.add('active');
+        sessionStorage.setItem('welcomeShown', 'true');
+    }, 1800);
 }
 
 function closeWelcomePopup() {
     const popup = document.getElementById('welcome-popup');
-    if (popup) {
-        popup.classList.add('hide');
-        setTimeout(() => {
-            popup.style.display = 'none';
-        }, 400);
-    }
+    if (!popup) return;
+
+    popup.classList.remove('active');
+    popup.classList.add('hide');
+
+    setTimeout(() => {
+        popup.classList.remove('hide');
+    }, 400);
 }
 
-// Particle System
+/* ---------- PARTICLES (DOM SAFE) ---------- */
 function createParticles() {
     const container = document.getElementById('particles-container');
-    if (!container) return;
+    if (!container || prefersReducedMotion) return;
 
-    // Create 50 particles
-    for (let i = 0; i < 50; i++) {
-        setTimeout(() => {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-            particle.style.animationDelay = Math.random() * 5 + 's';
-            container.appendChild(particle);
-        }, i * 100);
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = 12 + Math.random() * 8 + 's';
+        p.style.animationDelay = Math.random() * 5 + 's';
+        fragment.appendChild(p);
     }
+
+    container.appendChild(fragment);
 }
 
-// Floating Module Cards
+/* ---------- FLOATING MODULE CARDS ---------- */
 function createFloatingCards() {
     const container = document.querySelector('.floating-modules');
     if (!container) return;
 
     const cards = [
-        {
-            icon: '📚',
-            title: 'Student Management',
-            description: '1000+ students managed'
-        },
-        {
-            icon: '📊',
-            title: 'Attendance Analytics',
-            description: '99.9% accuracy'
-        },
-        {
-            icon: '🏢',
-            title: 'Hostel & Residential',
-            description: '24/7 management'
-        },
-        {
-            icon: '💼',
-            title: 'Finance & Payroll',
-            description: 'Automated billing'
-        }
+        ['📚', 'Student Management', '1000+ students managed'],
+        ['📊', 'Attendance Analytics', '99.9% accuracy'],
+        ['🏢', 'Hostel & Residential', '24/7 management'],
+        ['💼', 'Finance & Payroll', 'Automated billing']
     ];
 
-    cards.forEach((card, index) => {
-        const cardEl = document.createElement('div');
-        cardEl.className = 'floating-card';
-        cardEl.innerHTML = `
-            <div class="floating-card-icon">${card.icon}</div>
-            <h4>${card.title}</h4>
-            <p>${card.description}</p>
+    cards.forEach(([icon, title, desc]) => {
+        const el = document.createElement('div');
+        el.className = 'floating-card';
+        el.innerHTML = `
+            <div class="floating-card-icon">${icon}</div>
+            <h4>${title}</h4>
+            <p>${desc}</p>
         `;
-        container.appendChild(cardEl);
+        container.appendChild(el);
     });
 }
 
-// Stats Counter Animation
+/* ---------- STATS DELAY ---------- */
 function animateStats() {
-    const stats = document.querySelectorAll('.stat-item h3');
-    stats.forEach((stat, index) => {
-        stat.parentElement.style.setProperty('--delay', index);
+    document.querySelectorAll('.stat-item').forEach((el, i) => {
+        el.style.setProperty('--delay', i * 0.15 + 's');
     });
 }
 
-// Smooth Scroll
+/* ---------- SMOOTH SCROLL ---------- */
 function setupSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const href = this.getAttribute('href');
-            if (href !== '#') {
-                e.preventDefault();
-                const target = document.querySelector(href);
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            }
+        anchor.addEventListener('click', e => {
+            const target = document.querySelector(anchor.getAttribute('href'));
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 }
 
-// Module Card Hover 3D Effect
+/* ---------- 3D HOVER (CLAMPED & SAFE) ---------- */
 function setup3DHover() {
+    if (prefersReducedMotion) return;
+
     const cards = document.querySelectorAll('.bento-card, .pricing-card');
+    const maxRotate = 8;
 
     cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        let raf;
 
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
+        card.addEventListener('mousemove', e => {
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(() => {
+                const r = card.getBoundingClientRect();
+                const x = e.clientX - r.left;
+                const y = e.clientY - r.top;
 
-            const rotateX = (y - centerY) / 10;
-            const rotateY = (centerX - x) / 10;
+                const rx = Math.max(-maxRotate,
+                    Math.min(maxRotate, (y - r.height / 2) / 15));
+                const ry = Math.max(-maxRotate,
+                    Math.min(maxRotate, (r.width / 2 - x) / 15));
 
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                card.style.transform =
+                    `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+            });
         });
 
         card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            card.style.transform =
+                'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
         });
     });
 }
 
-// Initialize on page load
+/* ---------- INIT ---------- */
 document.addEventListener('DOMContentLoaded', () => {
     showWelcomePopup();
     createParticles();
@@ -138,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSmoothScroll();
     setup3DHover();
 
-    console.log('✨ Y.S.M ERP - Premium animations loaded');
+    console.log('✨ Y.S.M ERP – Premium Landing Engine V2 Loaded');
 });
 
-// Export functions for inline use
+/* ---------- EXPORT ---------- */
 window.closeWelcomePopup = closeWelcomePopup;

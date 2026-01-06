@@ -1,169 +1,206 @@
-/* Premium 3D Modal System */
-:root {
-    --modal-primary: #6366f1;
-    /* Indigo */
-    --modal-success: #10b981;
-    /* Emerald */
-    --modal-error: #ef4444;
-    /* Red */
-    --modal-bg: rgba(17, 24, 39, 0.95);
-    /* Dark Gray */
-    --modal-glass: rgba(255, 255, 255, 0.05);
-    --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+/* ======================================================================
+   PREMIUM 3D MODAL SYSTEM — ENTERPRISE / SAAS GRADE
+   Fixed • Polished • Production Ready
+   ====================================================================== */
+
+:root{
+  --modal-primary:#6366f1;
+  --modal-success:#10b981;
+  --modal-error:#ef4444;
+
+  --modal-bg:rgba(17,24,39,.96);
+  --modal-glass:rgba(255,255,255,.06);
+
+  --modal-shadow:
+    0 30px 80px rgba(0,0,0,.6),
+    inset 0 1px 0 rgba(255,255,255,.08);
+
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
 }
 
-/* Overlay - Glassmorphism */
-.premium-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    perspective: 1000px;
-    /* Essential for 3D effect */
+/* ================= OVERLAY ================= */
+.premium-modal-overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+
+  z-index:9999;
+  opacity:0;
+  visibility:hidden;
+  transition:.45s ease;
+  perspective:1200px;
 }
 
-.premium-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
+.premium-modal-overlay.active{
+  opacity:1;
+  visibility:visible;
 }
 
-/* Modal Content - 3D Card */
-.premium-modal-box {
-    background: linear-gradient(145deg, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.95));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 2.5rem;
-    width: 90%;
-    max-width: 450px;
-    text-align: center;
-    color: white;
-    box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.05),
-        0 20px 60px rgba(0, 0, 0, 0.6),
-        0 0 40px rgba(99, 102, 241, 0.1);
-    /* Subtle Glow */
+/* ================= MODAL BOX ================= */
+.premium-modal-box{
+  width:90%;
+  max-width:460px;
+  padding:2.6rem 2.4rem;
 
-    transform: rotateX(20deg) scale(0.8) translateY(50px);
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    /* Bouncy spring effect */
+  background:
+    linear-gradient(160deg,
+      rgba(31,41,55,.92),
+      rgba(17,24,39,.98)
+    );
+
+  border-radius:26px;
+  border:1px solid rgba(255,255,255,.12);
+
+  color:#fff;
+  text-align:center;
+
+  box-shadow:var(--modal-shadow);
+
+  transform:
+    rotateX(22deg)
+    translateY(80px)
+    scale(.78);
+
+  opacity:0;
+  transition:.55s var(--ease-spring);
+  position:relative;
+  overflow:hidden;
 }
 
-/* Active State Animation - Pop & Flatten */
-.premium-modal-overlay.active .premium-modal-box {
-    transform: rotateX(0deg) scale(1) translateY(0);
-    opacity: 1;
+/* Glass highlight */
+.premium-modal-box::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(120deg,
+      transparent 30%,
+      rgba(255,255,255,.06),
+      transparent 70%);
+  opacity:.6;
+  pointer-events:none;
 }
 
-/* 3D Animated Icon */
-.premium-modal-icon {
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
-    display: inline-block;
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
-    animation: floatIcon 3s ease-in-out infinite;
+.premium-modal-overlay.active .premium-modal-box{
+  transform:rotateX(0) translateY(0) scale(1);
+  opacity:1;
 }
 
-@keyframes floatIcon {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
+/* ================= ICON ================= */
+.premium-modal-icon{
+  font-size:3.6rem;
+  margin-bottom:1.6rem;
+  display:inline-block;
+  filter:drop-shadow(0 0 18px rgba(255,255,255,.35));
+  animation:floatIcon 3.2s ease-in-out infinite;
 }
 
-/* 3D Heading Text */
-.premium-modal-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    letter-spacing: -0.02em;
+@keyframes floatIcon{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
 }
 
-.premium-modal-message {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.1rem;
-    color: #9ca3af;
-    line-height: 1.6;
-    margin-bottom: 2rem;
+/* ================= TITLE ================= */
+.premium-modal-title{
+  font-size:1.9rem;
+  font-weight:800;
+  margin-bottom:.9rem;
+  letter-spacing:-.02em;
+
+  background:linear-gradient(135deg,#fff,#cbd5e1);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+
+  text-shadow:0 6px 18px rgba(0,0,0,.35);
 }
 
-/* Action Button with Glow */
-.premium-modal-btn {
-    background: linear-gradient(135deg, var(--modal-primary), #4f46e5);
-    color: white;
-    border: none;
-    padding: 1rem 2.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
-    width: 100%;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
+/* ================= MESSAGE ================= */
+.premium-modal-message{
+  font-size:1.08rem;
+  line-height:1.65;
+  color:#9ca3af;
+  margin-bottom:2.3rem;
 }
 
-.premium-modal-btn::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: 0.5s;
+/* ================= BUTTON ================= */
+.premium-modal-btn{
+  width:100%;
+  padding:1rem 2.4rem;
+
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+
+  font-size:1rem;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+
+  color:#fff;
+  background:linear-gradient(135deg,var(--modal-primary),#4f46e5);
+
+  box-shadow:0 12px 30px rgba(79,70,229,.45);
+  transition:.3s ease;
+  position:relative;
+  overflow:hidden;
 }
 
-.premium-modal-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.6);
+.premium-modal-btn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.25),
+    transparent
+  );
+  transform:translateX(-120%);
+  transition:.55s ease;
 }
 
-.premium-modal-btn:hover::after {
-    left: 100%;
+.premium-modal-btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 45px rgba(79,70,229,.65);
 }
 
-.premium-modal-btn:active {
-    transform: translateY(1px);
+.premium-modal-btn:hover::after{
+  transform:translateX(120%);
 }
 
-/* Status Variants */
-.premium-modal-box.success {
-    border-top: 4px solid var(--modal-success);
+.premium-modal-btn:active{
+  transform:translateY(1px);
 }
 
-.premium-modal-box.success .premium-modal-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
+/* ================= STATUS STATES ================= */
+.premium-modal-box.success{
+  border-top:4px solid var(--modal-success);
 }
 
-.premium-modal-box.error {
-    border-top: 4px solid var(--modal-error);
+.premium-modal-box.success .premium-modal-btn{
+  background:linear-gradient(135deg,#10b981,#059669);
+  box-shadow:0 12px 30px rgba(16,185,129,.45);
 }
 
-.premium-modal-box.error .premium-modal-btn {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4);
+.premium-modal-box.error{
+  border-top:4px solid var(--modal-error);
+}
+
+.premium-modal-box.error .premium-modal-btn{
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  box-shadow:0 12px 30px rgba(239,68,68,.45);
+}
+
+/* ================= ACCESSIBILITY ================= */
+@media (prefers-reduced-motion:reduce){
+  *{
+    animation:none!important;
+    transition:none!important;
+  }
 }

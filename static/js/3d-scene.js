@@ -1,94 +1,141 @@
-// 3D Scene with Three.js - Floating Graduation Cap
+/* =====================================================
+   PREMIUM 3D SCENE – GRADUATION CAP V2
+   Cinematic | GPU Safe | SaaS Landing Ready
+   ===================================================== */
+
+const prefersReducedMotion =
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- SCENE ---------- */
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+const camera = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
+);
+camera.position.z = 6;
+
+/* ---------- RENDERER (DPR SAFE) ---------- */
 const renderer = new THREE.WebGLRenderer({
     antialias: true,
-    alpha: true
+    alpha: true,
+    powerPreference: 'high-performance'
 });
 
+const dpr = Math.min(window.devicePixelRatio, 2);
+renderer.setPixelRatio(dpr);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000, 0); // Transparent background
-document.getElementById('scene-container').appendChild(renderer.domElement);
+renderer.setClearColor(0x000000, 0);
 
-// Create Graduation Cap
+document
+    .getElementById('scene-container')
+    ?.appendChild(renderer.domElement);
+
+/* ---------- CAP MODEL ---------- */
 const capGroup = new THREE.Group();
 
-// Cap top (square)
-const topGeometry = new THREE.BoxGeometry(2, 0.1, 2);
-const capMaterial = new THREE.MeshPhongMaterial({
+/* Top */
+const capMaterial = new THREE.MeshStandardMaterial({
     color: 0x6366f1,
-    shininess: 100,
+    roughness: 0.25,
+    metalness: 0.4,
     emissive: 0x4f46e5,
-    emissiveIntensity: 0.2
+    emissiveIntensity: 0.15
 });
-const capTop = new THREE.Mesh(topGeometry, capMaterial);
+
+const capTop = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 0.12, 2),
+    capMaterial
+);
 capGroup.add(capTop);
 
-// Cap base (cylinder)
-const baseGeometry = new THREE.CylinderGeometry(0.8, 0.8, 0.5, 32);
-const capBase = new THREE.Mesh(baseGeometry, capMaterial);
-capBase.position.y = -0.3;
+/* Base */
+const capBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.8, 0.8, 0.45, 32),
+    capMaterial
+);
+capBase.position.y = -0.32;
 capGroup.add(capBase);
 
-// Tassel
-const tasselGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 8);
-const tasselMaterial = new THREE.MeshPhongMaterial({ color: 0xffd700 });
-const tassel = new THREE.Mesh(tasselGeometry, tasselMaterial);
-tassel.position.set(0.8, 0.05, 0.8);
+/* Tassel */
+const tasselMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffd700,
+    metalness: 0.6,
+    roughness: 0.3
+});
+
+const tassel = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 1, 12),
+    tasselMaterial
+);
+tassel.position.set(0.85, 0.05, 0.85);
 capGroup.add(tassel);
 
-// Tassel ball
-const ballGeometry = new THREE.SphereGeometry(0.12, 16, 16);
-const ball = new THREE.Mesh(ballGeometry, tasselMaterial);
-ball.position.set(0.8, -0.45, 0.8);
-capGroup.add(ball);
+const tasselBall = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12, 16, 16),
+    tasselMaterial
+);
+tasselBall.position.set(0.85, -0.45, 0.85);
+capGroup.add(tasselBall);
 
 scene.add(capGroup);
 
-// Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambientLight);
+/* ---------- LIGHTING ---------- */
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-const pointLight1 = new THREE.PointLight(0x6366f1, 1);
-pointLight1.position.set(5, 5, 5);
-scene.add(pointLight1);
+const keyLight = new THREE.PointLight(0x6366f1, 1.2);
+keyLight.position.set(4, 6, 5);
+scene.add(keyLight);
 
-const pointLight2 = new THREE.PointLight(0xec4899, 0.8);
-pointLight2.position.set(-5, -5, 5);
-scene.add(pointLight2);
+const rimLight = new THREE.PointLight(0xec4899, 0.8);
+rimLight.position.set(-5, -4, 3);
+scene.add(rimLight);
 
-camera.position.z = 6;
+/* ---------- MOUSE INFLUENCE ---------- */
+let mouseX = 0;
+let mouseY = 0;
 
-// Animation
+document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 0.6;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 0.6;
+});
+
+/* ---------- ANIMATION LOOP ---------- */
 let time = 0;
-function animate3D() {
-    requestAnimationFrame(animate3D);
-    time += 0.01;
+let active = true;
 
-    // Floating animation
-    capGroup.position.y = Math.sin(time) * 0.5;
+function animate() {
+    if (!active) return;
 
-    // Rotating animation
-    capGroup.rotation.y += 0.01;
-    capGroup.rotation.x = Math.sin(time * 0.5) * 0.1;
+    requestAnimationFrame(animate);
+    time += 0.015;
+
+    // Floating (cinematic)
+    capGroup.position.y = prefersReducedMotion ? 0 : Math.sin(time) * 0.35;
+
+    // Autonomous rotation
+    capGroup.rotation.y += 0.004;
+
+    // Mouse influence (smooth)
+    capGroup.rotation.x += (mouseY - capGroup.rotation.x) * 0.05;
+    capGroup.rotation.y += (mouseX - capGroup.rotation.y) * 0.05;
 
     renderer.render(scene, camera);
 }
 
-animate3D();
+animate();
 
-// Resize handler
+/* ---------- VISIBILITY / POWER SAVE ---------- */
+document.addEventListener('visibilitychange', () => {
+    active = !document.hidden;
+    if (active) animate();
+});
+
+/* ---------- RESIZE ---------- */
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// Mouse interaction
-document.addEventListener('mousemove', (event) => {
-    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    capGroup.rotation.x = mouseY * 0.3;
-    capGroup.rotation.y = mouseX * 0.3;
 });

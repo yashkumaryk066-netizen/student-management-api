@@ -1,35 +1,38 @@
 /*
-    PREMIUM MOTION ENGINE (Lenis + GSAP)
-    Author: Antigravity / Y.S.M Advance Education System
+    PREMIUM MOTION ENGINE – ENTERPRISE V2
+    Lenis + GSAP (Jitter-free, SPA-safe)
+    Author: Y.S.M Advance Education System
 */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 0. Safety Check
-    if (typeof Lenis === 'undefined' || typeof gsap === 'undefined') {
-        console.error("❌ Y.S.M Motion Engine: Lenis or GSAP not loaded. Check script order.");
+
+    /* ---------------- SAFETY ---------------- */
+    if (!window.gsap || !window.Lenis) {
+        console.error("❌ Y.S.M Motion Engine: GSAP or Lenis missing. Check script order.");
         return;
     }
 
-    // 1. Preloader Removal (Immediate Safety)
+    if (window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+    }
+
+    /* ---------------- PRELOADER ---------------- */
     window.addEventListener('load', () => {
         const preloader = document.getElementById('preloader');
-        if (preloader) {
-            preloader.classList.add('fade-out');
-            setTimeout(() => preloader.style.display = 'none', 1000);
-        }
+        if (!preloader) return;
+
+        preloader.classList.add('fade-out');
+        setTimeout(() => preloader.remove(), 1000);
     });
 
-    // 2. Initialize Lenis Smooth Scroll
+    /* ---------------- LENIS INIT (SINGLE RAF) ---------------- */
     const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        gestureOrientation: 'vertical',
+        duration: 1.1,
         smoothWheel: true,
-        wheelMultiplier: 1,
         smoothTouch: false,
+        wheelMultiplier: 1,
         touchMultiplier: 2,
-        infinite: false,
+        easing: t => 1 - Math.pow(1 - t, 4),
     });
 
     function raf(time) {
@@ -38,50 +41,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     requestAnimationFrame(raf);
 
-    // 2. Register GSAP Plugins
-    if (typeof ScrollTrigger !== 'undefined') {
-        gsap.registerPlugin(ScrollTrigger);
-    } else {
-        console.warn("⚠️ ScrollTrigger not found.");
+    /* ---------------- SCROLLTRIGGER SYNC ---------------- */
+    if (window.ScrollTrigger) {
+        lenis.on('scroll', ScrollTrigger.update);
+        ScrollTrigger.scrollerProxy(document.body, {
+            scrollTop(value) {
+                return arguments.length
+                    ? lenis.scrollTo(value, { immediate: true })
+                    : lenis.scroll;
+            },
+            getBoundingClientRect() {
+                return { top: 0, left: 0, width: innerWidth, height: innerHeight };
+            }
+        });
+
+        ScrollTrigger.addEventListener('refresh', () => lenis.resize());
+        ScrollTrigger.refresh();
     }
 
-    // Sync ScrollTrigger with Lenis
-    lenis.on('scroll', () => {
-        if (typeof ScrollTrigger !== 'undefined') {
-            ScrollTrigger.update();
-        }
-    });
-
-    gsap.ticker.add((time) => {
-        lenis.raf(time * 1000);
-    });
-
-    gsap.ticker.lagSmoothing(0);
-
-    // 3. Cinematic Section Reveal (Landing Page)
-    if (typeof ScrollTrigger !== 'undefined') {
-        const revealSections = gsap.utils.toArray('.reveal-section');
-        revealSections.forEach((section) => {
-            gsap.to(section, {
+    /* ---------------- REVEAL SECTIONS ---------------- */
+    gsap.utils.toArray('.reveal-section').forEach(section => {
+        gsap.fromTo(section,
+            { opacity: 0, y: 60, scale: 0.96, filter: "blur(6px)" },
+            {
                 opacity: 1,
                 y: 0,
                 scale: 1,
                 filter: "blur(0px)",
-                duration: 1.5,
+                duration: 1.4,
                 ease: "power4.out",
                 scrollTrigger: {
                     trigger: section,
                     start: "top 85%",
-                    toggleActions: "play none none reverse",
+                    toggleActions: "play none none reverse"
                 }
-            });
-        });
-    }
+            }
+        );
+    });
 
-    // 4. Parallax Background Effects
-    if (document.querySelector('.grid-3d') && typeof ScrollTrigger !== 'undefined') {
+    /* ---------------- HERO PARALLAX ---------------- */
+    if (document.querySelector('.grid-3d') && window.ScrollTrigger) {
         gsap.to(".grid-3d", {
-            yPercent: 30,
+            yPercent: 25,
             ease: "none",
             scrollTrigger: {
                 trigger: ".hero",
@@ -92,65 +93,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Floating Header Glass Effect
+    /* ---------------- FLOATING GLASS NAV ---------------- */
     const navbar = document.querySelector('.navbar');
-    if (navbar && typeof ScrollTrigger !== 'undefined') {
+    if (navbar && window.ScrollTrigger) {
         ScrollTrigger.create({
-            start: 'top -80',
-            onUpdate: (self) => {
-                if (self.direction === 1) {
-                    navbar.classList.add('glass-active');
-                    gsap.to(navbar, { y: -10, duration: 0.3 });
-                } else {
-                    navbar.classList.remove('glass-active');
-                    gsap.to(navbar, { y: 0, duration: 0.3 });
-                }
+            start: 80,
+            onUpdate: self => {
+                navbar.classList.toggle('glass-active', self.scroll() > 80);
+                gsap.to(navbar, {
+                    y: self.direction === 1 ? -10 : 0,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
             }
         });
     }
 
-    // 6. SPA-like Transition on Navigation (Intercept links)
-    const links = document.querySelectorAll('a[href^="/"]');
-    links.forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            if (href.includes('logout') || href.includes('api')) return;
-            if (e.ctrlKey || e.shiftKey || e.metaKey || link.target === '_blank') return;
-
-            e.preventDefault();
-
-            gsap.to("body", {
-                opacity: 0,
-                y: -20,
-                duration: 0.5,
-                ease: "power2.inOut",
-                onComplete: () => {
-                    window.location.href = href;
-                }
-            });
-        });
-    });
-
-    // 7. Hero Elements Entrance (Safe & Cinematic)
+    /* ---------------- HERO INTRO ---------------- */
     if (document.querySelector('.hero-left h1')) {
-        const heroTl = gsap.timeline({
-            defaults: { ease: "power4.out", force3D: true }
-        });
-
-        // Initial set to ensure they aren't hidden by previous JS runs
-        gsap.set([".hero-left h1", ".hero-description", ".hero-buttons", ".stat-item"], { visibility: "visible", opacity: 1 });
-
-        heroTl.from(".hero-left h1", {
-            opacity: 0,
-            y: 50,
-            duration: 1.2,
-            delay: 0.5
-        })
-            .from(".hero-description", {
-                opacity: 0,
-                y: 30,
-                duration: 1
-            }, "-=0.8")
+        gsap.timeline({ defaults: { ease: "power4.out" } })
+            .from(".hero-left h1", { opacity: 0, y: 60, duration: 1.2 })
+            .from(".hero-description", { opacity: 0, y: 40, duration: 1 }, "-=0.8")
             .from(".hero-buttons .btn-premium", {
                 opacity: 0,
                 y: 30,
@@ -166,23 +129,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }, "-=0.4");
     }
 
-    // 8. Pricing Cards Entrance (Robust Trigger)
+    /* ---------------- PRICING ---------------- */
     if (document.querySelector('.pricing-card')) {
-        gsap.set(".pricing-card", { visibility: "visible", opacity: 1 });
-
         gsap.from(".pricing-card", {
             opacity: 0,
-            y: 50,
+            y: 60,
             stagger: 0.2,
-            duration: 1.2,
+            duration: 1.1,
             ease: "power3.out",
             scrollTrigger: {
                 trigger: "#pricing",
-                start: "top 85%",
-                toggleActions: "play none none none"
+                start: "top 85%"
             }
         });
     }
 
-    console.log("🚀 Y.S.M Motion Engine: Stabilized & Active");
+    /* ---------------- SPA SAFE NAV ---------------- */
+    document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', e => {
+            const href = link.getAttribute('href');
+            if (
+                !href ||
+                href.startsWith('#') ||
+                href.startsWith('http') ||
+                href.includes('logout') ||
+                e.metaKey || e.ctrlKey || e.shiftKey ||
+                link.target === '_blank'
+            ) return;
+
+            e.preventDefault();
+            gsap.to("body", {
+                opacity: 0,
+                y: -20,
+                duration: 0.45,
+                ease: "power2.inOut",
+                onComplete: () => window.location.href = href
+            });
+        });
+    });
+
+    console.log("🚀 Y.S.M Motion Engine V2 — Enterprise Stable & Active");
 });

@@ -1,89 +1,183 @@
-/* 
-   PREMIUM MOTION ENGINE STYLES
-   Designed for Cinematic SaaS Experience
-*/
+/* ==========================================================================
+   PREMIUM MOTION ENGINE — CINEMATIC SAAS (FIXED & HARDENED)
+   Lenis • GSAP • Scroll Safe • Production Ready
+   ========================================================================== */
 
+/* ================= LENIS CORE ================= */
 html.lenis {
-    height: auto;
+  height: auto;
+}
+
+.lenis,
+.lenis body {
+  overscroll-behavior: none;
 }
 
 .lenis-smooth {
-    scroll-behavior: auto !important;
+  scroll-behavior: auto !important;
 }
 
 .lenis-smooth [data-lenis-prevent] {
-    overscroll-behavior: contain;
+  overscroll-behavior: contain;
 }
 
-/* Smooth Wrapper Requirements */
+/* ================= SMOOTH WRAPPER ================= */
 #smooth-wrapper {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 #smooth-content {
-    overflow: visible;
-    width: 100%;
-    position: relative;
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: visible;
+  will-change: transform;
 }
 
-/* Reveal Animation Base Classes (Safe Defaults) */
+/* ================= REVEAL SYSTEM ================= */
 .reveal-section {
-    opacity: 1;
-    transform: none;
-    filter: none;
-    transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition:
+    opacity .8s cubic-bezier(.22,1,.36,1),
+    transform .9s cubic-bezier(.22,1,.36,1),
+    filter .6s ease;
 }
 
-/* Glassmorphism for floating headers */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(80px) scale(.96);
+  filter: blur(6px);
+}
+
+.reveal-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* ================= FLOATING GLASS NAV ================= */
 .navbar.glass-active {
-    background: rgba(2, 4, 10, 0.7) !important;
-    backdrop-filter: blur(25px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  background: rgba(2, 4, 10, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+
+  border-bottom: 1px solid rgba(255,255,255,.12) !important;
+
+  box-shadow:
+    0 8px 40px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.08);
 }
 
-/* Dashboard Card Depth */
+/* ================= MODULE / CARD DEPTH ================= */
 .module-card {
-    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
-        box-shadow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
-        filter 0.4s ease;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow, filter;
+
+  transition:
+    transform .65s cubic-bezier(.22,1,.36,1),
+    box-shadow .65s cubic-bezier(.22,1,.36,1),
+    filter .45s ease;
+}
+
+.module-card::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(255,255,255,.08),
+    transparent 60%
+  );
+  opacity:0;
+  transition:.6s ease;
+  pointer-events:none;
 }
 
 .module-card:hover {
-    transform: translateY(-15px) scale(1.02) rotateX(2deg);
-    filter: brightness(1.1);
-    box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.5);
-    z-index: 50;
+  transform:
+    translateY(-18px)
+    scale(1.035)
+    rotateX(3deg)
+    rotateY(-2deg);
+
+  filter: brightness(1.12);
+  z-index: 60;
+
+  box-shadow:
+    0 40px 80px -20px rgba(99,102,241,.55),
+    0 0 40px rgba(99,102,241,.25);
 }
 
-/* Scroll Indicators */
+.module-card:hover::after {
+  opacity:1;
+}
+
+/* ================= SCROLL INDICATOR ================= */
 .scroll-indicator {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    opacity: 0.6;
-    animation: bounce 2s infinite;
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+
+  opacity: .65;
+  pointer-events: none;
+
+  animation: scrollPulse 2.2s infinite;
 }
 
-@keyframes bounce {
+@keyframes scrollPulse {
+  0%,100% {
+    transform: translate(-50%,0);
+    opacity:.4;
+  }
+  50% {
+    transform: translate(-50%,-12px);
+    opacity:1;
+  }
+}
 
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-        transform: translateY(0) translateX(-50%);
-    }
+/* ================= CINEMATIC DEPTH HELPERS ================= */
+.depth-soft {
+  transform: translateZ(0);
+  will-change: transform;
+}
 
-    40% {
-        transform: translateY(-10px) translateX(-50%);
-    }
+.depth-medium {
+  transform: translateZ(40px);
+}
 
-    60% {
-        transform: translateY(-5px) translateX(-50%);
-    }
+.depth-hard {
+  transform: translateZ(80px);
+}
+
+/* ================= PERFORMANCE GUARDS ================= */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  #smooth-wrapper {
+    position: relative;
+    overflow: auto;
+  }
+}
+
+/* ================= SAFETY FALLBACK (NO LENIS) ================= */
+html:not(.lenis) #smooth-wrapper {
+  position: relative;
+  overflow: auto;
+}
+
+html:not(.lenis) #smooth-content {
+  transform: none !important;
 }
