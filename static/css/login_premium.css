@@ -93,10 +93,37 @@ body {
     border-radius: 28px;
     padding: 45px;
     box-shadow:
-        0 40px 80px rgba(0, 0, 0, 0.4),
+        0 40px 90px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
         inset 0 0 0.5px rgba(255, 255, 255, 0.3);
     transform: translateY(30px);
     opacity: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Glass Light Sweep Effect */
+.login-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg,
+            transparent,
+            rgba(255, 255, 255, 0.08),
+            transparent);
+    transform: translateX(-120%);
+    pointer-events: none;
+    z-index: 100;
+}
+
+.login-card:hover::after {
+    animation: lightSweep 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes lightSweep {
+    to {
+        transform: translateX(120%);
+    }
 }
 
 .logo-section {

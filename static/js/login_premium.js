@@ -35,6 +35,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- SENSORY LUXURY: 3D PARALLAX TILT ---
+    const loginCard = document.querySelector('.login-card');
+    if (loginCard && !isTouchDevice && !prefersReducedMotion) {
+        window.addEventListener('mousemove', (e) => {
+            const { innerWidth, innerHeight } = window;
+            const x = (e.clientX / innerWidth - 0.5) * 12; // Max 6 degrees each side
+            const y = (e.clientY / innerHeight - 0.5) * -12;
+
+            gsap.to(loginCard, {
+                rotateY: x,
+                rotateX: y,
+                transformPerspective: 1000,
+                transformOrigin: "center",
+                duration: 0.6,
+                ease: "power2.out"
+            });
+        });
+
+        // Reset on mouse leave or idle
+        window.addEventListener('mouseleave', () => {
+            gsap.to(loginCard, { rotateX: 0, rotateY: 0, duration: 1, ease: "elastic.out(1, 0.3)" });
+        });
+    }
+
     // --- INITIALIZATION ANIMATIONS ---
     const initAnimations = () => {
         const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
