@@ -1,69 +1,96 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if GSAP is loaded, if not, wait or handle gracefully
+    // Check if GSAP is loaded
     if (typeof gsap === 'undefined') {
         console.error('GSAP not loaded. Premium animations disabled.');
         return;
     }
 
-    // Initialize Animations
+    // --- CURSOR GLOW LOGIC ---
+    const cursorGlow = document.getElementById('cursorGlow');
+    if (cursorGlow) {
+        window.addEventListener('mousemove', (e) => {
+            gsap.to(cursorGlow, {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.8,
+                ease: "power2.out"
+            });
+        });
+    }
+
+    // --- INITIALIZATION ANIMATIONS ---
     const initAnimations = () => {
-        // Page Load: Login card fade + slide up
-        gsap.to('.login-card', {
-            duration: 1.2,
+        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+        // Card Entry
+        tl.to('.login-card', {
+            duration: 1.5,
             y: 0,
             opacity: 1,
-            ease: "power4.out",
             delay: 0.2
         });
 
-        // Background Blobs floating animation
+        // Branding Footer Entry
+        tl.to('.branding-footer', {
+            duration: 1.2,
+            opacity: 1,
+            y: 0,
+        }, "-=0.8");
+
+        // Background Blobs Floating
         gsap.to('.blob-1', {
-            x: '30vw',
-            y: '20vh',
-            duration: 20,
+            x: '25vw',
+            y: '15vh',
+            duration: 15,
             repeat: -1,
             yoyo: true,
-            ease: "none"
+            ease: "sine.inOut"
         });
         gsap.to('.blob-2', {
             x: '-20vw',
-            y: '40vh',
-            duration: 25,
+            y: '30vh',
+            duration: 18,
             repeat: -1,
             yoyo: true,
-            ease: "none"
+            ease: "sine.inOut"
         });
     };
 
     initAnimations();
 
-    // Input Field Behaviors
+    // --- INPUT FIELD MICRO-INTERACTIONS ---
     const inputs = document.querySelectorAll('.form-group input');
     inputs.forEach(input => {
         input.addEventListener('focus', () => {
-            gsap.to(input.parentElement, { scale: 1.02, duration: 0.3 });
+            // Focus Handled by CSS for scale, but let's add a subtle GSAP glow boost
+            gsap.to(input, { borderColor: '#6366f1', duration: 0.3 });
         });
         input.addEventListener('blur', () => {
-            gsap.to(input.parentElement, { scale: 1, duration: 0.3 });
+            gsap.to(input, { borderColor: 'rgba(255, 255, 255, 0.1)', duration: 0.3 });
         });
     });
 
-    // Toggle Password Visibility
+    // --- PASSWORD TOGGLE SATISFACTION ---
     const togglePassword = document.querySelector('.password-toggle');
     const passwordInput = document.querySelector('#password');
     if (togglePassword && passwordInput) {
         togglePassword.addEventListener('click', () => {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+
+            // Icon Toggle
             togglePassword.classList.toggle('fa-eye');
             togglePassword.classList.toggle('fa-eye-slash');
 
-            // GSAP pulse effect on click
-            gsap.fromTo(togglePassword, { scale: 1.2 }, { scale: 1, duration: 0.2 });
+            // Satisfying Pulse Animation
+            gsap.fromTo(togglePassword,
+                { scale: 1.5, rotation: 10 },
+                { scale: 1, rotation: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" }
+            );
         });
     }
 
-    // Login Form Submission
+    // --- CINEMATIC LOGIN FLOW ---
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -75,63 +102,103 @@ document.addEventListener('DOMContentLoaded', () => {
             const loginText = document.getElementById('loginText');
             const loginLoader = document.getElementById('loginLoader');
 
-            // Button Loading State
+            // 1. CLICK EFFECT: Shrink & Initial Feedback
             loginBtn.disabled = true;
-            gsap.to(loginBtn, { scale: 0.95, duration: 0.1 });
+            gsap.to(loginBtn, { scale: 0.94, duration: 0.1 });
             loginText.innerText = "Logging in...";
             if (loginLoader) loginLoader.style.display = 'inline-block';
 
+            // Subtle Background Focus
+            gsap.to('.bg-blobs', { filter: 'blur(120px)', opacity: 0.4, duration: 0.8 });
+
             try {
-                // Call AuthAPI.login from existing auth.js (assuming it's loaded)
+                // AUTH API CALL
                 const response = await AuthAPI.login(username, password);
 
-                // Credentials Correct: Green Tick Animation
-                loginBtn.innerHTML = '<span>✔️ Verified</span>';
-                gsap.to(loginBtn, { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', scale: 1.05, duration: 0.4 });
+                // --- SUCCESS SEQUENCE (THE VIDEO MOMENT) ---
 
-                // Card Scale Down
-                gsap.to('.login-card', { scale: 0.9, opacity: 0, duration: 0.6, delay: 0.3 });
+                // Button Transforms to Green Verified
+                gsap.to(loginBtn, {
+                    backgroundColor: '#10b981',
+                    scale: 1.05,
+                    duration: 0.4,
+                    onStart: () => {
+                        loginBtn.innerHTML = '<span><i class="fas fa-check-circle"></i> Verified</span>';
+                    }
+                });
 
-                // Start Transition
-                showSuccessTransition(response);
+                // Cinematic Card Dissolve
+                gsap.to('.login-card', {
+                    scale: 0.85,
+                    opacity: 0,
+                    y: -20,
+                    duration: 0.8,
+                    delay: 0.4,
+                    ease: "power4.in"
+                });
+
+                // Branding Dissolve
+                gsap.to('.branding-footer', { opacity: 0, duration: 0.5, delay: 0.4 });
+
+                // Start Transition Sequence
+                setTimeout(() => showCinematicTransition(response), 1000);
 
             } catch (error) {
-                // Credentials Wrong: Shake & Red Border
-                gsap.to('.login-card', { x: [-10, 10, -10, 10, 0], duration: 0.4 });
-                const inputs = loginForm.querySelectorAll('input');
-                inputs.forEach(input => input.classList.add('border-error'));
+                // --- FAILURE SEQUENCE (SOFT PREMIUM UX) ---
 
-                // Reset Button
+                // Cinematic Shake
+                gsap.to('.login-card', {
+                    x: [-15, 15, -10, 10, -5, 5, 0],
+                    duration: 0.5,
+                    ease: "power2.inOut"
+                });
+
+                // Input Borders Vibration
+                const inputFields = loginForm.querySelectorAll('input');
+                inputFields.forEach(input => {
+                    input.classList.add('border-error');
+                    gsap.fromTo(input, { x: -2 }, { x: 2, duration: 0.1, repeat: 5, yoyo: true });
+                });
+
+                // Button Reset
                 setTimeout(() => {
                     loginBtn.disabled = false;
                     loginText.innerText = "Sign In";
                     if (loginLoader) loginLoader.style.display = 'none';
-                    inputs.forEach(input => input.classList.remove('border-error'));
-                    gsap.to(loginBtn, { scale: 1, duration: 0.2 });
-                }, 2000);
+                    inputFields.forEach(input => input.classList.remove('border-error'));
+                    gsap.to(loginBtn, { scale: 1, backgroundColor: '', duration: 0.2 });
+                    gsap.to('.bg-blobs', { filter: 'blur(80px)', opacity: 0.6, duration: 0.8 });
+                }, 1500);
 
-                // Show soft feedback instead of hard alert
-                showToast(error.message || "Authentication failed", "error");
+                // Soft Feedback
+                showToast(error.message || "Invalid credentials", "error");
             }
         });
     }
 
-    const showSuccessTransition = async (loginResponse) => {
-        // 1. Show Transition Layer
+    const showCinematicTransition = async (loginResponse) => {
         const layer = document.getElementById('transition-layer');
+        if (!layer) return;
+
+        // 1. Fade in Transition Layer
         layer.style.display = 'flex';
-        gsap.from(layer, { opacity: 0, duration: 0.8 });
+        const layerTl = gsap.timeline();
+        layerTl.fromTo(layer, { opacity: 0 }, { opacity: 1, duration: 0.8 });
 
-        // 2. Animate Logo
-        gsap.from('.transition-logo', { scale: 0, rotation: 180, duration: 1.2, ease: "back.out(1.7)" });
+        // 2. Cinematic Logo Zoom & Rotate
+        layerTl.fromTo('.transition-logo',
+            { scale: 0, rotation: -180 },
+            { scale: 1, rotation: 0, duration: 1.2, ease: "back.out(1.5)" },
+            "-=0.4"
+        );
 
-        // 3. Fill Loader
-        gsap.to('.transition-loader-fill', {
+        // 3. Loader Progress
+        layerTl.to('.transition-loader-fill', {
             width: '100%',
-            duration: 1.5,
+            duration: 1.8,
             ease: "power2.inOut",
             onComplete: async () => {
-                // Store auth data
+                // Data Storage
                 localStorage.setItem('authToken', loginResponse.access || loginResponse.token);
                 localStorage.setItem('refreshToken', loginResponse.refresh);
                 localStorage.setItem('username', document.getElementById('username').value.trim());
@@ -142,17 +209,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('userRole', role);
                     localStorage.setItem('isSuperuser', profile.is_superuser);
 
-                    // Final Fade out and Redirect
+                    // Final cinematic exit
                     gsap.to(layer, {
                         opacity: 0,
-                        duration: 0.5,
+                        scale: 1.1,
+                        duration: 0.8,
                         onComplete: () => {
                             redirectToDashboard(role);
                         }
                     });
                 } catch (e) {
-                    console.error("Profile fetch failed", e);
-                    // Fallback redirect
                     window.location.href = '/dashboard/student/';
                 }
             }
@@ -160,11 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
-// Helper for Toast (matches existing structure in api.js if present)
+// Helper for Toast
 function showToast(message, type) {
     if (window.showToast) {
         window.showToast(message, type);
     } else {
-        alert(message);
     }
 }
