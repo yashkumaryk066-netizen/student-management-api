@@ -262,19 +262,8 @@
         }
 
         .hero-left {
-            animation: fadeInUp 1s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            position: relative;
+            z-index: 5;
         }
 
         .badge {
@@ -339,105 +328,89 @@
             display: flex;
             gap: 24px;
             flex-wrap: wrap;
-            margin-top: 40px;
+            margin: 50px 0;
+            position: relative;
+            z-index: 100;
         }
 
-        .btn-primary {
-            padding: 18px 45px;
-            background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
-            color: white !important;
-            border: none;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 0.95rem;
+        .btn-premium {
+            padding: 20px 45px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             position: relative;
             overflow: hidden;
-            display: inline-flex !important;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            opacity: 1;
-            z-index: 10;
+            gap: 15px;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
         }
 
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
+        /* Get Started - Cyber Blue */
+        .btn-call-to-action {
+            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.6),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
         }
 
-        .btn-primary:hover::after {
-            transform: translateX(100%);
+        .btn-call-to-action:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 20px 60px -15px rgba(99, 102, 241, 0.8),
+                0 0 30px rgba(99, 102, 241, 0.4);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6),
-                0 0 60px rgba(99, 102, 241, 0.3);
-            background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        /* Live Demo - Glass */
+        .btn-demo-action {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
-        .btn-secondary {
-            padding: 18px 45px;
-            background: rgba(255, 255, 255, 0.05) !important;
-            color: white !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            backdrop-filter: blur(10px);
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            opacity: 1;
-            z-index: 10;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
+        .btn-demo-action:hover {
+            background: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.4);
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .btn-developer {
-            padding: 18px 45px;
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-developer:hover {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: #10b981;
+        /* Developer - Emerald Glow */
+        .btn-dev-action {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.4);
             color: #34d399;
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-dev-action:hover {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+            color: #6ee7b7;
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-premium .icon-pulse {
+            animation: iconPulse 2s infinite;
+        }
+
+        @keyframes iconPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
         }
 
         /* Stats Counter */
@@ -819,24 +792,25 @@
                             Built for modern schools, colleges, and universities.
                         </p>
                         <div class="hero-buttons">
-                            <button class="btn-primary" onclick="window.location.href='/login/'">
+                            <button class="btn-premium btn-call-to-action" onclick="window.location.href='/login/'">
                                 <span>GET STARTED</span>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="icon-pulse" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                    stroke-linejoin="round">
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                     <polyline points="12 5 19 12 12 19"></polyline>
                                 </svg>
                             </button>
-                            <button class="btn-secondary" onclick="window.location.href='/demo/'">
+                            <button class="btn-premium btn-demo-action" onclick="window.location.href='/demo/'">
                                 <span>LIVE DEMO</span>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                 </svg>
                             </button>
-                            <button class="btn-developer" onclick="window.location.href='/api/developer/'">
-                                <span>MEET THE DEVELOPER</span>
-                                <span style="font-size: 1.25rem;">👨‍💻</span>
+                            <button class="btn-premium btn-dev-action" onclick="window.location.href='/api/developer/'">
+                                <span>MEET DEVELOPER</span>
+                                <span style="font-size: 1.5rem;">👨‍💻</span>
                             </button>
                         </div>
                         <div class="stats">
