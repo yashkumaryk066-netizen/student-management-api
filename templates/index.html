@@ -1132,11 +1132,24 @@
                                 <span>BUY NOW</span>
                                 <span style="font-size: 1.2rem;">💰</span>
                             </button>
-                            <button class="btn-premium btn-dev-action" onclick="window.lenis.scrollTo('#developer')">
+                            <button class="btn-premium btn-dev-action" onclick="window.location.href='/api/developer/'">
                                 <span>MEET DEVELOPER</span>
                                 <span style="font-size: 1.5rem;">👨‍💻</span>
                             </button>
                         </div>
+                        <script>
+                            // Safety Fallback: Ensure sections are visible if GSAP fails
+                            document.addEventListener('DOMContentLoaded', () => {
+                                setTimeout(() => {
+                                    document.querySelectorAll('.reveal-section, .pricing-card').forEach(el => {
+                                        if (getComputedStyle(el).opacity === '0') {
+                                            el.style.opacity = '1';
+                                            el.style.transform = 'none';
+                                        }
+                                    });
+                                }, 1000);
+                            });
+                        </script>
                         <div class="stats">
                             <div class="stat-item">
                                 <div class="stat-number">50+</div>

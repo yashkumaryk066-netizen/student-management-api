@@ -201,6 +201,12 @@ const Toast = (() => {
     return { show };
 })();
 
-/* BACKWARD COMPAT */
-/* BACKWARD COMPAT */
+/* BACKWARD COMPAT & GLOBAL EXPORT */
 window.showToast = Toast.show;
+window.AuthAPI = AuthAPI;
+window.StudentAPI = StudentAPI;
+window.AttendanceAPI = AttendanceAPI;
+window.PaymentAPI = PaymentAPI;
+window.NotificationAPI = NotificationAPI;
+window.LibraryAPI = LibraryAPI;
+window.SubscriptionAPI = SubscriptionAPI;
