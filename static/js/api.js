@@ -202,6 +202,5 @@ const Toast = (() => {
 })();
 
 /* BACKWARD COMPAT */
-function showToast(msg, type) {
-    Toast.show(msg, type);
-}
+/* BACKWARD COMPAT */
+window.showToast = Toast.show;

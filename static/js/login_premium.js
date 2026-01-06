@@ -203,25 +203,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tl = gsap.timeline();
         tl.fromTo(layer, { opacity: 0 }, { opacity: 1, duration: 0.8 })
-          .fromTo('.transition-logo',
-            { scale: 0, rotation: -180 },
-            { scale: 1, rotation: 0, duration: 1.2, ease: "back.out(1.5)" }
-          )
-          .to('.transition-loader-fill', {
-              width: '100%',
-              duration: 1.8,
-              onComplete: async () => {
-                  localStorage.setItem('authToken', res.access || res.token);
-                  localStorage.setItem('refreshToken', res.refresh);
+            .fromTo('.transition-logo',
+                { scale: 0, rotation: -180 },
+                { scale: 1, rotation: 0, duration: 1.2, ease: "back.out(1.5)" }
+            )
+            .to('.transition-loader-fill', {
+                width: '100%',
+                duration: 1.8,
+                onComplete: async () => {
+                    localStorage.setItem('authToken', res.access || res.token);
+                    localStorage.setItem('refreshToken', res.refresh);
 
-                  try {
-                      const profile = await AuthAPI.getProfile();
-                      redirectToDashboard((profile.role || 'student').toLowerCase());
-                  } catch {
-                      redirectFallback();
-                  }
-              }
-          });
+                    try {
+                        const profile = await AuthAPI.getProfile();
+                        redirectToDashboard((profile.role || 'student').toLowerCase());
+                    } catch {
+                        redirectFallback();
+                    }
+                }
+            });
     }
 
     function redirectFallback() {
@@ -230,7 +230,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ---------------- TOAST FALLBACK ---------------- */
+/* ---------------- TOAST FALLBACK ---------------- */
 function showToast(msg, type) {
-    if (window.showToast) window.showToast(msg, type);
-    else console.log(`[${type}] ${msg}`);
+    if (window.Toast && window.Toast.show) {
+        window.Toast.show(msg, type);
+    } else {
+        console.log(`[${type}] ${msg}`);
+        // Simple fallback alert if Toast is not available
+        if (type === 'error') alert(msg);
+    }
 }
