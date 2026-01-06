@@ -1691,45 +1691,67 @@
                 }
             </script>
 
-            // Preloader handled by premium_motion.js
+            <!-- Three.js Particle System -->
+            <script>
+                const canvas = document.getElementById('bg-canvas');
+                if (canvas) {
+                    const scene = new THREE.Scene();
+                    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
 
-            // Three.js Particle System
-            const canvas = document.getElementById('bg-canvas');
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    camera.position.z = 5;
 
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.position.z = 5;
+                    // Create particles
+                    const particlesGeometry = new THREE.BufferGeometry();
+                    const particlesCount = 2000;
+                    const posArray = new Float32Array(particlesCount * 3);
 
-            // Create particles
-            const particlesGeometry = new THREE.BufferGeometry();
-            const particlesCount = 2000;
-            const posArray = new Float32Array(particlesCount * 3);
+                    for (let i = 0; i < particlesCount * 3; i++) {
+                        posArray[i] = (Math.random() - 0.5) * 15;
+                    }
 
-            for (let i = 0; i < particlesCount * 3; i++) { posArray[i]=(Math.random() - 0.5) * 15; }
-                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3)); const
-                particlesMaterial=new THREE.PointsMaterial({ size: 0.01, color: 0x6366f1, transparent: true, opacity:
-                0.6 }); const particlesMesh=new THREE.Points(particlesGeometry, particlesMaterial);
-                scene.add(particlesMesh); // Animation function animate() { requestAnimationFrame(animate);
-                particlesMesh.rotation.y +=0.0005; particlesMesh.rotation.x +=0.0002; renderer.render(scene, camera); }
-                animate(); // Handle window resize window.addEventListener('resize', ()=> {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                });
-                </script>
-                <!-- Scripts -->
-                <script>
-                    // Premium Modal Functions with 3D Animation
-                    function showPremiumModal(options) {
-                        // Remove any existing modal
-                        const existing = document.getElementById('premiumModal');
-                        if (existing) existing.remove();
+                    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
-                        const modal = document.createElement('div');
-                        modal.id = 'premiumModal';
-                        modal.innerHTML = `
+                    const particlesMaterial = new THREE.PointsMaterial({
+                        size: 0.01,
+                        color: 0x6366f1,
+                        transparent: true,
+                        opacity: 0.6
+                    });
+
+                    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+                    scene.add(particlesMesh);
+
+                    // Animation
+                    function animate() {
+                        requestAnimationFrame(animate);
+                        particlesMesh.rotation.y += 0.0005;
+                        particlesMesh.rotation.x += 0.0002;
+                        renderer.render(scene, camera);
+                    }
+
+                    animate();
+
+                    // Handle window resize
+                    window.addEventListener('resize', () => {
+                        camera.aspect = window.innerWidth / window.innerHeight;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(window.innerWidth, window.innerHeight);
+                    });
+                }
+            </script>
+            <!-- Scripts -->
+            <script>
+                // Premium Modal Functions with 3D Animation
+                function showPremiumModal(options) {
+                    // Remove any existing modal
+                    const existing = document.getElementById('premiumModal');
+                    if (existing) existing.remove();
+
+                    const modal = document.createElement('div');
+                    modal.id = 'premiumModal';
+                    modal.innerHTML = `
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap');
                     
@@ -1881,42 +1903,42 @@
                 </div>
             `;
 
-                        // Store button actions globally
-                        window.premiumModalActions = options.buttons.map(btn => btn.action);
+                    // Store button actions globally
+                    window.premiumModalActions = options.buttons.map(btn => btn.action);
 
-                        document.body.appendChild(modal);
-                    }
+                    document.body.appendChild(modal);
+                }
 
-                    function closePremiumModal() {
-                        const modal = document.getElementById('premiumModal');
-                        if (modal) {
-                            modal.style.animation = 'modalFadeIn 0.2s ease reverse';
-                            setTimeout(() => modal.remove(), 200);
-                        }
+                function closePremiumModal() {
+                    const modal = document.getElementById('premiumModal');
+                    if (modal) {
+                        modal.style.animation = 'modalFadeIn 0.2s ease reverse';
+                        setTimeout(() => modal.remove(), 200);
                     }
-                </script>
-                <!-- Smooth Scroll Handler -->
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                            anchor.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                const targetId = this.getAttribute('href');
-                                if (targetId === '#') return;
-                                if (window.lenis) {
-                                    window.lenis.scrollTo(targetId);
-                                } else {
-                                    const target = document.querySelector(targetId);
-                                    if (target) target.scrollIntoView({ behavior: 'smooth' });
-                                }
-                            });
+                }
+            </script>
+            <!-- Smooth Scroll Handler -->
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                        anchor.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            const targetId = this.getAttribute('href');
+                            if (targetId === '#') return;
+                            if (window.lenis) {
+                                window.lenis.scrollTo(targetId);
+                            } else {
+                                const target = document.querySelector(targetId);
+                                if (target) target.scrollIntoView({ behavior: 'smooth' });
+                            }
                         });
                     });
-                </script>
-                <!-- Premium Motion JS -->
-                <script src="{% static 'js/premium_motion.js' %}"></script>
+                });
+            </script>
+            <!-- Premium Motion JS -->
+            <script src="{% static 'js/premium_motion.js' %}"></script>
 
-                <script src="{% static 'js/premium_modal.js' %}"></script>
+            <script src="{% static 'js/premium_modal.js' %}"></script>
         </div>
     </div>
 </body>
