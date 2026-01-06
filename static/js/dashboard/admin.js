@@ -81,7 +81,7 @@ const DashboardApp = {
 
             if (!token) {
                 console.warn("No token found, redirecting to login");
-                window.location.href = "/login/";
+                window.location.href = "/";
                 return;
             }
 
@@ -92,13 +92,21 @@ const DashboardApp = {
             if (res.status === 401) {
                 console.warn("Token expired or invalid");
                 localStorage.removeItem('authToken');
-                window.location.href = "/login/";
+                localStorage.removeItem('refreshToken');
+                window.location.href = "/";
+                return;
+            }
+
+            if (!res.ok) {
+                console.error("Profile fetch failed with status:", res.status);
+                // Don't redirect immediately, show error in UI instead
+                this.showAlert("Error", "Failed to load profile. Please refresh the page.", "error");
                 return;
             }
 
             if (res.ok) {
                 this.currentUser = await res.json();
-                console.log("Logged in as:", this.currentUser.role, this.currentUser.institution_type);
+                console.log("✅ Logged in as:", this.currentUser.role, this.currentUser.institution_type);
 
                 // --- UPDATE UI FOR ALL ROLES ---
                 const roleEl = document.querySelector('.user-role');
@@ -131,7 +139,9 @@ const DashboardApp = {
                 }
             }
         } catch (e) {
-            console.error("Failed to fetch profile", e);
+            console.error("Failed to fetch profile:", e);
+            // Show error but don't redirect - let user try to refresh
+            this.showAlert("Connection Error", "Could not connect to server. Please check your internet connection.", "error");
         }
     },
 
