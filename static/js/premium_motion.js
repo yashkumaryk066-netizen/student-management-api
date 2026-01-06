@@ -18,11 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ---------------- PRELOADER ---------------- */
     window.addEventListener('load', () => {
-        const preloader = document.getElementById('preloader');
-        if (!preloader) return;
-
-        preloader.classList.add('fade-out');
-        setTimeout(() => preloader.remove(), 1000);
+        setTimeout(() => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.classList.add('fade-out');
+                setTimeout(() => preloader.remove(), 1000);
+            }
+        }, 500); // 500ms guaranteed loading
     });
 
     /* ---------------- LENIS INIT (SINGLE RAF) ---------------- */
