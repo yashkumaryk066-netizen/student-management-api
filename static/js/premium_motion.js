@@ -122,55 +122,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 7. Hero Elements Entrance
+    // 7. Hero Elements Entrance (Safe & Cinematic)
     if (document.querySelector('.hero-left h1')) {
         const heroTl = gsap.timeline({
-            defaults: { ease: "power4.out" },
-            onStart: () => {
-                gsap.set(".hero-buttons", { autoAlpha: 1 }); // Force visibility on start
-            }
+            defaults: { ease: "power4.out", force3D: true }
         });
 
+        // Initial set to ensure they aren't hidden by previous JS runs
+        gsap.set([".hero-left h1", ".hero-description", ".hero-buttons", ".stat-item"], { visibility: "visible", opacity: 1 });
+
         heroTl.from(".hero-left h1", {
-            autoAlpha: 0,
+            opacity: 0,
             y: 50,
             duration: 1.2,
-            delay: 0.2
+            delay: 0.5
         })
             .from(".hero-description", {
-                autoAlpha: 0,
+                opacity: 0,
                 y: 30,
                 duration: 1
             }, "-=0.8")
             .from(".hero-buttons .btn-premium", {
-                autoAlpha: 0,
+                opacity: 0,
                 y: 30,
                 stagger: 0.15,
                 duration: 0.8,
                 ease: "back.out(1.7)"
             }, "-=0.6")
             .from(".stat-item", {
-                autoAlpha: 0,
+                opacity: 0,
                 y: 20,
                 stagger: 0.1,
                 duration: 0.6
             }, "-=0.4");
     }
 
-    // 8. Pricing Cards Entrance
+    // 8. Pricing Cards Entrance (Robust Trigger)
     if (document.querySelector('.pricing-card')) {
+        gsap.set(".pricing-card", { visibility: "visible", opacity: 1 });
+
         gsap.from(".pricing-card", {
-            autoAlpha: 0,
+            opacity: 0,
             y: 50,
             stagger: 0.2,
-            duration: 1,
+            duration: 1.2,
             ease: "power3.out",
             scrollTrigger: {
                 trigger: "#pricing",
-                start: "top 80%",
+                start: "top 85%",
+                toggleActions: "play none none none"
             }
         });
     }
 
-    console.log("🚀 Y.S.M Motion Engine Active");
+    console.log("🚀 Y.S.M Motion Engine: Stabilized & Active");
 });
