@@ -8,480 +8,506 @@
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <link rel="stylesheet" href="/static/css/premium_modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Cinematic Motion Engine -->
+    <link rel="stylesheet" href="/static/css/premium_motion.css">
 </head>
 
 <body>
-    <!-- Animated Background -->
-    <div class="dashboard-bg"></div>
+    <!-- Smooth Wrapper for Cinematic Feel -->
+    <div id="smooth-wrapper">
+        <div id="smooth-content">
+            <!-- Animated Background -->
+            <div class="dashboard-bg"></div>
 
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header ysm-brand">
-            <img src="/static/img/ysm_logo.png" alt="Y.S.M Logo" class="sidebar-logo-img">
-            <div class="brand-text">
-                <h2 class="sidebar-title ysm-title">Y.S.M</h2>
-                <span class="sidebar-subtitle">Advance Education System</span>
-            </div>
-        </div>
-
-        <nav>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#dashboard" class="nav-link active">
-                        <span class="nav-icon">📊</span>
-                        <span class="nav-text">Dashboard</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#students" class="nav-link">
-                        <span class="nav-icon">👥</span>
-                        <span class="nav-text">Student Management</span>
-                        <span class="nav-badge">1,234</span>
-                    </a>
-                <li class="nav-item">
-                    <a href="#courses" class="nav-link">
-                        <span class="nav-icon">🎓</span>
-                        <span class="nav-text">Courses & Batches</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#attendance" class="nav-link">
-                        <span class="nav-icon">✅</span>
-                        <span class="nav-text">Attendance</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#finance" class="nav-link">
-                        <span class="nav-icon">💰</span>
-                        <span class="nav-text">Finance & Payments</span>
-                        <span class="nav-badge">47</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#library" class="nav-link">
-                        <span class="nav-icon">📚</span>
-                        <span class="nav-text">Library Management</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#hostel" class="nav-link">
-                        <span class="nav-icon">🏢</span>
-                        <span class="nav-text">Hostel Management</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#transport" class="nav-link">
-                        <span class="nav-icon">🚌</span>
-                        <span class="nav-text">Transportation</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#hr" class="nav-link">
-                        <span class="nav-icon">👔</span>
-                        <span class="nav-text">HR & Payroll</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#exams" class="nav-link">
-                        <span class="nav-icon">📝</span>
-                        <span class="nav-text">Exams & Grading</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#events" class="nav-link">
-                        <span class="nav-icon">📅</span>
-                        <span class="nav-text">Events & Calendar</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#live-classes" class="nav-link">
-                        <span class="nav-icon"
-                            style="color:#ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;">🔴</span>
-                        <span class="nav-text">Live Classes</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#reports" class="nav-link">
-                        <span class="nav-icon">📈</span>
-                        <span class="nav-text">Reports & Analytics</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#subscription" class="nav-link">
-                        <span class="nav-icon">💳</span>
-                        <span class="nav-text">Plan & Subscription</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#settings" class="nav-link">
-                        <span class="nav-icon">⚙️</span>
-                        <span class="nav-text">Settings</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
-
-    <!-- API Helper -->
-    <!-- API Helper - Moved to bottom -->
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Top Header -->
-        <header class="top-header">
-            <!-- Premium Menu Toggle (Left of Search) -->
-            <button class="menu-toggle" id="menuToggle" title="Menu">
-                <span class="menu-bar"></span>
-                <span class="menu-bar"></span>
-                <span class="menu-bar"></span>
-            </button>
-
-            <div class="header-search">
-                <input type="text" class="search-input" placeholder="Search students, courses, or anything...">
-            </div>
-
-            <div class="header-actions">
-                <div
-                    style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                    <span
-                        style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
-                    LIVE SERVER
-                </div>
-
-                <button class="header-btn">
-                    🔔
-                    <span class="notification-badge"></span>
-                </button>
-
-                <button class="header-btn">
-                    💬
-                </button>
-
-                <div class="user-profile">
-                    <div class="user-avatar">👤</div>
-                    <div class="user-info">
-                        <div class="user-name">Loading...</div>
-                        <div class="user-role">...</div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Dashboard Content -->
-        <div class="dashboard-content" id="dashboardView">
-            <h1 class="page-title">Welcome! 👋</h1>
-            <p class="page-subtitle">Here's what's happening with your institute today</p>
-
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-trend up">
-                            ↑ 12%
-                        </div>
-                    </div>
-                    <div class="stat-value">1,234</div>
-                    <div class="stat-label">Total Students</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✅</div>
-                        <div class="stat-trend up">
-                            ↑ 5%
-                        </div>
-                    </div>
-                    <div class="stat-value">94.2%</div>
-                    <div class="stat-label">Attendance Today</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">💰</div>
-                        <div class="stat-trend down">
-                            ↓ 3%
-                        </div>
-                    </div>
-                    <div class="stat-value">₹4.8L</div>
-                    <div class="stat-label">Pending Fees</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">👔</div>
-                        <div class="stat-trend up">
-                            ↑ 2%
-                        </div>
-                    </div>
-                    <div class="stat-value">87</div>
-                    <div class="stat-label">Staff Members</div>
-                </div>
-            </div>
-
-            <!-- Management Modules Grid -->
-            <div class="cards-grid">
-                <div class="module-card" onclick="navigateTo('students')">
-                    <div class="module-icon">👥</div>
-                    <h3 class="module-title">Student Management</h3>
-                    <p class="module-description">
-                        Manage student records, admissions, profiles, and academic histories
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">1,234</div>
-                            <div class="module-stat-label">Students</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">24</div>
-                            <div class="module-stat-label">Classes</div>
-                        </div>
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header ysm-brand">
+                    <img src="/static/img/ysm_logo.png" alt="Y.S.M Logo" class="sidebar-logo-img">
+                    <div class="brand-text">
+                        <h2 class="sidebar-title ysm-title">Y.S.M</h2>
+                        <span class="sidebar-subtitle">Advance Education System</span>
                     </div>
                 </div>
 
-                <div class="module-card" onclick="navigateTo('attendance')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #10b981, #059669);">✅</div>
-                    <h3 class="module-title">Attendance System</h3>
-                    <p class="module-description">
-                        Track daily attendance, generate reports, and monitor student presence
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">94.2%</div>
-                            <div class="module-stat-label">Today</div>
+                <nav>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#dashboard" class="nav-link active">
+                                <span class="nav-icon">📊</span>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#students" class="nav-link">
+                                <span class="nav-icon">👥</span>
+                                <span class="nav-text">Student Management</span>
+                                <span class="nav-badge">1,234</span>
+                            </a>
+                        <li class="nav-item">
+                            <a href="#courses" class="nav-link">
+                                <span class="nav-icon">🎓</span>
+                                <span class="nav-text">Courses & Batches</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#attendance" class="nav-link">
+                                <span class="nav-icon">✅</span>
+                                <span class="nav-text">Attendance</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#finance" class="nav-link">
+                                <span class="nav-icon">💰</span>
+                                <span class="nav-text">Finance & Payments</span>
+                                <span class="nav-badge">47</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#library" class="nav-link">
+                                <span class="nav-icon">📚</span>
+                                <span class="nav-text">Library Management</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#hostel" class="nav-link">
+                                <span class="nav-icon">🏢</span>
+                                <span class="nav-text">Hostel Management</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#transport" class="nav-link">
+                                <span class="nav-icon">🚌</span>
+                                <span class="nav-text">Transportation</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#hr" class="nav-link">
+                                <span class="nav-icon">👔</span>
+                                <span class="nav-text">HR & Payroll</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#exams" class="nav-link">
+                                <span class="nav-icon">📝</span>
+                                <span class="nav-text">Exams & Grading</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#events" class="nav-link">
+                                <span class="nav-icon">📅</span>
+                                <span class="nav-text">Events & Calendar</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#live-classes" class="nav-link">
+                                <span class="nav-icon"
+                                    style="color:#ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;">🔴</span>
+                                <span class="nav-text">Live Classes</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#reports" class="nav-link">
+                                <span class="nav-icon">📈</span>
+                                <span class="nav-text">Reports & Analytics</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#subscription" class="nav-link">
+                                <span class="nav-icon">💳</span>
+                                <span class="nav-text">Plan & Subscription</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#settings" class="nav-link">
+                                <span class="nav-icon">⚙️</span>
+                                <span class="nav-text">Settings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- API Helper -->
+            <!-- API Helper - Moved to bottom -->
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Top Header -->
+                <header class="top-header">
+                    <!-- Premium Menu Toggle (Left of Search) -->
+                    <button class="menu-toggle" id="menuToggle" title="Menu">
+                        <span class="menu-bar"></span>
+                        <span class="menu-bar"></span>
+                        <span class="menu-bar"></span>
+                    </button>
+
+                    <div class="header-search">
+                        <input type="text" class="search-input" placeholder="Search students, courses, or anything...">
+                    </div>
+
+                    <div class="header-actions">
+                        <div
+                            style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            <span
+                                style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
+                            LIVE SERVER
                         </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">91.8%</div>
-                            <div class="module-stat-label">This Month</div>
+
+                        <button class="header-btn">
+                            🔔
+                            <span class="notification-badge"></span>
+                        </button>
+
+                        <button class="header-btn">
+                            💬
+                        </button>
+
+                        <div class="user-profile">
+                            <div class="user-avatar">👤</div>
+                            <div class="user-info">
+                                <div class="user-name">Loading...</div>
+                                <div class="user-role">...</div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Dashboard Content -->
+                <div class="dashboard-content" id="dashboardView">
+                    <h1 class="page-title">Welcome! 👋</h1>
+                    <p class="page-subtitle">Here's what's happening with your institute today</p>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-trend up">
+                                    ↑ 12%
+                                </div>
+                            </div>
+                            <div class="stat-value">1,234</div>
+                            <div class="stat-label">Total Students</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✅
+                                </div>
+                                <div class="stat-trend up">
+                                    ↑ 5%
+                                </div>
+                            </div>
+                            <div class="stat-value">94.2%</div>
+                            <div class="stat-label">Attendance Today</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">💰
+                                </div>
+                                <div class="stat-trend down">
+                                    ↓ 3%
+                                </div>
+                            </div>
+                            <div class="stat-value">₹4.8L</div>
+                            <div class="stat-label">Pending Fees</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">👔
+                                </div>
+                                <div class="stat-trend up">
+                                    ↑ 2%
+                                </div>
+                            </div>
+                            <div class="stat-value">87</div>
+                            <div class="stat-label">Staff Members</div>
+                        </div>
+                    </div>
+
+                    <!-- Management Modules Grid -->
+                    <div class="cards-grid">
+                        <div class="module-card" onclick="navigateTo('students')">
+                            <div class="module-icon">👥</div>
+                            <h3 class="module-title">Student Management</h3>
+                            <p class="module-description">
+                                Manage student records, admissions, profiles, and academic histories
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">1,234</div>
+                                    <div class="module-stat-label">Students</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">24</div>
+                                    <div class="module-stat-label">Classes</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="module-card" onclick="navigateTo('attendance')">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #10b981, #059669);">✅
+                            </div>
+                            <h3 class="module-title">Attendance System</h3>
+                            <p class="module-description">
+                                Track daily attendance, generate reports, and monitor student presence
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">94.2%</div>
+                                    <div class="module-stat-label">Today</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">91.8%</div>
+                                    <div class="module-stat-label">This Month</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="module-card" onclick="navigateTo('finance')">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰
+                            </div>
+                            <h3 class="module-title">Finance & Payments</h3>
+                            <p class="module-description">
+                                Fee collection, payment tracking, invoicing, and financial reports
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">₹12.4L</div>
+                                    <div class="module-stat-label">Collected</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">₹4.8L</div>
+                                    <div class="module-stat-label">Pending</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="module-card" onclick="navigateTo('library')">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📚
+                            </div>
+                            <h3 class="module-title">Library Management</h3>
+                            <p class="module-description">
+                                Book cataloging, issue/return tracking, and library inventory management
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">2,850</div>
+                                    <div class="module-stat-label">Books</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">412</div>
+                                    <div class="module-stat-label">Issued</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="module-card" onclick="navigateTo('hostel')">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🏢
+                            </div>
+                            <h3 class="module-title">Hostel Management</h3>
+                            <p class="module-description">
+                                Room allocation, mess management, gate pass system, and hostel inventory
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">456</div>
+                                    <div class="module-stat-label">Residents</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">120</div>
+                                    <div class="module-stat-label">Rooms</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="module-card" onclick="navigateTo('transport')">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">🚌
+                            </div>
+                            <h3 class="module-title">Transportation</h3>
+                            <p class="module-description">
+                                Fleet management, route planning, GPS tracking, and driver logs
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">18</div>
+                                    <div class="module-stat-label">Buses</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">12</div>
+                                    <div class="module-stat-label">Routes</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="module-card" onclick="navigateTo('hr')">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">👔
+                            </div>
+                            <h3 class="module-title">HR & Payroll</h3>
+                            <p class="module-description">
+                                Staff management, payroll processing, leave management, and recruitment
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">87</div>
+                                    <div class="module-stat-label">Staff</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">₹2.1L</div>
+                                    <div class="module-stat-label">This Month</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="module-card" onclick="navigateTo('exams')">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">📝
+                            </div>
+                            <h3 class="module-title">Exams & Grading</h3>
+                            <p class="module-description">
+                                Exam scheduling, grade management, result cards, and performance analytics
+                            </p>
+                            <div class="module-stats">
+                                <div class="module-stat">
+                                    <div class="module-stat-value">8</div>
+                                    <div class="module-stat-label">Upcoming</div>
+                                </div>
+                                <div class="module-stat">
+                                    <div class="module-stat-value">3.8</div>
+                                    <div class="module-stat-label">Avg GPA</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </main>
 
-                <div class="module-card" onclick="navigateTo('finance')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰</div>
-                    <h3 class="module-title">Finance & Payments</h3>
-                    <p class="module-description">
-                        Fee collection, payment tracking, invoicing, and financial reports
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">₹12.4L</div>
-                            <div class="module-stat-label">Collected</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">₹4.8L</div>
-                            <div class="module-stat-label">Pending</div>
-                        </div>
-                    </div>
-                </div>
+            <script>
+                // Sidebar Toggle - Works for both mobile and desktop
+                const sidebar = document.getElementById('sidebar');
+                const menuToggle = document.getElementById('menuToggle');
 
-                <div class="module-card" onclick="navigateTo('library')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📚</div>
-                    <h3 class="module-title">Library Management</h3>
-                    <p class="module-description">
-                        Book cataloging, issue/return tracking, and library inventory management
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">2,850</div>
-                            <div class="module-stat-label">Books</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">412</div>
-                            <div class="module-stat-label">Issued</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('hostel')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🏢</div>
-                    <h3 class="module-title">Hostel Management</h3>
-                    <p class="module-description">
-                        Room allocation, mess management, gate pass system, and hostel inventory
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">456</div>
-                            <div class="module-stat-label">Residents</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">120</div>
-                            <div class="module-stat-label">Rooms</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('transport')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">🚌</div>
-                    <h3 class="module-title">Transportation</h3>
-                    <p class="module-description">
-                        Fleet management, route planning, GPS tracking, and driver logs
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">18</div>
-                            <div class="module-stat-label">Buses</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">12</div>
-                            <div class="module-stat-label">Routes</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('hr')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">👔</div>
-                    <h3 class="module-title">HR & Payroll</h3>
-                    <p class="module-description">
-                        Staff management, payroll processing, leave management, and recruitment
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">87</div>
-                            <div class="module-stat-label">Staff</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">₹2.1L</div>
-                            <div class="module-stat-label">This Month</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('exams')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">📝</div>
-                    <h3 class="module-title">Exams & Grading</h3>
-                    <p class="module-description">
-                        Exam scheduling, grade management, result cards, and performance analytics
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">8</div>
-                            <div class="module-stat-label">Upcoming</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">3.8</div>
-                            <div class="module-stat-label">Avg GPA</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // Sidebar Toggle - Works for both mobile and desktop
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-
-        // Toggle sidebar AND update button state
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-            menuToggle.classList.toggle('open');
-        }
-
-        // Click handler
-        menuToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleSidebar();
-        });
-
-        // Touch handler for better mobile response
-        menuToggle.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            toggleSidebar();
-        }, { passive: false });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 1024) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                    menuToggle.classList.remove('open');
+                // Toggle sidebar AND update button state
+                function toggleSidebar() {
+                    sidebar.classList.toggle('open');
+                    menuToggle.classList.toggle('open');
                 }
-            }
-        });
 
-        // Close sidebar on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-                menuToggle.classList.remove('open');
-            }
-        });
+                // Click handler
+                menuToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
 
-        // Navigation
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
+                // Touch handler for better mobile response
+                menuToggle.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    toggleSidebar();
+                }, { passive: false });
 
-                const target = link.getAttribute('href').substring(1);
-                navigateTo(target);
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 1024) {
+                        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                            sidebar.classList.remove('open');
+                            menuToggle.classList.remove('open');
+                        }
+                    }
+                });
 
-                // Close sidebar on mobile after navigation
-                if (window.innerWidth <= 1024) {
-                    sidebar.classList.remove('open');
-                    menuToggle.classList.remove('open');
-                }
-            });
-        });
+                // Close sidebar on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('open');
+                        menuToggle.classList.remove('open');
+                    }
+                });
 
+                // Navigation
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
 
+                        const target = link.getAttribute('href').substring(1);
+                        navigateTo(target);
 
-        // Fallback Navigation Handler
-        window.navigateTo = function (module) {
-            if (window.DashboardApp && typeof DashboardApp.loadModule === 'function') {
-                DashboardApp.loadModule(module);
-            } else {
-                console.warn("DashboardApp loading... Redirecting to hash");
-                window.location.hash = module;
-                // If app is broken, reloading might help if it was a transient loading issue
-                // But if it's syntax error, this won't help much other than changing URL.
-            }
-        };
-
-        // navigateTo function is now handled by /static/js/dashboard/admin.js
-        // which provides full SPA functionality
-
-        // Add smooth scroll for better UX
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+                        // Close sidebar on mobile after navigation
+                        if (window.innerWidth <= 1024) {
+                            sidebar.classList.remove('open');
+                            menuToggle.classList.remove('open');
+                        }
                     });
-                }
-            });
-        });
-    </script>
+                });
 
-    <!-- Premium Modal System -->
-    <script src="/static/js/premium_modal.js"></script>
 
-    <!-- API Helper Modules -->
-    <script src="/static/js/api.js?v=3.5"></script>
 
-    <!-- Dashboard SPA System (Updated Version) -->
-    <script src="/static/js/dashboard/admin.js?v=3.7"></script>
+                // Fallback Navigation Handler
+                window.navigateTo = function (module) {
+                    if (window.DashboardApp && typeof DashboardApp.loadModule === 'function') {
+                        DashboardApp.loadModule(module);
+                    } else {
+                        console.warn("DashboardApp loading... Redirecting to hash");
+                        window.location.hash = module;
+                        // If app is broken, reloading might help if it was a transient loading issue
+                        // But if it's syntax error, this won't help much other than changing URL.
+                    }
+                };
+
+                // navigateTo function is now handled by /static/js/dashboard/admin.js
+                // which provides full SPA functionality
+
+                // Add smooth scroll for better UX
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    });
+                });
+            </script>
+
+            <!-- Premium Modal System -->
+            <script src="/static/js/premium_modal.js"></script>
+
+            <!-- API Helper Modules -->
+            <script src="/static/js/api.js?v=3.5"></script>
+
+            <!-- Dashboard SPA System (Updated Version) -->
+            <script src="/static/js/dashboard/admin.js?v=3.7"></script>
+
+            <!-- Smooth Scroll & GSAP Engine -->
+            <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+            <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+            <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+            <!-- Premium Motion JS -->
+            <script src="/static/js/premium_motion.js"></script>
+        </div>
+    </div>
 </body>
 
 </html>

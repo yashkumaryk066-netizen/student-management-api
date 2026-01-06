@@ -15,6 +15,9 @@
     <!-- Premium Modal CSS -->
     <link rel="stylesheet" href="{% static 'css/premium_modal.css' %}">
 
+    <!-- Cinematic Motion Engine -->
+    <link rel="stylesheet" href="{% static 'css/premium_motion.css' %}">
+
     <!-- Three.js for 3D Effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
@@ -730,437 +733,462 @@
     <!-- 3D Background Canvas -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Navigation -->
-    <nav class="navbar">
-        <a href="#" class="logo">
-            <span>🎓</span>
-            <div>
-                <div>NEXTGEN ERP</div>
-                <a href="/api/developer/"
-                    style="font-size: 0.75rem; color: var(--primary); font-weight: 700; text-decoration: none; letter-spacing: 1px; display: block; margin-top: 2px; transition: all 0.3s;"
-                    onmouseover="this.style.textShadow='0 0 10px var(--primary)'"
-                    onmouseout="this.style.textShadow='none'">
-                    BY YASH A MISHRA <span style="font-size: 0.8em;">↗</span>
+    <div id="smooth-wrapper">
+        <div id="smooth-content">
+
+            <!-- Navigation -->
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <span>🎓</span>
+                    <div>
+                        <div>NEXTGEN ERP</div>
+                        <a href="/api/developer/"
+                            style="font-size: 0.75rem; color: var(--primary); font-weight: 700; text-decoration: none; letter-spacing: 1px; display: block; margin-top: 2px; transition: all 0.3s;"
+                            onmouseover="this.style.textShadow='0 0 10px var(--primary)'"
+                            onmouseout="this.style.textShadow='none'">
+                            BY YASH A MISHRA <span style="font-size: 0.8em;">↗</span>
+                        </a>
+                    </div>
                 </a>
-            </div>
-        </a>
-        <div class="nav-links">
-            <a href="#modules" class="nav-link">Modules</a>
-            <a href="#pricing" class="nav-link">Pricing</a>
-            <!-- API Link Hidden -->
-            <button class="btn-login" onclick="window.location.href='/login/'">ACCESS PORTAL</button>
-        </div>
-    </nav>
+                <div class="nav-links">
+                    <a href="#modules" class="nav-link">Modules</a>
+                    <a href="#pricing" class="nav-link">Pricing</a>
+                    <!-- API Link Hidden -->
+                    <button class="btn-login" onclick="window.location.href='/login/'">ACCESS PORTAL</button>
+                </div>
+            </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="grid-3d"></div>
-        <div class="hero-content">
-            <div class="hero-left">
-                <div class="badge">
-                    <span class="pulse-dot"></span>
-                    SYSTEM ONLINE
-                </div>
-                <h1>The Complete Operating System for Education</h1>
-                <p class="hero-description">
-                    Transform your institution with Y.S.M Advance Education — the most comprehensive education management platform.
-                    Built for modern schools, colleges, and universities.
-                </p>
-                <div class="hero-buttons">
-                    <button class="btn-primary" onclick="window.location.href='/login/'">
-                        GET STARTED
-                    </button>
-                    <button class="btn-secondary" onclick="window.location.href='/demo/'">
-                        LIVE DEMO
-                    </button>
-                    <button class="btn-secondary" onclick="window.location.href='/api/developer/'"
-                        style="border-color: var(--accent); color: var(--accent);">
-                        <span style="display: flex; align-items: center; gap: 8px;">
-                            MEET THE DEVELOPER <span style="font-size: 1.2em;">👨‍💻</span>
-                        </span>
-                    </button>
-                </div>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-number">50+</div>
-                        <div class="stat-label">Modules</div>
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="grid-3d"></div>
+                <div class="hero-content">
+                    <div class="hero-left">
+                        <div class="badge">
+                            <span class="pulse-dot"></span>
+                            SYSTEM ONLINE
+                        </div>
+                        <h1>The Complete Operating System for Education</h1>
+                        <p class="hero-description">
+                            Transform your institution with Y.S.M Advance Education — the most comprehensive education
+                            management platform.
+                            Built for modern schools, colleges, and universities.
+                        </p>
+                        <div class="hero-buttons">
+                            <button class="btn-primary" onclick="window.location.href='/login/'">
+                                GET STARTED
+                            </button>
+                            <button class="btn-secondary" onclick="window.location.href='/demo/'">
+                                LIVE DEMO
+                            </button>
+                            <button class="btn-secondary" onclick="window.location.href='/api/developer/'"
+                                style="border-color: var(--accent); color: var(--accent);">
+                                <span style="display: flex; align-items: center; gap: 8px;">
+                                    MEET THE DEVELOPER <span style="font-size: 1.2em;">👨‍💻</span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-number">50+</div>
+                                <div class="stat-label">Modules</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">99.9%</div>
+                                <div class="stat-label">Uptime</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">24/7</div>
+                                <div class="stat-label">Support</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">99.9%</div>
-                        <div class="stat-label">Uptime</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">24/7</div>
-                        <div class="stat-label">Support</div>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-right">
-                <div class="hologram">
-                    <div class="holo-ring ring-1"></div>
-                    <div class="holo-ring ring-2"></div>
-                    <div class="holo-ring ring-3"></div>
-                    <div class="holo-core"></div>
-                    <div class="data-point dp-1">Students: 1542</div>
-                    <div class="data-point dp-2">Revenue: +12%</div>
-                    <div class="data-point dp-3">Staff: 120</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Modules Section -->
-    <section id="modules" class="features-section">
-        <div class="section-header">
-            <div class="badge">
-                <span class="pulse-dot"></span>
-                POWERFUL FEATURES
-            </div>
-            <h2>Enterprise Modules</h2>
-            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Everything you need to manage your
-                institution efficiently in one unified platform.</p>
-        </div>
-
-        <div class="bento-grid">
-            <!-- Academics -->
-            <div class="bento-card large">
-                <div class="card-icon">📚</div>
-                <h3>Academics & Exams</h3>
-                <p>Complete examination management, grading systems, automated report cards (GPA/CGPA), and smart
-                    timetable scheduling with conflict detection.</p>
-            </div>
-
-            <!-- Finance -->
-            <div class="bento-card">
-                <div class="card-icon">💰</div>
-                <h3>Finance & Payroll</h3>
-                <p>Fee collection, automated receipts, staff payroll processing, expense tracking, and financial
-                    auditing reports.</p>
-            </div>
-
-            <!-- Library -->
-            <div class="bento-card">
-                <div class="card-icon">📖</div>
-                <h3>Digital Library</h3>
-                <p>LMS for book issue/returns, digital catalog, fine calculation, and ebook management support.</p>
-            </div>
-
-            <!-- HR -->
-            <div class="bento-card tall">
-                <div class="card-icon">👥</div>
-                <h3>HR Management</h3>
-                <p>Staff attendance, leave management, recruitment portal, and performance appraisal systems. Track
-                    every employee's lifecycle from hiring to retiring.</p>
-            </div>
-
-            <!-- Transport -->
-            <div class="bento-card large">
-                <div class="card-icon">🚌</div>
-                <h3>Transport & GPS</h3>
-                <p>Real-time bus tracking, route optimization, driver management, and parent alerts. Ensure student
-                    safety with live location updates.</p>
-            </div>
-
-            <!-- Hostel -->
-            <div class="bento-card">
-                <div class="card-icon">🏨</div>
-                <h3>Smart Hostel</h3>
-                <p>Room allocation, mess management, gate pass system, and biometric attendance integration.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" style="padding: 100px 60px; background: #02040a;">
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <div style="text-align: center; margin-bottom: 80px;">
-                <div class="badge">
-                    <span class="pulse-dot"></span>
-                    FLEXIBLE PLANS
-                </div>
-                <h2 style="font-size: 3rem; margin-bottom: 20px;">Simple, Transparent Pricing</h2>
-                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
-                    Choose the perfect plan for your institution. Instant activation upon secure payment.
-                </p>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
-
-                <!-- Coaching Plan -->
-                <div class="pricing-card"
-                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s; position:relative;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Coaching Center</h3>
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
-                        ₹500<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
-                    </div>
-                    <ul style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
-                        <li>✓ Up to 100 Students</li>
-                        <li>✓ Attendance & Batches</li>
-                        <li>✓ Basic Reports</li>
-                        <li>✓ Email Support</li>
-                    </ul>
-                    <button class="btn-secondary" style="width: 100%;"
-                        onclick="openPaymentModal('Coaching Center', 500)">
-                        CHOOSE PLAN
-                    </button>
-                </div>
-
-                <!-- School Plan -->
-                <div class="pricing-card"
-                    style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1)); border: 1px solid var(--primary); border-radius: 20px; padding: 40px; transform: scale(1.05); position: relative;">
-                    <div
-                        style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
-                        FOR SCHOOLS
-                    </div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">School</h3>
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
-                        ₹10,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
-                    </div>
-                    <ul style="list-style: none; color: white; line-height: 2; margin-bottom: 40px;">
-                        <li>✓ Unlimited Students</li>
-                        <li>✓ Exam & Grading System</li>
-                        <li>✓ ID Card Generation</li>
-                        <li>✓ Transport Management</li>
-                        <li>✓ Priority Support</li>
-                    </ul>
-                    <button class="btn-primary" style="width: 100%;" onclick="openPaymentModal('School', 10000)">
-                        CHOOSE PLAN
-                    </button>
-                </div>
-
-                <!-- Institute Plan -->
-                <div class="pricing-card"
-                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Institute / University</h3>
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
-                        ₹15,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
-                    </div>
-                    <ul style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
-                        <li>✓ Multi-Branch Support</li>
-                        <li>✓ HR & Payroll</li>
-                        <li>✓ Library & Hostel</li>
-                        <li>✓ Advanced Analytics</li>
-                        <li>✓ Dedicated Account Manager</li>
-                    </ul>
-                    <button class="btn-secondary" style="width: 100%;" onclick="openPaymentModal('Institute', 15000)">
-                        CHOOSE PLAN
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Payment Modal -->
-    <div id="paymentModalOverlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); z-index:10000; justify-content:center; align-items:center;">
-        <div id="paymentModalContent"
-            style="background: #0f172a; border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; width: 90%; max-width: 500px; position:relative; animation: fadeInUp 0.3s ease-out;">
-            <button onclick="closePaymentModal()"
-                style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
-
-            <!-- Step 1: Account Details -->
-            <div id="step1">
-                <h3 style="margin-bottom: 10px; font-family: 'Space Grotesk';">Create Account</h3>
-                <p style="color:var(--text-muted); margin-bottom:20px;">Enter your details to proceed with payment.</p>
-
-                <div style="margin-bottom:15px;">
-                    <label style="display:block; margin-bottom:5px; color:var(--text-muted);">Email Address</label>
-                    <input type="email" id="userEmail" placeholder="admin@school.com"
-                        style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px;">
-                </div>
-                <div style="margin-bottom:25px;">
-                    <label style="display:block; margin-bottom:5px; color:var(--text-muted);">Mobile Number</label>
-                    <input type="tel" id="userPhone" placeholder="+91 98765 43210"
-                        style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px;">
-                </div>
-
-                <button onclick="goToPaymentStep()" class="btn-primary" style="width:100%;">Proceed to Payment</button>
-            </div>
-
-            <!-- Step 2: Payment Scanner -->
-            <div id="step2" style="display:none; text-align:center;">
-                <h3 style="margin-bottom: 10px; font-family: 'Space Grotesk';">Secure Payment</h3>
-                <p id="planAmountDisplay"
-                    style="color:var(--primary); font-size:1.5rem; font-weight:700; margin-bottom:20px;">₹0</p>
-
-                <div
-                    style="background:white; padding:15px; border-radius:15px; display:inline-block; margin-bottom:20px;">
-                    <img src="/static/images/payment_qr.jpg" alt="Payment QR"
-                        style="width:200px; height:200px; object-fit:contain;">
-                </div>
-
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Scan using any UPI App (GPay,
-                    PhonePe, Paytm)</p>
-
-                <div
-                    style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; text-align:left;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="color:var(--text-muted);">Bank Transfer (IMPS/NEFT)</span>
-                    </div>
-                    <div style="font-family:monospace; color:var(--text-muted); font-size:0.85rem;">
-                        IFSC: CNRB0004949<br>
-                        ACC: 4949120000179
+                    <div class="hero-right">
+                        <div class="hologram">
+                            <div class="holo-ring ring-1"></div>
+                            <div class="holo-ring ring-2"></div>
+                            <div class="holo-ring ring-3"></div>
+                            <div class="holo-core"></div>
+                            <div class="data-point dp-1">Students: 1542</div>
+                            <div class="data-point dp-2">Revenue: +12%</div>
+                            <div class="data-point dp-3">Staff: 120</div>
+                        </div>
                     </div>
                 </div>
+            </section>
 
-                <div id="paymentProcessing" style="display:none; color:var(--primary); margin-bottom:10px;">
-                    <span class="pulse-dot"></span> Verifying Payment & Creating Account...
+            <!-- Modules Section -->
+            <section id="modules" class="features-section reveal-section">
+                <div class="section-header">
+                    <div class="badge">
+                        <span class="pulse-dot"></span>
+                        POWERFUL FEATURES
+                    </div>
+                    <h2>Enterprise Modules</h2>
+                    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Everything you need to manage
+                        your
+                        institution efficiently in one unified platform.</p>
                 </div>
 
-                <button id="confirmPaymentBtn" onclick="confirmPayment()" class="btn-primary" style="width:100%;">I Have
-                    Paid</button>
+                <div class="bento-grid">
+                    <!-- Academics -->
+                    <div class="bento-card large">
+                        <div class="card-icon">📚</div>
+                        <h3>Academics & Exams</h3>
+                        <p>Complete examination management, grading systems, automated report cards (GPA/CGPA), and
+                            smart
+                            timetable scheduling with conflict detection.</p>
+                    </div>
+
+                    <!-- Finance -->
+                    <div class="bento-card">
+                        <div class="card-icon">💰</div>
+                        <h3>Finance & Payroll</h3>
+                        <p>Fee collection, automated receipts, staff payroll processing, expense tracking, and financial
+                            auditing reports.</p>
+                    </div>
+
+                    <!-- Library -->
+                    <div class="bento-card">
+                        <div class="card-icon">📖</div>
+                        <h3>Digital Library</h3>
+                        <p>LMS for book issue/returns, digital catalog, fine calculation, and ebook management support.
+                        </p>
+                    </div>
+
+                    <!-- HR -->
+                    <div class="bento-card tall">
+                        <div class="card-icon">👥</div>
+                        <h3>HR Management</h3>
+                        <p>Staff attendance, leave management, recruitment portal, and performance appraisal systems.
+                            Track
+                            every employee's lifecycle from hiring to retiring.</p>
+                    </div>
+
+                    <!-- Transport -->
+                    <div class="bento-card large">
+                        <div class="card-icon">🚌</div>
+                        <h3>Transport & GPS</h3>
+                        <p>Real-time bus tracking, route optimization, driver management, and parent alerts. Ensure
+                            student
+                            safety with live location updates.</p>
+                    </div>
+
+                    <!-- Hostel -->
+                    <div class="bento-card">
+                        <div class="card-icon">🏨</div>
+                        <h3>Smart Hostel</h3>
+                        <p>Room allocation, mess management, gate pass system, and biometric attendance integration.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pricing Section -->
+            <section id="pricing" class="reveal-section" style="padding: 100px 60px; background: #02040a;">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                    <div style="text-align: center; margin-bottom: 80px;">
+                        <div class="badge">
+                            <span class="pulse-dot"></span>
+                            FLEXIBLE PLANS
+                        </div>
+                        <h2 style="font-size: 3rem; margin-bottom: 20px;">Simple, Transparent Pricing</h2>
+                        <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+                            Choose the perfect plan for your institution. Instant activation upon secure payment.
+                        </p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+
+                        <!-- Coaching Plan -->
+                        <div class="pricing-card"
+                            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s; position:relative;">
+                            <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Coaching Center</h3>
+                            <div
+                                style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                                ₹500<span
+                                    style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
+                            </div>
+                            <ul
+                                style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
+                                <li>✓ Up to 100 Students</li>
+                                <li>✓ Attendance & Batches</li>
+                                <li>✓ Basic Reports</li>
+                                <li>✓ Email Support</li>
+                            </ul>
+                            <button class="btn-secondary" style="width: 100%;"
+                                onclick="openPaymentModal('Coaching Center', 500)">
+                                CHOOSE PLAN
+                            </button>
+                        </div>
+
+                        <!-- School Plan -->
+                        <div class="pricing-card"
+                            style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1)); border: 1px solid var(--primary); border-radius: 20px; padding: 40px; transform: scale(1.05); position: relative;">
+                            <div
+                                style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                                FOR SCHOOLS
+                            </div>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 10px;">School</h3>
+                            <div
+                                style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                                ₹10,000<span
+                                    style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
+                            </div>
+                            <ul style="list-style: none; color: white; line-height: 2; margin-bottom: 40px;">
+                                <li>✓ Unlimited Students</li>
+                                <li>✓ Exam & Grading System</li>
+                                <li>✓ ID Card Generation</li>
+                                <li>✓ Transport Management</li>
+                                <li>✓ Priority Support</li>
+                            </ul>
+                            <button class="btn-primary" style="width: 100%;"
+                                onclick="openPaymentModal('School', 10000)">
+                                CHOOSE PLAN
+                            </button>
+                        </div>
+
+                        <!-- Institute Plan -->
+                        <div class="pricing-card"
+                            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; transition: transform 0.3s;">
+                            <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Institute / University</h3>
+                            <div
+                                style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                                ₹15,000<span
+                                    style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
+                            </div>
+                            <ul
+                                style="list-style: none; color: var(--text-muted); line-height: 2; margin-bottom: 40px;">
+                                <li>✓ Multi-Branch Support</li>
+                                <li>✓ HR & Payroll</li>
+                                <li>✓ Library & Hostel</li>
+                                <li>✓ Advanced Analytics</li>
+                                <li>✓ Dedicated Account Manager</li>
+                            </ul>
+                            <button class="btn-secondary" style="width: 100%;"
+                                onclick="openPaymentModal('Institute', 15000)">
+                                CHOOSE PLAN
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Modal -->
+            <div id="paymentModalOverlay"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); z-index:10000; justify-content:center; align-items:center;">
+                <div id="paymentModalContent"
+                    style="background: #0f172a; border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; width: 90%; max-width: 500px; position:relative; animation: fadeInUp 0.3s ease-out;">
+                    <button onclick="closePaymentModal()"
+                        style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+
+                    <!-- Step 1: Account Details -->
+                    <div id="step1">
+                        <h3 style="margin-bottom: 10px; font-family: 'Space Grotesk';">Create Account</h3>
+                        <p style="color:var(--text-muted); margin-bottom:20px;">Enter your details to proceed with
+                            payment.</p>
+
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; margin-bottom:5px; color:var(--text-muted);">Email
+                                Address</label>
+                            <input type="email" id="userEmail" placeholder="admin@school.com"
+                                style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:25px;">
+                            <label style="display:block; margin-bottom:5px; color:var(--text-muted);">Mobile
+                                Number</label>
+                            <input type="tel" id="userPhone" placeholder="+91 98765 43210"
+                                style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px;">
+                        </div>
+
+                        <button onclick="goToPaymentStep()" class="btn-primary" style="width:100%;">Proceed to
+                            Payment</button>
+                    </div>
+
+                    <!-- Step 2: Payment Scanner -->
+                    <div id="step2" style="display:none; text-align:center;">
+                        <h3 style="margin-bottom: 10px; font-family: 'Space Grotesk';">Secure Payment</h3>
+                        <p id="planAmountDisplay"
+                            style="color:var(--primary); font-size:1.5rem; font-weight:700; margin-bottom:20px;">₹0</p>
+
+                        <div
+                            style="background:white; padding:15px; border-radius:15px; display:inline-block; margin-bottom:20px;">
+                            <img src="/static/images/payment_qr.jpg" alt="Payment QR"
+                                style="width:200px; height:200px; object-fit:contain;">
+                        </div>
+
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Scan using any UPI App
+                            (GPay,
+                            PhonePe, Paytm)</p>
+
+                        <div
+                            style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; text-align:left;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <span style="color:var(--text-muted);">Bank Transfer (IMPS/NEFT)</span>
+                            </div>
+                            <div style="font-family:monospace; color:var(--text-muted); font-size:0.85rem;">
+                                IFSC: CNRB0004949<br>
+                                ACC: 4949120000179
+                            </div>
+                        </div>
+
+                        <div id="paymentProcessing" style="display:none; color:var(--primary); margin-bottom:10px;">
+                            <span class="pulse-dot"></span> Verifying Payment & Creating Account...
+                        </div>
+
+                        <button id="confirmPaymentBtn" onclick="confirmPayment()" class="btn-primary"
+                            style="width:100%;">I Have
+                            Paid</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Razorpay SDK -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+            <!-- Razorpay SDK -->
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-    <!-- Payment Logic Script -->
-    <script>
-        let selectedPlan = '';
-        let selectedAmount = 0;
+            <!-- Payment Logic Script -->
+            <script>
+                let selectedPlan = '';
+                let selectedAmount = 0;
 
-        function openPaymentModal(plan, amount) {
-            selectedPlan = plan;
-            selectedAmount = amount;
-            document.getElementById('planAmountDisplay').innerText = '₹' + amount.toLocaleString('en-IN');
+                function openPaymentModal(plan, amount) {
+                    selectedPlan = plan;
+                    selectedAmount = amount;
+                    document.getElementById('planAmountDisplay').innerText = '₹' + amount.toLocaleString('en-IN');
 
-            // Reset modal state
-            document.getElementById('paymentModalOverlay').style.display = 'flex';
-            document.getElementById('step1').style.display = 'block';
-            document.getElementById('step2').style.display = 'none';
-        }
-
-        function closePaymentModal() {
-            document.getElementById('paymentModalOverlay').style.display = 'none';
-        }
-
-        function goToPaymentStep() {
-            const email = document.getElementById('userEmail').value;
-            const phone = document.getElementById('userPhone').value;
-
-            if (!email || !phone) {
-                alert('Please enter both Email and Phone Number');
-                return;
-            }
-            if (phone.length < 10) {
-                alert('Please enter a valid phone number (10 digits)');
-                return;
-            }
-
-            // Trigger Razorpay Payment Flow directly instead of showing QR Step
-            initiateRazorpayPayment();
-        }
-
-        async function initiateRazorpayPayment() {
-            const email = document.getElementById('userEmail').value;
-            const phone = document.getElementById('userPhone').value;
-            const btn = document.querySelector('#step1 button'); // The Proceed Button
-            btn.innerText = "Initializing Payment Gateway...";
-            btn.disabled = true;
-
-            try {
-                // 1. Create Order
-                const res = await fetch('/api/payment/create-order/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: selectedAmount })
-                });
-                const orderData = await res.json();
-
-                if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
-
-                // CHECK FOR MOCK MODE (If real keys aren't set)
-                // Use User's Custom QR Scanner instead of generic bank
-                if (orderData.mock_order) {
-                    showQRScanner(orderData);
-                    return;
+                    // Reset modal state
+                    document.getElementById('paymentModalOverlay').style.display = 'flex';
+                    document.getElementById('step1').style.display = 'block';
+                    document.getElementById('step2').style.display = 'none';
                 }
 
-                // 2. Open Razorpay Checkout (REAL MODE)
-                const options = {
-                    "key": orderData.key_id,
-                    "amount": orderData.amount,
-                    "currency": orderData.currency,
-                    "name": "IMS Premium",
-                    "description": `Payment for ${selectedPlan}`,
-                    "image": "https://cdn-icons-png.flaticon.com/512/2995/2995467.png",
-                    "order_id": orderData.order_id,
-                    "handler": function (response) {
-                        verifyAndOnboard(response);
-                    },
-                    "prefill": {
-                        "name": email.split('@')[0],
-                        "email": email,
-                        "contact": phone
-                    },
-                    "theme": { "color": "#6366f1" }
-                };
+                function closePaymentModal() {
+                    document.getElementById('paymentModalOverlay').style.display = 'none';
+                }
 
-                const rzp1 = new Razorpay(options);
-                rzp1.on('payment.failed', function (response) {
-                    alert("Payment Failed: " + response.error.description);
-                    btn.innerText = "Proceed to Payment";
-                    btn.disabled = false;
-                });
-                rzp1.open();
+                function goToPaymentStep() {
+                    const email = document.getElementById('userEmail').value;
+                    const phone = document.getElementById('userPhone').value;
 
-            } catch (e) {
-                console.error(e);
+                    if (!email || !phone) {
+                        alert('Please enter both Email and Phone Number');
+                        return;
+                    }
+                    if (phone.length < 10) {
+                        alert('Please enter a valid phone number (10 digits)');
+                        return;
+                    }
 
-                // Check if it's payment gateway not configured error
-                if (e.message && e.message.includes('PAYMENT_GATEWAY_NOT_CONFIGURED')) {
-                    showPremiumModal({
-                        title: '💳 Payment Gateway Unavailable',
-                        message: 'Automatic payment gateway is not configured. We use Manual Bank Transfer for secure payments.',
-                        type: 'info',
-                        buttons: [
-                            {
-                                text: 'Continue with Bank Transfer',
-                                class: 'btn-primary',
-                                action: () => {
-                                    closePremiumModal();
-                                    // Directly trigger bank transfer flow
-                                    showManualPaymentStep();
-                                }
+                    // Trigger Razorpay Payment Flow directly instead of showing QR Step
+                    initiateRazorpayPayment();
+                }
+
+                async function initiateRazorpayPayment() {
+                    const email = document.getElementById('userEmail').value;
+                    const phone = document.getElementById('userPhone').value;
+                    const btn = document.querySelector('#step1 button'); // The Proceed Button
+                    btn.innerText = "Initializing Payment Gateway...";
+                    btn.disabled = true;
+
+                    try {
+                        // 1. Create Order
+                        const res = await fetch('/api/payment/create-order/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ amount: selectedAmount })
+                        });
+                        const orderData = await res.json();
+
+                        if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
+
+                        // CHECK FOR MOCK MODE (If real keys aren't set)
+                        // Use User's Custom QR Scanner instead of generic bank
+                        if (orderData.mock_order) {
+                            showQRScanner(orderData);
+                            return;
+                        }
+
+                        // 2. Open Razorpay Checkout (REAL MODE)
+                        const options = {
+                            "key": orderData.key_id,
+                            "amount": orderData.amount,
+                            "currency": orderData.currency,
+                            "name": "IMS Premium",
+                            "description": `Payment for ${selectedPlan}`,
+                            "image": "https://cdn-icons-png.flaticon.com/512/2995/2995467.png",
+                            "order_id": orderData.order_id,
+                            "handler": function (response) {
+                                verifyAndOnboard(response);
                             },
-                            {
-                                text: 'Cancel',
-                                class: 'btn-secondary',
-                                action: closePremiumModal
-                            }
-                        ]
-                    });
-                } else {
-                    showPremiumModal({
-                        title: '❌ Payment Error',
-                        message: e.message || 'An error occurred while initializing payment. Please try again.',
-                        type: 'error',
-                        buttons: [{
-                            text: 'Close',
-                            class: 'btn-primary',
-                            action: closePremiumModal
-                        }]
-                    });
+                            "prefill": {
+                                "name": email.split('@')[0],
+                                "email": email,
+                                "contact": phone
+                            },
+                            "theme": { "color": "#6366f1" }
+                        };
+
+                        const rzp1 = new Razorpay(options);
+                        rzp1.on('payment.failed', function (response) {
+                            alert("Payment Failed: " + response.error.description);
+                            btn.innerText = "Proceed to Payment";
+                            btn.disabled = false;
+                        });
+                        rzp1.open();
+
+                    } catch (e) {
+                        console.error(e);
+
+                        // Check if it's payment gateway not configured error
+                        if (e.message && e.message.includes('PAYMENT_GATEWAY_NOT_CONFIGURED')) {
+                            showPremiumModal({
+                                title: '💳 Payment Gateway Unavailable',
+                                message: 'Automatic payment gateway is not configured. We use Manual Bank Transfer for secure payments.',
+                                type: 'info',
+                                buttons: [
+                                    {
+                                        text: 'Continue with Bank Transfer',
+                                        class: 'btn-primary',
+                                        action: () => {
+                                            closePremiumModal();
+                                            // Directly trigger bank transfer flow
+                                            showManualPaymentStep();
+                                        }
+                                    },
+                                    {
+                                        text: 'Cancel',
+                                        class: 'btn-secondary',
+                                        action: closePremiumModal
+                                    }
+                                ]
+                            });
+                        } else {
+                            showPremiumModal({
+                                title: '❌ Payment Error',
+                                message: e.message || 'An error occurred while initializing payment. Please try again.',
+                                type: 'error',
+                                buttons: [{
+                                    text: 'Close',
+                                    class: 'btn-primary',
+                                    action: closePremiumModal
+                                }]
+                            });
+                        }
+
+                        btn.innerText = "Proceed to Payment";
+                        btn.disabled = false;
+                    }
                 }
 
-                btn.innerText = "Proceed to Payment";
-                btn.disabled = false;
-            }
-        }
+                function showManualPaymentStep() {
+                    // Hide Email Step
+                    document.getElementById('step1').style.display = 'none';
+                    // Show new QR UI in Step 2 container
+                    const step2 = document.getElementById('step2');
+                    step2.style.display = 'block';
 
-        function showManualPaymentStep() {
-            // Hide Email Step
-            document.getElementById('step1').style.display = 'none';
-            // Show new QR UI in Step 2 container
-            const step2 = document.getElementById('step2');
-            step2.style.display = 'block';
+                    // Generate a temporary reference ID
+                    const manualOrderId = 'MANUAL-' + Date.now().toString().slice(-6);
 
-            // Generate a temporary reference ID
-            const manualOrderId = 'MANUAL-' + Date.now().toString().slice(-6);
-
-            step2.innerHTML = `
+                    step2.innerHTML = `
             <div style="text-align:center; padding: 20px;">
                 <h3 style="margin-bottom:5px; font-family:'Space Grotesk'">Scan & Pay</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Use any UPI App to pay securely</p>
@@ -1196,16 +1224,16 @@
                 </button>
             </div>
         `;
-        }
+                }
 
-        function showQRScanner(orderData) {
-            // Hide Email Step
-            document.getElementById('step1').style.display = 'none';
-            // Show new QR UI in Step 2 container
-            const step2 = document.getElementById('step2');
-            step2.style.display = 'block';
+                function showQRScanner(orderData) {
+                    // Hide Email Step
+                    document.getElementById('step1').style.display = 'none';
+                    // Show new QR UI in Step 2 container
+                    const step2 = document.getElementById('step2');
+                    step2.style.display = 'block';
 
-            step2.innerHTML = `
+                    step2.innerHTML = `
                 <div style="text-align:center; padding: 20px;">
                     <h3 style="margin-bottom:5px; font-family:'Space Grotesk'">Scan & Pay</h3>
                     <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Use any UPI App to pay securely</p>
@@ -1235,53 +1263,53 @@
                     </button>
                 </div>
             `;
-        }
-
-        async function verifyManualPayment(orderId) {
-            const utr = document.getElementById('txnUtrInput').value.trim();
-            const errDiv = document.getElementById('utrError');
-            const btn = document.getElementById('verifyBtn');
-            const email = document.getElementById('userEmail').value;
-            const phone = document.getElementById('userPhone').value;
-
-            // 1. Strict UTR Validation (Minimum 10 characters)
-            if (!utr || utr.length < 10) {
-                errDiv.style.display = 'block';
-                errDiv.innerText = "Invalid UTR! Please enter a valid Transaction ID (minimum 10 characters).";
-                return;
-            }
-            errDiv.style.display = 'none';
-
-            // 2. Show Advanced Verification Animation
-            btn.disabled = true;
-            btn.innerHTML = `<span class="pulse-dot"></span> Submitting for verification...`;
-
-            try {
-                // Call new subscription verify API
-                const response = await fetch('/api/subscription/submit/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: email,
-                        phone: phone,
-                        plan_type: selectedPlan,
-                        utr: utr,
-                        amount: selectedAmount.toString()
-                    })
-                });
-
-                const text = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(text);
-                } catch (e) {
-                    console.warn("Server returned non-JSON response:", text);
-                    throw new Error("Server Error: " + (text.length > 50 ? text.substring(0, 50) + "..." : text));
                 }
 
-                if (response.ok) {
-                    // Success - Show waiting for approval message
-                    document.getElementById('step2').innerHTML = `
+                async function verifyManualPayment(orderId) {
+                    const utr = document.getElementById('txnUtrInput').value.trim();
+                    const errDiv = document.getElementById('utrError');
+                    const btn = document.getElementById('verifyBtn');
+                    const email = document.getElementById('userEmail').value;
+                    const phone = document.getElementById('userPhone').value;
+
+                    // 1. Strict UTR Validation (Minimum 10 characters)
+                    if (!utr || utr.length < 10) {
+                        errDiv.style.display = 'block';
+                        errDiv.innerText = "Invalid UTR! Please enter a valid Transaction ID (minimum 10 characters).";
+                        return;
+                    }
+                    errDiv.style.display = 'none';
+
+                    // 2. Show Advanced Verification Animation
+                    btn.disabled = true;
+                    btn.innerHTML = `<span class="pulse-dot"></span> Submitting for verification...`;
+
+                    try {
+                        // Call new subscription verify API
+                        const response = await fetch('/api/subscription/submit/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: email,
+                                phone: phone,
+                                plan_type: selectedPlan,
+                                utr: utr,
+                                amount: selectedAmount.toString()
+                            })
+                        });
+
+                        const text = await response.text();
+                        let result;
+                        try {
+                            result = JSON.parse(text);
+                        } catch (e) {
+                            console.warn("Server returned non-JSON response:", text);
+                            throw new Error("Server Error: " + (text.length > 50 ? text.substring(0, 50) + "..." : text));
+                        }
+
+                        if (response.ok) {
+                            // Success - Show waiting for approval message
+                            document.getElementById('step2').innerHTML = `
                         <div style="padding:40px; text-align:center;">
                             <div style="font-size:3rem; margin-bottom:20px;">⏳</div>
                             <h3 style="margin-bottom:10px; color:#f59e0b;">Waiting for Admin Approval</h3>
@@ -1338,31 +1366,31 @@
                             <button onclick="location.href='/login/'" class="btn-secondary" style="width:100%;">Go to Login Page</button>
                         </div>
                     `;
-                } else {
-                    // Error
-                    errDiv.style.display = 'block';
-                    errDiv.innerText = result.error || result.message || "Verification failed. Please try again.";
-                    btn.disabled = false;
-                    btn.innerHTML = "VERIFY PAYMENT";
+                        } else {
+                            // Error
+                            errDiv.style.display = 'block';
+                            errDiv.innerText = result.error || result.message || "Verification failed. Please try again.";
+                            btn.disabled = false;
+                            btn.innerHTML = "VERIFY PAYMENT";
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+                        errDiv.style.display = 'block';
+                        errDiv.innerText = error.message || "Network error. Please check your connection.";
+                        btn.disabled = false;
+                        btn.innerHTML = "VERIFY PAYMENT";
+                    }
                 }
 
-            } catch (error) {
-                console.error(error);
-                errDiv.style.display = 'block';
-                errDiv.innerText = error.message || "Network error. Please check your connection.";
-                btn.disabled = false;
-                btn.innerHTML = "VERIFY PAYMENT";
-            }
-        }
+                async function verifyAndOnboard(paymentResponse) {
+                    const email = document.getElementById('userEmail').value;
+                    const phone = document.getElementById('userPhone').value;
 
-        async function verifyAndOnboard(paymentResponse) {
-            const email = document.getElementById('userEmail').value;
-            const phone = document.getElementById('userPhone').value;
-
-            // Show processing UI (reuse step2 container for feedback)
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-            document.getElementById('step2').innerHTML = `
+                    // Show processing UI (reuse step2 container for feedback)
+                    document.getElementById('step1').style.display = 'none';
+                    document.getElementById('step2').style.display = 'block';
+                    document.getElementById('step2').innerHTML = `
                 <div style="padding:40px; text-align:center;">
                     <div style="font-size:3rem; margin-bottom:20px;">🎉</div>
                     <h3 style="margin-bottom:10px;">Payment Successful!</h3>
@@ -1373,42 +1401,42 @@
                 </div>
              `;
 
-            // Determine plan type
-            let planTypeEnum = 'SCHOOL';
-            if (selectedPlan.toLowerCase().includes('coaching')) planTypeEnum = 'COACHING';
-            if (selectedPlan.toLowerCase().includes('institute')) planTypeEnum = 'INSTITUTE';
+                    // Determine plan type
+                    let planTypeEnum = 'SCHOOL';
+                    if (selectedPlan.toLowerCase().includes('coaching')) planTypeEnum = 'COACHING';
+                    if (selectedPlan.toLowerCase().includes('institute')) planTypeEnum = 'INSTITUTE';
 
-            // Call Onboarding API
-            try {
-                const response = await fetch('/api/onboarding/pay/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: email,
-                        phone: phone,
-                        plan_type: planTypeEnum,
-                        amount: selectedAmount,
-                        // Pass payment details for backend to verify if implemented
-                        razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                        razorpay_order_id: paymentResponse.razorpay_order_id,
-                        razorpay_signature: paymentResponse.razorpay_signature
-                    })
-                });
+                    // Call Onboarding API
+                    try {
+                        const response = await fetch('/api/onboarding/pay/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: email,
+                                phone: phone,
+                                plan_type: planTypeEnum,
+                                amount: selectedAmount,
+                                // Pass payment details for backend to verify if implemented
+                                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                                razorpay_order_id: paymentResponse.razorpay_order_id,
+                                razorpay_signature: paymentResponse.razorpay_signature
+                            })
+                        });
 
-                const data = await response.json();
+                        const data = await response.json();
 
-                if (response.ok) {
-                    // DISPLAY CREDENTIALS TO USER ON SCREEN
-                    const creds = data.display_credentials;
+                        if (response.ok) {
+                            // DISPLAY CREDENTIALS TO USER ON SCREEN
+                            const creds = data.display_credentials;
 
-                    // SAVE TOKENS FOR AUTO LOGIN
-                    if (data.tokens) {
-                        localStorage.setItem('accessToken', data.tokens.access);
-                        localStorage.setItem('refreshToken', data.tokens.refresh);
-                        console.log("Auto Login Tokens Saved");
-                    }
+                            // SAVE TOKENS FOR AUTO LOGIN
+                            if (data.tokens) {
+                                localStorage.setItem('accessToken', data.tokens.access);
+                                localStorage.setItem('refreshToken', data.tokens.refresh);
+                                console.log("Auto Login Tokens Saved");
+                            }
 
-                    document.getElementById('step2').innerHTML = `
+                            document.getElementById('step2').innerHTML = `
                         <div style="padding:20px; text-align:center;">
                             <div style="font-size:3rem; margin-bottom:10px;">✅</div>
                             <h3 style="margin-bottom:10px; color:#10b981;">Account Activated!</h3>
@@ -1428,73 +1456,73 @@
                         </div>
                     `;
 
-                } else {
-                    document.getElementById('step2').innerHTML = `<p style="color:red">Account Creation Failed: ${data.error}</p>`;
+                        } else {
+                            document.getElementById('step2').innerHTML = `<p style="color:red">Account Creation Failed: ${data.error}</p>`;
+                        }
+                    } catch (e) {
+                        document.getElementById('step2').innerHTML = `<p style="color:red">Server Error: ${e.message}</p>`;
+                    }
                 }
-            } catch (e) {
-                document.getElementById('step2').innerHTML = `<p style="color:red">Server Error: ${e.message}</p>`;
-            }
-        }
-    </script>
+            </script>
 
-    <script>
-        // Remove preloader after 2 seconds
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('preloader').classList.add('fade-out');
-                setTimeout(() => {
-                    document.getElementById('preloader').style.display = 'none';
-                }, 800);
-            }, 2000);
-        });
+            <script>
+                // Remove preloader after 2 seconds
+                window.addEventListener('load', () => {
+                    setTimeout(() => {
+                        document.getElementById('preloader').classList.add('fade-out');
+                        setTimeout(() => {
+                            document.getElementById('preloader').style.display = 'none';
+                        }, 800);
+                    }, 2000);
+                });
 
-        // Three.js Particle System
-        const canvas = document.getElementById('bg-canvas');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+                // Three.js Particle System
+                const canvas = document.getElementById('bg-canvas');
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.position.z = 5;
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.position.z = 5;
 
-        // Create particles
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 2000;
-        const posArray = new Float32Array(particlesCount * 3);
+                // Create particles
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particlesCount = 2000;
+                const posArray = new Float32Array(particlesCount * 3);
 
-        for (let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 15;
-        }
+                for (let i = 0; i < particlesCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 15;
+                }
 
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.01,
-            color: 0x6366f1,
-            transparent: true,
-            opacity: 0.6
-        });
+                const particlesMaterial = new THREE.PointsMaterial({
+                    size: 0.01,
+                    color: 0x6366f1,
+                    transparent: true,
+                    opacity: 0.6
+                });
 
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
+                const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+                scene.add(particlesMesh);
 
-        // Animation
-        function animate() {
-            requestAnimationFrame(animate);
-            particlesMesh.rotation.y += 0.0005;
-            particlesMesh.rotation.x += 0.0002;
-            renderer.render(scene, camera);
-        }
+                // Animation
+                function animate() {
+                    requestAnimationFrame(animate);
+                    particlesMesh.rotation.y += 0.0005;
+                    particlesMesh.rotation.x += 0.0002;
+                    renderer.render(scene, camera);
+                }
 
-        animate();
+                animate();
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            </script>
 </body>
 
 </html>
@@ -1673,7 +1701,17 @@
         }
     }
 </script>
+<!-- Smooth Scroll & GSAP Engine -->
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+<script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+<!-- Premium Motion JS -->
+<script src="{% static 'js/premium_motion.js' %}"></script>
+
 <script src="{% static 'js/premium_modal.js' %}"></script>
+</div>
+</div>
 </body>
 
 </html>
