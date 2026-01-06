@@ -102,12 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ScrollTrigger.create({
             start: 80,
             onUpdate: self => {
-                navbar.classList.toggle('glass-active', self.scroll() > 80);
-                gsap.to(navbar, {
-                    y: self.direction === 1 ? -10 : 0,
-                    duration: 0.3,
-                    ease: "power2.out"
-                });
+                if (navbar) {
+                    navbar.classList.toggle('glass-active', self.scroll() > 80);
+                    gsap.to(navbar, {
+                        y: self.direction === 1 ? -10 : 0,
+                        duration: 0.3,
+                        ease: "power2.out"
+                    });
+                }
             }
         });
     }
