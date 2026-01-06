@@ -124,33 +124,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 7. Hero Elements Entrance
     if (document.querySelector('.hero-left h1')) {
-        const heroTl = gsap.timeline();
+        const heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
         heroTl.from(".hero-left h1", {
-            opacity: 0,
-            y: 40,
-            duration: 1,
-            ease: "power4.out"
+            autoAlpha: 0,
+            y: 50,
+            duration: 1.2
         })
             .from(".hero-description", {
-                opacity: 0,
-                y: 20,
-                duration: 0.8,
-                ease: "power3.out"
-            }, "-=0.6")
-            .from(".hero-buttons button", {
-                opacity: 0,
-                y: 20,
+                autoAlpha: 0,
+                y: 30,
+                duration: 1
+            }, "-=0.8")
+            .from(".hero-buttons .btn-premium", {
+                autoAlpha: 0,
+                y: 30,
                 stagger: 0.15,
-                duration: 0.6,
+                duration: 0.8,
                 ease: "back.out(1.7)"
-            }, "-=0.4")
+            }, "-=0.6")
             .from(".stat-item", {
-                opacity: 0,
+                autoAlpha: 0,
                 y: 20,
                 stagger: 0.1,
-                duration: 0.5,
-                ease: "power2.out"
-            }, "-=0.2");
+                duration: 0.6
+            }, "-=0.4");
     }
 
     console.log("🚀 Y.S.M Motion Engine Active");
