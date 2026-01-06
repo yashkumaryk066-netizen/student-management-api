@@ -127,33 +127,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const heroTl = gsap.timeline();
         heroTl.from(".hero-left h1", {
             opacity: 0,
-            x: -50,
+            y: 40,
             duration: 1,
-            ease: "power3.out"
+            ease: "power4.out"
         })
             .from(".hero-description", {
                 opacity: 0,
-                x: -30,
-                duration: 0.8
-            }, "-=0.5")
-            .from(".hero-buttons .btn-primary", {
-                opacity: 0,
-                scale: 0.8,
-                duration: 0.5,
-                ease: "back.out(1.7)"
-            }, "-=0.3")
-            .from(".hero-buttons .btn-secondary", {
-                opacity: 0,
                 y: 20,
-                stagger: 0.2,
-                duration: 0.5
-            }, "-=0.2")
-            .from(".stat-item", {
+                duration: 0.8,
+                ease: "power3.out"
+            }, "-=0.6")
+            .from(".hero-buttons button", {
                 opacity: 0,
                 y: 20,
                 stagger: 0.15,
-                duration: 0.6
-            }, "-=0.4");
+                duration: 0.6,
+                ease: "back.out(1.7)"
+            }, "-=0.4")
+            .from(".stat-item", {
+                opacity: 0,
+                y: 20,
+                stagger: 0.1,
+                duration: 0.5,
+                ease: "power2.out"
+            }, "-=0.2");
     }
 
     console.log("🚀 Y.S.M Motion Engine Active");
