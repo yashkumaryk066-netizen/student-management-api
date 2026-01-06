@@ -1,102 +1,118 @@
 /**
- * Premium 3D Modal System
- * Replaces default window.alert with a SaaS-style popup.
+ * PREMIUM 3D MODAL SYSTEM – ENTERPRISE V2
+ * SaaS-grade replacement for window.alert
+ * Author: Y.S.M Advance Education System
  */
 
-const ModalSystem = {
-    init() {
-        if (!document.getElementById('premium-modal-overlay')) {
-            const modalHTML = `
-            <div id="premium-modal-overlay" class="premium-modal-overlay">
-                <div id="premium-modal-box" class="premium-modal-box">
-                    <div id="premium-modal-icon" class="premium-modal-icon">✨</div>
-                    <h2 id="premium-modal-title" class="premium-modal-title">Notification</h2>
-                    <p id="premium-modal-message" class="premium-modal-message"></p>
-                    <button id="premium-modal-btn" class="premium-modal-btn">Got it</button>
-                </div>
+const ModalSystem = (() => {
+    let isOpen = false;
+    let queue = [];
+    let initialized = false;
+
+    function injectHTML() {
+        if (initialized) return;
+        initialized = true;
+
+        const modalHTML = `
+        <div id="premium-modal-overlay" class="premium-modal-overlay">
+            <div id="premium-modal-box" class="premium-modal-box" role="dialog" aria-modal="true">
+                <div id="premium-modal-icon" class="premium-modal-icon">✨</div>
+                <h2 id="premium-modal-title" class="premium-modal-title">Notification</h2>
+                <p id="premium-modal-message" class="premium-modal-message"></p>
+                <button id="premium-modal-btn" class="premium-modal-btn">Okay</button>
             </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-            // Event Listener
-            document.getElementById('premium-modal-btn').addEventListener('click', () => {
-                ModalSystem.close();
+        document.getElementById('premium-modal-btn')
+            .addEventListener('click', close);
+
+        document.getElementById('premium-modal-overlay')
+            .addEventListener('click', e => {
+                if (e.target.id === 'premium-modal-overlay') close();
             });
 
-            // Close on backdrop click
-            document.getElementById('premium-modal-overlay').addEventListener('click', (e) => {
-                if (e.target.id === 'premium-modal-overlay') ModalSystem.close();
-            });
-        }
-    },
+        document.addEventListener('keydown', e => {
+            if (!isOpen) return;
+            if (e.key === 'Escape' || e.key === 'Enter') close();
+        });
+    }
 
-    show(message, title = "Alert", type = "info") {
-        this.init(); // Ensure HTML exists
+    function show(message, title = 'Notification', type = 'info') {
+        injectHTML();
+
+        queue.push({ message, title, type });
+        if (!isOpen) processQueue();
+    }
+
+    function processQueue() {
+        if (queue.length === 0) return;
+
+        isOpen = true;
+        const { message, title, type } = queue.shift();
 
         const overlay = document.getElementById('premium-modal-overlay');
         const box = document.getElementById('premium-modal-box');
+        const icon = document.getElementById('premium-modal-icon');
         const titleEl = document.getElementById('premium-modal-title');
         const msgEl = document.getElementById('premium-modal-message');
-        const iconEl = document.getElementById('premium-modal-icon');
-        const btnEl = document.getElementById('premium-modal-btn');
+        const btn = document.getElementById('premium-modal-btn');
 
-        // Reset Classes
-        box.classList.remove('success', 'error', 'info');
-        box.classList.add(type);
+        box.className = `premium-modal-box ${type}`;
 
-        // Set Content
         titleEl.textContent = title;
         msgEl.textContent = message;
 
-        // Set Icon & Button Color
         if (type === 'success') {
-            iconEl.textContent = "🎉";
-            btnEl.textContent = "Awesome!";
+            icon.textContent = '🎉';
+            btn.textContent = 'Awesome';
         } else if (type === 'error') {
-            iconEl.textContent = "⚠️";
-            btnEl.textContent = "Try Again";
+            icon.textContent = '⚠️';
+            btn.textContent = 'Try Again';
         } else {
-            iconEl.textContent = "✨";
-            btnEl.textContent = "Okay, Got it";
+            icon.textContent = '✨';
+            btn.textContent = 'Got it';
         }
 
-        // Show Animation
         overlay.classList.add('active');
 
-        // Sound Effect (Optional - Subtle Pop)
-        // const audio = new Audio('/static/sounds/pop.mp3'); 
-        // audio.play().catch(e => {}); 
-    },
 
-    close() {
+        // Accessibility: Move focus to button
+        setTimeout(() => btn.focus(), 50);
+    }
+
+    function close() {
         const overlay = document.getElementById('premium-modal-overlay');
         overlay.classList.remove('active');
-    }
-};
 
-// --- Override Default Browser Alert ---
+        setTimeout(() => {
+            isOpen = false;
+            processQueue();
+        }, 400); // animation-safe delay
+    }
+
+    return { show };
+})();
+
+/* ---------------- OVERRIDE ALERT ---------------- */
+
 window.alert = function (message) {
-    // Detect type based on keywords
+    const msg = String(message).toLowerCase();
     let type = 'info';
     let title = 'Notification';
 
-    const lowerMsg = String(message).toLowerCase();
-
-    if (lowerMsg.includes('success') || lowerMsg.includes('done') || lowerMsg.includes('congratulations')) {
+    if (msg.includes('success') || msg.includes('done')) {
         type = 'success';
-        title = 'Success!';
-    } else if (lowerMsg.includes('error') || lowerMsg.includes('failed') || lowerMsg.includes('wrong') || lowerMsg.includes('invalid')) {
+        title = 'Success';
+    } else if (msg.includes('error') || msg.includes('failed') || msg.includes('invalid')) {
         type = 'error';
         title = 'Error';
-    } else if (lowerMsg.includes('welcome')) {
-        type = 'info';
-        title = 'Welcome!';
+    } else if (msg.includes('welcome')) {
+        title = 'Welcome';
     }
 
     ModalSystem.show(message, title, type);
 };
 
-// Initialize on Load
-document.addEventListener('DOMContentLoaded', () => {
-    ModalSystem.init();
-});
+/* ---------------- AUTO INIT ---------------- */
+// DOMContentLoaded warm-up removed to prevent empty modal flash
