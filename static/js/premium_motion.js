@@ -124,12 +124,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 7. Hero Elements Entrance
     if (document.querySelector('.hero-left h1')) {
-        const heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
+        const heroTl = gsap.timeline({
+            defaults: { ease: "power4.out" },
+            onStart: () => {
+                gsap.set(".hero-buttons", { autoAlpha: 1 }); // Force visibility on start
+            }
+        });
 
         heroTl.from(".hero-left h1", {
             autoAlpha: 0,
             y: 50,
-            duration: 1.2
+            duration: 1.2,
+            delay: 0.2
         })
             .from(".hero-description", {
                 autoAlpha: 0,
@@ -149,6 +155,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 stagger: 0.1,
                 duration: 0.6
             }, "-=0.4");
+    }
+
+    // 8. Pricing Cards Entrance
+    if (document.querySelector('.pricing-card')) {
+        gsap.from(".pricing-card", {
+            autoAlpha: 0,
+            y: 50,
+            stagger: 0.2,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: "#pricing",
+                start: "top 80%",
+            }
+        });
     }
 
     console.log("🚀 Y.S.M Motion Engine Active");
