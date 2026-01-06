@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -38,6 +39,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # Trigger reload to force update to front-end assets (V5.1)
+    # Favicon Fix
+    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico')),
+    
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),
     path('demo/', DemoPageView.as_view(), name='demo-page'),
