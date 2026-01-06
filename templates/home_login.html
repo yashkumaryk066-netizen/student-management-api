@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
 </head>
+
 <body>
     <!-- Backgrounds -->
     <div class="animated-bg"></div>
@@ -31,14 +33,18 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1 class="hero-title">The Future of <br>Education Management</h1>
-            <p>A complete, enterprise-grade ERP solution for modern institutions. <br>Powered by AI, designed for humans.</p>
-            
+            <h1 class="hero-title">The Future of <br>Education Management <span
+                    style="font-size: 1rem; color: #4ade80; display: block; margin-top: 10px;">(v2.5 Premium
+                    Live)</span></h1>
+            <p>A complete, enterprise-grade ERP solution for modern institutions. <br>Powered by AI, designed for
+                humans.</p>
+
             <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px;">
                 <button class="btn-3d" onclick="openLoginModal()" style="font-size: 1.2rem; padding: 16px 40px;">
                     🚀 Launch Dashboard
                 </button>
-                <button class="btn-3d" onclick="enterDemoMode()" style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1);">
+                <button class="btn-3d" onclick="enterDemoMode()"
+                    style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1);">
                     ▶ Watch Demo
                 </button>
             </div>
@@ -48,48 +54,54 @@
     <!-- Detailed Modules Section -->
     <section id="modules" class="container" style="padding: 100px 20px;">
         <h2 style="text-align: center; font-size: 3rem; margin-bottom: 60px;">Enterprise Modules</h2>
-        
+
         <div class="features-grid">
             <!-- Academics -->
             <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
                 <div class="feature-icon-wrapper">��</div>
                 <h3 class="feature-title">Academics & Exams</h3>
-                <p class="feature-description">Complete examination management, grading systems, automated report cards (GPA/CGPA), and timetable scheduling.</p>
+                <p class="feature-description">Complete examination management, grading systems, automated report cards
+                    (GPA/CGPA), and timetable scheduling.</p>
             </div>
 
             <!-- Finance -->
             <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
                 <div class="feature-icon-wrapper">💰</div>
                 <h3 class="feature-title">Finance & Payroll</h3>
-                <p class="feature-description">Fee collection, automated receipts, staff payroll processing, expense tracking, and financial auditing reports.</p>
+                <p class="feature-description">Fee collection, automated receipts, staff payroll processing, expense
+                    tracking, and financial auditing reports.</p>
             </div>
 
             <!-- Library -->
             <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
                 <div class="feature-icon-wrapper">📖</div>
                 <h3 class="feature-title">Digital Library</h3>
-                <p class="feature-description">LMS for book issue/returns, digital catalog, fine calculation, and ebook management support.</p>
+                <p class="feature-description">LMS for book issue/returns, digital catalog, fine calculation, and ebook
+                    management support.</p>
             </div>
 
             <!-- HR -->
             <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
                 <div class="feature-icon-wrapper">👥</div>
                 <h3 class="feature-title">HR Management</h3>
-                <p class="feature-description">Staff attendance, leave management, recruitment portal, and performance appraisal systems.</p>
+                <p class="feature-description">Staff attendance, leave management, recruitment portal, and performance
+                    appraisal systems.</p>
             </div>
 
             <!-- Transport -->
             <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
                 <div class="feature-icon-wrapper">🚌</div>
                 <h3 class="feature-title">Transport & GPS</h3>
-                <p class="feature-description">Real-time bus tracking, route optimization, driver management, and parent alerts.</p>
+                <p class="feature-description">Real-time bus tracking, route optimization, driver management, and parent
+                    alerts.</p>
             </div>
 
             <!-- Hostel -->
             <div class="feature-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.5">
                 <div class="feature-icon-wrapper">🏨</div>
                 <h3 class="feature-title">Smart Hostel</h3>
-                <p class="feature-description">Room allocation, mess management, gate pass system, and biometric attendance integration.</p>
+                <p class="feature-description">Room allocation, mess management, gate pass system, and biometric
+                    attendance integration.</p>
             </div>
         </div>
     </section>
@@ -99,7 +111,8 @@
         <div class="login-content glass-card">
             <span class="close-modal" onclick="closeLoginModal()">&times;</span>
             <h2 style="text-align: center; margin-bottom: 10px;">Welcome Back</h2>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 30px;">Select your role to continue</p>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 30px;">Select your role to continue
+            </p>
 
             <div class="role-selector">
                 <div class="role-btn" onclick="selectRole('STUDENT')">
@@ -147,4 +160,5 @@
         });
     </script>
 </body>
+
 </html>
