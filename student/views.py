@@ -193,7 +193,8 @@ class AttendenceCreateView(APIView):
             ).exists():
                 return Response({"error": "Already marked"}, status=400)
 
-            serializer.save()
+            owner = get_owner_user(request.user)
+            serializer.save(created_by=owner)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -201,17 +202,18 @@ class AttendenceCreateView(APIView):
 class AttendenceDetailsView(APIView):
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
 
-    def get_object(self, id):
-        return Attendence.objects.filter(id=id).first()
+    def get_object(self, user, id):
+        qs = Attendence.objects.filter(id=id)
+        return filter_by_owner(qs, user).first()
 
     def get(self, request, id):
-        attendance = self.get_object(id)
+        attendance = self.get_object(request.user, id)
         if not attendance:
              return Response({"error": "Not found"}, status=404)
         return Response(AttendenceSerializer(attendance).data)
     
     def put(self, request, id):
-        attendance = self.get_object(id)
+        attendance = self.get_object(request.user, id)
         if not attendance:
              return Response({"error": "Not found"}, status=404)
         serializer = AttendenceSerializer(attendance, data=request.data)
@@ -221,7 +223,7 @@ class AttendenceDetailsView(APIView):
         return Response(serializer.errors, status=400)
     
     def delete(self, request, id):
-        attendance = self.get_object(id)
+        attendance = self.get_object(request.user, id)
         if not attendance:
             return Response({"error": "Not found"}, status=404)
         attendance.delete()
@@ -306,11 +308,16 @@ class LiveClassListView(APIView):
     def get(self, request):
         today = timezone.now().date()
         qs = LiveClass.objects.filter(start_time__date=today, is_active=True)
+        qs = filter_by_owner(qs, request.user) # SaaS Isolation
 
         if request.user.profile.role == 'TEACHER':
             qs = qs.filter(teacher=request.user)
 
-        return Response(LiveClassSerializer(qs, many=True).data)
+        data = LiveClassSerializer(qs, many=True).data
+        if not data:
+            return Response({"code": "NO_LIVE_CLASSES", "message": "No active classes found"}, status=200)
+
+        return Response(data)
 
 
 # =====================================================
@@ -340,15 +347,30 @@ class LibraryBookListCreateView(generics.ListCreateAPIView):
     serializer_class = LibraryBookSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class LibraryBookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = LibraryBook.objects.all()
     serializer_class = LibraryBookSerializer
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
 class BookIssueListCreateView(generics.ListCreateAPIView):
     queryset = BookIssue.objects.all()
     serializer_class = BookIssueSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
 
 # --- HOSTEL ---
 class HostelListCreateView(generics.ListCreateAPIView):
@@ -356,15 +378,33 @@ class HostelListCreateView(generics.ListCreateAPIView):
     serializer_class = HostelSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class RoomListCreateView(generics.ListCreateAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class HostelAllocationListCreateView(generics.ListCreateAPIView):
     queryset = HostelAllocation.objects.all()
     serializer_class = HostelAllocationSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
 
 # --- TRANSPORT ---
 class VehicleListCreateView(generics.ListCreateAPIView):
@@ -372,15 +412,33 @@ class VehicleListCreateView(generics.ListCreateAPIView):
     serializer_class = VehicleSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class RouteListCreateView(generics.ListCreateAPIView):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class TransportAllocationListCreateView(generics.ListCreateAPIView):
     queryset = TransportAllocation.objects.all()
     serializer_class = TransportAllocationSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
 
 # --- HR ---
 class EmployeeListCreateView(generics.ListCreateAPIView):
@@ -400,16 +458,34 @@ class LeaveRequestListCreateView(generics.ListCreateAPIView):
     serializer_class = LeaveRequestSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 # --- ACADEMIC / EXAMS ---
 class ExamListCreateView(generics.ListCreateAPIView):
     queryset = Exam.objects.all()
     serializer_class = ExamSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class EventListCreateView(generics.ListCreateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
 
 # --- COACHING ---
 class CourseListCreateView(generics.ListCreateAPIView):
@@ -417,25 +493,52 @@ class CourseListCreateView(generics.ListCreateAPIView):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
 
 class BatchListCreateView(generics.ListCreateAPIView):
     queryset = Batch.objects.all()
     serializer_class = BatchSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class EnrollmentListCreateView(generics.ListCreateAPIView):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
 class LiveClassListCreateView(generics.ListCreateAPIView):
     queryset = LiveClass.objects.all()
     serializer_class = LiveClassSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -558,3 +661,9 @@ class DepartmentListCreateView(generics.ListCreateAPIView):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(self.queryset, self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))

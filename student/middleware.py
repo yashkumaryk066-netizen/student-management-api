@@ -62,12 +62,9 @@ class SubscriptionMiddleware:
             # Expired → write blocked
             if not is_safe_method:
                 return JsonResponse({
-                    "success": False,
-                    "error": {
-                        "code": "SUBSCRIPTION_EXPIRED",
-                        "message": "Your subscription has expired.",
-                        "action": "RENEW_PLAN"
-                    }
+                    "code": "SUBSCRIPTION_EXPIRED",
+                    "message": "Your subscription has expired.",
+                    "action": "RENEW_PLAN"
                 }, status=403)
 
             # Read-only allowed, skip plan restrictions

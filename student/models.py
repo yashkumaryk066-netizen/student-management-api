@@ -103,6 +103,7 @@ class Student(models.Model):
         
         
 class Attendence(models.Model):
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     date = models.DateField()
     is_present = models.BooleanField(default=True)
@@ -142,6 +143,7 @@ class UserProfile(models.Model):
 
 class Department(models.Model):
     """For Institutes/Universities to manage departments (e.g., CSE, Mechanical)"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     name = models.CharField(max_length=100)
     head_of_department = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
@@ -222,6 +224,7 @@ class Notification(models.Model):
 
 class Subject(models.Model):
     """Subject/Course information"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20, unique=True)
     credits = models.IntegerField(default=3)
@@ -254,6 +257,7 @@ class Classroom(models.Model):
 
 class ClassSchedule(models.Model):
     """Timetable/Schedule for classes"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     DAYS = [
         ('MONDAY', 'Monday'),
         ('TUESDAY', 'Tuesday'),
@@ -283,6 +287,7 @@ class ClassSchedule(models.Model):
 
 class Hostel(models.Model):
     """Hostel building information"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     HOSTEL_TYPES = [
         ('BOYS', 'Boys Hostel'),
         ('GIRLS', 'Girls Hostel'),
@@ -301,6 +306,7 @@ class Hostel(models.Model):
 
 class Room(models.Model):
     """Hostel room information"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='rooms')
     room_number = models.CharField(max_length=20)
     floor = models.IntegerField()
@@ -326,6 +332,7 @@ class Room(models.Model):
 
 class HostelAllocation(models.Model):
     """Student hostel room allocation"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     STATUS_CHOICES = [
         ('ACTIVE', 'Active'),
         ('VACATED', 'Vacated'),
@@ -354,6 +361,7 @@ class HostelAllocation(models.Model):
 
 class Event(models.Model):
     """College events and activities"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     EVENT_TYPES = [
         ('ACADEMIC', 'Academic'),
         ('CULTURAL', 'Cultural'),
@@ -458,6 +466,7 @@ class DemoRequest(models.Model):
 
 class Exam(models.Model):
     """Examination/Test configuration"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     EXAM_TYPES = [
         ('UNIT', 'Unit Test'),
         ('MIDTERM', 'Mid-Term'),
@@ -488,6 +497,7 @@ class Exam(models.Model):
 
 class Grade(models.Model):
     """Student exam grades/marks"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     STATUS_CHOICES = [
         ('PASS', 'Pass'),
         ('FAIL', 'Fail'),
@@ -524,6 +534,7 @@ class Grade(models.Model):
 
 class ResultCard(models.Model):
     """Consolidated result card for a student"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='result_cards')
     academic_year = models.CharField(max_length=20)
     semester_term = models.CharField(max_length=50, help_text="Semester 1, Term 2, etc.")
@@ -548,6 +559,7 @@ class ResultCard(models.Model):
 
 class LibraryBook(models.Model):
     """Library book catalog"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     CATEGORIES = [
         ('FICTION', 'Fiction'),
         ('NON_FICTION', 'Non-Fiction'),
@@ -585,6 +597,7 @@ class LibraryBook(models.Model):
 
 class BookIssue(models.Model):
     """Book issue/return tracking"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     STATUS_CHOICES = [
         ('ISSUED', 'Issued'),
         ('RETURNED', 'Returned'),
@@ -638,6 +651,7 @@ class BookIssue(models.Model):
 
 class Vehicle(models.Model):
     """Transport vehicle information"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     registration_number = models.CharField(max_length=20, unique=True)
     vehicle_type = models.CharField(max_length=20, choices=[('BUS', 'Bus'), ('VAN', 'Van'), ('CAR', 'Car')])
     capacity = models.IntegerField()
@@ -654,6 +668,7 @@ class Vehicle(models.Model):
 
 class Route(models.Model):
     """Transport route details"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     route_name = models.CharField(max_length=100)
     start_point = models.CharField(max_length=100)
     end_point = models.CharField(max_length=100)
@@ -669,6 +684,7 @@ class Route(models.Model):
 
 class TransportAllocation(models.Model):
     """Student transport allocation"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='transport_allocation')
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='passengers')
     pickup_stop = models.CharField(max_length=100)
@@ -687,6 +703,7 @@ class TransportAllocation(models.Model):
 
 class HRDepartment(models.Model):
     """Organization departments"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     head_of_department = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='headed_departments')
@@ -697,6 +714,7 @@ class HRDepartment(models.Model):
 
 class Designation(models.Model):
     """Job roles/titles"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     title = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     
@@ -722,6 +740,7 @@ class Employee(models.Model):
 
 class LeaveRequest(models.Model):
     """Employee leave management"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='leaves')
     leave_type = models.CharField(max_length=20, choices=[('SICK', 'Sick Leave'), ('CASUAL', 'Casual Leave'), ('EARNED', 'Earned Leave')])
     start_date = models.DateField()
@@ -736,6 +755,7 @@ class LeaveRequest(models.Model):
 
 class Payroll(models.Model):
     """Staff salary processing"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='payrolls')
     month = models.CharField(max_length=20) # e.g. "January 2025"
     year = models.IntegerField()
@@ -761,6 +781,7 @@ from .models import Student
 
 class Course(models.Model):
     """Institute Course Catalog (e.g. JEE Mains, Python Masterclass)"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     LEVEL_CHOICES = [
         ('BEGINNER', 'Beginner'),
         ('INTERMEDIATE', 'Intermediate'),
@@ -781,6 +802,7 @@ class Course(models.Model):
 
 class Batch(models.Model):
     """Specific Batch/Section of a Course"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='batches')
     name = models.CharField(max_length=100, help_text="e.g. Morning Batch A, Weekend Batch")
     start_date = models.DateField()
@@ -798,6 +820,7 @@ class Batch(models.Model):
 
 class Enrollment(models.Model):
     """Student Enrollment in a Batch"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     STATUS_CHOICES = [
         ('ACTIVE', 'Active'),
         ('COMPLETED', 'Completed'),
@@ -834,6 +857,7 @@ class PasswordResetOTP(models.Model):
 
 
 class GeneratedReport(models.Model):
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     REPORT_TYPES = [
         ('FINANCE', 'Financial Statement'),
         ('ACADEMIC', 'Academic Performance'),
@@ -855,6 +879,7 @@ class GeneratedReport(models.Model):
 
 class LiveClass(models.Model):
     """Live Class / Zoom Meeting integration"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created', null=True, blank=True)
     PLATFORM_CHOICES = [
         ('ZOOM', 'Zoom Meeting'),
         ('GOOGLE_MEET', 'Google Meet'),

@@ -39,9 +39,12 @@ class ReportListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        from .views import get_owner_user
+        owner = get_owner_user(request.user)
+        
         reports = (
             GeneratedReport.objects
-            .filter(user=request.user)
+            .filter(created_by=owner)
             .only('id', 'name', 'report_type', 'generated_at', 'status', 'file_url')
             .order_by('-generated_at')
         )
@@ -91,8 +94,12 @@ class ReportListView(APIView):
         # =========================
         # CREATE REPORT
         # =========================
+        from .views import get_owner_user
+        owner = get_owner_user(request.user)
+        
         report = GeneratedReport.objects.create(
             user=request.user,
+            created_by=owner,
             name=f"{report_type} Report - {timezone.now().strftime('%b %Y')}",
             report_type=report_type,
             status=REPORT_PENDING
@@ -118,7 +125,9 @@ class ReportDownloadView(APIView):
 
     def get(self, request, pk):
         try:
-            report = GeneratedReport.objects.get(pk=pk, user=request.user)
+            from .views import get_owner_user
+            owner = get_owner_user(request.user)
+            report = GeneratedReport.objects.get(pk=pk, created_by=owner)
 
             if report.status != REPORT_READY:
                 return Response(
