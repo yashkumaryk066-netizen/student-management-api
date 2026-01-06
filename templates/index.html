@@ -921,6 +921,112 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ==== MOBILE MENU ==== */
+        .menu-toggle-btn {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: white;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+
+        .menu-toggle-btn:hover {
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle-btn svg {
+            display: block;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(2, 4, 10, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.95);
+        }
+
+        .mobile-menu.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: scale(1);
+        }
+
+        .mobile-links {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            text-align: center;
+        }
+
+        .mobile-links a {
+            color: white;
+            font-size: 2rem;
+            text-decoration: none;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .mobile-links a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 30px var(--primary);
+            transform: scale(1.1);
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 3rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-menu:hover {
+            transform: rotate(90deg) scale(1.2);
+            color: var(--secondary);
+        }
+
+        @media (max-width: 900px) {
+            .nav-links {
+                display: none;
+            }
+
+            .menu-toggle-btn {
+                display: block;
+            }
+
+            .navbar {
+                padding: 15px 20px;
+            }
+        }
     </style>
 </head>
 
@@ -954,14 +1060,40 @@
                         </a>
                     </div>
                 </a>
+
+                <!-- Desktop Nav -->
                 <div class="nav-links">
                     <a href="#modules" class="nav-link">Modules</a>
                     <a href="#developer" class="nav-link">Meet Developer</a>
                     <a href="#pricing" class="nav-link">Pricing</a>
-                    <!-- API Link Hidden -->
                     <button class="btn-login" onclick="window.location.href='/login/'">ACCESS PORTAL</button>
                 </div>
+
+                <!-- Premium Three-Dot Menu (Mobile/Tablet) -->
+                <button class="menu-toggle-btn" onclick="toggleMobileMenu()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="5" r="2" fill="currentColor" />
+                        <circle cx="12" cy="12" r="2" fill="currentColor" />
+                        <circle cx="12" cy="19" r="2" fill="currentColor" />
+                    </svg>
+                </button>
             </nav>
+
+            <!-- Mobile Menu Overlay -->
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="close-menu" onclick="toggleMobileMenu()">×</button>
+                <div class="mobile-links">
+                    <a href="#modules"
+                        onclick="toggleMobileMenu(); setTimeout(() => window.lenis.scrollTo('#modules'), 500)">Modules</a>
+                    <a href="#developer"
+                        onclick="toggleMobileMenu(); setTimeout(() => window.lenis.scrollTo('#developer'), 500)">Meet
+                        Developer</a>
+                    <a href="#pricing"
+                        onclick="toggleMobileMenu(); setTimeout(() => window.lenis.scrollTo('#pricing'), 500)">Pricing</a>
+                    <button class="btn-login" onclick="window.location.href='/login/'"
+                        style="width: 100%; margin-top: 20px;">ACCESS PORTAL</button>
+                </div>
+            </div>
 
             <!-- Hero Section -->
             <section class="hero">
@@ -1916,6 +2048,14 @@
                     if (modal) {
                         modal.style.animation = 'modalFadeIn 0.2s ease reverse';
                         setTimeout(() => modal.remove(), 200);
+                    }
+                }
+            </script>
+            <script>
+                function toggleMobileMenu() {
+                    const menu = document.getElementById('mobileMenu');
+                    if (menu) {
+                        menu.classList.toggle('active');
                     }
                 }
             </script>
