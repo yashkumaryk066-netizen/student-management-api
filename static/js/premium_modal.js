@@ -19,7 +19,7 @@ const ModalSystem = (() => {
                 <div id="premium-modal-icon" class="premium-modal-icon">✨</div>
                 <h2 id="premium-modal-title" class="premium-modal-title">Notification</h2>
                 <p id="premium-modal-message" class="premium-modal-message"></p>
-                <button id="premium-modal-btn" class="premium-modal-btn" autofocus>Okay</button>
+                <button id="premium-modal-btn" class="premium-modal-btn">Okay</button>
             </div>
         </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
@@ -76,6 +76,9 @@ const ModalSystem = (() => {
 
         overlay.classList.add('active');
         overlay.setAttribute('aria-hidden', 'false');
+
+        // Accessibility: Move focus to button
+        setTimeout(() => btn.focus(), 50);
     }
 
     function close() {
@@ -113,6 +116,4 @@ window.alert = function (message) {
 };
 
 /* ---------------- AUTO INIT ---------------- */
-document.addEventListener('DOMContentLoaded', () => {
-    ModalSystem.show('', '', 'info'); // warm-up (no UI shown)
-});
+// DOMContentLoaded warm-up removed to prevent empty modal flash
