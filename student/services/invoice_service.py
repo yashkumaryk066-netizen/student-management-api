@@ -139,13 +139,40 @@ def generate_invoice_pdf(user, subscription, payment):
     
     elements.append(Paragraph("Subscription Summary", style_heading))
     
+    # Itemized Breakdown based on Plan
+    plan_features = {
+        'COACHING': [
+            "Student Management (Up to 100)",
+            "Attendance & Batch Tracking",
+            "Basic Performance Reports",
+            "Email Support Access"
+        ],
+        'SCHOOL': [
+            "Unlimited Student Enrollment",
+            "Advanced Exam & Grading System",
+            "Digital ID Card Generation",
+            "Transport & Fleet Management",
+            "Priority Technical Support"
+        ],
+        'INSTITUTE': [
+            "Multi-Branch Governance",
+            "Enterprise HR & Payroll",
+            "Library & Hostel Management",
+            "Big Data & Advanced Analytics",
+            "Dedicated Personal Account Manager"
+        ]
+    }
+    
+    features = plan_features.get(subscription.plan_type, ["Standard System Access"])
+    features_str = "<br/>• ".join(features)
+    
     amount_str = f"Rs. {payment.amount:,.2f}"
     
     # Table Header & Rows
     table_data = [
-        ["DESCRIPTION", "TYPE / PLAN", "VALIDITY", "AMOUNT"],
+        ["DESCRIPTION", "PLAN DETAILS", "VALIDITY", "AMOUNT"],
         [
-            "Premium Access License\nY.S.M Advance Education System License", 
+            Paragraph(f"<b>Premium License Access</b><br/><font size='9' color='gray'>• {features_str}</font>", style_data),
             subscription.plan_type, 
             "30 Days", 
             amount_str
@@ -186,13 +213,20 @@ def generate_invoice_pdf(user, subscription, payment):
     elements.append(Spacer(1, 40))
 
     # =========================
-    # 3. TERMS & NOTES
+    # 3. TERMS & NOTES (ADVANCE)
     # =========================
-    elements.append(Paragraph("Terms & Conditions:", style_label))
-    elements.append(Paragraph("1. This is a computer-generated invoice and requires no signature.<br/>2. Payment is non-refundable once the license is activated.<br/>3. For support, contact support@ysm-education.com.", ParagraphStyle('Small', parent=styles['Normal'], fontSize=9, textColor=colors.gray)))
+    elements.append(Paragraph("Advance Level Service Agreement:", style_label))
+    terms = [
+        "1. This is a computer-generated invoice and requires no physical signature.",
+        "2. Activation of membership implies acceptance of Y.S.M Intelligence Terms of Service.",
+        "3. License is non-transferable and valid for one institution instance only.",
+        "4. High-priority support included as per the selected SLA (Service Level Agreement).",
+        "5. Automated credentials and access portal details sent via secure SMTP protocol."
+    ]
+    elements.append(Paragraph("<br/>".join(terms), ParagraphStyle('Small', parent=styles['Normal'], fontSize=8.5, textColor=colors.gray, leading=11)))
     
-    elements.append(Spacer(1, 20))
-    elements.append(Paragraph("Thank you for choosing Y.S.M Advance Education System!", ParagraphStyle('ThankYou', parent=styles['Normal'], fontSize=12, alignment=TA_CENTER, textColor=colors.HexColor('#050517'), fontName='Helvetica-Oblique')))
+    elements.append(Spacer(1, 30))
+    elements.append(Paragraph("Y.S.M Intelligence & Advanced Architecture Protocol — 2026", ParagraphStyle('ThankYou', parent=styles['Normal'], fontSize=11, alignment=TA_CENTER, textColor=colors.HexColor('#050517'), fontName='Helvetica-Oblique')))
 
     # Build PDF with Header/Footer
     doc.build(elements, onFirstPage=draw_header_footer, onLaterPages=draw_header_footer)

@@ -49,6 +49,14 @@ class PublicSubscriptionSubmitView(APIView):
         amount = request.data.get('amount')
         utr = request.data.get('utr')
 
+        # Map frontend names to backend enums
+        PLAN_MAP = {
+            'Coaching Center': 'COACHING',
+            'School': 'SCHOOL',
+            'Institute': 'INSTITUTE'
+        }
+        plan_type = PLAN_MAP.get(plan_type, 'SCHOOL')
+
         if not all([email, plan_type, amount, utr]):
             return Response(
                 {'error': 'email, plan_type, amount, utr are required'},
