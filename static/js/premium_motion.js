@@ -10,7 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 1. Initialize Lenis Smooth Scroll
+    // 1. Preloader Removal (Immediate Safety)
+    window.addEventListener('load', () => {
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            preloader.classList.add('fade-out');
+            setTimeout(() => preloader.style.display = 'none', 1000);
+        }
+    });
+
+    // 2. Initialize Lenis Smooth Scroll
     const lenis = new Lenis({
         duration: 1.2,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
