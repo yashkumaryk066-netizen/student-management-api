@@ -773,9 +773,7 @@ class Payroll(models.Model):
     def save(self, *args, **kwargs):
         self.net_salary = self.basic_salary + self.allowances - self.deductions
         super().save(*args, **kwargs)
-from django.db import models
-from django.contrib.auth.models import User
-from .models import Student
+
 
 # ==================== COACHING/INSTITUTE MANAGEMENT ====================
 
@@ -837,9 +835,7 @@ class Enrollment(models.Model):
         
     def __str__(self):
         return f"{self.student.name} -> {self.batch.name}"
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
+
 
 class PasswordResetOTP(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_otps')
