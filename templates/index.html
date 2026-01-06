@@ -313,7 +313,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
             position: relative;
         }
 
@@ -1097,7 +1096,7 @@
                             THE ARCHITECT
                         </div>
                         <h2
-                            style="font-size: 3.5rem; margin-bottom: 25px; background: linear-gradient(to right, #fff, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            style="font-size: 3.5rem; margin-bottom: 25px; background: linear-gradient(to right, #fff, #818cf8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
                             Crafting the Future of Education</h2>
                         <p style="color: var(--text-muted); font-size: 1.2rem; line-height: 1.8; margin-bottom: 30px;">
                             "The mission was simple: Build a system that doesn't just manage data, but empowers
@@ -1140,7 +1139,8 @@
                                 <li>Email Support</li>
                             </ul>
                             <button class="btn-pricing btn-pricing-secondary"
-                                onclick="openPaymentModal('Coaching Center', 500)">
+                                onclick="openPaymentModal('Coaching Center', 500)"
+                                style="background: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid rgba(255,255,255,0.1) !important;">
                                 CHOOSE PLAN
                             </button>
                         </div>
@@ -1176,7 +1176,8 @@
                                 <li>Dedicated Account Manager</li>
                             </ul>
                             <button class="btn-pricing btn-pricing-secondary"
-                                onclick="openPaymentModal('Institute', 15000)">
+                                onclick="openPaymentModal('Institute', 15000)"
+                                style="background: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid rgba(255,255,255,0.1) !important;">
                                 CHOOSE PLAN
                             </button>
                         </div>
@@ -1349,29 +1350,9 @@
                     } catch (e) {
                         console.error(e);
 
-                        // Check if it's payment gateway not configured error
                         if (e.message && e.message.includes('PAYMENT_GATEWAY_NOT_CONFIGURED')) {
-                            showPremiumModal({
-                                title: '💳 Payment Gateway Unavailable',
-                                message: 'Automatic payment gateway is not configured. We use Manual Bank Transfer for secure payments.',
-                                type: 'info',
-                                buttons: [
-                                    {
-                                        text: 'Continue with Bank Transfer',
-                                        class: 'btn-primary',
-                                        action: () => {
-                                            closePremiumModal();
-                                            // Directly trigger bank transfer flow
-                                            showManualPaymentStep();
-                                        }
-                                    },
-                                    {
-                                        text: 'Cancel',
-                                        class: 'btn-secondary',
-                                        action: closePremiumModal
-                                    }
-                                ]
-                            });
+                            // SKIP MODAL, GO STRAIGHT TO MANUAL DATA ENTRY
+                            showManualPaymentStep();
                         } else {
                             showPremiumModal({
                                 title: '❌ Payment Error',
