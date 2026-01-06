@@ -416,36 +416,59 @@ button,
         top: 20px;
         left: 20px;
         z-index: 1001;
-        background: rgba(239, 68, 68, 0.2);
-        border: 1px solid rgba(239, 68, 68, 0.4);
-        color: #fecaca;
-        font-size: 1.5rem;
-        padding: 8px 14px;
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: linear-gradient(145deg, rgba(239, 68, 68, .35), rgba(127, 29, 29, .25));
+        border: 2px solid rgba(239, 68, 68, .5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
         cursor: pointer;
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        box-shadow: 0 10px 30px rgba(239, 68, 68, .45);
+        backdrop-filter: blur(10px);
         animation: neonPulseRed 2s infinite alternate;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 }
 
+.menu-bar {
+    width: 24px;
+    height: 3px;
+    background: linear-gradient(90deg, #fff, #fecaca);
+    border-radius: 4px;
+    transition: transform 0.3s ease, opacity .2s;
+}
+
+.menu-toggle.open .menu-bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.menu-toggle.open .menu-bar:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.open .menu-bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
 .menu-toggle:hover {
-    transform: scale(1.1) rotate(90deg);
+    transform: scale(1.1) rotate(5deg);
     background: #ef4444;
-    color: white;
-    box-shadow: 0 0 30px #ef4444;
+    box-shadow: 0 0 40px #ef4444, 0 15px 35px rgba(239, 68, 68, .6);
 }
 
 @keyframes neonPulseRed {
     from {
-        box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
-        border-color: rgba(239, 68, 68, 0.4);
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        border-color: rgba(239, 68, 68, 0.5);
     }
 
     to {
-        box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-        border-color: rgba(239, 68, 68, 0.8);
+        box-shadow: 0 15px 40px rgba(239, 68, 68, 0.65);
+        border-color: rgba(239, 68, 68, 0.9);
     }
 }
 
