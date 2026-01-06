@@ -311,6 +311,7 @@
             margin-bottom: 30px;
             background: linear-gradient(135deg, #ffffff 0%, #818cf8 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             position: relative;
@@ -581,6 +582,7 @@
             font-weight: 900;
             background: linear-gradient(to bottom, #fff, #818cf8);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
@@ -791,6 +793,7 @@
             margin-bottom: 20px;
             background: linear-gradient(to right, #fff, #818cf8);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
@@ -804,7 +807,7 @@
         }
 
         .bento-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 30px;
@@ -920,6 +923,7 @@
                 </a>
                 <div class="nav-links">
                     <a href="#modules" class="nav-link">Modules</a>
+                    <a href="#developer" class="nav-link">Meet Developer</a>
                     <a href="#pricing" class="nav-link">Pricing</a>
                     <!-- API Link Hidden -->
                     <button class="btn-login" onclick="window.location.href='/login/'">ACCESS PORTAL</button>
@@ -958,7 +962,8 @@
                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                 </svg>
                             </button>
-                            <button class="btn-premium btn-dev-action" onclick="window.location.href='/api/developer/'">
+                            <button class="btn-premium btn-dev-action"
+                                onclick="document.getElementById('developer').scrollIntoView({behavior: 'smooth'})">
                                 <span>MEET DEVELOPER</span>
                                 <span style="font-size: 1.5rem;">👨‍💻</span>
                             </button>
@@ -1058,6 +1063,57 @@
                 </div>
             </section>
 
+            <!-- MEET DEVELOPER SECTION (PREMIUM ADDITION) -->
+            <section id="developer" class="reveal-section"
+                style="padding: 100px 60px; background: linear-gradient(to bottom, #02040a, #0a0e27);">
+                <div
+                    style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: center;">
+                    <div class="developer-visual" style="perspective: 1000px;">
+                        <div class="dev-card-premium"
+                            style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--primary); border-radius: 30px; padding: 40px; text-align: center; backdrop-filter: blur(20px); transform-style: preserve-3d; transition: all 0.5s;">
+                            <div class="dev-avatar-container"
+                                style="width: 200px; height: 200px; margin: 0 auto 30px; border-radius: 50%; padding: 6px; background: linear-gradient(45deg, var(--primary), var(--secondary)); box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);">
+                                <img src="{% static 'images/yash_profile.jpg' %}" alt="Yash A Mishra"
+                                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid #0f172a;">
+                            </div>
+                            <h3
+                                style="font-size: 2rem; color: white; margin-bottom: 10px; font-family: 'Space Grotesk';">
+                                Yash A Mishra</h3>
+                            <div
+                                style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; margin-bottom: 20px;">
+                                Chief Architect</div>
+                            <div style="display: flex; justify-content: center; gap: 15px;">
+                                <a href="https://www.linkedin.com/in/yash-kumar-342330213" target="_blank"
+                                    style="color: white; font-size: 1.2rem;"><i class="fab fa-linkedin"></i></a>
+                                <a href="https://github.com" target="_blank" style="color: white; font-size: 1.2rem;"><i
+                                        class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="developer-info">
+                        <div class="badge">
+                            <span class="pulse-dot"></span>
+                            THE ARCHITECT
+                        </div>
+                        <h2
+                            style="font-size: 3.5rem; margin-bottom: 25px; background: linear-gradient(to right, #fff, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            Crafting the Future of Education</h2>
+                        <p style="color: var(--text-muted); font-size: 1.2rem; line-height: 1.8; margin-bottom: 30px;">
+                            "The mission was simple: Build a system that doesn't just manage data, but empowers
+                            institutions to reach their full potential. Y.S.M Advance is the result of years of
+                            architecting scalable enterprise solutions."
+                        </p>
+                        <div style="display: flex; gap: 20px;">
+                            <a href="/api/developer/" class="btn-premium btn-call-to-action"
+                                style="min-width: auto; padding: 15px 30px;">
+                                VIEW FULL PROFILE
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Pricing Section -->
             <section id="pricing" class="reveal-section" style="padding: 100px 60px; background: #02040a;">
                 <div style="max-width: 1200px; margin: 0 auto;">
@@ -1093,15 +1149,16 @@
                         <div class="pricing-card featured">
                             <div class="featured-badge">MOST POPULAR</div>
                             <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Modern School</h3>
-                            <div class="price-tag">₹10,000<span>/month</span></div>
+                            <div class="price-tag" style="color: #6366f1 !important;">₹10,000<span>/month</span></div>
                             <ul class="pricing-features">
-                                <li style="color: white;">Unlimited Students</li>
-                                <li style="color: white;">Exam & Grading System</li>
-                                <li style="color: white;">ID Card Generation</li>
-                                <li style="color: white;">Transport Management</li>
-                                <li style="color: white;">Priority Support</li>
+                                <li style="color: white !important;">Unlimited Students</li>
+                                <li style="color: white !important;">Exam & Grading System</li>
+                                <li style="color: white !important;">ID Card Generation</li>
+                                <li style="color: white !important;">Transport Management</li>
+                                <li style="color: white !important;">Priority Support</li>
                             </ul>
-                            <button class="btn-pricing btn-pricing-primary" onclick="openPaymentModal('School', 10000)">
+                            <button class="btn-pricing btn-pricing-primary" onclick="openPaymentModal('School', 10000)"
+                                style="background: #6366f1 !important; color: white !important;">
                                 CHOOSE PLAN
                             </button>
                         </div>
@@ -1678,19 +1735,17 @@
                     renderer.setSize(window.innerWidth, window.innerHeight);
                 });
             </script>
-</body>
+            <!-- Scripts -->
+            <script>
+                // Premium Modal Functions with 3D Animation
+                function showPremiumModal(options) {
+                    // Remove any existing modal
+                    const existing = document.getElementById('premiumModal');
+                    if (existing) existing.remove();
 
-</html>
-<script>
-    // Premium Modal Functions with 3D Animation
-    function showPremiumModal(options) {
-        // Remove any existing modal
-        const existing = document.getElementById('premiumModal');
-        if (existing) existing.remove();
-
-        const modal = document.createElement('div');
-        modal.id = 'premiumModal';
-        modal.innerHTML = `
+                    const modal = document.createElement('div');
+                    modal.id = 'premiumModal';
+                    modal.innerHTML = `
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap');
                     
@@ -1842,26 +1897,26 @@
                 </div>
             `;
 
-        // Store button actions globally
-        window.premiumModalActions = options.buttons.map(btn => btn.action);
+                    // Store button actions globally
+                    window.premiumModalActions = options.buttons.map(btn => btn.action);
 
-        document.body.appendChild(modal);
-    }
+                    document.body.appendChild(modal);
+                }
 
-    function closePremiumModal() {
-        const modal = document.getElementById('premiumModal');
-        if (modal) {
-            modal.style.animation = 'modalFadeIn 0.2s ease reverse';
-            setTimeout(() => modal.remove(), 200);
-        }
-    }
-</script>
-<!-- Premium Motion JS -->
-<script src="{% static 'js/premium_motion.js' %}"></script>
+                function closePremiumModal() {
+                    const modal = document.getElementById('premiumModal');
+                    if (modal) {
+                        modal.style.animation = 'modalFadeIn 0.2s ease reverse';
+                        setTimeout(() => modal.remove(), 200);
+                    }
+                }
+            </script>
+            <!-- Premium Motion JS -->
+            <script src="{% static 'js/premium_motion.js' %}"></script>
 
-<script src="{% static 'js/premium_modal.js' %}"></script>
-</div>
-</div>
+            <script src="{% static 'js/premium_modal.js' %}"></script>
+        </div>
+    </div>
 </body>
 
 </html>

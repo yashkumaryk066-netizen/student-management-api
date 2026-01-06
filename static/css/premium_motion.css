@@ -5,179 +5,180 @@
 
 /* ================= LENIS CORE ================= */
 html.lenis {
-  height: auto;
+    height: auto;
 }
 
 .lenis,
 .lenis body {
-  overscroll-behavior: none;
+    overscroll-behavior: none;
 }
 
 .lenis-smooth {
-  scroll-behavior: auto !important;
+    scroll-behavior: auto !important;
 }
 
 .lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
+    overscroll-behavior: contain;
 }
 
 /* ================= SMOOTH WRAPPER ================= */
 #smooth-wrapper {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
 }
 
 #smooth-content {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  overflow: visible;
-  will-change: transform;
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    overflow: visible;
+    will-change: transform;
 }
 
 /* ================= REVEAL SYSTEM ================= */
 .reveal-section {
-  opacity: 1;
-  transform: none;
-  filter: none;
-  transition:
-    opacity .8s cubic-bezier(.22,1,.36,1),
-    transform .9s cubic-bezier(.22,1,.36,1),
-    filter .6s ease;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    visibility: visible !important;
+    transition:
+        opacity .8s cubic-bezier(.22, 1, .36, 1),
+        transform .9s cubic-bezier(.22, 1, .36, 1),
+        filter .6s ease;
 }
 
 .reveal-hidden {
-  opacity: 0;
-  transform: translateY(80px) scale(.96);
-  filter: blur(6px);
+    opacity: 0 !important;
+    transform: translateY(80px) scale(.96) !important;
+    filter: blur(6px) !important;
+    visibility: hidden !important;
 }
 
 .reveal-active {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: blur(0);
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+    filter: blur(0) !important;
+    visibility: visible !important;
 }
 
 /* ================= FLOATING GLASS NAV ================= */
 .navbar.glass-active {
-  background: rgba(2, 4, 10, 0.72) !important;
-  backdrop-filter: blur(28px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    background: rgba(2, 4, 10, 0.72) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
 
-  border-bottom: 1px solid rgba(255,255,255,.12) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, .12) !important;
 
-  box-shadow:
-    0 8px 40px rgba(0,0,0,.55),
-    inset 0 1px 0 rgba(255,255,255,.08);
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, .55),
+        inset 0 1px 0 rgba(255, 255, 255, .08);
 }
 
 /* ================= MODULE / CARD DEPTH ================= */
 .module-card {
-  transform-style: preserve-3d;
-  will-change: transform, box-shadow, filter;
+    transform-style: preserve-3d;
+    will-change: transform, box-shadow, filter;
 
-  transition:
-    transform .65s cubic-bezier(.22,1,.36,1),
-    box-shadow .65s cubic-bezier(.22,1,.36,1),
-    filter .45s ease;
+    transition:
+        transform .65s cubic-bezier(.22, 1, .36, 1),
+        box-shadow .65s cubic-bezier(.22, 1, .36, 1),
+        filter .45s ease;
 }
 
 .module-card::after {
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    transparent 40%,
-    rgba(255,255,255,.08),
-    transparent 60%
-  );
-  opacity:0;
-  transition:.6s ease;
-  pointer-events:none;
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg,
+            transparent 40%,
+            rgba(255, 255, 255, .08),
+            transparent 60%);
+    opacity: 0;
+    transition: .6s ease;
+    pointer-events: none;
 }
 
 .module-card:hover {
-  transform:
-    translateY(-18px)
-    scale(1.035)
-    rotateX(3deg)
-    rotateY(-2deg);
+    transform:
+        translateY(-18px) scale(1.035) rotateX(3deg) rotateY(-2deg);
 
-  filter: brightness(1.12);
-  z-index: 60;
+    filter: brightness(1.12);
+    z-index: 60;
 
-  box-shadow:
-    0 40px 80px -20px rgba(99,102,241,.55),
-    0 0 40px rgba(99,102,241,.25);
+    box-shadow:
+        0 40px 80px -20px rgba(99, 102, 241, .55),
+        0 0 40px rgba(99, 102, 241, .25);
 }
 
 .module-card:hover::after {
-  opacity:1;
+    opacity: 1;
 }
 
 /* ================= SCROLL INDICATOR ================= */
 .scroll-indicator {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 200;
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
 
-  opacity: .65;
-  pointer-events: none;
+    opacity: .65;
+    pointer-events: none;
 
-  animation: scrollPulse 2.2s infinite;
+    animation: scrollPulse 2.2s infinite;
 }
 
 @keyframes scrollPulse {
-  0%,100% {
-    transform: translate(-50%,0);
-    opacity:.4;
-  }
-  50% {
-    transform: translate(-50%,-12px);
-    opacity:1;
-  }
+
+    0%,
+    100% {
+        transform: translate(-50%, 0);
+        opacity: .4;
+    }
+
+    50% {
+        transform: translate(-50%, -12px);
+        opacity: 1;
+    }
 }
 
 /* ================= CINEMATIC DEPTH HELPERS ================= */
 .depth-soft {
-  transform: translateZ(0);
-  will-change: transform;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .depth-medium {
-  transform: translateZ(40px);
+    transform: translateZ(40px);
 }
 
 .depth-hard {
-  transform: translateZ(80px);
+    transform: translateZ(80px);
 }
 
 /* ================= PERFORMANCE GUARDS ================= */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
 
-  #smooth-wrapper {
-    position: relative;
-    overflow: auto;
-  }
+    #smooth-wrapper {
+        position: relative;
+        overflow: auto;
+    }
 }
 
 /* ================= SAFETY FALLBACK (NO LENIS) ================= */
 html:not(.lenis) #smooth-wrapper {
-  position: relative;
-  overflow: auto;
+    position: relative;
+    overflow: auto;
 }
 
 html:not(.lenis) #smooth-content {
-  transform: none !important;
+    transform: none !important;
 }
