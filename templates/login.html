@@ -4,53 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Login | Institute Management System</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Login - Y.S.M Advance Education System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/css/login_premium.css">
+    <link rel="stylesheet" href="/static/css/premium_modal.css">
+
+    <!-- GSAP Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 
 <body>
-    <!-- Background Animated Blobs -->
-    <div class="bg-blobs">
-        <div class="blob blob-1" style="top: -100px; left: -100px;"></div>
-        <div class="blob blob-2"
-            style="bottom: -150px; right: -100px; background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);"></div>
-    </div>
-
-    <!-- Cursor Glow -->
+    <!-- Background Effects -->
     <div class="cursor-glow" id="cursorGlow"></div>
-
-    <!-- Transition Layer (Hidden Initially) -->
-    <div id="transition-layer">
-        <div class="transition-logo">🎓</div>
-        <h2 style="margin-bottom: 20px;">Welcome Back</h2>
-        <div class="transition-loader">
-            <div class="transition-loader-fill"></div>
-        </div>
-        <p style="margin-top: 15px; color: #94a3b8; font-size: 0.9rem;">Initializing Secure Session...</p>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
     </div>
 
+    <!-- Main Container -->
     <div class="login-container">
         <div class="login-card">
+
             <div class="logo-section">
                 <div class="logo-icon">🎓</div>
                 <h1>Institute Pro</h1>
                 <p>Advanced Management System</p>
             </div>
 
-            <form id="loginForm" class="login-form">
+            <form id="loginForm">
                 <div class="form-group">
-                    <input type="text" id="username" name="username" required placeholder=" " autocomplete="username">
-                    <label for="username">Username</label>
+                    <input type="text" id="usernameInput" required placeholder=" " autocomplete="off">
+                    <label for="usernameInput">Username</label>
                 </div>
 
                 <div class="form-group">
-                    <input type="password" id="password" name="password" required placeholder=" "
-                        autocomplete="current-password">
+                    <input type="password" id="password" required placeholder=" " autocomplete="off">
                     <label for="password">Password</label>
                     <i class="fas fa-eye password-toggle"></i>
                 </div>
@@ -58,96 +48,94 @@
                 <div class="form-options">
                     <label class="checkbox-label">
                         <input type="checkbox" id="rememberMe">
-                        <span>Keep me logged in</span>
+                        Remember me
                     </label>
                     <a href="#" class="forgot-link" onclick="openResetModal()">Recovery Access</a>
                 </div>
 
                 <button type="submit" class="btn-primary" id="loginBtn">
                     <span id="loginText">Sign In</span>
-                    <span id="loginLoader" class="loader"
-                        style="display: none; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite;"></span>
+                    <span id="loginLoader" class="loader" style="display: none;">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </span>
                 </button>
             </form>
 
             <div class="login-footer">
-                <p>New here? <a href="#" onclick="showToast('Contact administrator: 8356926231', 'info')">Request
-                        Access</a></p>
-                <p style="margin-top: 15px;"><a href="/" style="color: rgba(255,255,255,0.4);">← Surface Home</a></p>
-            </div>
-
-            <!-- Cinematic Branding Footer -->
-            <div class="branding-footer">
-                <div class="branding-text">
-                    Powered by <span class="branding-name">Yash A. Mishra</span> ✨
+                <p>New here? <a href="/#pricing">Request Access</a></p>
+                <div style="margin-top: 15px; font-size: 0.8rem; color: var(--text-secondary); opacity: 0.6;">
+                    _ Surface Home
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Password Reset Modal (Kept for functionality) -->
-    <div id="resetModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; backdrop-filter: blur(10px);">
-        <div
-            style="background: #1e1b4b; border: 1px solid rgba(255,255,255,0.1); color:white; padding:30px; border-radius:20px; width:90%; max-width:400px; position:relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
-            <button onclick="closeResetModal()"
-                style="position:absolute; top:15px; right:15px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
-            <h3 style="margin-top:0; margin-bottom:20px; font-weight: 600;">Recovery Access</h3>
+    <!-- Cinematic Transition Layer -->
+    <div id="transition-layer">
+        <div class="logo-icon transition-logo">✨</div>
+        <div class="transition-loader">
+            <div class="transition-loader-fill"></div>
+        </div>
+    </div>
 
+    <!-- Password Reset Modal (Preserved Functionality) -->
+    <div id="resetModal"
+        style="display:none; position:fixed; inset:0; z-index:10000; align-items:center; justify-content:center; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px);">
+        <div class="login-card" style="width:90%; max-width:400px; animation: none;">
+            <button onclick="closeResetModal()"
+                style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h3 style="margin-bottom:20px; font-size:1.5rem; color:#fff;">Reset Password</h3>
+
+            <!-- Step 1 -->
             <div id="resetStep1">
-                <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Verify your identity to reset
-                    credentials.</p>
+                <p style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem;">Enter your registered
+                    details to verify identity.</p>
                 <div class="form-group">
-                    <input type="text" id="resetIdentifier" placeholder="Email or Phone"
-                        style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:12px; border-radius:10px; margin-bottom: 20px;">
+                    <input type="text" id="resetIdentifier" placeholder=" " required>
+                    <label>Email or Phone</label>
                 </div>
-                <button onclick="requestOTP()" id="btnGetOTP" class="btn-primary" style="width:100%;">Verify
-                    Identity</button>
+                <button onclick="requestOTP()" id="btnGetOTP" class="btn-primary">Send Verification OTP</button>
             </div>
 
+            <!-- Step 2 -->
             <div id="resetStep2" style="display:none;">
-                <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Enter the 4-digit code sent to you.</p>
+                <p style="color:var(--text-secondary); margin-bottom:20px;">Enter the code sent to your device.</p>
                 <div class="form-group">
-                    <input type="text" id="resetOTP" placeholder="Enter OTP" maxlength="4"
-                        style="text-align:center; letter-spacing: 5px; width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:10px; margin-bottom: 15px;">
-                    <input type="password" id="newPassword" placeholder="New Password"
-                        style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:10px;">
+                    <input type="text" id="resetOTP" placeholder=" " maxlength="4"
+                        style="text-align:center; letter-spacing:4px;">
+                    <label>4-Digit Code</label>
                 </div>
-                <button onclick="confirmReset()" id="btnReset" class="btn-primary"
-                    style="width:100%; margin-top: 15px;">Update Password</button>
+                <div class="form-group">
+                    <input type="password" id="newPassword" placeholder=" ">
+                    <label>New Password</label>
+                </div>
+                <button onclick="confirmReset()" id="btnReset" class="btn-primary">Reset Password</button>
+                <button onclick="backToStep1()"
+                    style="width:100%; margin-top:15px; background:none; border:none; color:var(--text-secondary); cursor:pointer;">Back</button>
             </div>
 
             <div id="resetMessage"
-                style="color:#ef4444; margin-top:15px; text-align:center; font-size:0.9rem; display:none;"></div>
+                style="color:var(--danger); margin-top:15px; text-align:center; font-size:0.9rem; display:none;"></div>
         </div>
     </div>
 
-    <style>
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
-
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="/static/js/api.js?v=4.0"></script>
     <script src="/static/js/auth.js?v=4.0"></script>
-    <script src="/static/js/login_premium.js?v=4.0" defer></script>
+    <script src="/static/js/premium_modal.js"></script>
+    <script src="/static/js/login_premium.js"></script>
 
+    <!-- Reset Script (Inline for simplicity) -->
     <script>
-        // Existing Reset Modal Logic (Integrated with Premium Look)
-        const API_BASE = 'https://yashamishra.pythonanywhere.com/api';
+        const API_BASE = '/api';
 
         function openResetModal() {
-            document.getElementById('resetModal').style.display = 'flex';
-            document.getElementById('resetStep1').style.display = 'block';
-            document.getElementById('resetStep2').style.display = 'none';
+            const modal = document.getElementById('resetModal');
+            modal.style.display = 'flex';
+            gsap.fromTo(modal.querySelector('.login-card'),
+                { scale: 0.9, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" }
+            );
         }
 
         function closeResetModal() {
@@ -157,10 +145,15 @@
         async function requestOTP() {
             const identifier = document.getElementById('resetIdentifier').value.trim();
             const btn = document.getElementById('btnGetOTP');
-            if (!identifier) return showToast("Enter identity", "error");
+            const msg = document.getElementById('resetMessage');
+
+            if (!identifier) {
+                showToast("Please enter email or phone", "error");
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerText = "Verifying...";
+            btn.innerText = "Sending...";
 
             try {
                 const res = await fetch(`${API_BASE}/auth/password-reset/request/`, {
@@ -168,25 +161,41 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ identifier: identifier })
                 });
+                const data = await res.json();
+
                 if (res.ok) {
+                    // if (data.dev_otp) console.log("OTP:", data.dev_otp);
                     document.getElementById('resetStep1').style.display = 'none';
                     document.getElementById('resetStep2').style.display = 'block';
                 } else {
-                    showToast("Verification failed", "error");
+                    showToast(data.error || "Failed to send OTP", "error");
                 }
             } catch (e) {
-                showToast("Network error", "error");
+                showToast("Network Error", "error");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Verify Identity";
+                btn.innerText = "Send Verification OTP";
             }
+        }
+
+        function backToStep1() {
+            document.getElementById('resetStep2').style.display = 'none';
+            document.getElementById('resetStep1').style.display = 'block';
         }
 
         async function confirmReset() {
             const identifier = document.getElementById('resetIdentifier').value.trim();
             const otp = document.getElementById('resetOTP').value.trim();
             const pass = document.getElementById('newPassword').value.trim();
-            if (!otp || !pass) return showToast("Complete all fields", "error");
+            const btn = document.getElementById('btnReset');
+
+            if (!otp || !pass) {
+                showToast("Please enter OTP and new password", "error");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Verifying...";
 
             try {
                 const res = await fetch(`${API_BASE}/auth/password-reset/confirm/`, {
@@ -195,16 +204,25 @@
                     body: JSON.stringify({ identifier: identifier, otp: otp, new_password: pass })
                 });
                 const data = await res.json();
+
                 if (res.ok) {
-                    showToast("Credentials updated", "success");
                     closeResetModal();
-                    document.getElementById('username').value = data.username;
+                    ModalSystem.show(`
+                        Recovery Successful!<br/><br/>
+                        Username: <b>${data.username}</b><br/>
+                        Password: <b>${data.password}</b>
+                    `, "Success", "success");
+
+                    document.getElementById('usernameInput').value = data.username;
                     document.getElementById('password').value = data.password;
                 } else {
-                    showToast(data.error || "Update failed", "error");
+                    showToast(data.error || "Reset Failed", "error");
                 }
             } catch (e) {
-                showToast("Error updating password", "error");
+                showToast("Error resetting password", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Reset Password";
             }
         }
     </script>
