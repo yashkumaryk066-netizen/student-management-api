@@ -14,7 +14,7 @@ Hello,
 Your {plan} subscription has been successfully activated.
 
 Login Details:
-URL: https://yashamishra.pythonanywhere.com/dashboard/login
+URL: https://yashamishra.pythonanywhere.com/login/
 Username: {user.username}
 Password: {password}
 
