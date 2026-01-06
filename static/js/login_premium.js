@@ -71,9 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ---------------- INIT ANIMATION ---------------- */
     if (!prefersReducedMotion) {
-        gsap.timeline({ defaults: { ease: "power4.out" } })
-            .to('.login-card', { y: 0, opacity: 1, duration: 1.4 })
-            .to('.branding-footer', { y: 0, opacity: 1, duration: 1 }, "-=0.8");
+        const timeline = gsap.timeline({ defaults: { ease: "power4.out" } })
+            .to('.login-card', { y: 0, opacity: 1, duration: 1.4 });
+
+        // Only animate branding footer if it exists
+        if (document.querySelector('.branding-footer')) {
+            timeline.to('.branding-footer', { y: 0, opacity: 1, duration: 1 }, "-=0.8");
+        }
 
         gsap.to('.blob-1', {
             x: '20vw',
@@ -92,7 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ease: "sine.inOut"
         });
     } else {
-        gsap.set(['.login-card', '.branding-footer'], { opacity: 1, y: 0 });
+        gsap.set('.login-card', { opacity: 1, y: 0 });
+        if (document.querySelector('.branding-footer')) {
+            gsap.set('.branding-footer', { opacity: 1, y: 0 });
+        }
     }
 
     /* ---------------- INPUT MICRO ---------------- */
@@ -235,7 +242,7 @@ function showToast(msg, type) {
     if (window.Toast && window.Toast.show) {
         window.Toast.show(msg, type);
     } else {
-        console.log(`[${type}] ${msg}`);
+        console.warn(`[${type}] ${msg}`);
         // Simple fallback alert if Toast is not available
         if (type === 'error') alert(msg);
     }
