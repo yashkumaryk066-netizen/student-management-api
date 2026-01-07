@@ -65,6 +65,14 @@ A Django REST API for managing students and their attendance records with JWT au
 
 > **📖 Full AI Documentation:** See `MULTI_AI_INTEGRATION_GUIDE.md` for complete multi-provider guide
 
+### Premium ERP Features 💎 (New)
+- **💸 Smart Invoices**: Auto-generated Tax Invoices for every subscription payment (with PDF).
+- **🪪 Smart ID Cards**: Generate Student ID Cards with Photo & QR Code (Bulk ZIP Download).
+- **📄 Admission Letters**: Professional Welcome Letters for new admissions.
+- **🎫 Exam Admit Cards**: One-click generation of Exam Hall Tickets.
+- **🔒 Premium UI**: Feature Locking with Glassmorphism modals for plan upgrades.
+- **📊 Plan-Wise Dashboard**: Smart dashboard that adapts to User Plan (Coaching/School/Institute).
+
 ## Setup Instructions
 
 ### 1. Clone the repository
