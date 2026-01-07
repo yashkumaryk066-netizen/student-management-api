@@ -231,6 +231,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    function redirectToDashboard(role) {
+        const routes = {
+            admin: '/dashboard/admin/',
+            client: '/dashboard/admin/',
+            teacher: '/dashboard/teacher/',
+            parent: '/dashboard/parent/',
+            student: '/dashboard/student/'
+        };
+        window.location.href = routes[role] || routes.student;
+    }
+
     function redirectFallback() {
         window.location.href = '/dashboard/student/';
     }
