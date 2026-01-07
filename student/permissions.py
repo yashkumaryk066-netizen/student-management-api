@@ -127,20 +127,19 @@ class HasPlanAccess(permissions.BasePermission):
 
     PLAN_FEATURES = {
         'SCHOOL': [
-            'students', 'school_exams', 'attendance',
+            'dashboard', 'students', 'exams', 'attendance',
             'transport', 'hostel', 'parents', 'teachers',
-            'reports', 'payments'
+            'reports', 'payments', 'events', 'settings', 'subscription', 'hr'
         ],
         'COACHING': [
-            'students', 'coaching_classes', 'test_series',
-            'study_material', 'basic_attendance',
-            'teachers', 'reports', 'payments'
+            'dashboard', 'students', 'courses', 'live_classes',
+            'attendance', 'reports', 'payments', 'events', 'settings', 'subscription'
         ],
         'INSTITUTE': [
-            'students', 'school_exams', 'coaching_classes',
-            'test_series', 'attendance', 'transport', 'hostel',
+            'dashboard', 'students', 'exams', 'courses',
+            'attendance', 'transport', 'hostel',
             'parents', 'teachers', 'reports', 'payments',
-            'study_material', 'lab', 'library'
+            'lab', 'library', 'hr', 'events', 'settings', 'subscription', 'logs', 'users', 'live_classes'
         ],
     }
 

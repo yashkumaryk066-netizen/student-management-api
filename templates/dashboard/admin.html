@@ -10,7 +10,9 @@
     <link rel="stylesheet" href="/static/css/premium_modal.css">
     <link rel="stylesheet" href="/static/css/upgrade-modal.css">
     <link rel="stylesheet" href="/static/css/sidebar-overlay.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
 
     <!-- Chart.js for Advanced Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -21,6 +23,9 @@
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+    <!-- Core API & Engine -->
+    <script src="/static/js/api.js" defer></script>
 </head>
 
 <body>
@@ -31,12 +36,16 @@
 
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header ysm-brand">
-            <img src="/static/img/ysm_logo.png" alt="Y.S.M Logo" class="sidebar-logo-img">
+        <div class="sidebar-header premium-branding" id="brandingContainer">
+            <div class="glow-effect"></div>
+            <img src="/static/img/ysm_logo.png" alt="Logo" class="sidebar-logo-img premium-logo">
             <div class="brand-text">
-                <h2 class="sidebar-title ysm-title">Y.S.M</h2>
-                <span class="sidebar-subtitle">Advance Education System</span>
+                <h2 class="sidebar-title premium-title" id="instName" contenteditable="true" spellcheck="false">Y.S.M
+                </h2>
+                <span class="sidebar-subtitle premium-subtitle" id="instType" contenteditable="true"
+                    spellcheck="false">Advance Education System</span>
             </div>
+            <div class="edit-hint">Click to edit name</div>
         </div>
 
         <nav>
@@ -74,7 +83,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#finance" class="nav-link" data-module="finance">
+                    <a href="#finance" class="nav-link" data-module="payments">
                         <span class="nav-icon">💰</span>
                         <span class="nav-text">Finance & Payments</span>
                         <span class="nav-badge" id="pendingCount">47</span>
@@ -99,7 +108,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#live-classes" class="nav-link" data-module="live-classes" data-plan="coaching">
+                    <a href="#live-classes" class="nav-link" data-module="live_classes" data-plan="coaching">
                         <span class="nav-icon"
                             style="color:#ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;">🔴</span>
                         <span class="nav-text">Live Classes</span>
@@ -148,6 +157,20 @@
                 </li>
 
                 <li class="nav-item">
+                    <a href="#users" class="nav-link" data-module="users">
+                        <span class="nav-icon">👮</span>
+                        <span class="nav-text">Team & Permissions</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#logs" class="nav-link" data-module="logs">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">System Logs</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a href="#subscription" class="nav-link" data-module="subscription">
                         <span class="nav-icon">💳</span>
                         <span class="nav-text">Plan & Subscription</span>
@@ -178,6 +201,11 @@
                     <span class="menu-bar"></span>
                     <span class="menu-bar"></span>
                 </button>
+                <div class="premium-brand-container">
+                    <h1 class="premium-brand-text" id="institution-name" contenteditable="true">Y.S.M ADVANCE</h1>
+                    <p class="premium-brand-subtitle" id="institution-type" contenteditable="true">EDUCATION SYSTEM</p>
+                    <div class="premium-brand-glow"></div>
+                </div>
 
                 <div class="header-search">
                     <input type="text" class="search-input" placeholder="Search students, courses, or anything...">
@@ -264,12 +292,28 @@
                 </button>
 
                 <div class="profile-wrapper" style="position: relative;">
-                    <div class="user-profile" id="profileBtn" style="cursor: pointer;">
-                        <div class="user-avatar">👤</div>
+                    <div class="user-profile">
+                        <div class="user-avatar">1</div>
                         <div class="user-info">
                             <div class="user-name">Loading...</div>
-                            <div class="user-role">...</div>
+                            <div class="user-role">Super Admin</div>
                         </div>
+                        <!-- Three-Dot Menu Icon -->
+                        <button class="three-dot-menu" id="profileBtn" title="More Options" style="
+                            background: transparent;
+                            border: none;
+                            color: #94a3b8;
+                            font-size: 1.2rem;
+                            cursor: pointer;
+                            margin-left: 10px;
+                            padding: 5px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: color 0.2s;
+                        ">
+                            ⋮
+                        </button>
                     </div>
                     <!-- Profile Dropdown -->
                     <div class="profile-dropdown" id="profileDropdown" style="
@@ -606,224 +650,59 @@
     </main>
 
     <script>
-        // Sidebar Toggle - Premium Version with Overlay
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-        // Toggle sidebar AND update button state + overlay
-        function toggleSidebar() {
-            const isOpen = sidebar.classList.toggle('open');
-            menuToggle.classList.toggle('open');
-            sidebarOverlay.classList.toggle('active');
-
-            // Prevent body scroll when sidebar is open
-            if (isOpen) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
+        // System Initializer
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                setTimeout(() => {
+                    preloader.classList.add('loaded');
+                    setTimeout(() => preloader.remove(), 800);
+                }, 1000);
             }
-        }
-
-        // Close sidebar function
-        function closeSidebar() {
-            sidebar.classList.remove('open');
-            menuToggle.classList.remove('open');
-            sidebarOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Click handler
-        menuToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleSidebar();
-            console.log('🎯 Menu toggle clicked - Sidebar:', sidebar.classList.contains('open') ? 'OPEN' : 'CLOSED');
+            console.log('✨ Y.S.M System Online');
         });
 
-        // Touch handler for better mobile response
-        menuToggle.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            toggleSidebar();
-        }, { passive: false });
-
-        // Close sidebar when clicking overlay
-        sidebarOverlay.addEventListener('click', () => {
-            closeSidebar();
-            console.log('🎯 Overlay clicked - Sidebar closed');
-        });
-
-        // Close sidebar when clicking outside
-        document.addEventListener('click', (e) => {
-            if (sidebar.classList.contains('open')) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    closeSidebar();
-                }
-            }
-        });
-
-        // Close sidebar on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && sidebar.classList.contains('open')) {
-                closeSidebar();
-            }
-        });
-
-        // Navigation
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-
-                const target = link.getAttribute('href').substring(1);
-                navigateTo(target);
-
-                // Close sidebar on mobile after navigation
-                if (window.innerWidth <= 1024) {
-                    sidebar.classList.remove('open');
-                    menuToggle.classList.remove('open');
-                }
-            });
-        });
-
-
-
-        // Fallback Navigation Handler
+        // SPA Navigation Helper
         window.navigateTo = function (module) {
             if (window.DashboardApp && typeof DashboardApp.loadModule === 'function') {
                 DashboardApp.loadModule(module);
             } else {
-                console.warn("DashboardApp loading... Redirecting to hash");
                 window.location.hash = module;
-                // If app is broken, reloading might help if it was a transient loading issue
-                // But if it's syntax error, this won't help much other than changing URL.
             }
         };
 
-        // navigateTo function is now handled by /static/js/dashboard/admin.js
-        // which provides full SPA functionality
-
-        // Preloader Handler
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const preloader = document.getElementById('preloader');
-                preloader.classList.add('loaded');
-                // Remove from DOM after transition
-                setTimeout(() => {
-                    if (preloader.parentNode) {
-                        preloader.parentNode.removeChild(preloader);
-                    }
-                }, 800);
-                console.log('✨ System initialized - Welcome to Y.S.M');
-            }, 2000); // 2s delay for premium feel
-        });
-
-        // Notification Handler
-        const notifBtn = document.getElementById('notificationBtn');
-        const notifDropdown = document.getElementById('notifDropdown');
-
-        if (notifBtn && notifDropdown) {
-            notifBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // Close profile if open
-                const profileDropdown = document.getElementById('profileDropdown');
-                if (profileDropdown) profileDropdown.style.display = 'none';
-
-                // Toggle display
-                if (notifDropdown.style.display === 'none' || notifDropdown.style.display === '') {
-                    notifDropdown.style.display = 'block';
-                    notifDropdown.style.opacity = '0';
-                    notifDropdown.style.transform = 'translateY(-10px)';
-                    requestAnimationFrame(() => {
-                        notifDropdown.style.transition = 'all 0.3s ease';
-                        notifDropdown.style.opacity = '1';
-                        notifDropdown.style.transform = 'translateY(0)';
-                    });
-                } else {
-                    notifDropdown.style.display = 'none';
-                }
-            });
-
-            // Close on outside click
-            document.addEventListener('click', (e) => {
-                if (notifDropdown.style.display === 'block' && !notifDropdown.contains(e.target)) {
-                    notifDropdown.style.display = 'none';
-                }
-            });
-        }
-
-        // Profile Dropdown Handler
-        const profileBtn = document.getElementById('profileBtn');
-        const profileDropdown = document.getElementById('profileDropdown');
-
-        if (profileBtn && profileDropdown) {
-            profileBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // Close notif if open
-                const notifDropdown = document.getElementById('notifDropdown');
-                if (notifDropdown) notifDropdown.style.display = 'none';
-
-                if (profileDropdown.style.display === 'none' || profileDropdown.style.display === '') {
-                    profileDropdown.style.display = 'block';
-                    profileDropdown.style.opacity = '0';
-                    profileDropdown.style.transform = 'translateY(-10px)';
-                    requestAnimationFrame(() => {
-                        profileDropdown.style.transition = 'all 0.3s ease';
-                        profileDropdown.style.opacity = '1';
-                        profileDropdown.style.transform = 'translateY(0)';
-                    });
-                } else {
-                    profileDropdown.style.display = 'none';
-                }
-            });
-
-            // Hover effect
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('mouseenter', () => item.style.background = 'rgba(255,255,255,0.1)');
-                item.addEventListener('mouseleave', () => item.style.background = 'transparent');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (profileDropdown.style.display === 'block' && !profileDropdown.contains(e.target)) {
-                    profileDropdown.style.display = 'none';
-                }
-            });
-        }
-
-        // Smooth Scroll Handler
+        // Smooth Scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
             });
         });
     </script>
+
+    <!-- UI Controllers -->
+    <script src="/static/js/sidebar.js" defer></script>
+    <script src="/static/js/profile.js" defer></script>
+
 
     <!-- Premium Modal System -->
     <script src="/static/js/premium_modal.js"></script>
 
     <!-- API Helper Modules -->
-    <script src="/static/js/api.js?v=3.5"></script>
+    <script src="/static/js/api.js?v=3.6"></script>
 
     <!-- Dashboard SPA System (Updated Version) -->
-    <script src="/static/js/dashboard/admin.js?v=3.7"></script>
+    <script src="/static/js/dashboard/admin.js?v=3.8"></script>
 
     <!-- Premium Sidebar Manager (Plan-Based Access) -->
-    <script src="/static/js/sidebar-manager.js?v=1.0"></script>
+    <script src="/static/js/sidebar-manager.js?v=1.1"></script>
 
     <!-- Premium Motion JS -->
-    <script src="/static/js/premium_motion.js"></script>
+    <script src="/static/js/premium_motion.js?v=1.1"></script>
 
     <!-- Advanced Analytics JS -->
-    <script src="/static/js/analytics.js"></script>
+    <script src="/static/js/analytics.js?v=1.1"></script>
     </div>
     </div>
 </body>

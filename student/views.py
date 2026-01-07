@@ -102,7 +102,16 @@ class StudentListCreateView(APIView):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
             owner = get_owner_user(request.user)
-            serializer.save(created_by=owner)
+            student = serializer.save(created_by=owner)
+            
+            # Log Activity
+            AuditLog.objects.create(
+                created_by=request.user,
+                action='STUDENT_CREATED',
+                description=f"Added new student: {student.name}",
+                ip_address=request.META.get('REMOTE_ADDR')
+            )
+            
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -141,6 +150,52 @@ class StudentDetailsView(APIView):
             return Response({"error": "Student not found"}, status=404)
         student.delete()
         return Response(status=204)
+
+
+# =====================================================
+# SYSTEM LOGS / AUDIT (CLIENT LEVEL)
+# =====================================================
+
+class ClientAuditLogListView(APIView):
+    permission_classes = [IsAuthenticated, HasPlanAccess]
+    required_feature = 'logs'
+
+    def get(self, request):
+        owner = get_owner_user(request.user)
+        # Show logs for the owner and their staff
+        logs = AuditLog.objects.filter(
+            Q(created_by=owner) | 
+            Q(created_by__employee_profile__created_by=owner)
+        ).order_by('-created_at')[:100]
+        
+        return Response(AuditLogSerializer(logs, many=True).data)
+
+
+# =====================================================
+# TEAM MANAGEMENT (STAFF/TEACHERS)
+# =====================================================
+
+class TeamManagementView(APIView):
+    permission_classes = [IsAuthenticated, HasPlanAccess]
+    required_feature = 'users'
+
+    def get(self, request):
+        """List all staff and teachers in the institution"""
+        # Get employees
+        employees = filter_by_owner(Employee.objects.all(), request.user)
+        
+        return Response({
+            "employees": EmployeeSerializer(employees, many=True).data,
+            "roles": [
+                {"id": "TEACHER", "name": "Teacher"},
+                {"id": "ADMIN", "name": "Admin"},
+                {"id": "STUDENT", "name": "Student"}
+            ]
+        })
+
+    def post(self, request):
+        """Add new staff member"""
+        return Response({"message": "Use standard employee create for now"}, status=501)
 
 
 # =====================================================
@@ -303,7 +358,7 @@ class NotificationMarkReadView(APIView):
 
 class LiveClassListView(APIView):
     permission_classes = [IsAuthenticated, HasPlanAccess]
-    required_feature = 'coaching_classes'
+    required_feature = 'live_classes'
 
     def get(self, request):
         today = timezone.now().date()

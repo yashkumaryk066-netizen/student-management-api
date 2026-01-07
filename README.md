@@ -9,6 +9,7 @@ A Django REST API for managing students and their attendance records with JWT au
 - 🔐 **JWT Authentication** - Secure token-based authentication
 - 📚 **Swagger Documentation** - Interactive API documentation
 - ✅ **RESTful Design** - Proper HTTP status codes and REST principles
+- 🤖 **Multi-AI Integration** - ChatGPT, Gemini & Claude support with dynamic switching
 
 ## Tech Stack
 
@@ -41,6 +42,28 @@ A Django REST API for managing students and their attendance records with JWT au
 
 ### Profile APIs
 - `GET /api/profile/` - Get user profile
+
+### ChatGPT AI APIs 🤖
+- `GET /api/ai/chatgpt/health/` - AI service health check
+- `POST /api/ai/tutor/` - AI-powered tutoring
+- `POST /api/ai/quiz/generate/` - Generate quizzes automatically
+- `POST /api/ai/summarize/` - Summarize educational content
+- `POST /api/ai/grade/` - AI-powered assignment grading
+- `POST /api/ai/explain/` - Explain complex concepts
+- `POST /api/ai/translate/` - Translate content to any language
+- `POST /api/ai/lesson-plan/` - Generate lesson plans
+- `POST /api/ai/writing/analyze/` - Analyze student writing
+- `POST /api/ai/prompt/` - Custom AI prompts
+
+### Unified Multi-AI APIs 🚀 (ChatGPT + Gemini + Claude)
+- `GET /api/ai/providers/` - List all available AI providers & models
+- `POST /api/ai/unified/tutor/` - Unified tutoring (provider selection)
+- `POST /api/ai/unified/quiz/` - Unified quiz generation
+- `POST /api/ai/unified/summarize/` - Unified summarization
+- `POST /api/ai/unified/explain/` - Unified concept explanation
+- `POST /api/ai/unified/translate/` - Unified translation
+
+> **📖 Full AI Documentation:** See `MULTI_AI_INTEGRATION_GUIDE.md` for complete multi-provider guide
 
 ## Setup Instructions
 

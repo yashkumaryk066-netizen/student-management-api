@@ -8,17 +8,17 @@
 const PLAN_ACCESS = {
     'coaching': {
         name: 'Coaching Plan',
-        modules: ['dashboard', 'students', 'courses', 'attendance', 'finance', 'live-classes', 'reports', 'subscription', 'settings', 'events'],
+        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'reports', 'subscription', 'settings', 'events', 'live_classes'],
         color: '#10b981'
     },
     'school': {
         name: 'School Plan',
-        modules: ['dashboard', 'students', 'courses', 'attendance', 'finance', 'library', 'exams', 'hr', 'reports', 'subscription', 'settings', 'events'],
+        modules: ['dashboard', 'students', 'attendance', 'payments', 'library', 'exams', 'hr', 'reports', 'subscription', 'settings', 'events', 'parents'],
         color: '#f59e0b'
     },
     'institute': {
         name: 'Institute/University Plan',
-        modules: ['dashboard', 'students', 'courses', 'attendance', 'finance', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'live-classes'],
+        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'users', 'logs', 'parents', 'lab', 'live_classes'],
         color: '#8b5cf6'
     }
 };
@@ -61,23 +61,16 @@ class PremiumSidebarManager {
 
         // API endpoint not implemented yet - using localStorage/default
         // Uncomment below when /api/user/plan/ endpoint is ready
-        /*
         this.fetchUserPlanFromAPI();
-        */
     }
 
     async fetchUserPlanFromAPI() {
         try {
-            // This will be implemented with your actual API
-            const response = await fetch('/api/user/plan/', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            // Use apiCall if available for automatic token handling
+            const data = await (typeof apiCall === 'function' ? apiCall('/plan/features/') : fetch('/api/plan/features/').then(r => r.json()));
 
-            if (response.ok) {
-                const data = await response.json();
-                this.currentPlan = data.plan_type || 'institute';
+            if (data && data.plan_type) {
+                this.currentPlan = data.plan_type.toLowerCase();
                 localStorage.setItem('userPlan', this.currentPlan);
                 this.applyPlanAccess();
                 console.log(`✅ Plan loaded from API: ${this.currentPlan}`);
@@ -176,9 +169,16 @@ class PremiumSidebarManager {
         const menuToggle = document.getElementById('menuToggle');
         const overlay = document.getElementById('sidebarOverlay');
 
-        if (sidebar) sidebar.classList.remove('open');
-        if (menuToggle) menuToggle.classList.remove('open');
+        if (sidebar) {
+            sidebar.classList.remove('open');
+            sidebar.classList.remove('active');
+        }
+        if (menuToggle) {
+            menuToggle.classList.remove('open');
+            menuToggle.classList.remove('active');
+        }
         if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
     }
 
     showUpgradeModal(module) {
@@ -282,9 +282,18 @@ class PremiumSidebarManager {
         const menuToggle = document.getElementById('menuToggle');
         const overlay = document.getElementById('sidebarOverlay');
 
-        if (sidebar) sidebar.classList.toggle('open');
-        if (menuToggle) menuToggle.classList.toggle('open');
-        if (overlay) overlay.classList.toggle('active');
+        if (sidebar) {
+            const isOpen = sidebar.classList.toggle('open');
+            sidebar.classList.toggle('active');
+
+            if (menuToggle) {
+                menuToggle.classList.toggle('open');
+                menuToggle.classList.toggle('active');
+            }
+            if (overlay) overlay.classList.toggle('active');
+
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
     }
 
     // Public method to change plan (for testing/admin)

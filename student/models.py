@@ -900,3 +900,18 @@ class LiveClass(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.get_platform_display()})"
+
+class AuditLog(models.Model):
+    """System-wide activity logging for monitoring"""
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='audit_logs', null=True, blank=True)
+    action = models.CharField(max_length=100) # e.g., 'STUDENT_CREATED', 'PAYMENT_RECEIVED'
+    description = models.TextField()
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.action} by {self.created_by.username if self.created_by else 'System'} at {self.created_at}"

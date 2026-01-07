@@ -32,7 +32,8 @@ from .views import (
     EmployeeListCreateView, LeaveRequestListCreateView,
     ExamListCreateView, EventListCreateView,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
-    LiveClassListCreateView, DepartmentListCreateView
+    LiveClassListCreateView, DepartmentListCreateView,
+    TeamManagementView, ClientAuditLogListView
 )
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
@@ -52,6 +53,17 @@ from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView
 from .payment_gateway_views import CreateOrderView
 from .password_reset_views import RequestPasswordResetView, VerifyAndResetPasswordView
+from .chatgpt_views import (
+    ChatGPTHealthCheckView, AITutorView, QuizGeneratorView,
+    ContentSummarizerView, AssignmentGraderView, ConceptExplainerView,
+    ContentTranslatorView, LessonPlanGeneratorView, WritingAnalyzerView,
+    CustomAIPromptView
+)
+from .unified_ai_views import (
+    AIProvidersListView, UnifiedAITutorView, UnifiedQuizGeneratorView,
+    UnifiedContentSummarizerView, UnifiedConceptExplainerView,
+    UnifiedContentTranslatorView
+)
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -169,7 +181,8 @@ urlpatterns = [
     path('admin/subscriptions/overview/', SuperAdminDashboardView.as_view(), name='superadmin-overview'),
     path('admin/client-actions/', SuperAdminClientActionView.as_view(), name='admin-client-actions'),
     path('admin/advanced/dashboard/', SuperAdminAdvancedDashboardView.as_view(), name='superadmin-advanced-dashboard'),
-    path('admin/audit-logs/', AuditLogView.as_view(), name='admin-audit-logs'),
+    path('team/manage/', TeamManagementView.as_view(), name='team-manage'),
+    path('audit/logs/client/', ClientAuditLogListView.as_view(), name='client-audit-logs'),
 
     # REPORTS
     path('reports/', ReportListView.as_view(), name='report-list'),
@@ -177,4 +190,46 @@ urlpatterns = [
     
     # Invoice
     path('invoice/<int:payment_id>/download/', InvoiceDownloadView.as_view(), name='invoice-download'),
+    
+    # ==================== CHATGPT AI ENDPOINTS ====================
+    # AI Service Health Check
+    path('ai/chatgpt/health/', ChatGPTHealthCheckView.as_view(), name='chatgpt-health'),
+    
+    # AI Tutoring
+    path('ai/tutor/', AITutorView.as_view(), name='ai-tutor'),
+    
+    # Quiz Generation
+    path('ai/quiz/generate/', QuizGeneratorView.as_view(), name='ai-quiz-generate'),
+    
+    # Content Summarization
+    path('ai/summarize/', ContentSummarizerView.as_view(), name='ai-summarize'),
+    
+    # Assignment Grading
+    path('ai/grade/', AssignmentGraderView.as_view(), name='ai-grade'),
+    
+    # Concept Explanation
+    path('ai/explain/', ConceptExplainerView.as_view(), name='ai-explain'),
+    
+    # Content Translation
+    path('ai/translate/', ContentTranslatorView.as_view(), name='ai-translate'),
+    
+    # Lesson Plan Generation
+    path('ai/lesson-plan/', LessonPlanGeneratorView.as_view(), name='ai-lesson-plan'),
+    
+    # Writing Analysis
+    path('ai/writing/analyze/', WritingAnalyzerView.as_view(), name='ai-writing-analyze'),
+    
+    # Custom AI Prompt
+    path('ai/prompt/', CustomAIPromptView.as_view(), name='ai-custom-prompt'),
+    
+    # ==================== UNIFIED MULTI-MODEL AI ENDPOINTS ====================
+    # List all available AI providers
+    path('ai/providers/', AIProvidersListView.as_view(), name='ai-providers-list'),
+    
+    # Unified endpoints with provider selection (ChatGPT, Gemini, Claude)
+    path('ai/unified/tutor/', UnifiedAITutorView.as_view(), name='ai-unified-tutor'),
+    path('ai/unified/quiz/', UnifiedQuizGeneratorView.as_view(), name='ai-unified-quiz'),
+    path('ai/unified/summarize/', UnifiedContentSummarizerView.as_view(), name='ai-unified-summarize'),
+    path('ai/unified/explain/', UnifiedConceptExplainerView.as_view(), name='ai-unified-explain'),
+    path('ai/unified/translate/', UnifiedContentTranslatorView.as_view(), name='ai-unified-translate'),
 ]

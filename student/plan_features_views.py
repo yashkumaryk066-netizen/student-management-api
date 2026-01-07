@@ -53,19 +53,24 @@ class UserPlanFeaturesView(APIView):
 
     def get_feature_descriptions(self):
         return {
+            "dashboard": "Main Dashboard",
             "students": "Student Management",
-            "school_exams": "School Examinations",
-            "coaching_classes": "Coaching Classes",
-            "test_series": "Test Series & Mock Tests",
-            "attendance": "Advanced Attendance System",
-            "basic_attendance": "Basic Attendance",
+            "exams": "Exams & Grading",
+            "courses": "Courses & Batches",
+            "attendance": "Attendance System",
             "transport": "Transport Management",
             "hostel": "Hostel Management",
             "parents": "Parent Portal",
             "teachers": "Teacher Management",
             "reports": "Reports & Analytics",
-            "payments": "Payment Tracking",
-            "study_material": "Study Material",
+            "payments": "Payment & Fees",
             "lab": "Lab Management",
-            "library": "Library Management"
+            "library": "Library Management",
+            "hr": "HR & Payroll",
+            "events": "Events & Calendar",
+            "settings": "Settings",
+            "subscription": "Plan & Subscription",
+            "users": "Team & Permissions",
+            "logs": "System Logs",
+            "live_classes": "Live Virtual Classes"
         }

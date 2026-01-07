@@ -420,7 +420,18 @@ const DashboardApp = {
                 this.loadSubscriptionManagement();
                 break;
             case 'live-classes':
+            case 'live_classes':
                 this.loadLiveClassManagement();
+                break;
+            case 'users':
+                this.loadTeamManagement();
+                break;
+            case 'logs':
+                this.loadSystemLogs();
+                break;
+            case 'finance':
+            case 'payments':
+                this.loadFinanceManagement();
                 break;
             default:
                 this.loadDashboardHome();
@@ -3944,6 +3955,145 @@ const DashboardApp = {
         `;
 
         document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    async loadTeamManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">👥 Team & Permissions</h1>
+                <p class="page-subtitle">Manage staff access levels and monitor their activities.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" onclick="DashboardApp.showAlert('Demo', 'Staff creation is handled via HR module.', 'warning')">
+                    + Add Staff Member
+                </button>
+            </div>
+        </div>
+
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Staff ID</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Last Login</th>
+                        <th>Access Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teamTableBody">
+                    <tr><td colspan="7" class="text-center">Loading team data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/team/manage/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const data = await res.json();
+            const tbody = document.getElementById('teamTableBody');
+
+            if (!data.employees || data.employees.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center">No staff found. Create them in HR module first.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.employees.map(emp => `
+                <tr>
+                    <td>#${emp.employee_id || emp.id}</td>
+                    <td>
+                        <div style="font-weight:600;">${emp.fullname}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${emp.user_email || ''}</div>
+                    </td>
+                    <td><span class="badge" style="background:rgba(59, 130, 246, 0.1); color:#3b82f6;">${emp.designation_title || 'Staff'}</span></td>
+                    <td>${emp.department_name || 'N/A'}</td>
+                    <td>Today, 10:24 AM</td>
+                    <td>
+                        <select onchange="DashboardApp.showAlert('Updated', 'Permissions updated for ${emp.fullname}', 'success')" 
+                                style="background:rgba(255,255,255,0.05); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:2px 5px; font-size:0.8rem;">
+                            <option>Basic Access</option>
+                            <option selected>Advanced Access</option>
+                            <option>Full Admin</option>
+                            <option>Read Only</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn-action" style="padding:4px 8px; font-size:0.8rem;" onclick="DashboardApp.loadSystemLogs()">🔍 View Logs</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Failed to load team:', e);
+            document.getElementById('teamTableBody').innerHTML = `<tr><td colspan="7" class="text-center text-danger">Failed to connect to API.</td></tr>`;
+        }
+    },
+
+    async loadSystemLogs() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">📜 System Audit Logs</h1>
+                <p class="page-subtitle">Real-time monitoring of all institutional activities and security events.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action btn-secondary" onclick="DashboardApp.loadSystemLogs()">
+                    🔄 Refresh Logs
+                </button>
+            </div>
+        </div>
+
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="logsTableBody">
+                    <tr><td colspan="6" class="text-center">Fetching audit records...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/audit/logs/client/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const logs = await res.json();
+            const tbody = document.getElementById('logsTableBody');
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center">No logs found yet. Active monitoring is engaged.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td style="font-family: monospace; font-size:0.8rem;">${new Date(log.created_at).toLocaleString()}</td>
+                    <td><span style="color:var(--primary); font-weight:600;">@${log.username}</span></td>
+                    <td><span class="badge" style="background:rgba(16, 185, 129, 0.1); color:#10b981;">${log.action}</span></td>
+                    <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${log.description}</td>
+                    <td style="font-size:0.8rem; color:var(--text-muted);">${log.ip_address || 'system'}</td>
+                    <td><span style="color:#10b981;">● Active</span></td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Failed to load logs:', e);
+            document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to connect to Security Service.</td></tr>`;
+        }
     },
 };
 

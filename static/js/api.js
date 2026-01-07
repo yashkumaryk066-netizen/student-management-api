@@ -81,7 +81,7 @@ async function refreshAccessToken() {
     if (!TokenStore.refresh) return false;
 
     try {
-        const res = await fetch(`${API_BASE_URL}/token/refresh/`, {
+        const res = await fetch(`${API_BASE_URL}/auth/token/refresh/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refresh: TokenStore.refresh })

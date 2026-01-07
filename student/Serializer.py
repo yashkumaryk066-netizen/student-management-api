@@ -5,7 +5,7 @@ from .models import (
     LibraryBook, BookIssue, Hostel, Room, HostelAllocation,
     Vehicle, Route, TransportAllocation, Employee, Department, Designation,
     LeaveRequest, Payroll, Exam, Grade, Event,
-    Course, Batch, Enrollment, LiveClass
+    Course, Batch, Enrollment, LiveClass, AuditLog
 )
 
 # ==================== CORE ====================
@@ -208,3 +208,10 @@ class LiveClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = LiveClass
         fields = "__all__"
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='created_by.username', read_only=True)
+    
+    class Meta:
+        model = AuditLog
+        fields = ['id', 'username', 'action', 'description', 'ip_address', 'created_at']
