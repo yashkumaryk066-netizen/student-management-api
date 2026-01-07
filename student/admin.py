@@ -54,11 +54,49 @@ class ClientSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'age', 'gender', 'grade', 'institution_type', 'parent']
-    list_filter = ['gender', 'grade', 'institution_type']
-    search_fields = ['name', 'relation']
+    list_display = ['id', 'name', 'roll_number', 'grade', 'institution_type', 'has_photo']
+    list_filter = ['grade', 'institution_type', 'blood_group']
+    search_fields = ['name', 'roll_number', 'contact_number']
     list_per_page = 50
     ordering = ['-id']
+    actions = ['download_id_card']
+    
+    def has_photo(self, obj):
+        return "✅" if obj.photo else "❌"
+    has_photo.short_description = "Photo"
+
+    def download_id_card(self, request, queryset):
+        """Generate and download ID cards for selected students"""
+        from django.http import HttpResponse
+        from .id_card_utils import generate_id_card_pdf
+        import zipfile
+        from io import BytesIO
+        
+        # If single student, return PDF directly
+        if queryset.count() == 1:
+            student = queryset.first()
+            if not student.roll_number:
+                self.message_user(request, f"⚠️ Roll Number missing for {student.name}", level='error')
+                return
+                
+            pdf_buffer = generate_id_card_pdf(student)
+            response = HttpResponse(pdf_buffer, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="ID_Card_{student.roll_number}.pdf"'
+            return response
+            
+        # If multiple, return ZIP
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+            for student in queryset:
+                if student.roll_number:
+                    pdf_buffer = generate_id_card_pdf(student)
+                    zip_file.writestr(f"ID_{student.roll_number}.pdf", pdf_buffer.getvalue())
+        
+        zip_buffer.seek(0)
+        response = HttpResponse(zip_buffer, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="Student_ID_Cards.zip"'
+        return response
+    download_id_card.short_description = "🪪 Download Smart ID Card"
 
 
 @admin.register(Attendence)

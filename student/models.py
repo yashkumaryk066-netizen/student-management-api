@@ -95,8 +95,15 @@ class Student(models.Model):
         institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL')
         department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
         
+        # Extended Bio-Data for ID Cards
+        photo = models.ImageField(upload_to='student_photos/', blank=True, null=True)
+        roll_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
+        blood_group = models.CharField(max_length=5, blank=True, null=True)
+        address = models.TextField(blank=True, null=True)
+        contact_number = models.CharField(max_length=15, blank=True, null=True)
+        
         def __str__(self):
-            return self.name
+            return f"{self.name} ({self.roll_number or 'No Roll No'})"
 
 
 
