@@ -619,6 +619,7 @@ class LiveClassListCreateView(generics.ListCreateAPIView):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    
     def get(self, request):
         from .plan_permissions import get_user_features
         
@@ -635,6 +636,44 @@ class ProfileView(APIView):
         if hasattr(user, 'profile'):
              data.update(UserProfileSerializer(user.profile).data)
         return Response(data)
+    
+    def put(self, request):
+        """Update user profile information"""
+        user = request.user
+        data = request.data
+        
+        # Update User model fields
+        if 'first_name' in data:
+            user.first_name = data['first_name']
+        if 'last_name' in data:
+            user.last_name = data['last_name']
+        if 'email' in data:
+            user.email = data['email']
+        
+        user.save()
+        
+        # Update Profile model fields if profile exists
+        if hasattr(user, 'profile'):
+            profile = user.profile
+            if 'phone' in data:
+                profile.phone = data['phone']
+            if 'institution_name' in data:
+                profile.institution_name = data['institution_name']
+            if 'address' in data:
+                profile.address = data['address']
+            profile.save()
+        
+        return Response({
+            "message": "Profile updated successfully",
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name
+        })
+    
+    def patch(self, request):
+        """Partial update - same as PUT for now"""
+        return self.put(request)
 
 class NotificationCreateView(APIView):
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
