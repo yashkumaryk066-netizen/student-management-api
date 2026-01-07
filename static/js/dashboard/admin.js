@@ -8,6 +8,7 @@ const DashboardApp = {
     dashboardMarkup: null,
 
     init() {
+        console.log("%c NextGen ERP v3.8 Loaded ", "background: #3b82f6; color: white; padding: 4px; border-radius: 4px;");
         // Capture initial dashboard state for SPA navigation
         const view = document.getElementById('dashboardView');
         if (view) this.dashboardMarkup = view.innerHTML;
