@@ -50,6 +50,18 @@ A visual upgrade to the user interface to encourage plan upgrades.
 *   **Visual**: A "Glassmorphism" styled modal appears with a glowing lock icon.
 *   **Action**: Prompts user to "Upgrade Plan" instead of just showing an error.
 
+## 5. 📈 Smart Progress Reports (Report Cards)
+Generate comprehensive Academic Report Cards with performance analysis.
+
+### How to Use:
+1.  Go to **Admin Panel > Students**.
+2.  Select student(s).
+3.  Choose Action: **"Download Progress Report"**.
+4.  **Result**:
+    *   Professional PDF Report Card.
+    *   Lists all exams, marks, grades, and Fail/Pass status.
+    *   Includes **Performance Summary** and Teacher Signature area.
+
 ---
 
 ## 🛠️ Required Setup for Deployment
