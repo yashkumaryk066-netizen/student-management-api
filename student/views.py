@@ -783,3 +783,52 @@ class DepartmentListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(created_by=get_owner_user(self.request.user))
+# =====================================================
+# PREMIUM DASHBOARD API
+# =====================================================
+class DashboardStatsView(APIView):
+    """
+    Returns Plan-Specific Statistics for the Dashboard.
+    Filters data visibility based on User's Plan (Coaching/School/Institute).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        owner = get_owner_user(user)
+        
+        # Get Plan
+        plan = 'SCHOOL' # Default
+        if hasattr(user, 'profile'):
+            plan = user.profile.institution_type
+            
+        stats = {
+            'plan': plan,
+            'students_count': Student.objects.filter(created_by=owner).count(),
+            'recent_payments': Payment.objects.filter(user=owner).order_by('-created_at')[:5].values('amount', 'status', 'created_at'),
+        }
+        
+        # --- PLAN SPECIFIC DATA ---
+        
+        # 1. COACHING PLAN Focus
+        if plan in ['COACHING', 'INSTITUTE']:
+            stats['courses_count'] = Course.objects.filter(created_by=owner).count()
+            stats['batches_count'] = Batch.objects.filter(created_by=owner).count()
+            
+        # 2. SCHOOL/INSTITUTE Focus
+        if plan in ['SCHOOL', 'INSTITUTE']:
+            stats['teachers_count'] = 0 # Placeholder if teacher model exists
+            stats['exams_count'] = Exam.objects.filter(created_by=owner).count()
+            
+            # Attendance Stats (Today)
+            today = timezone.now().date()
+            present_count = Attendence.objects.filter(student__created_by=owner, date=today, is_present=True).count()
+            total_students = stats['students_count']
+            stats['attendance_percentage'] = int((present_count / total_students * 100)) if total_students > 0 else 0
+            
+        # 3. EXTRA MODULES (Institute Only)
+        if plan == 'INSTITUTE':
+            stats['hostel_occupancy'] = 0 # Placeholder
+            stats['transport_routes'] = 0 # Placeholder
+            
+        return Response(stats)

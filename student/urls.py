@@ -33,7 +33,7 @@ from .views import (
     ExamListCreateView, EventListCreateView,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
     LiveClassListCreateView, DepartmentListCreateView,
-    TeamManagementView, ClientAuditLogListView
+    TeamManagementView, ClientAuditLogListView, DashboardStatsView
 )
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
@@ -222,6 +222,9 @@ urlpatterns = [
     # Custom AI Prompt
     path('ai/prompt/', CustomAIPromptView.as_view(), name='ai-custom-prompt'),
     
+    # DASHBOARD STATS (PLAN SPECIFIC)
+    path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
+
     # ==================== UNIFIED MULTI-MODEL AI ENDPOINTS ====================
     # List all available AI providers
     path('ai/providers/', AIProvidersListView.as_view(), name='ai-providers-list'),

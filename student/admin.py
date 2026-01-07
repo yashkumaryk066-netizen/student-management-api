@@ -59,7 +59,7 @@ class StudentAdmin(admin.ModelAdmin):
     search_fields = ['name', 'roll_number', 'contact_number']
     list_per_page = 50
     ordering = ['-id']
-    actions = ['download_id_card', 'download_admission_letter']
+    actions = ['download_id_card', 'download_admission_letter', 'download_admit_card']
     
     def has_photo(self, obj):
         return "✅" if obj.photo else "❌"
@@ -125,6 +125,41 @@ class StudentAdmin(admin.ModelAdmin):
         response['Content-Disposition'] = 'attachment; filename="Admission_Letters.zip"'
         return response
     download_admission_letter.short_description = "📄 Download Admission Letter"
+
+    def download_admit_card(self, request, queryset):
+        """Generate Exam Admit Card (Hall Ticket)"""
+        from django.http import HttpResponse
+        from .admit_card_utils import generate_admit_card_pdf
+        import zipfile
+        from io import BytesIO
+        
+        # Single Download
+        if queryset.count() == 1:
+            student = queryset.first()
+            try:
+                pdf_buffer = generate_admit_card_pdf(student)
+                response = HttpResponse(pdf_buffer, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="Admit_Card_{student.roll_number or student.name}.pdf"'
+                return response
+            except Exception as e:
+                self.message_user(request, f"Error: {str(e)}", level='error')
+                return
+
+        # Bulk Download
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+            for student in queryset:
+                try:
+                    pdf_buffer = generate_admit_card_pdf(student)
+                    zip_file.writestr(f"Admit_Card_{student.roll_number or student.name}.pdf", pdf_buffer.getvalue())
+                except:
+                    continue
+        
+        zip_buffer.seek(0)
+        response = HttpResponse(zip_buffer, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="Exam_Admit_Cards.zip"'
+        return response
+    download_admit_card.short_description = "🎫 Download Exam Admit Card"
 
 
 @admin.register(Attendence)
