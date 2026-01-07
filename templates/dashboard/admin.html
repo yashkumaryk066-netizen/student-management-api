@@ -8,6 +8,7 @@
     <link rel="icon" type="image/png" href="/static/img/ysm_logo.png">
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <link rel="stylesheet" href="/static/css/premium_modal.css">
+    <link rel="stylesheet" href="/static/css/upgrade-modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Cinematic Motion Engine -->
@@ -35,108 +36,122 @@
                 </div>
 
                 <nav>
-                    <ul class="nav-menu">
+                    <ul class="nav-menu" id="navMenu">
+                        <!-- CORE MODULES (All Plans) -->
+                        <li class="nav-category">Core Modules</li>
+
                         <li class="nav-item">
-                            <a href="#dashboard" class="nav-link active">
+                            <a href="#dashboard" class="nav-link active" data-module="dashboard">
                                 <span class="nav-icon">📊</span>
                                 <span class="nav-text">Dashboard</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="#students" class="nav-link">
+                            <a href="#students" class="nav-link" data-module="students">
                                 <span class="nav-icon">👥</span>
                                 <span class="nav-text">Student Management</span>
-                                <span class="nav-badge">1,234</span>
+                                <span class="nav-badge" id="studentCount">1,234</span>
                             </a>
+                        </li>
+
                         <li class="nav-item">
-                            <a href="#courses" class="nav-link">
+                            <a href="#courses" class="nav-link" data-module="courses" data-plan="coaching">
                                 <span class="nav-icon">🎓</span>
                                 <span class="nav-text">Courses & Batches</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="#attendance" class="nav-link">
+                            <a href="#attendance" class="nav-link" data-module="attendance">
                                 <span class="nav-icon">✅</span>
                                 <span class="nav-text">Attendance</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="#finance" class="nav-link">
+                            <a href="#finance" class="nav-link" data-module="finance">
                                 <span class="nav-icon">💰</span>
                                 <span class="nav-text">Finance & Payments</span>
-                                <span class="nav-badge">47</span>
+                                <span class="nav-badge" id="pendingCount">47</span>
                             </a>
                         </li>
 
+                        <!-- ACADEMIC MODULES (School & Institute) -->
+                        <li class="nav-category">Academic Management</li>
+
                         <li class="nav-item">
-                            <a href="#library" class="nav-link">
+                            <a href="#library" class="nav-link" data-module="library" data-plan="school">
                                 <span class="nav-icon">📚</span>
                                 <span class="nav-text">Library Management</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="#hostel" class="nav-link">
-                                <span class="nav-icon">🏢</span>
-                                <span class="nav-text">Hostel Management</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="#transport" class="nav-link">
-                                <span class="nav-icon">🚌</span>
-                                <span class="nav-text">Transportation</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="#hr" class="nav-link">
-                                <span class="nav-icon">👔</span>
-                                <span class="nav-text">HR & Payroll</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="#exams" class="nav-link">
+                            <a href="#exams" class="nav-link" data-module="exams" data-plan="school">
                                 <span class="nav-icon">📝</span>
                                 <span class="nav-text">Exams & Grading</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="#events" class="nav-link">
-                                <span class="nav-icon">📅</span>
-                                <span class="nav-text">Events & Calendar</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="#live-classes" class="nav-link">
+                            <a href="#live-classes" class="nav-link" data-module="live-classes" data-plan="coaching">
                                 <span class="nav-icon"
                                     style="color:#ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;">🔴</span>
                                 <span class="nav-text">Live Classes</span>
                             </a>
                         </li>
 
+                        <!-- OPERATIONS (Institute/University) -->
+                        <li class="nav-category">Operations & Facilities</li>
+
                         <li class="nav-item">
-                            <a href="#reports" class="nav-link">
+                            <a href="#hostel" class="nav-link" data-module="hostel" data-plan="institute">
+                                <span class="nav-icon">🏢</span>
+                                <span class="nav-text">Hostel Management</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#transport" class="nav-link" data-module="transport" data-plan="institute">
+                                <span class="nav-icon">🚌</span>
+                                <span class="nav-text">Transportation</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#hr" class="nav-link" data-module="hr" data-plan="school">
+                                <span class="nav-icon">👔</span>
+                                <span class="nav-text">HR & Payroll</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#events" class="nav-link" data-module="events">
+                                <span class="nav-icon">📅</span>
+                                <span class="nav-text">Events & Calendar</span>
+                            </a>
+                        </li>
+
+                        <!-- SYSTEM & ANALYTICS -->
+                        <li class="nav-category">System & Analytics</li>
+
+                        <li class="nav-item">
+                            <a href="#reports" class="nav-link" data-module="reports">
                                 <span class="nav-icon">📈</span>
                                 <span class="nav-text">Reports & Analytics</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="#subscription" class="nav-link">
+                            <a href="#subscription" class="nav-link" data-module="subscription">
                                 <span class="nav-icon">💳</span>
                                 <span class="nav-text">Plan & Subscription</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="#settings" class="nav-link">
+                            <a href="#settings" class="nav-link" data-module="settings">
                                 <span class="nav-icon">⚙️</span>
                                 <span class="nav-text">Settings</span>
                             </a>
@@ -505,6 +520,9 @@
 
             <!-- Dashboard SPA System (Updated Version) -->
             <script src="/static/js/dashboard/admin.js?v=3.7"></script>
+
+            <!-- Premium Sidebar Manager (Plan-Based Access) -->
+            <script src="/static/js/sidebar-manager.js?v=1.0"></script>
 
             <!-- Premium Motion JS -->
             <script src="/static/js/premium_motion.js"></script>

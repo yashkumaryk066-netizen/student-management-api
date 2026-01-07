@@ -157,15 +157,65 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* Navigation */
+/* ============================================
+   PREMIUM NAVIGATION MENU
+   ============================================ */
 .nav-menu,
 .dash-nav {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     list-style: none;
     flex: 1;
     overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* Custom Scrollbar */
+.nav-menu::-webkit-scrollbar,
+.dash-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav-menu::-webkit-scrollbar-track,
+.dash-nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.nav-menu::-webkit-scrollbar-thumb,
+.dash-nav::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* Category Separator */
+.nav-category {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 16px 12px 8px 12px;
+    margin-top: 8px;
+    position: relative;
+    opacity: 0.6;
+}
+
+.nav-category::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+/* Navigation Links - Premium 3D Design */
+.nav-item {
+    position: relative;
 }
 
 .nav-link,
@@ -173,44 +223,239 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
     color: var(--text-muted);
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid transparent;
     font-weight: 500;
+    font-size: 0.95rem;
     position: relative;
     background: transparent;
+    overflow: hidden;
+    cursor: pointer;
 }
 
+/* 3D Depth Effect on Links */
+.nav-link::before,
+.dash-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+/* Neon Glow Effect on Hover */
+.nav-link::after,
+.dash-item::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.nav-link:hover::after,
+.dash-item:hover::after {
+    width: 200%;
+    height: 200%;
+}
+
+/* Icon Animation */
+.nav-icon {
+    font-size: 1.4rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 0 0 transparent);
+    position: relative;
+    z-index: 1;
+}
+
+.nav-link:hover .nav-icon,
+.dash-item:hover .nav-icon {
+    transform: scale(1.2) rotate(5deg);
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+/* Text Styling */
+.nav-text {
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s;
+}
+
+/* Hover State - Premium Glassmorphism */
 .nav-link:hover,
 .dash-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
     color: #fff;
-    transform: translateX(5px);
+    transform: translateX(8px) scale(1.02);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(59, 130, 246, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+.nav-link:hover::before,
+.dash-item:hover::before {
+    opacity: 1;
+}
+
+/* Active State - Neon Glow */
 .nav-link.active,
 .dash-item.active {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), transparent);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.15));
     color: white;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    box-shadow:
+        0 0 20px rgba(59, 130, 246, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    transform: translateX(4px);
 }
 
 .nav-link.active::before,
 .dash-item.active::before {
     content: '';
     position: absolute;
-    left: 0;
+    left: -1px;
     top: 50%;
     transform: translateY(-50%);
-    width: 3px;
-    height: 20px;
-    background: var(--primary);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
     border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 10px var(--primary);
+    box-shadow:
+        0 0 15px var(--primary),
+        0 0 30px rgba(59, 130, 246, 0.5);
+    animation: neonPulse 2s infinite alternate;
+}
+
+.nav-link.active .nav-icon,
+.dash-item.active .nav-icon {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.8));
+}
+
+.nav-link.active .nav-text,
+.dash-item.active .nav-text {
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Badge Styling */
+.nav-badge {
+    margin-left: auto;
+    padding: 3px 8px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.2));
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fca5a5;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    animation: badgePulse 3s infinite;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        transform: scale(1);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes neonPulse {
+    from {
+        box-shadow:
+            0 0 10px var(--primary),
+            0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    to {
+        box-shadow:
+            0 0 20px var(--primary),
+            0 0 40px rgba(59, 130, 246, 0.6);
+    }
+}
+
+/* Plan-Based Module Indicators */
+.nav-link[data-plan="coaching"]::after,
+.nav-link[data-plan="school"]::after,
+.nav-link[data-plan="institute"]::after {
+    content: attr(data-plan);
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.nav-link[data-plan="coaching"]::after {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.2));
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+}
+
+.nav-link[data-plan="school"]::after {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.2));
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fcd34d;
+}
+
+.nav-link[data-plan="institute"]::after {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.2));
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    color: #c4b5fd;
+}
+
+.nav-link:hover[data-plan]::after {
+    opacity: 1;
+}
+
+/* Disabled/Locked Modules */
+.nav-link.locked,
+.dash-item.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+}
+
+.nav-link.locked::before,
+.dash-item.locked::before {
+    content: '🔒';
+    position: absolute;
+    right: 12px;
+    font-size: 0.9rem;
+    opacity: 0.6;
 }
 
 /* ============================================
