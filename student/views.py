@@ -328,12 +328,18 @@ class ClientSubscriptionView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         if hasattr(request.user, 'subscription'):
+             sub = request.user.subscription
              return Response({
-                 "plan": request.user.subscription.plan_type,
-                 "status": request.user.subscription.status,
-                 "valid_until": request.user.subscription.end_date
+                 "plan_type": sub.plan_type,
+                 "status": sub.status,
+                 "valid_until": sub.end_date,
+                 "days_left": sub.days_remaining,
+                 "plan": sub.plan_type, # Backward compat
+                 "amount_paid": sub.amount_paid,
+                 "start_date": sub.start_date,
+                 "end_date": sub.end_date,
              })
-        return Response({"status": "No Subscription"})
+        return Response({"status": "NO_SUBSCRIPTION", "days_left": 0})
 
 class SubscriptionRenewalView(APIView):
     permission_classes = [IsAuthenticated]

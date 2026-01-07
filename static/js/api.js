@@ -50,12 +50,25 @@ async function apiCall(endpoint, options = {}) {
         const data = text ? JSON.parse(text) : {};
 
         if (!res.ok) {
+            // --- SUBSCRIPTION EXPIRED ---
+            if (res.status === 403 && data.code === "SUBSCRIPTION_EXPIRED") {
+                console.warn("⚠️ Subscription Expired");
+                if (window.DashboardApp && window.DashboardApp.showSubscriptionExpiredModal) {
+                    window.DashboardApp.showSubscriptionExpiredModal(data);
+                    // Stop further processing but still throw to stop the caller
+                    throw new Error("SUBSCRIPTION_EXPIRED");
+                }
+            }
+
             throw new Error(data.detail || data.message || 'API Error');
         }
 
         return data;
 
     } catch (err) {
+        // Suppress subscription expired if handled by UI
+        if (err.message === "SUBSCRIPTION_EXPIRED") return;
+
         if (err.name !== 'AbortError') {
             console.error('API Error:', err);
         }

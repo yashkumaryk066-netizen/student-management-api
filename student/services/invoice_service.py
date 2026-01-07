@@ -176,21 +176,22 @@ def generate_invoice_pdf(user, subscription, payment):
     data = [
         ["DESCRIPTION / SERVICE", "QTY", "RATE", "AMOUNT"],
         [
-            Paragraph(f"<b>{plan_details}</b><br/>"
+            Paragraph(f"<b>{plan_details} (Monthly Subscription)</b><br/>"
                       f"<font color='#718096' size='9'>[Ref: {subscription.transaction_id or 'N/A'}]</font><br/><br/>"
+                      "<i>Billing Cycle: Monthly Recurring Charge</i><br/>"
                       "<i>Included Features:</i><br/>"
                       "• Full Cloud Access & Data Persistence<br/>"
                       "• Automated Backup & Security Protocols<br/>"
                       "• Y.S.M Intelligence Dashboard License<br/>"
                       "• Priority Developer Support", style_data),
             "1",
-            f"{payment.amount:,.2f}",
-            f"{payment.amount:,.2f}"
+            f"₹ {payment.amount:,.2f}",
+            f"₹ {payment.amount:,.2f}"
         ],
         ["", "", "", ""], # Spacer Row
-        ["", "", "Subtotal", f"{payment.amount:,.2f}"],
+        ["", "", "Subtotal", f"₹ {payment.amount:,.2f}"],
         ["", "", "Processing Fee", "0.00"],
-        ["", "", "TOTAL REVENUE", f"Rs. {payment.amount:,.2f}"]
+        ["", "", "GRAND TOTAL", f"₹ {payment.amount:,.2f}"]
     ]
 
     t = Table(data, colWidths=[3.5*inch, 0.8*inch, 1.2*inch, 1.5*inch])

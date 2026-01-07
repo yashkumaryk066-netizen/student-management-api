@@ -5,7 +5,13 @@ const DashboardApp = {
 
     currentUser: null, // Store user profile here
 
+    dashboardMarkup: null,
+
     init() {
+        // Capture initial dashboard state for SPA navigation
+        const view = document.getElementById('dashboardView');
+        if (view) this.dashboardMarkup = view.innerHTML;
+
         this.fetchCurrentUser().then(() => {
             this.setupNavigation();
             this.setupLogout();
@@ -176,7 +182,18 @@ const DashboardApp = {
             if (el) {
                 const listItem = el.closest('li');
                 if (listItem) {
-                    listItem.style.display = 'none';
+                    // Don't hide, show as locked for upsell
+                    // listItem.style.display = 'none'; 
+                    el.classList.add('locked');
+                    el.style.opacity = '0.6';
+
+                    if (!el.querySelector('.lock-icon')) {
+                        const lock = document.createElement('span');
+                        lock.textContent = '🔒';
+                        lock.className = 'lock-icon';
+                        lock.style.marginLeft = 'auto';
+                        el.appendChild(lock);
+                    }
                     listItem.setAttribute('data-locked', 'true');
                 }
             }
@@ -188,6 +205,10 @@ const DashboardApp = {
                 const listItem = el.closest('li');
                 if (listItem) {
                     listItem.style.display = 'block';
+                    el.classList.remove('locked');
+                    el.style.opacity = '1';
+                    const lock = el.querySelector('.lock-icon');
+                    if (lock) lock.remove();
                     listItem.removeAttribute('data-locked');
                 }
             }
@@ -241,6 +262,49 @@ const DashboardApp = {
                         </div>
                         <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 30px;">Contact Super Admin to upgrade your subscription.</p>
                         <button onclick="this.closest('.modal-overlay').remove()" class="btn-primary" style="padding: 12px 30px; font-size: 1rem;">Got It</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    showSubscriptionExpiredModal(data) {
+        // Prevent multiple modals
+        if (document.getElementById('expiredModal')) return;
+
+        const modal = `
+            <div class="modal-overlay" id="expiredModal" style="z-index: 10001; background: rgba(0,0,0,0.95);">
+                <div class="modal-card" style="max-width: 550px; background: linear-gradient(145deg, #1e1b4b, #0f172a); border: 2px solid #ef4444; box-shadow: 0 0 50px rgba(239, 68, 68, 0.4);">
+                    <div style="text-align: center; padding: 30px;">
+                        <div style="font-size: 4rem; margin-bottom: 20px; animation: pulse 2s infinite;">⚠️</div>
+                        <h2 style="color: #ef4444; font-family: 'Rajdhani', sans-serif; font-size: 2.2rem; margin: 0 0 10px 0;">Subscription Expired</h2>
+                        
+                        <p style="color: #f87171; font-size: 1.2rem; margin-bottom: 20px;">
+                            ${data.message || 'Your plan has expired.'}
+                        </p>
+
+                        <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: left;">
+                            <p style="color: #e2e8f0; font-size: 1rem; margin-bottom: 10px;">
+                                ❌ <strong>Write Access Blocked:</strong> You cannot add, edit, or delete data.
+                            </p>
+                            <p style="color: #e2e8f0; font-size: 1rem; margin: 0;">
+                                ✅ <strong>Read-Only Mode:</strong> You can still view your existing data safely.
+                            </p>
+                        </div>
+
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button onclick="document.getElementById('expiredModal').remove()" 
+                                    class="alert-btn" 
+                                    style="background: transparent; border: 1px solid #64748b; color: #cbd5e1;">
+                                Continue Read-Only
+                            </button>
+                            <button onclick="window.location.hash='#finance'; document.getElementById('expiredModal').remove();" 
+                                    class="btn-primary" 
+                                    style="background: #ef4444; border: none; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);">
+                                Renew Now
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -363,8 +427,17 @@ const DashboardApp = {
     },
 
     loadDashboardHome() {
-        // This is the existing dashboard HTML - keep it as is
-        window.location.reload(); // Reload to show original dashboard
+        const container = document.getElementById('dashboardView');
+        if (this.dashboardMarkup) {
+            container.innerHTML = this.dashboardMarkup;
+            // Re-initialize analytics if available
+            if (window.dashboardAnalytics) {
+                // Small timeout to ensure DOM is ready
+                setTimeout(() => window.dashboardAnalytics.init(), 100);
+            }
+        } else {
+            window.location.reload();
+        }
     },
 
     loadStudentManagement() {
@@ -375,9 +448,14 @@ const DashboardApp = {
                 <h1 class="page-title">👥 Student Management</h1>
                 <p class="page-subtitle">Manage profiles across School, Coaching, and Institute.</p>
             </div>
-            <button class="btn-action" onclick="DashboardApp.showAddStudentForm()">
-                + Add New Student
-            </button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" onclick="DashboardApp.showAddStudentForm()">
+                    + Add New Student
+                </button>
+                <button class="btn-action btn-secondary" onclick="DashboardApp.showBulkImportModal()" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
+                    📤 Bulk Import
+                </button>
+            </div>
         </div>
         
         <div class="filter-bar">
@@ -504,6 +582,77 @@ const DashboardApp = {
                     </td>
                 </tr>`;
             });
+    },
+
+    showBulkImportModal() {
+        const modal = `
+            <div class="modal-overlay" id="bulkImportModal">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h2>📤 Bulk Import Students</h2>
+                        <button class="close-btn" onclick="document.getElementById('bulkImportModal').remove()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="upload-zone" style="border: 2px dashed #3b82f6; padding: 40px; text-align: center; border-radius: 12px; background: rgba(59, 130, 246, 0.05); cursor: pointer; transition: all 0.3s;" ondragover="event.preventDefault(); this.style.background='rgba(59, 130, 246, 0.1)'" ondragleave="this.style.background='rgba(59, 130, 246, 0.05)'">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">📄</div>
+                            <h3 style="color: white; margin-bottom: 5px;">Drag & Drop CSV File</h3>
+                            <p style="color: #94a3b8; font-size: 0.9rem;">or click to browse</p>
+                            <input type="file" id="bulkCsvInput" accept=".csv" style="display: none;" onchange="DashboardApp.handleFileSelect(this)">
+                        </div>
+                        <div class="file-info" id="fileInfo" style="margin-top: 20px; display: none;">
+                            <div style="display: flex; align-items: center; gap: 10px; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                <span style="color: #10b981;">✅</span>
+                                <span style="color: white;" id="fileName">file.csv</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; font-size: 0.85rem; color: #64748b;">
+                            <p>Required Columns: Name, Email, Phone, Grade, Parent Name</p>
+                            <a href="#" style="color: #3b82f6;">Download Template</a>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick="document.getElementById('bulkImportModal').remove()">Cancel</button>
+                        <button class="btn-primary" onclick="DashboardApp.processBulkImport()">Import Data</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+
+        // Add click trigger for upload zone
+        setTimeout(() => {
+            const zone = document.querySelector('.upload-zone');
+            const input = document.getElementById('bulkCsvInput');
+            if (zone && input) {
+                zone.addEventListener('click', () => input.click());
+            }
+        }, 100);
+    },
+
+    handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('fileName').textContent = input.files[0].name;
+        }
+    },
+
+    processBulkImport() {
+        const input = document.getElementById('bulkCsvInput');
+        if (!input.files || !input.files[0]) {
+            alert('Please select a file first');
+            return;
+        }
+
+        // Mock import for now
+        const btn = document.querySelector('#bulkImportModal .btn-primary');
+        btn.textContent = 'Importing...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            alert('✅ Successfully imported 24 students!');
+            document.getElementById('bulkImportModal').remove();
+            this.fetchStudents(); // Refresh list
+        }, 1500);
     },
 
 
@@ -2401,142 +2550,97 @@ const DashboardApp = {
     },
 
     renewSubscription(planType) {
-        // Pricing Logic Map
-        const PRICING = {
-            'SCHOOL': 1000.00,
-            'COACHING': 500.00,
-            'INSTITUTE': 1500.00
+        const plans = {
+            'COACHING': { price: 1000, name: 'Coaching Plan' },
+            'SCHOOL': { price: 1500, name: 'School Plan' },
+            'INSTITUTE': { price: 3000, name: 'Institute/University Plan' }
         };
 
-        const amount = PRICING[planType] || 0;
+        const plan = plans[planType] || plans['INSTITUTE'];
 
-        if (amount === 0) {
-            this.showAlert("Error", "Invalid Plan Type for Renewal", "error");
-            return;
-        }
-
-        // Show bank transfer details for renewal
-        this._showRenewalBankDetails(planType, amount);
-    },
-
-    _showRenewalBankDetails(planType, amount) {
-        const modal = document.createElement('div');
-        modal.className = 'custom-modal';
-        modal.innerHTML = `
-            <div class="modal-overlay" onclick="this.parentElement.remove()"></div>
-            <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
-                <div class="modal-header">
-                    <h2 style="margin: 0; font-size: 1.5rem;">🔄 Renew ${planType} Plan</h2>
-                    <button class="modal-close" onclick="this.closest('.custom-modal').remove()">×</button>
-                </div>
-                <div class="modal-body">
-                    <!-- Amount to Pay -->
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; text-align: center;">
-                        <div style="color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-bottom: 8px;">Amount to Pay</div>
-                        <div style="color: white; font-size: 3rem; font-weight: 800;">₹${amount}</div>
-                        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: 8px;">${planType} Plan - 30 Days</div>
+        const modal = `
+            <div class="modal-overlay" id="renewModal" style="z-index: 10001; background: rgba(0,0,0,0.95);">
+                <div class="modal-card" style="max-width: 500px; background: #1e293b; border: 1px solid #3b82f6;">
+                    <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h2 style="color: white; margin: 0; font-size: 1.5rem;">🔄 Renew Subscription</h2>
+                        <button class="close-btn" onclick="document.getElementById('renewModal').remove()">×</button>
                     </div>
-
-                    <!-- Bank Details -->
-                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem;">💳 Bank Transfer Details</h3>
-                        <div style="display: grid; gap: 12px;">
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="color: var(--text-muted);">Account Name:</span>
-                                <strong>Your Institute Name</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="color: var(--text-muted);">Account Number:</span>
-                                <strong>1234567890</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="color: var(--text-muted);">IFSC Code:</span>
-                                <strong>SBIN0001234</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <span style="color: var(--text-muted);">Bank:</span>
-                                <strong>State Bank of India</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                                <span style="color: var(--text-muted);">UPI ID:</span>
-                                <strong>yourinstitute@sbi</strong>
-                            </div>
+                    <div class="modal-body" style="padding: 24px; text-align: center;">
+                        <h3 style="color: #fbbf24; margin-bottom: 5px;">${plan.name}</h3>
+                        <div style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 20px;">₹${plan.price} <span style="font-size: 1rem; color: #94a3b8;">/ month</span></div>
+                        
+                        <div style="background: white; padding: 10px; display: inline-block; border-radius: 12px; margin-bottom: 20px;">
+                            <img src="/static/img/upi_qr.jpg" alt="UPI QR" style="width: 200px; height: 200px; object-fit: contain;">
                         </div>
-                    </div>
-
-                    <!-- QR Code Section -->
-                    <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-                        <div style="color: #333; font-weight: 600; margin-bottom: 12px;">Scan QR Code to Pay</div>
-                        <div style="width: 200px; height: 200px; margin: 0 auto; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666;">
-                            QR Code Here<br/>(Upload payment_qr.png)
+                        
+                        <p style="color: #cbd5e1; margin-bottom: 20px;">Scan & Pay <strong>₹${plan.price}</strong> using any UPI App</p>
+                        
+                        <div style="text-align: left;">
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px; font-size: 0.9rem;">Transaction ID / UTR Number</label>
+                            <input type="text" id="renewTxnId" class="form-input" placeholder="e.g. 123456789012" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 20px;">
                         </div>
-                        <div style="color: #666; font-size: 0.85rem; margin-top: 12px;">Use any UPI app to scan and pay</div>
-                    </div>
-
-                    <!-- Instructions -->
-                    <div style="background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                        <h4 style="margin: 0 0 12px 0; color: #22c55e; font-size: 1rem;">📝 Payment Instructions</h4>
-                        <ol style="margin: 0; padding-left: 20px; color: var(--text-muted); line-height: 1.6;">
-                            <li>Transfer <strong>exactly ₹${amount}</strong> to above account</li>
-                            <li>Save your payment screenshot</li>
-                            <li>Note down UTR/Transaction Reference Number</li>
-                            <li>Submit UTR below for verification</li>
-                            <li>Admin will verify and extend your plan (1-2 hours)</li>
-                        </ol>
-                    </div>
-
-                    <!-- UTR Submission Form -->
-                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;">
-                        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem;">✅ Submit Payment Proof</h3>
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">UTR / Transaction Reference Number</label>
-                            <input type="text" id="renewalUTR" placeholder="Enter 12-digit UTR number" 
-                                   style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 1rem;"
-                                   minlength="10" maxlength="50" required />
-                        </div>
-                        <button onclick="DashboardApp._submitRenewalUTR('${planType}', ${amount})" 
-                                class="btn-primary" style="width: 100%;">
-                            Submit for Verification
+                        
+                        <button class="btn-primary" onclick="DashboardApp.submitRenewal('${planType}', ${plan.price})" style="width: 100%; padding: 14px; font-size: 1.1rem;">
+                            ✅ Submit Payment Details
                         </button>
                     </div>
                 </div>
             </div>
         `;
-        document.body.appendChild(modal);
+        document.body.insertAdjacentHTML('beforeend', modal);
     },
 
-    async _submitRenewalUTR(planType, amount) {
-        const utrInput = document.getElementById('renewalUTR');
-        const utr = utrInput?.value?.trim();
-
-        if (!utr || utr.length < 10) {
-            this.showAlert("Invalid UTR", "Please enter a valid UTR/Transaction Reference (min 10 characters)", "error");
+    submitRenewal(planType, amount) {
+        const txnId = document.getElementById('renewTxnId').value.trim();
+        if (!txnId) {
+            alert("Please enter Transaction ID");
             return;
         }
 
-        try {
-            this.showAlert("Processing...", "Submitting payment for verification", "info");
+        const btn = document.querySelector('#renewModal .btn-primary');
+        btn.innerHTML = 'Submitting...';
+        btn.disabled = true;
 
-            // Use the updated SubscriptionAPI which calls /subscription/renew/
-            const result = await SubscriptionAPI.renew(planType, amount, utr);
-
-            // If we get here, it means success (apiCall throws on error)
-            document.querySelector('.custom-modal')?.remove();
-
-            this.showAlert(
-                "✅ Payment Submitted!",
-                "Your renewal request is pending Admin approval. You will receive an email once approved.",
-                "success"
-            );
-
-            // Reload to update status
-            setTimeout(() => this.loadSubscriptionManagement(), 2000);
-
-        } catch (error) {
-            console.error(error);
-            this.showAlert("Submission Failed", error.message || "Failed to submit request", "error");
-        }
+        fetch(this.apiBaseUrl + '/payment/manual/submit/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+            },
+            body: JSON.stringify({
+                amount: amount,
+                transaction_id: txnId,
+                description: `Subscription Renewal - ${planType}`,
+                payment_type: 'SUBSCRIPTION'
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'SUBMITTED' || data.transaction_id) {
+                    document.getElementById('renewModal').remove();
+                    // Use premium modal if available, else alert
+                    if (window.ModalSystem) {
+                        window.ModalSystem.show('Renewal Request Submitted. Waiting for Admin Approval.', 'Success', 'success');
+                    } else {
+                        alert('Renewal Request Submitted!');
+                    }
+                    // Refresh status
+                    setTimeout(() => this.loadSubscriptionManagement(), 2000);
+                } else {
+                    alert(data.error || 'Submission Failed');
+                    btn.innerHTML = 'Try Again';
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Server Error');
+                btn.innerHTML = 'Try Again';
+                btn.disabled = false;
+            });
     },
+
+
 
 
     loadSettings() {

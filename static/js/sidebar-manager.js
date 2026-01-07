@@ -174,9 +174,11 @@ class PremiumSidebarManager {
     closeSidebar() {
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menuToggle');
+        const overlay = document.getElementById('sidebarOverlay');
 
         if (sidebar) sidebar.classList.remove('open');
         if (menuToggle) menuToggle.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
     }
 
     showUpgradeModal(module) {
@@ -265,14 +267,24 @@ class PremiumSidebarManager {
                 this.toggleSidebar();
             });
         }
+
+        // Listen for overlay click
+        const overlay = document.getElementById('sidebarOverlay');
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                this.closeSidebar();
+            });
+        }
     }
 
     toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menuToggle');
+        const overlay = document.getElementById('sidebarOverlay');
 
         if (sidebar) sidebar.classList.toggle('open');
         if (menuToggle) menuToggle.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('active');
     }
 
     // Public method to change plan (for testing/admin)

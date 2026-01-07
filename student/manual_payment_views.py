@@ -16,11 +16,15 @@ class ManualPaymentSubmitView(APIView):
         Expects: { "amount": "500.00", "transaction_id": "UPI123456", "description": "Tuition Fee" }
         """
         user = request.user
-        try:
-            student = user.student_profile
-        except AttributeError:
-             return Response({"error": "Only students can submit fee payments"}, status=status.HTTP_400_BAD_REQUEST)
-
+        payment_type = request.data.get('payment_type', 'FEE')
+        
+        student = None
+        if payment_type == 'FEE':
+            try:
+                student = user.student_profile
+            except AttributeError:
+                 return Response({"error": "Only students can submit fee payments"}, status=status.HTTP_400_BAD_REQUEST)
+        
         amount = request.data.get('amount')
         txn_id = request.data.get('transaction_id')
         description = request.data.get('description', 'Fee Payment')
@@ -34,11 +38,13 @@ class ManualPaymentSubmitView(APIView):
 
         # Create Pending Payment Record
         payment = Payment.objects.create(
+            user=user if payment_type == 'SUBSCRIPTION' else None, # Link user for Subscription
             student=student,
             transaction_id=txn_id,
             amount=amount,
             due_date=date.today(),
             status='PENDING', # Needs Admin Approval
+            payment_type=payment_type,
             description=f"{description} (Manual: {txn_id})"
         )
 

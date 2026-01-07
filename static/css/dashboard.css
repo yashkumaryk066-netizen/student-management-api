@@ -1945,7 +1945,20 @@ body {
    ============================================ */
 @media (max-width: 1024px) {
     .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 280px;
         transform: translateX(-100%);
+        z-index: 1000;
+        /* High z-index */
+        background: rgba(15, 23, 42, 0.95);
+        /* Deep glass */
+        backdrop-filter: blur(20px);
+        box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+        transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        /* Expo easing */
     }
 
     .sidebar.open {
@@ -1954,10 +1967,20 @@ body {
 
     .main-content {
         margin-left: 0 !important;
+        width: 100%;
     }
 
     .menu-toggle {
         display: block;
+        z-index: 1001;
+        /* Above sidebar if needed, or sidebar has close btn? */
+    }
+
+    /* Overlay Active State */
+    .sidebar-overlay.active {
+        display: block !important;
+        opacity: 1 !important;
+        pointer-events: all;
     }
 }
 
