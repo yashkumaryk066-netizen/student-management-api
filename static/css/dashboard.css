@@ -152,6 +152,7 @@ body {
     font-weight: 800;
     letter-spacing: -0.5px;
     background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -398,6 +399,136 @@ button,
 /* ============================================
    RESPONSIVE
    ============================================ */
+/* ============================================
+   PREMIUM 3D MENU TOGGLE (RED THEME)
+   ============================================ */
+.menu-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(239, 68, 68, 0.35), rgba(127, 29, 29, 0.25));
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    cursor: pointer;
+    box-shadow:
+        0 10px 30px rgba(239, 68, 68, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: neonPulseRed 2s infinite alternate;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* 3D Depth Effect */
+.menu-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%);
+    border-radius: 14px;
+    pointer-events: none;
+}
+
+/* Animated Glow Effect */
+.menu-toggle::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.menu-toggle:hover::after {
+    opacity: 1;
+    animation: rotateGlow 3s linear infinite;
+}
+
+@keyframes rotateGlow {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.menu-bar {
+    width: 24px;
+    height: 3px;
+    background: linear-gradient(90deg, #fff, #fecaca);
+    border-radius: 4px;
+    transition: transform 0.3s ease, opacity 0.2s;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.menu-toggle.open .menu-bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.menu-toggle.open .menu-bar:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.menu-toggle.open .menu-bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+.menu-toggle:hover {
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(145deg, rgba(239, 68, 68, 0.6), rgba(127, 29, 29, 0.4));
+    box-shadow:
+        0 0 40px rgba(239, 68, 68, 0.8),
+        0 15px 35px rgba(239, 68, 68, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: rgba(239, 68, 68, 0.9);
+}
+
+.menu-toggle:active {
+    transform: scale(0.95);
+    box-shadow:
+        0 5px 15px rgba(239, 68, 68, 0.5),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes neonPulseRed {
+    from {
+        box-shadow:
+            0 10px 30px rgba(239, 68, 68, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    to {
+        box-shadow:
+            0 15px 40px rgba(239, 68, 68, 0.65),
+            0 0 20px rgba(239, 68, 68, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        border-color: rgba(239, 68, 68, 0.9);
+    }
+}
+
 @media (max-width: 1024px) {
 
     .sidebar,
@@ -408,67 +539,6 @@ button,
     .main-content,
     .dash-main {
         margin-left: 0;
-    }
-
-    .menu-toggle {
-        display: block !important;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 1001;
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
-        background: linear-gradient(145deg, rgba(239, 68, 68, .35), rgba(127, 29, 29, .25));
-        border: 2px solid rgba(239, 68, 68, .5);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        cursor: pointer;
-        box-shadow: 0 10px 30px rgba(239, 68, 68, .45);
-        backdrop-filter: blur(10px);
-        animation: neonPulseRed 2s infinite alternate;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-}
-
-.menu-bar {
-    width: 24px;
-    height: 3px;
-    background: linear-gradient(90deg, #fff, #fecaca);
-    border-radius: 4px;
-    transition: transform 0.3s ease, opacity .2s;
-}
-
-.menu-toggle.open .menu-bar:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-}
-
-.menu-toggle.open .menu-bar:nth-child(2) {
-    opacity: 0;
-}
-
-.menu-toggle.open .menu-bar:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-}
-
-.menu-toggle:hover {
-    transform: scale(1.1) rotate(5deg);
-    background: #ef4444;
-    box-shadow: 0 0 40px #ef4444, 0 15px 35px rgba(239, 68, 68, .6);
-}
-
-@keyframes neonPulseRed {
-    from {
-        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
-        border-color: rgba(239, 68, 68, 0.5);
-    }
-
-    to {
-        box-shadow: 0 15px 40px rgba(239, 68, 68, 0.65);
-        border-color: rgba(239, 68, 68, 0.9);
     }
 }
 
@@ -607,6 +677,7 @@ body {
     font-size: 1.4rem;
     font-weight: 800;
     background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.5px;
@@ -661,12 +732,27 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 20px;
     position: sticky;
     top: 0;
     z-index: 100;
     background: rgba(15, 23, 42, 0.7);
     backdrop-filter: blur(15px);
     border-bottom: 1px solid var(--glass-border);
+}
+
+/* Header Left Section - Menu Toggle + Search */
+.top-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+/* Header Search Container */
+.header-search {
+    flex: 1;
+    max-width: 500px;
 }
 
 /* Search Bar 3D */
@@ -710,6 +796,7 @@ body {
     font-weight: 800;
     margin-bottom: 10px;
     background: linear-gradient(120deg, #fff, #94a3b8);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -1px;
@@ -1192,21 +1279,7 @@ body {
     z-index: 100;
 }
 
-.menu-toggle {
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    color: var(--text);
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: all 0.3s;
-}
-
-.menu-toggle:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-}
+/* Menu toggle styles are defined globally above - no duplicate needed here */
 
 /* Search Input */
 .header-search {
@@ -2162,20 +2235,39 @@ body {
         left: 0;
     }
 
-    /* Mobile Menu Toggle */
+    /* Mobile Menu Toggle - Uses global styles, just ensure visibility */
     .menu-toggle {
-        display: block !important;
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        z-index: 1001;
-        background: var(--primary);
-        border: none;
-        padding: 12px;
-        border-radius: 12px;
-        cursor: pointer;
-        color: white;
-        font-size: 1.5rem;
+        display: flex !important;
+    }
+
+    /* Adjust header layout for mobile */
+    .top-header {
+        padding: 0 16px;
+        gap: 12px;
+    }
+
+    .top-header .header-left {
+        gap: 12px;
+    }
+
+    .header-search {
+        max-width: 100%;
+    }
+
+    .search-input {
+        font-size: 0.85rem;
+        padding: 10px 16px;
+    }
+
+    /* Ensure menu toggle is properly sized on mobile */
+    .menu-toggle {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+
+    .menu-bar {
+        width: 22px;
     }
 
     /* Main Content - Full width on mobile */
@@ -2344,7 +2436,8 @@ body {
 /* Desktop (1025px+) - Keep existing design */
 @media screen and (min-width: 1025px) {
     .menu-toggle {
-        display: none;
+        display: flex !important;
+        /* Always visible for consistent UX */
     }
 }
 

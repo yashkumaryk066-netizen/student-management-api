@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Menu Toggle Demo - Y.S.M Education</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Demo-specific styles */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .demo-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .demo-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 300px;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .demo-info h3 {
+            color: #ef4444;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .demo-info p {
+            color: #94a3b8;
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .demo-content {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .demo-card h2 {
+            color: white;
+            margin: 0 0 15px 0;
+        }
+
+        .demo-card p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="dashboard-bg"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header ysm-brand">
+            <div class="brand-text">
+                <h2 class="sidebar-title ysm-title">Y.S.M</h2>
+                <span class="sidebar-subtitle">Advance Education System</span>
+            </div>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Student Management</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Courses & Batches</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">✅</span>
+                        <span class="nav-text">Attendance</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">💰</span>
+                        <span class="nav-text">Finance & Payments</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <!-- Left Section: Menu Toggle + Search -->
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" title="Menu">
+                    <span class="menu-bar"></span>
+                    <span class="menu-bar"></span>
+                    <span class="menu-bar"></span>
+                </button>
+
+                <div class="header-search">
+                    <input type="text" class="search-input" placeholder="Search students, courses, or anything...">
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div
+                    style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <span
+                        style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
+                    DEMO
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="demo-content">
+            <h1 class="page-title">Premium 3D Menu Toggle Demo 🎨</h1>
+            <p class="page-subtitle" style="color: #94a3b8; margin-bottom: 40px;">
+                Experience the advanced red-themed 3D animated menu button with glassmorphism effects
+            </p>
+
+            <div class="demo-card">
+                <h2>✨ Features Implemented</h2>
+                <ul style="color: #94a3b8; line-height: 2;">
+                    <li>🔴 <strong style="color: white;">Premium Red Color Theme</strong> - Vibrant red gradient with
+                        neon glow effects</li>
+                    <li>🎯 <strong style="color: white;">Fixed Positioning</strong> - Menu toggle positioned to the left
+                        of search bar</li>
+                    <li>💎 <strong style="color: white;">3D Glassmorphism</strong> - Advanced depth effects with
+                        backdrop blur</li>
+                    <li>✨ <strong style="color: white;">Animated Glow</strong> - Rotating radial gradient on hover</li>
+                    <li>📱 <strong style="color: white;">Fully Responsive</strong> - Consistent display across all
+                        devices</li>
+                    <li>🎭 <strong style="color: white;">Smooth Animations</strong> - Cubic-bezier easing for premium
+                        feel</li>
+                    <li>🌟 <strong style="color: white;">Neon Pulse Effect</strong> - Continuous breathing animation
+                    </li>
+                </ul>
+            </div>
+
+            <div class="demo-card">
+                <h2>🎮 How to Use</h2>
+                <p>
+                    <strong style="color: white;">Desktop:</strong> Click the three-dot menu button to toggle the
+                    sidebar.<br>
+                    <strong style="color: white;">Mobile:</strong> The menu button is always visible and positioned
+                    inline with the search bar.<br>
+                    <strong style="color: white;">Hover Effect:</strong> Hover over the button to see the 3D glow
+                    animation and scale effect.
+                </p>
+            </div>
+
+            <div class="demo-card">
+                <h2>🎨 Design Specifications</h2>
+                <ul style="color: #94a3b8; line-height: 2;">
+                    <li><strong style="color: white;">Size:</strong> 52x52px (48x48px on mobile)</li>
+                    <li><strong style="color: white;">Border Radius:</strong> 14px for smooth corners</li>
+                    <li><strong style="color: white;">Background:</strong> Linear gradient from rgba(239, 68, 68, 0.35)
+                        to rgba(127, 29, 29, 0.25)</li>
+                    <li><strong style="color: white;">Border:</strong> 2px solid rgba(239, 68, 68, 0.5)</li>
+                    <li><strong style="color: white;">Shadow:</strong> Multi-layered box-shadow with inset highlights
+                    </li>
+                    <li><strong style="color: white;">Animation:</strong> 2s infinite alternate neon pulse</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Demo Info Card -->
+    <div class="demo-info">
+        <h3>🎯 Menu Toggle Demo</h3>
+        <p>
+            The premium 3D menu button is now positioned inline with the search bar, featuring advanced red-themed
+            animations and glassmorphism effects. Try clicking it to toggle the sidebar!
+        </p>
+    </div>
+
+    <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            menuToggle.classList.toggle('open');
+        }
+
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 1024) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                    menuToggle.classList.remove('open');
+                }
+            }
+        });
+
+        // Pulse animation for demo badge
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>
