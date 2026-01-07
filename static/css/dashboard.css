@@ -2887,3 +2887,56 @@ screen and (min-resolution: 192dpi) {
         -webkit-overflow-scrolling: touch;
     }
 }
+
+/* ============================================
+   ADVANCED VISIBILITY FIXES (CRITICAL PATCH)
+   ============================================ */
+
+/* Mobile/Tablet: Ensure JS 'open' class works sync with CSS */
+@media screen and (max-width: 1024px) {
+    .sidebar.open {
+        left: 0 !important;
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Ensure overlay works with .active class from JS */
+    .sidebar-overlay.active {
+        display: block !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}
+
+/* Desktop: FORCE SIDEBAR VISIBILITY (Laptop Full Screen Fix) */
+@media screen and (min-width: 1025px) {
+    .sidebar {
+        position: fixed !important;
+        left: 0 !important;
+        width: 280px !important;
+        /* var(--sidebar-w) */
+        height: 100vh !important;
+        display: flex !important;
+        transform: translateX(0) !important;
+        opacity: 1 !important;
+        z-index: 9999 !important;
+        visibility: visible !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .main-content {
+        margin-left: 280px !important;
+        width: calc(100% - 280px) !important;
+    }
+
+    /* Hide overlay on desktop */
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    /* Ensure Toggle is hidden or optional on Desktop */
+    .menu-toggle {
+        display: none !important;
+    }
+}

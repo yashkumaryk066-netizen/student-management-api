@@ -327,6 +327,22 @@ class LiveClassListView(APIView):
 class ClientSubscriptionView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
+        # Auto-create subscription if missing (Advance Level User Experience)
+        if not hasattr(request.user, 'subscription'):
+            try:
+                from .models import ClientSubscription
+                from datetime import date
+                # Create an EXPIRED 'INSTITUTE' subscription so they see the plan and can Renew
+                ClientSubscription.objects.create(
+                    user=request.user,
+                    plan_type='INSTITUTE',
+                    status='EXPIRED',
+                    start_date=date.today(),
+                    end_date=date.today()
+                )
+            except Exception:
+                pass # Fallback to NO_SUBSCRIPTION response if creation fails
+
         if hasattr(request.user, 'subscription'):
              sub = request.user.subscription
              return Response({
