@@ -4097,31 +4097,51 @@ const DashboardApp = {
     },
 };
 
-// Mobile Menu Toggle
+// Universal Menu Toggle (Works on All Screen Sizes)
 document.addEventListener('DOMContentLoaded', function () {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
 
     if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function () {
+        // Toggle sidebar on button click
+        menuToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
             sidebar.classList.toggle('active');
+            if (overlay) {
+                overlay.classList.toggle('active');
+            }
         });
 
-        // Close sidebar when clicking outside on mobile
+        // Close sidebar when clicking outside
         document.addEventListener('click', function (event) {
-            if (window.innerWidth <= 767) {
+            if (sidebar.classList.contains('active')) {
                 if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                     sidebar.classList.remove('active');
+                    if (overlay) {
+                        overlay.classList.remove('active');
+                    }
                 }
             }
         });
 
-        // Close sidebar when nav link clicked on mobile
+        // Close sidebar when clicking overlay
+        if (overlay) {
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Auto-close sidebar when nav link clicked on mobile only
         const navLinks = sidebar.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
             link.addEventListener('click', function () {
                 if (window.innerWidth <= 767) {
                     sidebar.classList.remove('active');
+                    if (overlay) {
+                        overlay.classList.remove('active');
+                    }
                 }
             });
         });

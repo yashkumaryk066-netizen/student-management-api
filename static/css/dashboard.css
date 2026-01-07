@@ -2918,7 +2918,7 @@ screen and (min-resolution: 192dpi) {
 
 @media screen and (min-width: 768px) {
 
-    /* Force Sidebar Visible */
+    /* Sidebar Start Position (Hidden by default, toggleable) */
     .sidebar {
         position: fixed !important;
         left: 0 !important;
@@ -2926,30 +2926,52 @@ screen and (min-resolution: 192dpi) {
         width: 280px !important;
         height: 100vh !important;
         display: flex !important;
-        transform: translateX(0) !important;
+        transform: translateX(-280px) !important;
+        /* Hidden by default */
         opacity: 1 !important;
         z-index: 9999 !important;
         visibility: visible !important;
-        --sidebar-w: 280px !important;
-        /* Fix variable name mismatch */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
-    /* Push Main Content */
+    /* Sidebar When Open */
+    .sidebar.active,
+    .sidebar.open {
+        transform: translateX(0) !important;
+    }
+
+    /* Main Content Adjusts Based on Sidebar State */
     .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 32px !important;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    /* When Sidebar is Open, Push Content */
+    .sidebar.active~.main-content,
+    .sidebar.open~.main-content {
         margin-left: 280px !important;
         width: calc(100% - 280px) !important;
-        padding: 32px !important;
     }
 
-    /* Hide Toggle Button (Sidebar is always there) */
+    /* Show Toggle Button on Desktop Too */
     .menu-toggle {
-        display: none !important;
+        display: flex !important;
+        /* Always visible for toggle functionality */
     }
 
-    /* Hide Overlay */
+    /* Show Overlay on Desktop When Sidebar Open */
     .sidebar-overlay {
         display: none !important;
+        /* No overlay needed on desktop */
         pointer-events: none !important;
+    }
+
+    .sidebar.active+.sidebar-overlay,
+    .sidebar.open+.sidebar-overlay {
+        display: block !important;
+        opacity: 0.5 !important;
     }
 }
 
