@@ -185,22 +185,27 @@ class PremiumSidebarManager {
         const moduleName = this.getModuleName(module);
         const requiredPlan = this.getRequiredPlan(module);
 
-        // Create premium modal
+        // Create Premium Glassmorphism Modal
         const modal = document.createElement('div');
-        modal.className = 'upgrade-modal';
+        modal.className = 'upgrade-modal premium-glass';
         modal.innerHTML = `
             <div class="upgrade-modal-overlay"></div>
-            <div class="upgrade-modal-content">
-                <div class="upgrade-icon">🔒</div>
-                <h2 class="upgrade-title">Upgrade Required</h2>
-                <p class="upgrade-message">
-                    <strong>${moduleName}</strong> is not available in your current plan.
-                    <br><br>
-                    Upgrade to <strong>${PLAN_ACCESS[requiredPlan].name}</strong> to unlock this feature.
-                </p>
+            <div class="upgrade-modal-content premium-card">
+                <div class="upgrade-icon-wrapper">
+                    <div class="upgrade-icon-glow"></div>
+                    <div class="upgrade-icon">🔒</div>
+                </div>
+                <h2 class="upgrade-title">Feature Locked</h2>
+                <div class="upgrade-message-wrapper">
+                    <p class="upgrade-message">
+                        The <strong>${moduleName}</strong> module is exclusive to the 
+                        <span class="plan-badge">${PLAN_ACCESS[requiredPlan].name}</span>.
+                    </p>
+                    <p class="upgrade-subtext">Unlock advanced capabilities and take your institution to the next level.</p>
+                </div>
                 <div class="upgrade-actions">
-                    <button class="btn-upgrade" onclick="window.location.hash='subscription'">
-                        Upgrade Now
+                    <button class="btn-upgrade glow-effect" onclick="window.location.hash='subscription'; this.closest('.upgrade-modal').remove()">
+                        🚀 Upgrade Plan
                     </button>
                     <button class="btn-cancel" onclick="this.closest('.upgrade-modal').remove()">
                         Maybe Later

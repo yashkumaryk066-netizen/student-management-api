@@ -59,7 +59,7 @@ class StudentAdmin(admin.ModelAdmin):
     search_fields = ['name', 'roll_number', 'contact_number']
     list_per_page = 50
     ordering = ['-id']
-    actions = ['download_id_card']
+    actions = ['download_id_card', 'download_admission_letter']
     
     def has_photo(self, obj):
         return "✅" if obj.photo else "❌"
@@ -97,6 +97,34 @@ class StudentAdmin(admin.ModelAdmin):
         response['Content-Disposition'] = 'attachment; filename="Student_ID_Cards.zip"'
         return response
     download_id_card.short_description = "🪪 Download Smart ID Card"
+
+    def download_admission_letter(self, request, queryset):
+        """Generate Admission Welcome Letter"""
+        from django.http import HttpResponse
+        from .admission_letter_utils import generate_admission_letter_pdf
+        import zipfile
+        from io import BytesIO
+        
+        # Single Download
+        if queryset.count() == 1:
+            student = queryset.first()
+            pdf_buffer = generate_admission_letter_pdf(student)
+            response = HttpResponse(pdf_buffer, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="Admission_Letter_{student.name}.pdf"'
+            return response
+            
+        # Bulk Download
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+            for student in queryset:
+                pdf_buffer = generate_admission_letter_pdf(student)
+                zip_file.writestr(f"Admission_Letter_{student.name}.pdf", pdf_buffer.getvalue())
+        
+        zip_buffer.seek(0)
+        response = HttpResponse(zip_buffer, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="Admission_Letters.zip"'
+        return response
+    download_admission_letter.short_description = "📄 Download Admission Letter"
 
 
 @admin.register(Attendence)
