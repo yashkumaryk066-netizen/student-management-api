@@ -5,6 +5,7 @@ from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from django.conf import settings
+from django.utils import timezone
 import os
 
 def generate_id_card_pdf(student):
