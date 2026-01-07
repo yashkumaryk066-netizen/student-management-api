@@ -2909,34 +2909,69 @@ screen and (min-resolution: 192dpi) {
     }
 }
 
-/* Desktop: FORCE SIDEBAR VISIBILITY (Laptop Full Screen Fix) */
-@media screen and (min-width: 1025px) {
+/* =================================================================
+   FINAL LAYOUT OVERRIDE - FORCE DESKTOP ON TABLET+ 
+   ================================================================= */
+
+@media screen and (min-width: 768px) {
+
+    /* Force Sidebar Visible */
     .sidebar {
         position: fixed !important;
         left: 0 !important;
+        top: 0 !important;
         width: 280px !important;
-        /* var(--sidebar-w) */
         height: 100vh !important;
         display: flex !important;
         transform: translateX(0) !important;
         opacity: 1 !important;
         z-index: 9999 !important;
         visibility: visible !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+        --sidebar-w: 280px !important;
+        /* Fix variable name mismatch */
     }
 
+    /* Push Main Content */
     .main-content {
         margin-left: 280px !important;
         width: calc(100% - 280px) !important;
+        padding: 32px !important;
     }
 
-    /* Hide overlay on desktop */
-    .sidebar-overlay {
-        display: none !important;
-    }
-
-    /* Ensure Toggle is hidden or optional on Desktop */
+    /* Hide Toggle Button (Sidebar is always there) */
     .menu-toggle {
         display: none !important;
+    }
+
+    /* Hide Overlay */
+    .sidebar-overlay {
+        display: none !important;
+        pointer-events: none !important;
+    }
+}
+
+/* Ensure Mobile (< 768px) still works with Toggle */
+@media screen and (max-width: 767px) {
+    .sidebar {
+        left: -100% !important;
+        /* Hidden by default */
+        width: 100% !important;
+        transform: translateX(0) !important;
+        transition: left 0.3s ease !important;
+    }
+
+    .sidebar.open,
+    .sidebar.active {
+        left: 0 !important;
+        /* Visible when open */
+    }
+
+    .menu-toggle {
+        display: flex !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
     }
 }
