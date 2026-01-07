@@ -51,15 +51,19 @@ class PremiumSidebarManager {
         if (storedPlan) {
             this.currentPlan = storedPlan;
         } else {
-            // Default to 'institute' for demo (full access)
-            // In production, fetch from API
+            // Default to 'institute' for full access
+            // Change this to 'coaching' or 'school' to test different plans
             this.currentPlan = 'institute';
-
-            // Fetch from API if available
-            this.fetchUserPlanFromAPI();
+            localStorage.setItem('userPlan', this.currentPlan);
         }
 
-        console.log(`🎯 Current Plan: ${this.currentPlan}`);
+        console.log(`🎯 Current Plan: ${this.currentPlan} (${PLAN_ACCESS[this.currentPlan].name})`);
+
+        // API endpoint not implemented yet - using localStorage/default
+        // Uncomment below when /api/user/plan/ endpoint is ready
+        /*
+        this.fetchUserPlanFromAPI();
+        */
     }
 
     async fetchUserPlanFromAPI() {
@@ -73,12 +77,13 @@ class PremiumSidebarManager {
 
             if (response.ok) {
                 const data = await response.json();
-                this.currentPlan = data.plan_type || 'coaching';
+                this.currentPlan = data.plan_type || 'institute';
                 localStorage.setItem('userPlan', this.currentPlan);
                 this.applyPlanAccess();
+                console.log(`✅ Plan loaded from API: ${this.currentPlan}`);
             }
         } catch (error) {
-            console.warn('Could not fetch user plan, using default:', error);
+            console.warn('⚠️ API not available, using default plan:', this.currentPlan);
         }
     }
 
