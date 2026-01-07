@@ -4097,7 +4097,7 @@ const DashboardApp = {
     },
 };
 
-// Universal Menu Toggle (Works on All Screen Sizes)
+// Universal Menu Toggle (Premium UX - Auto-Close on Click)
 document.addEventListener('DOMContentLoaded', function () {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
@@ -4133,16 +4133,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Auto-close sidebar when nav link clicked on mobile only
+        // Auto-close sidebar when ANY nav link clicked (Premium UX)
         const navLinks = sidebar.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
             link.addEventListener('click', function () {
-                if (window.innerWidth <= 767) {
+                // Small delay for smooth visual feedback
+                setTimeout(() => {
                     sidebar.classList.remove('active');
                     if (overlay) {
                         overlay.classList.remove('active');
                     }
-                }
+                }, 150); // 150ms delay for premium feel
             });
         });
     }

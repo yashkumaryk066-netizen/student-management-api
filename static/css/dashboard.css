@@ -102,7 +102,7 @@ body {
 }
 
 /* ============================================
-   PREMIUM SIDEBAR (Always Visible on Desktop)
+   PREMIUM SIDEBAR (Toggleable with Smooth Scroll)
    ============================================ */
 .sidebar,
 .dash-sidebar {
@@ -116,17 +116,48 @@ body {
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     border-right: 2px solid rgba(59, 130, 246, 0.3);
     padding: 24px;
+    padding-bottom: 80px;
+    /* Extra space for scroll comfort */
     z-index: 10000;
     display: flex;
     flex-direction: column;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateX(-280px);
-    /* Hidden by default */
     box-shadow:
         0 0 40px rgba(59, 130, 246, 0.3),
         20px 0 60px rgba(0, 0, 0, 0.3);
     overflow-y: auto;
     overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* iOS smooth scrolling */
+}
+
+/* Premium Custom Scrollbar for Sidebar */
+.sidebar::-webkit-scrollbar,
+.dash-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.dash-sidebar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.dash-sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+    border-radius: 10px;
+    border: 2px solid rgba(15, 23, 42, 0.5);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.dash-sidebar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #60a5fa, #a78bfa);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.9);
 }
 
 /* Enhanced Glow When Active */
@@ -258,23 +289,31 @@ body {
     padding-left: 4px;
 }
 
-/* Premium Scrollbar */
+/* Premium Scrollbar for Nav Menu */
 .nav-menu::-webkit-scrollbar,
 .dash-nav::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
 }
 
 .nav-menu::-webkit-scrollbar-track,
 .dash-nav::-webkit-scrollbar-track {
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(15, 23, 42, 0.6);
     border-radius: 10px;
+    margin: 8px 0;
 }
 
 .nav-menu::-webkit-scrollbar-thumb,
 .dash-nav::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, #3b82f6, #8b5cf6);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    border: 1px solid rgba(15, 23, 42, 0.3);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
+}
+
+.nav-menu::-webkit-scrollbar-thumb:hover,
+.dash-nav::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #60a5fa, #a78bfa);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 1);
 }
 
 /* Category Headers - Futuristic Style */
