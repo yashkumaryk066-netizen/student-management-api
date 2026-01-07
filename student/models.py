@@ -133,12 +133,35 @@ class UserProfile(models.Model):
         ('INSTITUTE', 'Institute/University'),
     ]
     institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL', db_index=True)
+    institution_name = models.CharField(max_length=200, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True)
+    
+    # Plan Management
     subscription_expiry = models.DateField(null=True, blank=True)
+    plan_purchased_at = models.DateTimeField(null=True, blank=True)  # First purchase timestamp
+    is_active = models.BooleanField(default=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.user.username} - {self.role} ({self.institution_type})"
+    
+    def is_plan_expired(self):
+        """Check if plan has expired"""
+        if not self.subscription_expiry:
+            return True
+        return timezone.now().date() > self.subscription_expiry
+    
+    def extend_plan(self, days=30):
+        """Extend plan by specified days"""
+        if self.subscription_expiry and self.subscription_expiry > timezone.now().date():
+            # Extend from current expiry
+            self.subscription_expiry = self.subscription_expiry + timezone.timedelta(days=days)
+        else:
+            # Start from today
+            self.subscription_expiry = timezone.now().date() + timezone.timedelta(days=days)
+        self.save()
 
 
 class Department(models.Model):
