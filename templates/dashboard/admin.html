@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <link rel="stylesheet" href="/static/css/premium_modal.css">
     <link rel="stylesheet" href="/static/css/upgrade-modal.css">
+    <link rel="stylesheet" href="/static/css/sidebar-overlay.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Cinematic Motion Engine -->
@@ -24,6 +25,9 @@
         <div id="smooth-content">
             <!-- Animated Background -->
             <div class="dashboard-bg"></div>
+
+            <!-- Sidebar Overlay Backdrop -->
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
             <!-- Sidebar Navigation -->
             <aside class="sidebar" id="sidebar">
@@ -420,14 +424,31 @@
             </main>
 
             <script>
-                // Sidebar Toggle - Works for both mobile and desktop
+                // Sidebar Toggle - Premium Version with Overlay
                 const sidebar = document.getElementById('sidebar');
                 const menuToggle = document.getElementById('menuToggle');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-                // Toggle sidebar AND update button state
+                // Toggle sidebar AND update button state + overlay
                 function toggleSidebar() {
-                    sidebar.classList.toggle('open');
+                    const isOpen = sidebar.classList.toggle('open');
                     menuToggle.classList.toggle('open');
+                    sidebarOverlay.classList.toggle('active');
+
+                    // Prevent body scroll when sidebar is open
+                    if (isOpen) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                }
+
+                // Close sidebar function
+                function closeSidebar() {
+                    sidebar.classList.remove('open');
+                    menuToggle.classList.remove('open');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
                 }
 
                 // Click handler
@@ -435,6 +456,7 @@
                     e.preventDefault();
                     e.stopPropagation();
                     toggleSidebar();
+                    console.log('🎯 Menu toggle clicked - Sidebar:', sidebar.classList.contains('open') ? 'OPEN' : 'CLOSED');
                 });
 
                 // Touch handler for better mobile response
@@ -443,12 +465,17 @@
                     toggleSidebar();
                 }, { passive: false });
 
-                // Close sidebar when clicking outside on mobile
+                // Close sidebar when clicking overlay
+                sidebarOverlay.addEventListener('click', () => {
+                    closeSidebar();
+                    console.log('🎯 Overlay clicked - Sidebar closed');
+                });
+
+                // Close sidebar when clicking outside
                 document.addEventListener('click', (e) => {
-                    if (window.innerWidth <= 1024) {
+                    if (sidebar.classList.contains('open')) {
                         if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                            sidebar.classList.remove('open');
-                            menuToggle.classList.remove('open');
+                            closeSidebar();
                         }
                     }
                 });
@@ -456,8 +483,7 @@
                 // Close sidebar on escape key
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && sidebar.classList.contains('open')) {
-                        sidebar.classList.remove('open');
-                        menuToggle.classList.remove('open');
+                        closeSidebar();
                     }
                 });
 
