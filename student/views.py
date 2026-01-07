@@ -15,7 +15,7 @@ from .models import (
     LibraryBook, BookIssue, Hostel, Room, HostelAllocation,
     Vehicle, Route, TransportAllocation,
     Employee, LeaveRequest, Department, Designation,
-    Exam, Event, DemoRequest, ClientSubscription
+    Exam, Event, DemoRequest, ClientSubscription, AuditLog
 )
 
 from .Serializer import *
