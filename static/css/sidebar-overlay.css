@@ -1,5 +1,5 @@
 /* ============================================
-   SIDEBAR OVERLAY BACKDROP
+   SIDEBAR OVERLAY BACKDROP (Mobile Only)
    ============================================ */
 .sidebar-overlay {
     position: fixed;
@@ -13,6 +13,8 @@
     z-index: 9998;
     opacity: 0;
     visibility: hidden;
+    display: none;
+    /* Hidden on desktop */
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
 }
