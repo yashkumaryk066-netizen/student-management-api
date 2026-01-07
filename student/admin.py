@@ -296,57 +296,68 @@ class PaymentAdmin(admin.ModelAdmin):
                 plan_name = user.profile.institution_type if hasattr(user, 'profile') else 'Standard'
                 
                 if is_renewal:
-                    # RENEWAL
-                    subject = f'✅ Subscription Renewed - {plan_name} Plan'
+                    # RENEWAL EMAIL
+                    subject = f'✅ Your {plan_name} Plan has been RENEWED! - Y.S.M Education'
                     message = f"""
 Dear {user.get_full_name() or user.username},
 
-Your {plan_name} Plan subscription has been renewed successfully!
+We are thrilled to inform you that your **{plan_name} Subscription** has been successfully renewed!
 
-🔄 RENEWAL DETAILS:
-- Extended: +30 Days
-- New Expiry: {user.profile.subscription_expiry if hasattr(user, 'profile') else 'N/A'}
-- Amount Paid: ₹{payment.amount}
-- Payment Mode: {payment.get_payment_mode_display()}
+🔄 ***RENEWAL CONFIRMATION***
+--------------------------------------------------
+🔹 Plan Extended By: 30 Days
+🔹 New Expiry Date: {user.profile.subscription_expiry}
+🔹 Transaction ID: {payment.transaction_id or 'Manual'}
+🔹 Amount Paid: ₹{payment.amount}
+--------------------------------------------------
 
-Please find the TAX INVOICE attached.
+We have attached your **official Tax Invoice** to this email.
 
-Dashboard: https://yashamishra.pythonanywhere.com/dashboard
+🚀 **Go to Dashboard:** https://yashamishra.pythonanywhere.com/dashboard/
 
-Thank you for your business!
-Y.S.M ADVANCE EDUCATION SYSTEM
-                    """
-                else:
-                    # FIRST PURCHASE
-                    login_url = "https://yashamishra.pythonanywhere.com/admin/"
-                    subject = f'🎉 Activated: Your {plan_name} Plan is Live!'
-                    message = f"""
-Dear {user.get_full_name() or user.username},
-
-Welcome to Y.S.M ADVANCE EDUCATION SYSTEM!
-
-Your {plan_name} Plan has been approved and activated.
-
-🔐 LOGIN CREDENTIALS:
-URL: {login_url}
-Username: {user.username}
-Email: {user.email}
-
-⏰ PLAN VALIDITY:
-- Type: {plan_name}
-- Validity: 30 Days
-- Expires On: {user.profile.subscription_expiry if hasattr(user, 'profile') else 'N/A'}
-
-Please find your TAX INVOICE attached to this email.
-
-📌 IMPORTANT:
-1. Change password after first login.
-2. Renew before expiry to ensure uninterrupted service.
-
-Get Started: {login_url}
+Thank you for continuing your journey with Y.S.M Advance Education System.
 
 Best Regards,
-Y.S.M Team
+Y.S.M Billing Team
+                    """
+                else:
+                    # FIRST TIME PURCHASE (GENERATE PASSWORD)
+                    temp_password = User.objects.make_random_password()
+                    user.set_password(temp_password)
+                    user.save()
+                    
+                    login_url = "https://yashamishra.pythonanywhere.com/"
+                    subject = f'🎉 Welcome Aboard! Your {plan_name} Plan is ACTIVE - Credentials Inside'
+                    message = f"""
+Dear {user.get_full_name() or user.username},
+
+Congratulations! Your **{plan_name} Plan** is now ACTIVE. Welcome to the Y.S.M Family.
+
+Here are your secure login credentials. Please keep them safe.
+
+🔐 ***LOGIN CREDENTIALS*** (Save These!)
+--------------------------------------------------
+🔗 **Login URL:** {login_url}
+👤 **Username:** {user.username}
+🔑 **Password:** {temp_password}
+--------------------------------------------------
+
+🗓️ ***PLAN DETAILS***
+- Plan Type: {plan_name} (Premium)
+- Valid Until: {user.profile.subscription_expiry}
+- Status: ✅ Active
+
+We have attached your **official Tax Invoice** to this email.
+
+🚀 **Getting Started:**
+1. Log in using the credentials above.
+2. Complete your profile setup.
+3. Start managing your institution!
+
+If you have any questions, reply to this email.
+
+Warm Regards,
+Y.S.M Onboarding Team
                     """
                 
                 # Send Email with Attachment
@@ -361,9 +372,9 @@ Y.S.M Team
                         email.attach(pdf_name, pdf_content, 'application/pdf')
                     
                     email.send(fail_silently=False)
-                    self.message_user(request, f"✅ Email sent to {user.email} with Invoice.")
+                    self.message_user(request, f"✅ Email sent to {user.email} with Invoice & Credentials.", level='success')
                 except Exception as e:
-                    self.message_user(request, f"⚠️ Email failed for {user.username}: {str(e)}", level='warning')
+                    self.message_user(request, f"⚠️ Payment Approved but Email Failed: {e}", level='warning')
             
             success_count += 1
         
