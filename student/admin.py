@@ -105,37 +105,134 @@ class PaymentAdmin(admin.ModelAdmin):
     get_payment_reference.short_description = "Payer"
 
     def approve_payment_and_renew(self, request, queryset):
-        """Approve payment and extend subscription if applicable"""
+        """
+        Approve payment and activate/extend subscription
+        - Generates PDF Invoice
+        - Emails Credentials/Renewal Info + Invoice Attachment
+        """
+        from django.core.mail import EmailMessage
+        from django.conf import settings
+        from django.utils import timezone
+        from .utils import generate_invoice_pdf
+        
         success_count = 0
         for payment in queryset:
             if payment.status == 'APPROVED':
+                self.message_user(request, f"⚠️ Payment #{payment.id} already approved.", level='warning')
                 continue
             
-            # Update Status
+            # Update Payment Status
             payment.status = 'APPROVED'
             payment.paid_date = timezone.now().date()
             payment.save()
             
-            # If Subscription, Extend Plan
+            # Process Subscription Payment
             if payment.payment_type == 'SUBSCRIPTION' and payment.user:
-                if hasattr(payment.user, 'subscription'):
-                    payment.user.subscription.activate(days=30)
+                user = payment.user
+                
+                # Check if renewal or first purchase
+                is_renewal = False
+                if hasattr(user, 'profile') and user.profile.plan_purchased_at:
+                    is_renewal = True
+                
+                # Extend/Activate Subscription
+                if hasattr(user, 'subscription'):
+                    user.subscription.activate(days=30)
                     
-                    # Notify Client
-                    try:
-                        from notifications.whatsapp_service import whatsapp_service
-                        if hasattr(payment.user, 'profile') and payment.user.profile.phone:
-                            msg = f"✅ *Plan Renewed!*\n\nYour {payment.user.subscription.plan_type} plan has been extended by 30 days.\nEnjoy full access!"
-                            whatsapp_service.send_message(payment.user.profile.phone, msg)
-                    except Exception as e:
-                        print(f"Failed to notify client: {e}")
-                        
-                    self.message_user(request, f"Extended subscription for {payment.user.username} by 30 days.")
+                    # Sync with UserProfile
+                    if hasattr(user, 'profile'):
+                        if not user.profile.plan_purchased_at:
+                            user.profile.plan_purchased_at = timezone.now()
+                        user.profile.subscription_expiry = user.subscription.end_date
+                        user.profile.is_active = True
+                        user.profile.save()
+                
+                # Generate Invoice PDF
+                try:
+                    pdf_buffer = generate_invoice_pdf(payment)
+                    pdf_content = pdf_buffer.getvalue()
+                    pdf_name = f"Invoice_INV-{payment.id:06d}.pdf"
+                except Exception as e:
+                    print(f"PDF Gen Error: {e}")
+                    pdf_content = None
+
+                # Email Notification
+                plan_name = user.profile.institution_type if hasattr(user, 'profile') else 'Standard'
+                
+                if is_renewal:
+                    # RENEWAL
+                    subject = f'✅ Subscription Renewed - {plan_name} Plan'
+                    message = f"""
+Dear {user.get_full_name() or user.username},
+
+Your {plan_name} Plan subscription has been renewed successfully!
+
+🔄 RENEWAL DETAILS:
+- Extended: +30 Days
+- New Expiry: {user.profile.subscription_expiry if hasattr(user, 'profile') else 'N/A'}
+- Amount Paid: ₹{payment.amount}
+- Payment Mode: {payment.get_payment_mode_display()}
+
+Please find the TAX INVOICE attached.
+
+Dashboard: https://yashamishra.pythonanywhere.com/dashboard
+
+Thank you for your business!
+Y.S.M ADVANCE EDUCATION SYSTEM
+                    """
+                else:
+                    # FIRST PURCHASE
+                    login_url = "https://yashamishra.pythonanywhere.com/admin/"
+                    subject = f'🎉 Activated: Your {plan_name} Plan is Live!'
+                    message = f"""
+Dear {user.get_full_name() or user.username},
+
+Welcome to Y.S.M ADVANCE EDUCATION SYSTEM!
+
+Your {plan_name} Plan has been approved and activated.
+
+🔐 LOGIN CREDENTIALS:
+URL: {login_url}
+Username: {user.username}
+Email: {user.email}
+
+⏰ PLAN VALIDITY:
+- Type: {plan_name}
+- Validity: 30 Days
+- Expires On: {user.profile.subscription_expiry if hasattr(user, 'profile') else 'N/A'}
+
+Please find your TAX INVOICE attached to this email.
+
+📌 IMPORTANT:
+1. Change password after first login.
+2. Renew before expiry to ensure uninterrupted service.
+
+Get Started: {login_url}
+
+Best Regards,
+Y.S.M Team
+                    """
+                
+                # Send Email with Attachment
+                try:
+                    email = EmailMessage(
+                        subject,
+                        message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user.email],
+                    )
+                    if pdf_content:
+                        email.attach(pdf_name, pdf_content, 'application/pdf')
+                    
+                    email.send(fail_silently=False)
+                    self.message_user(request, f"✅ Email sent to {user.email} with Invoice.")
+                except Exception as e:
+                    self.message_user(request, f"⚠️ Email failed for {user.username}: {str(e)}", level='warning')
             
             success_count += 1
         
-        self.message_user(request, f"Approved {success_count} payments.")
-    approve_payment_and_renew.short_description = "Approve Payment & Renew Subscription"
+        self.message_user(request, f"✅ Successfully processed {success_count} payment(s).")
+    approve_payment_and_renew.short_description = "✅ Approve & Send Invoice (Email)"
 
 
 @admin.register(Notification)

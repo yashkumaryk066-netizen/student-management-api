@@ -192,9 +192,18 @@ class Payment(models.Model):
         ('SUBSCRIPTION', 'Client Subscription Renewal'),
     ]
     
+    PAYMENT_MODES = [
+        ('ONLINE', 'Online (Razorpay/Stripe)'),
+        ('CASH', 'Cash'),
+        ('BANK_TRANSFER', 'Bank Transfer (NEFT/IMPS)'),
+        ('UPI', 'UPI (GPay/PhonePe)'),
+        ('CHEQUE', 'Cheque/DD'),
+    ]
+    
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments', null=True, blank=True) # For Clients
     payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='FEE')
+    payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODES, default='ONLINE')
     
     transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
