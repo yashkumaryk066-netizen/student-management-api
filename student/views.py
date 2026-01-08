@@ -907,48 +907,4 @@ class GenerateIDCardView(APIView):
 # =========================
 # BULK IMPORT (Advance Feature)
 # =========================
-import openpyxl
-from rest_framework.parsers import MultiPartParser, FormParser
-from io import BytesIO
 
-        
-        file = request.FILES['file']
-        
-        try:
-            wb = openpyxl.load_workbook(file)
-            sheet = wb.active
-            
-            created_count = 0
-            owner = get_owner_user(request.user)
-            
-            students_to_create = []
-
-            # Skip header, iterate rows
-            # Expected format: Name, Grade, Phone, Parent Name
-            for row in sheet.iter_rows(min_row=2, values_only=True):
-                if not row[0]: continue
-                
-                name = str(row[0]).strip()
-                grade = str(row[1]).strip() if len(row) > 1 else 'N/A'
-                phone = str(row[2]).strip() if len(row) > 2 else ''
-                
-                # Basic creation logic
-                # Ideally we check for duplicates
-                
-                students_to_create.append(
-                    Student(
-                        name=name,
-                        grade=grade,
-                        created_by=owner,
-                        # Add other fields as defaults or parsed
-                    )
-                )
-                created_count += 1
-            
-            if students_to_create:
-                Student.objects.bulk_create(students_to_create)
-                
-            return Response({"message": f"Successfully processed {created_count} records", "count": created_count})
-            
-        except Exception as e:
-            return Response({"error": f"Invalid File: {str(e)}"}, status=400)
