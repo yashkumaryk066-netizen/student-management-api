@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 
 from .permissions import HasPlanAccess, StudentLimitPermission
+from .plan_permissions import PLAN_FEATURES  # Import centralized plan features
 from .models import Student
 
 
@@ -19,7 +20,7 @@ class UserPlanFeaturesView(APIView):
         if user.is_superuser:
             return Response({
                 "plan_type": "SUPER_ADMIN",
-                "features": HasPlanAccess.ALL_FEATURES,
+                "features": list(PLAN_FEATURES['INSTITUTE']), # Super admin gets all features
                 "student_limit": None,
                 "current_students": 0,
                 "can_add_students": True,
@@ -35,7 +36,8 @@ class UserPlanFeaturesView(APIView):
             )
 
         plan_type = profile.institution_type
-        features = HasPlanAccess.PLAN_FEATURES.get(plan_type, [])
+        # Use centralized PLAN_FEATURES
+        features = list(PLAN_FEATURES.get(plan_type, []))
         student_limit = StudentLimitPermission.STUDENT_LIMITS.get(plan_type)
 
         current_students = Student.objects.filter(created_by=user).count()
