@@ -252,3 +252,22 @@ window.PaymentAPI = PaymentAPI;
 window.NotificationAPI = NotificationAPI;
 window.LibraryAPI = LibraryAPI;
 window.SubscriptionAPI = SubscriptionAPI;
+
+const BulkAPI = {
+    importStudents: (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return apiCall('/auth/bulk-import/', { // Re-using auth endpoint or check views.py
+             headers: {}, // Let browser set content-type for FormData
+             method: 'POST',
+             body: formData
+        });
+    },
+    exportStudents: () => {
+         // This typically returns a blob, so apiCall might need adjustment or use direct fetch
+         return fetch(API_BASE_URL + '/students/export/', {
+             headers: { 'Authorization': 'Bearer ' + TokenStore.access }
+         }).then(res => res.blob());
+    }
+};
+window.BulkAPI = BulkAPI;

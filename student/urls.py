@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    BulkImportStudentView,
     StudentListCreateView,
     StudentDetailsView,
     StudentTodayView,
@@ -71,6 +72,7 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
+    path('auth/bulk-import/', BulkImportStudentView.as_view(), name='bulk-import'),
 
     #STUDENTS
     path("students/", StudentListCreateView.as_view(), name="student-create-list"),
