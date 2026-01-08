@@ -204,17 +204,31 @@ class AdminPaymentApprovalView(APIView):
                         plan_features = PLAN_FEATURES.get(sub.plan_type, [])
                         feature_icons = " ".join([FEATURE_META[f]['icon'] for f in plan_features if f in FEATURE_META][:8])
 
+                        # Determine Title and Creds based on New/Renew
+                        if created:
+                            title_text = f"✅ *New Account Approved for {sub.plan_type}*"
+                            creds_text = (
+                                f"🔐 *Login Credentials:*\n"
+                                f"🆔 ID: `{user.username}`\n"
+                                f"🔑 Pass: `{password}`"
+                            )
+                        else:
+                            title_text = f"🔄 *Account Renewed for {sub.plan_type}*"
+                            creds_text = (
+                                f"🔐 *Login Credentials:*\n"
+                                f"🆔 ID: `{user.username}`\n"
+                                f"🔑 Pass: _(Existing Password Valid)_"
+                            )
+
                         tg_message = (
-                            f"✅ *New Account Approved for {sub.plan_type}!*\n\n"
-                            f"👤 *Client Name:* {user.first_name}\n"
+                            f"{title_text}!\n\n"
+                            f"👤 *Client Name:* {user.first_name or user.username}\n"
                             f"📧 *Email:* `{email}`\n"
                             f"💰 *Amount Paid:* ₹{payment.amount}\n"
                             f"📅 *Valid Until:* {sub.end_date}\n\n"
                             f"🔓 *Unlocked Features:*\n"
                             f"{feature_icons} (+ more)\n\n"
-                            f"🔐 *Login Credentials:*\n"
-                            f"🆔 ID: `{user.username}`\n"
-                            f"🔑 Pass: `{password}`\n\n"
+                            f"{creds_text}\n\n"
                             f"🚀 _Automatic Notification from Y.S.M ERP_"
                         )
                         
