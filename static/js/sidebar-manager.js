@@ -77,7 +77,7 @@ class PremiumSidebarManager {
                     return;
                 }
             } else {
-                const token = localStorage.getItem('accessToken');
+                const token = localStorage.getItem('authToken');
                 if (!token) return; // Not logged in
 
                 const res = await fetch('/api/plan/features/', {
