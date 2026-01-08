@@ -3216,3 +3216,21 @@ screen and (min-resolution: 192dpi) {
     border: 1px solid rgba(59, 130, 246, 0.3) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
 }
+/* ============================================
+   MOBILE DROPDOWN ENHANCEMENTS
+   ============================================ */
+@media (max-width: 768px) {
+    .mobile-user-info {
+        display: block !important;
+    }
+    
+    .profile-dropdown {
+        width: 260px !important;
+        right: -10px !important; /* Slight offset for padding */
+    }
+}
+
+@keyframes dropdownFade {
+    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}

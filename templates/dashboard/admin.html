@@ -316,33 +316,50 @@
                         </button>
                     </div>
                     <!-- Profile Dropdown -->
+                    <!-- Profile Dropdown (Premium Fixed) -->
                     <div class="profile-dropdown" id="profileDropdown" style="
                                 position: absolute;
-                                top: 60px;
+                                top: 120%;
                                 right: 0;
-                                width: 220px;
-                                background: rgba(15, 23, 42, 0.95);
-                                backdrop-filter: blur(20px);
-                                border: 1px solid rgba(59, 130, 246, 0.2);
+                                width: 240px;
+                                background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95));
+                                backdrop-filter: blur(24px);
+                                -webkit-backdrop-filter: blur(24px);
+                                border: 1px solid rgba(59, 130, 246, 0.3);
                                 border-radius: 16px;
                                 padding: 8px;
-                                z-index: 100;
+                                z-index: 1000;
                                 display: none;
-                                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                                box-shadow: 
+                                    0 20px 40px -5px rgba(0, 0, 0, 0.6),
+                                    0 0 15px rgba(59, 130, 246, 0.2);
+                                transform-origin: top right;
+                                animation: dropdownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                             ">
+                        <!-- User Info (Visible on Mobile) -->
+                        <div class="mobile-user-info"
+                            style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; display: none;">
+                            <div style="font-weight: 700; color: #fff;">Super Admin</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">admin@ysm.edu</div>
+                        </div>
+
                         <div class="dropdown-item" onclick="window.location.hash='settings'"
-                            style="padding: 10px; border-radius: 8px; color: white; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
-                            <span>👤</span> My Profile
+                            style="padding: 12px; border-radius: 10px; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; font-weight: 500;">
+                            <span style="font-size: 1.1rem;">👤</span> My Profile
                         </div>
                         <div class="dropdown-item" onclick="window.location.hash='settings'"
-                            style="padding: 10px; border-radius: 8px; color: white; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
-                            <span>⚙️</span> Settings
+                            style="padding: 12px; border-radius: 10px; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; font-weight: 500;">
+                            <span style="font-size: 1.1rem;">⚙️</span> Settings
                         </div>
-                        <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 6px 0;"></div>
+
+                        <div
+                            style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin: 6px 0;">
+                        </div>
+
                         <div class="dropdown-item"
                             onclick="localStorage.removeItem('authToken'); window.location.href='/';"
-                            style="padding: 10px; border-radius: 8px; color: #ef4444; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
-                            <span>🚪</span> Logout
+                            style="padding: 12px; border-radius: 10px; color: #ef4444; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; font-weight: 600;">
+                            <span style="font-size: 1.1rem;">🚪</span> Logout
                         </div>
                     </div>
                 </div>
