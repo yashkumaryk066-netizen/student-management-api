@@ -45,6 +45,11 @@ class DashboardAnalytics {
         const canvas = document.getElementById('revenueChart');
         if (!canvas) return;
 
+        // Destroy existing chart if it exists
+        if (this.charts.revenue) {
+            this.charts.revenue.destroy();
+        }
+
         const ctx = canvas.getContext('2d');
 
         // Create gradient
@@ -111,6 +116,11 @@ class DashboardAnalytics {
         const canvas = document.getElementById('attendanceChart');
         if (!canvas) return;
 
+        // Destroy existing chart if it exists
+        if (this.charts.attendance) {
+            this.charts.attendance.destroy();
+        }
+
         const ctx = canvas.getContext('2d');
 
         this.charts.attendance = new Chart(ctx, {
@@ -157,6 +167,11 @@ class DashboardAnalytics {
     initStudentGrowthChart() {
         const canvas = document.getElementById('studentGrowthChart');
         if (!canvas) return;
+
+        // Destroy existing chart if it exists
+        if (this.charts.studentGrowth) {
+            this.charts.studentGrowth.destroy();
+        }
 
         const ctx = canvas.getContext('2d');
 
@@ -216,6 +231,11 @@ class DashboardAnalytics {
     initFeeCollectionChart() {
         const canvas = document.getElementById('feeCollectionChart');
         if (!canvas) return;
+
+        // Destroy existing chart if it exists
+        if (this.charts.feeCollection) {
+            this.charts.feeCollection.destroy();
+        }
 
         const ctx = canvas.getContext('2d');
 
