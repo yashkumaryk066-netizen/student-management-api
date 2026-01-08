@@ -840,7 +840,7 @@ from .report_utils import generate_admit_card_pdf, generate_report_card_pdf
 from .id_card_utils import generate_id_card_pdf
 
 class GenerateAdmitCardView(APIView):
-    permission_classes = [IsAuthenticated, IsVendorOrAdmin]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
     required_feature = 'exams'
 
     def get(self, request, student_id):
@@ -860,7 +860,7 @@ class GenerateAdmitCardView(APIView):
             return Response({"error": "Student not found"}, status=404)
 
 class GenerateReportCardView(APIView):
-    permission_classes = [IsAuthenticated, IsVendorOrAdmin]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
     required_feature = 'exams'
 
     def get(self, request, student_id):
@@ -887,7 +887,7 @@ class GenerateReportCardView(APIView):
             return Response({"error": "Student not found"}, status=404)
 
 class GenerateIDCardView(APIView):
-    permission_classes = [IsAuthenticated, IsVendorOrAdmin]
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
     required_feature = 'id_cards'
 
     def get(self, request, student_id):
@@ -911,13 +911,6 @@ import openpyxl
 from rest_framework.parsers import MultiPartParser, FormParser
 from io import BytesIO
 
-class BulkImportStudentView(APIView):
-    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
-    parser_classes = (MultiPartParser, FormParser)
-
-    def post(self, request):
-        if 'file' not in request.FILES:
-             return Response({"error": "No file uploaded"}, status=400)
         
         file = request.FILES['file']
         

@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import (
-    BulkImportStudentView,
     StudentListCreateView,
     StudentDetailsView,
     StudentTodayView,
@@ -51,7 +50,7 @@ from .subscription_views import (
 )
 from .plan_features_views import UserPlanFeaturesView
 from .report_views import ReportListView, ReportDownloadView
-from .onboarding_views import OnboardingPaymentView
+from .onboarding_views import OnboardingPaymentView , OnboardingBulkImportView , OnboardingBulkImportView
 from .payment_gateway_views import CreateOrderView
 from .password_reset_views import RequestPasswordResetView, VerifyAndResetPasswordView
 from .chatgpt_views import (
@@ -72,7 +71,7 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
-    path('auth/bulk-import/', BulkImportStudentView.as_view(), name='bulk-import'),
+    path('auth/bulk-import/', OnboardingBulkImportView.as_view(), name='bulk-import'),
 
     #STUDENTS
     path("students/", StudentListCreateView.as_view(), name="student-create-list"),
