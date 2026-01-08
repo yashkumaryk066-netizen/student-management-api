@@ -10,7 +10,10 @@ from django.core.mail import send_mail
 
 from .models import ClientSubscription, UserProfile, Payment, Notification
 from .services.invoice_service import generate_invoice_pdf
+from .services.invoice_service import generate_invoice_pdf
 from .services.email_service import send_credentials_with_invoice
+from .services.telegram_service import send_telegram_notification
+import os
 
 from datetime import date, timedelta
 from decimal import Decimal
@@ -185,8 +188,33 @@ class AdminPaymentApprovalView(APIView):
                     try:
                         invoice_pdf = generate_invoice_pdf(user, sub, payment)
                         send_credentials_with_invoice(user, password, sub.plan_type, invoice_pdf)
+                        
+                        # --- TELEGRAM NOTIFICATION ---
+                        # Use the chat_id provided by the super admin (you)
+                        # In a real SaaS, you might ask users for their own Telegram ID, 
+                        # but here we are notifying YOU (the Super Admin) of the new approval 
+                        # OR if this chat_id is the User's, we send it to them.
+                        # Based on request, "Telegram notification on ke liye...", this seems to be for the Admin to see/forward, 
+                        # or if we had the user's ID. For now, sending to the configured ID (yours).
+                        
+                        tg_chat_id = os.environ.get('TELEGRAM_CHAT_ID', '5280398471')
+                        
+                        tg_message = (
+                            f"✅ *New Account Approved!*\n\n"
+                            f"👤 *Name:* {user.first_name or 'New User'}\n"
+                            f"📧 *Email:* `{email}`\n"
+                            f"🏫 *Plan:* {sub.plan_type}\n"
+                            f"💰 *Amount:* ₹{payment.amount}\n\n"
+                            f"🔐 *Credentials:*\n"
+                            f"🆔 ID: `{user.username}`\n"
+                            f"🔑 Pass: `{password}`\n\n"
+                            f"🚀 _System Auto-Generated_"
+                        )
+                        
+                        send_telegram_notification(tg_chat_id, tg_message, invoice_pdf, invoice_filename=f"Invoice_{user.username}.pdf")
+
                     except Exception as e:
-                        logger.error(f"Error sending invoice: {e}")
+                        logger.error(f"Error sending notifications: {e}")
 
 
                     return Response({'message': 'Payment approved'}, status=200)
