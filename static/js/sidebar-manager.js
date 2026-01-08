@@ -20,6 +20,11 @@ const PLAN_ACCESS = {
         name: 'Institute/University Plan',
         modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'users', 'logs', 'parents', 'lab', 'live_classes'],
         color: '#8b5cf6'
+    },
+    'super_admin': {
+        name: 'Super Admin',
+        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'users', 'logs', 'parents', 'lab', 'live_classes', 'admin_approvals'],
+        color: '#ef4444'
     }
 };
 
@@ -91,8 +96,8 @@ class PremiumSidebarManager {
                 // normalize plan type
                 let remotePlan = data.plan_type.toLowerCase();
 
-                // Map SUPER_ADMIN to institute (full access)
-                if (remotePlan === 'super_admin') remotePlan = 'institute';
+                // Map SUPER_ADMIN to valid key
+                if (remotePlan === 'super_admin' || remotePlan === 'super_admin') remotePlan = 'super_admin';
 
                 // Only update if valid
                 if (PLAN_ACCESS[remotePlan]) {
@@ -143,6 +148,16 @@ class PremiumSidebarManager {
         }
 
         const allowedModules = PLAN_ACCESS[this.currentPlan].modules;
+
+        // Toggle Super Admin Specific Items
+        const superAdminItems = document.querySelectorAll('.super-admin-only');
+        superAdminItems.forEach(item => {
+            if (this.currentPlan === 'super_admin') {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
 
         this.navLinks.forEach(link => {
             const module = link.getAttribute('data-module');
