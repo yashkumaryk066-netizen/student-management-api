@@ -666,8 +666,11 @@ const DashboardApp = {
                     '<td>' + student.gender + '</td>' +
                     '<td>' + student.relation + '</td>' +
                     '<td>' +
-                    '<button class="btn-action" onclick="DashboardApp.editStudent(' + student.id + ')" style="padding: 4px 10px; font-size: 0.8rem; margin-right:5px;">✏️ Edit</button>' +
-                    '<button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" style="padding: 4px 10px; font-size: 0.8rem;">🗑️</button>' +
+                    '<button class="btn-action" onclick="DashboardApp.editStudent(' + student.id + ')" title="Edit" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px;">✏️</button>' +
+                    '<button class="btn-action" onclick="window.open(\'/api/generate/id-card/' + student.id + '/\', \'_blank\')" title="Download ID Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">🪪</button>' +
+                    '<button class="btn-action" onclick="window.open(\'/api/generate/admit-card/' + student.id + '/\', \'_blank\')" title="Download Admit Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">🎫</button>' +
+                    '<button class="btn-action" onclick="window.open(\'/api/generate/report-card/' + student.id + '/\', \'_blank\')" title="Download Report Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">📈</button>' +
+                    '<button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" title="Delete" style="padding: 4px 8px; font-size: 0.9rem;">🗑️</button>' +
                     '</td>' +
                     '</tr>'
                 ).join('');

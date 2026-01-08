@@ -236,3 +236,14 @@ urlpatterns = [
     path('ai/unified/explain/', UnifiedConceptExplainerView.as_view(), name='ai-unified-explain'),
     path('ai/unified/translate/', UnifiedContentTranslatorView.as_view(), name='ai-unified-translate'),
 ]
+
+# =====================================================
+# PDF REPORT GENERATION URLS
+# =====================================================
+from .views import GenerateIDCardView, GenerateAdmitCardView, GenerateReportCardView
+
+urlpatterns += [
+    path('generate/id-card/<int:student_id>/', GenerateIDCardView.as_view(), name='generate-id-card'),
+    path('generate/admit-card/<int:student_id>/', GenerateAdmitCardView.as_view(), name='generate-admit-card'),
+    path('generate/report-card/<int:student_id>/', GenerateReportCardView.as_view(), name='generate-report-card'),
+]

@@ -832,3 +832,74 @@ class DashboardStatsView(APIView):
             stats['transport_routes'] = 0 # Placeholder
             
         return Response(stats)
+
+# =====================================================
+# PREMIUM REPORT GENERATION (Advance Level)
+# =====================================================
+from .report_utils import generate_admit_card_pdf, generate_report_card_pdf
+from .id_card_utils import generate_id_card_pdf
+
+class GenerateAdmitCardView(APIView):
+    permission_classes = [IsAuthenticated, IsVendorOrAdmin]
+    required_feature = 'exams'
+
+    def get(self, request, student_id):
+        try:
+            student = Student.objects.get(id=student_id)
+            # Ensure owner isolation
+            if student.created_by != get_owner_user(request.user):
+                return Response({"error": "Permission Denied"}, status=403)
+                
+            exam_name = request.query_params.get('exam', 'Final Examination 2024')
+            
+            pdf = generate_admit_card_pdf(student, exam_name, '2025-03-15', 'Main Hall, Block A')
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="AdmitCard_{student.name}.pdf"'
+            return response
+        except Student.DoesNotExist:
+            return Response({"error": "Student not found"}, status=404)
+
+class GenerateReportCardView(APIView):
+    permission_classes = [IsAuthenticated, IsVendorOrAdmin]
+    required_feature = 'exams'
+
+    def get(self, request, student_id):
+        try:
+            student = Student.objects.get(id=student_id)
+            # Ensure owner isolation
+            if student.created_by != get_owner_user(request.user):
+                return Response({"error": "Permission Denied"}, status=403)
+            
+            # Mock Data for now (In real app, fetch from ExamResult model)
+            results = [
+                {'subject': 'Mathematics', 'total': 100, 'marks': 95},
+                {'subject': 'Physics', 'total': 100, 'marks': 88},
+                {'subject': 'Chemistry', 'total': 100, 'marks': 92},
+                {'subject': 'English', 'total': 100, 'marks': 85},
+                {'subject': 'Computer Science', 'total': 100, 'marks': 98},
+            ]
+            
+            pdf = generate_report_card_pdf(student, results)
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="ReportCard_{student.name}.pdf"'
+            return response
+        except Student.DoesNotExist:
+            return Response({"error": "Student not found"}, status=404)
+
+class GenerateIDCardView(APIView):
+    permission_classes = [IsAuthenticated, IsVendorOrAdmin]
+    required_feature = 'id_cards'
+
+    def get(self, request, student_id):
+        try:
+            student = Student.objects.get(id=student_id)
+            # Ensure owner isolation
+            if student.created_by != get_owner_user(request.user):
+                return Response({"error": "Permission Denied"}, status=403)
+
+            pdf = generate_id_card_pdf(student)
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="IDCard_{student.name}.pdf"'
+            return response
+        except Student.DoesNotExist:
+            return Response({"error": "Student not found"}, status=404)
