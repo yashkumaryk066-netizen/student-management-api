@@ -4290,26 +4290,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // --- PREMIUM RENEWAL SYSTEM (ADVANCED) ---
-DashboardApp.checkSubscriptionStatus = function() {
+DashboardApp.checkSubscriptionStatus = function () {
     fetch(this.apiBaseUrl + '/subscription/status/', {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') }
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('authToken') }
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'EXPIRED') {
-            this.showRenewalModal(data);
-        } else if (data.days_left <= 5) {
-            this.showExpiryWarning(data.days_left);
-        }
-    })
-    .catch(err => console.error("Sub check failed", err));
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'EXPIRED') {
+                this.showRenewalModal(data);
+            } else if (data.days_left <= 5) {
+                this.showExpiryWarning(data.days_left);
+            }
+        })
+        .catch(err => console.error("Sub check failed", err));
 };
 
-DashboardApp.showRenewalModal = function(subData) {
+DashboardApp.showRenewalModal = function (subData) {
     const overlay = document.createElement('div');
     overlay.id = 'renewalOverlay';
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(15px);z-index:99999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.5s ease;';
-    
+
     const planPrice = subData.plan_type === 'SCHOOL' ? '2000' : (subData.plan_type === 'INSTITUTE' ? '5000' : '500');
 
     overlay.innerHTML = `
@@ -4357,7 +4357,7 @@ DashboardApp.showRenewalModal = function(subData) {
     setTimeout(() => overlay.style.opacity = '1', 10);
 };
 
-DashboardApp.submitRenewal = function(planType, amount) {
+DashboardApp.submitRenewal = function (planType, amount) {
     const utr = document.getElementById('renewUtr').value;
     if (!utr) {
         this.showAlert('Required', 'Please enter payment UTR/Transaction ID', 'error');
@@ -4377,18 +4377,18 @@ DashboardApp.submitRenewal = function(planType, amount) {
             description: 'Plan Renewal: ' + planType
         })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'SUBMITTED') {
-            document.getElementById('renewalOverlay').remove();
-            this.showAlert('Renewal Submitted', 'Your renewal request is pending approval. You will be notified via email/telegram.', 'success');
-        } else {
-            this.showAlert('Error', data.error || 'Submission failed', 'error');
-        }
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'SUBMITTED') {
+                document.getElementById('renewalOverlay').remove();
+                this.showAlert('Renewal Submitted', 'Your renewal request is pending approval. You will be notified via email/telegram.', 'success');
+            } else {
+                this.showAlert('Error', data.error || 'Submission failed', 'error');
+            }
+        });
 };
 
-DashboardApp.showExpiryWarning = function(days) {
+DashboardApp.showExpiryWarning = function (days) {
     const banner = document.createElement('div');
     banner.style.cssText = 'background:#f59e0b;color:black;text-align:center;padding:10px;font-weight:bold;position:fixed;top:0;width:100%;z-index:1001;';
     banner.innerHTML = `⚠️ Your plan expires in ${days} days. <a href="#" onclick="DashboardApp.checkSubscriptionStatus()" style="color:black;text-decoration:underline;">Renew Now</a>`;
