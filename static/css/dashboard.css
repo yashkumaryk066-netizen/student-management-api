@@ -3234,3 +3234,37 @@ screen and (min-resolution: 192dpi) {
     from { opacity: 0; transform: translateY(-10px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* ============================================
+   CRITICAL FIX: Z-INDEX LAYERING (PREMIUM)
+   ============================================ */
+/* Ensure Sidebar is ALWAYS above the overlay */
+.sidebar, .dash-sidebar {
+    z-index: 10002 !important;
+}
+
+/* Ensure Overlay is below sidebar but above content */
+.sidebar-overlay {
+    z-index: 10000 !important;
+}
+
+/* Ensure Toggle Buttons are above everything */
+.menu-toggle {
+    z-index: 10003 !important;
+}
+
+/* Profile Dropdown (Three Dot) - Topmost */
+.profile-dropdown {
+    z-index: 10005 !important;
+}
+
+/* Fix for blurry sidebar on some devices */
+.sidebar, .dash-sidebar {
+    transform: translateZ(0); /* Force GPU */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Ensure header is below overlay on mobile but accessible */
+.top-header {
+    z-index: 9999 !important;
+}
