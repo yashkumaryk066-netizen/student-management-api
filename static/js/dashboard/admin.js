@@ -4288,76 +4288,76 @@ document.addEventListener('DOMContentLoaded', () => {
     DashboardApp.init();
 });
 
+
 // --- PREMIUM RENEWAL SYSTEM (ADVANCED) ---
-checkSubscriptionStatus() {
+DashboardApp.checkSubscriptionStatus = function() {
     fetch(this.apiBaseUrl + '/subscription/status/', {
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') }
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'EXPIRED') {
-                this.showRenewalModal(data);
-            } else if (data.days_left <= 5) {
-                // Warning Banner
-                this.showExpiryWarning(data.days_left);
-            }
-        })
-        .catch(err => console.error("Sub check failed", err));
-},
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'EXPIRED') {
+            this.showRenewalModal(data);
+        } else if (data.days_left <= 5) {
+            this.showExpiryWarning(data.days_left);
+        }
+    })
+    .catch(err => console.error("Sub check failed", err));
+};
 
-showRenewalModal(subData) {
+DashboardApp.showRenewalModal = function(subData) {
     const overlay = document.createElement('div');
     overlay.id = 'renewalOverlay';
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(15px);z-index:99999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.5s ease;';
-
+    
     const planPrice = subData.plan_type === 'SCHOOL' ? '2000' : (subData.plan_type === 'INSTITUTE' ? '5000' : '500');
 
     overlay.innerHTML = `
-            <div class="renewal-card" style="background:#0f172a;border:1px solid #6366f1;border-radius:24px;padding:50px;width:95%;max-width:550px;text-align:center;position:relative;box-shadow:0 0 80px rgba(99,102,241,0.3);">
-                <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:#6366f1;color:white;padding:8px 24px;border-radius:20px;font-weight:bold;box-shadow:0 10px 20px rgba(99,102,241,0.4);">
-                    PLAN EXPIRED
-                </div>
-                <h1 style="color:white;font-family:'Space Grotesk';margin-bottom:15px;font-size:2.5rem;">Renew Your Access</h1>
-                <p style="color:#94a3b8;margin-bottom:30px;line-height:1.6;">
-                    Your <strong>${subData.plan_type}</strong> plan availability has ended. <br>
-                    To continue editing and managing your data, please renew now.
-                    <br><span style="font-size:0.9rem;color:#64748b;">(You can still view your existing data in Read-Only mode)</span>
-                </p>
-                
-                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px;margin-bottom:30px;">
-                    <div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#cbd5e1;">
-                        <span>Plan Type</span>
-                        <span style="font-weight:bold;color:white;">${subData.plan_type}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#cbd5e1;">
-                        <span>Duration</span>
-                        <span style="font-weight:bold;color:white;">30 Days</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:1.2rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;margin-top:10px;">
-                        <span style="color:white;">Total</span>
-                        <span style="font-weight:bold;color:#a855f7;">₹${planPrice}</span>
-                    </div>
-                </div>
-
-                <div style="margin-bottom:20px;text-align:left;">
-                    <label style="color:#94a3b8;font-size:0.9rem;">Payment Reference (UTR/UPI ID)</label>
-                    <input type="text" id="renewUtr" placeholder="Enter Transaction ID" style="width:100%;padding:14px;background:#1e293b;border:1px solid #334155;color:white;border-radius:12px;margin-top:8px;font-size:1rem;">
-                </div>
-
-                <button onclick="DashboardApp.submitRenewal('${subData.plan_type}', ${planPrice})" style="width:100%;padding:16px;background:linear-gradient(135deg,#6366f1,#a855f7);border:none;border-radius:12px;color:white;font-weight:bold;font-size:1.1rem;cursor:pointer;transition:transform 0.2s;box-shadow:0 10px 30px rgba(99,102,241,0.4);">
-                    RENEW SUBSCRIPTION 🚀
-                </button>
-                
-                <button onclick="document.getElementById('renewalOverlay').remove()" style="margin-top:15px;background:none;border:none;color:#64748b;cursor:pointer;">
-                    Continue in Read-Only Mode
-                </button>
+        <div class="renewal-card" style="background:#0f172a;border:1px solid #6366f1;border-radius:24px;padding:50px;width:95%;max-width:550px;text-align:center;position:relative;box-shadow:0 0 80px rgba(99,102,241,0.3);">
+            <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:#6366f1;color:white;padding:8px 24px;border-radius:20px;font-weight:bold;box-shadow:0 10px 20px rgba(99,102,241,0.4);">
+                PLAN EXPIRED
             </div>
-        `;
+            <h1 style="color:white;font-family:'Space Grotesk';margin-bottom:15px;font-size:2.5rem;">Renew Your Access</h1>
+            <p style="color:#94a3b8;margin-bottom:30px;line-height:1.6;">
+                Your <strong>${subData.plan_type}</strong> plan availability has ended. <br>
+                To continue editing and managing your data, please renew now.
+                <br><span style="font-size:0.9rem;color:#64748b;">(You can still view your existing data in Read-Only mode)</span>
+            </p>
+            
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px;margin-bottom:30px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#cbd5e1;">
+                    <span>Plan Type</span>
+                    <span style="font-weight:bold;color:white;">${subData.plan_type}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#cbd5e1;">
+                    <span>Duration</span>
+                    <span style="font-weight:bold;color:white;">30 Days</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:1.2rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;margin-top:10px;">
+                    <span style="color:white;">Total</span>
+                    <span style="font-weight:bold;color:#a855f7;">₹${planPrice}</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;text-align:left;">
+                <label style="color:#94a3b8;font-size:0.9rem;">Payment Reference (UTR/UPI ID)</label>
+                <input type="text" id="renewUtr" placeholder="Enter Transaction ID" style="width:100%;padding:14px;background:#1e293b;border:1px solid #334155;color:white;border-radius:12px;margin-top:8px;font-size:1rem;">
+            </div>
+
+            <button onclick="DashboardApp.submitRenewal('${subData.plan_type}', ${planPrice})" style="width:100%;padding:16px;background:linear-gradient(135deg,#6366f1,#a855f7);border:none;border-radius:12px;color:white;font-weight:bold;font-size:1.1rem;cursor:pointer;transition:transform 0.2s;box-shadow:0 10px 30px rgba(99,102,241,0.4);">
+                RENEW SUBSCRIPTION 🚀
+            </button>
+            
+            <button onclick="document.getElementById('renewalOverlay').remove()" style="margin-top:15px;background:none;border:none;color:#64748b;cursor:pointer;">
+                Continue in Read-Only Mode
+            </button>
+        </div>
+    `;
     document.body.appendChild(overlay);
     setTimeout(() => overlay.style.opacity = '1', 10);
-},
+};
 
-submitRenewal(planType, amount) {
+DashboardApp.submitRenewal = function(planType, amount) {
     const utr = document.getElementById('renewUtr').value;
     if (!utr) {
         this.showAlert('Required', 'Please enter payment UTR/Transaction ID', 'error');
@@ -4377,20 +4377,20 @@ submitRenewal(planType, amount) {
             description: 'Plan Renewal: ' + planType
         })
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'SUBMITTED') {
-                document.getElementById('renewalOverlay').remove();
-                this.showAlert('Renewal Submitted', 'Your renewal request is pending admin approval. You will be notified via email/telegram once approved.', 'success');
-            } else {
-                this.showAlert('Error', data.error || 'Submission failed', 'error');
-            }
-        });
-},
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'SUBMITTED') {
+            document.getElementById('renewalOverlay').remove();
+            this.showAlert('Renewal Submitted', 'Your renewal request is pending approval. You will be notified via email/telegram.', 'success');
+        } else {
+            this.showAlert('Error', data.error || 'Submission failed', 'error');
+        }
+    });
+};
 
-showExpiryWarning(days) {
+DashboardApp.showExpiryWarning = function(days) {
     const banner = document.createElement('div');
     banner.style.cssText = 'background:#f59e0b;color:black;text-align:center;padding:10px;font-weight:bold;position:fixed;top:0;width:100%;z-index:1001;';
     banner.innerHTML = `⚠️ Your plan expires in ${days} days. <a href="#" onclick="DashboardApp.checkSubscriptionStatus()" style="color:black;text-decoration:underline;">Renew Now</a>`;
     document.body.prepend(banner);
-}
+};
