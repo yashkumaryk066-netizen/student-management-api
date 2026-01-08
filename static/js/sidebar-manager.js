@@ -66,17 +66,44 @@ class PremiumSidebarManager {
 
     async fetchUserPlanFromAPI() {
         try {
-            // Use apiCall if available for automatic token handling
-            const data = await (typeof apiCall === 'function' ? apiCall('/plan/features/') : fetch('/api/plan/features/').then(r => r.json()));
+            let data;
+            // Use api.js wrapper if available, otherwise raw fetch
+            if (typeof apiCall === 'function') {
+                try {
+                    data = await apiCall('/plan/features/');
+                } catch (e) {
+                    // If apiCall fails (e.g. auth error), fallback logic or silent fail
+                    console.warn("Sidebar: API Call failed", e);
+                    return;
+                }
+            } else {
+                const token = localStorage.getItem('accessToken');
+                if (!token) return; // Not logged in
+
+                const res = await fetch('/api/plan/features/', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Failed to fetch plan');
+                data = await res.json();
+            }
 
             if (data && data.plan_type) {
-                this.currentPlan = data.plan_type.toLowerCase();
-                localStorage.setItem('userPlan', this.currentPlan);
-                this.applyPlanAccess();
-                console.log(`✅ Plan loaded from API: ${this.currentPlan}`);
+                // normalize plan type
+                let remotePlan = data.plan_type.toLowerCase();
+
+                // Map SUPER_ADMIN to institute (full access)
+                if (remotePlan === 'super_admin') remotePlan = 'institute';
+
+                // Only update if valid
+                if (PLAN_ACCESS[remotePlan]) {
+                    this.currentPlan = remotePlan;
+                    localStorage.setItem('userPlan', this.currentPlan);
+                    this.applyPlanAccess();
+                    console.log(`✅ Plan synced from API: ${this.currentPlan}`);
+                }
             }
         } catch (error) {
-            console.warn('⚠️ API not available, using default plan:', this.currentPlan);
+            console.warn('⚠️ Could not sync plan from API (using local default):', error.message);
         }
     }
 
