@@ -13,6 +13,7 @@ from .services.invoice_service import generate_invoice_pdf
 from .services.invoice_service import generate_invoice_pdf
 from .services.email_service import send_credentials_with_invoice
 from .services.telegram_service import send_telegram_notification
+from .plan_permissions import PLAN_FEATURES, FEATURE_META
 import os
 
 from datetime import date, timedelta
@@ -199,16 +200,22 @@ class AdminPaymentApprovalView(APIView):
                         
                         tg_chat_id = os.environ.get('TELEGRAM_CHAT_ID', '5280398471')
                         
+                        # Get features for this plan
+                        plan_features = PLAN_FEATURES.get(sub.plan_type, [])
+                        feature_icons = " ".join([FEATURE_META[f]['icon'] for f in plan_features if f in FEATURE_META][:8])
+
                         tg_message = (
-                            f"✅ *New Account Approved!*\n\n"
-                            f"👤 *Name:* {user.first_name or 'New User'}\n"
+                            f"✅ *New Account Approved for {sub.plan_type}!*\n\n"
+                            f"👤 *Client Name:* {user.first_name}\n"
                             f"📧 *Email:* `{email}`\n"
-                            f"🏫 *Plan:* {sub.plan_type}\n"
-                            f"💰 *Amount:* ₹{payment.amount}\n\n"
-                            f"🔐 *Credentials:*\n"
+                            f"💰 *Amount Paid:* ₹{payment.amount}\n"
+                            f"📅 *Valid Until:* {sub.end_date}\n\n"
+                            f"🔓 *Unlocked Features:*\n"
+                            f"{feature_icons} (+ more)\n\n"
+                            f"🔐 *Login Credentials:*\n"
                             f"🆔 ID: `{user.username}`\n"
                             f"🔑 Pass: `{password}`\n\n"
-                            f"🚀 _System Auto-Generated_"
+                            f"🚀 _Automatic Notification from Y.S.M ERP_"
                         )
                         
                         send_telegram_notification(tg_chat_id, tg_message, invoice_pdf, invoice_filename=f"Invoice_{user.username}.pdf")

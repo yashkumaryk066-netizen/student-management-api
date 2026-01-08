@@ -4,37 +4,42 @@ Centralized permission system for different subscription tiers
 """
 
 # Feature definitions for each plan
+# Feature definitions for each plan
 PLAN_FEATURES = {
     'COACHING': {
-        'students', 'attendance', 'live_classes', 'notifications', 'reports', 'exams'
+        'students', 'batches', 'attendance', 'fees', 'notifications', 'reports'
     },
     'SCHOOL': {
-        'students', 'attendance', 'live_classes', 'notifications', 'reports',
-        'exams', 'finance', 'classes', 'parents'
+        'students', 'classes', 'attendance', 'fees', 'notifications', 'reports',
+        'exams', 'transport', 'library', 'id_cards', 'parents'
     },
     'INSTITUTE': {
-        'students', 'attendance', 'live_classes', 'notifications', 'reports',
-        'exams', 'finance', 'classes', 'parents',
-        'departments', 'hostel', 'lab', 'transport', 'hr'
+        'students', 'classes', 'attendance', 'fees', 'notifications', 'reports',
+        'exams', 'transport', 'library', 'id_cards', 'parents',
+        'departments', 'hostel', 'lab', 'hr', 'events', 'multi_branch'
     }
 }
 
 # Feature display names and icons
 FEATURE_META = {
     'students': {'name': 'Student Management', 'icon': '👨‍🎓'},
-    'attendance': {'name': 'Attendance', 'icon': '✅'},
-    'live_classes': {'name': 'Live Classes', 'icon': '📹'},
-    'notifications': {'name': 'Notifications', 'icon': '🔔'},
-    'reports': {'name': 'Reports & Analytics', 'icon': '📊'},
-    'exams': {'name': 'Exam Management', 'icon': '📝'},
-    'finance': {'name': 'Finance & Fees', 'icon': '💰'},
+    'batches': {'name': 'Batch Management', 'icon': '👥'},
     'classes': {'name': 'Class Management', 'icon': '🏫'},
+    'attendance': {'name': 'Attendance System', 'icon': '✅'},
+    'fees': {'name': 'Fee Management', 'icon': '💰'},
+    'notifications': {'name': 'Smart Notifications', 'icon': '🔔'},
+    'reports': {'name': 'Analytics & Reports', 'icon': '📊'},
+    'exams': {'name': 'Exam & Grading', 'icon': '📝'},
+    'transport': {'name': 'Transport System', 'icon': '🚌'},
+    'library': {'name': 'Digital Library', 'icon': '📚'},
+    'id_cards': {'name': 'ID Card Generator', 'icon': '🪪'},
     'parents': {'name': 'Parent Portal', 'icon': '👪'},
     'departments': {'name': 'Departments', 'icon': '🏛️'},
     'hostel': {'name': 'Hostel Management', 'icon': '🏨'},
-    'lab': {'name': 'Lab Management', 'icon': '🔬'},
-    'transport': {'name': 'Transport', 'icon': '🚌'},
-    'hr': {'name': 'HR Management', 'icon': '👔'}
+    'lab': {'name': 'Lab Inventory', 'icon': '🔬'},
+    'hr': {'name': 'HR & Payroll', 'icon': '👔'},
+    'events': {'name': 'Event Management', 'icon': '📅'},
+    'multi_branch': {'name': 'Multi-Branch Control', 'icon': '🏢'}
 }
 
 def has_feature_access(user, feature_name):
