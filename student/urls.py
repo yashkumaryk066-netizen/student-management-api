@@ -50,7 +50,7 @@ from .subscription_views import (
 )
 from .plan_features_views import UserPlanFeaturesView
 from .report_views import ReportListView, ReportDownloadView
-from .onboarding_views import OnboardingPaymentView , OnboardingBulkImportView , OnboardingBulkImportView
+from .onboarding_views import OnboardingPaymentView, OnboardingBulkImportView
 from .payment_gateway_views import CreateOrderView
 from .password_reset_views import RequestPasswordResetView, VerifyAndResetPasswordView
 from .chatgpt_views import (
@@ -248,3 +248,6 @@ urlpatterns += [
     path('generate/admit-card/<int:student_id>/', GenerateAdmitCardView.as_view(), name='generate-admit-card'),
     path('generate/report-card/<int:student_id>/', GenerateReportCardView.as_view(), name='generate-report-card'),
 ]
+
+# Temporarily appended to fix check
+# This line is intentionally left blank to ensure newline
