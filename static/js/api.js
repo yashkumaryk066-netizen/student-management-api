@@ -160,6 +160,35 @@ const LibraryAPI = {
     deleteBook: id => apiCall(`/library/books/${id}/`, { method: 'DELETE' })
 };
 
+const HostelAPI = {
+    getAll: () => apiCall('/hostel/rooms/'),
+    getResidents: () => apiCall('/hostel/residents/'),
+    assignRoom: (data) => apiCall('/hostel/assign/', { method: 'POST', body: JSON.stringify(data) })
+};
+
+const TransportAPI = {
+    getAllRoutes: () => apiCall('/transport/routes/'),
+    getAllVehicles: () => apiCall('/transport/vehicles/'),
+    assignRoute: (data) => apiCall('/transport/assign/', { method: 'POST', body: JSON.stringify(data) })
+};
+
+const HRAPI = {
+    getAllStaff: () => apiCall('/hr/staff/'),
+    getPayroll: () => apiCall('/hr/payroll/'),
+    addStaff: (data) => apiCall('/hr/staff/', { method: 'POST', body: JSON.stringify(data) })
+};
+
+const ExamAPI = {
+    getAll: () => apiCall('/exams/'),
+    create: (data) => apiCall('/exams/', { method: 'POST', body: JSON.stringify(data) }),
+    getResults: (id) => apiCall(`/exams/${id}/results/`)
+};
+EOF && sed -i '225r /dev/stdin' static/js/api.js <<EOF
+window.HostelAPI = HostelAPI;
+window.TransportAPI = TransportAPI;
+window.HRAPI = HRAPI;
+window.ExamAPI = ExamAPI;
+
 const SubscriptionAPI = {
     getStatus: () => apiCall('/subscription/status/'),
     renew: (plan, amt, txn) =>
