@@ -26,23 +26,110 @@ const DashboardApp = {
         const overlay = document.createElement('div');
         overlay.className = 'custom-alert-overlay';
         overlay.id = 'alertOverlay';
+        overlay.style.zIndex = '100000'; // Ensure it's on top
 
         let icon = '✅';
         let btnClass = 'alert-btn-primary';
-        if (type === 'error') { icon = '❌'; btnClass = 'alert-btn-danger'; }
-        if (type === 'warning') { icon = '⚠️'; btnClass = 'alert-btn-danger'; }
+        // Premium Icons
+        if (type === 'success') icon = '<div style="font-size: 4rem; animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);">✅</div>';
+        if (type === 'error') { icon = '<div style="font-size: 4rem; animation: shake 0.5s;">❌</div>'; btnClass = 'alert-btn-danger'; }
+        if (type === 'warning') { icon = '<div style="font-size: 4rem; animation: pulse 1s infinite;">⚠️</div>'; btnClass = 'alert-btn-danger'; }
 
         overlay.innerHTML = `
-            <div class="custom-alert-box">
-                <div class="custom-alert-icon">${icon}</div>
-                <div class="custom-alert-title">${title}</div>
-                <div class="custom-alert-message">${message}</div>
+            <div class="custom-alert-box" style="
+                background: linear-gradient(145deg, #0f172a, #1e293b); 
+                border: 1px solid rgba(255,255,255,0.1); 
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+                border-radius: 20px;
+                padding: 40px;
+            ">
+                <div class="custom-alert-icon" style="margin-bottom: 20px;">${icon}</div>
+                <div class="custom-alert-title" style="color: white; font-family: 'Outfit'; font-size: 1.8rem;">${title}</div>
+                <div class="custom-alert-message" style="color: #94a3b8; margin-bottom: 30px;">${message}</div>
                 <div class="custom-alert-actions">
-                    <button class="${btnClass} alert-btn" onclick="DashboardApp.closeAlert()">OK</button>
+                    <button class="${btnClass} alert-btn" onclick="DashboardApp.closeAlert()" style="padding: 12px 30px; font-weight: 600; font-size: 1.1rem; border-radius: 12px;">OK</button>
                 </div>
             </div>
         `;
         document.body.appendChild(overlay);
+    },
+
+    showPremiumConfirm(title, message, type = 'question') {
+        return new Promise((resolve) => {
+            if (document.getElementById('premiumConfirmOverlay')) document.getElementById('premiumConfirmOverlay').remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'premiumConfirmOverlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+                z-index: 100001; display: flex; align-items: center; justify-content: center;
+                opacity: 0; transition: opacity 0.3s ease;
+            `;
+
+            let icon = '❓';
+            let btnColor = '#6366f1'; // Primary
+            if (type === 'danger') {
+                icon = '🗑️';
+                btnColor = '#ef4444'; // Red
+            }
+
+            overlay.innerHTML = `
+                <div class="premium-alert-box" style="
+                    background: linear-gradient(145deg, #1e293b, #0f172a);
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    border-radius: 24px; padding: 40px; text-align: center;
+                    box-shadow: 0 0 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.05);
+                    transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    max-width: 420px; width: 90%;
+                ">
+                    <div style="font-size: 4rem; margin-bottom: 25px; filter: drop-shadow(0 0 15px ${btnColor}60); animation: float 3s infinite ease-in-out;">
+                        ${icon}
+                    </div>
+                    <h2 style="color: white; font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; margin-bottom: 15px;">${title}</h2>
+                    <p style="color: #cbd5e1; font-size: 1.1rem; line-height: 1.6; margin-bottom: 35px; font-family: 'Inter', sans-serif;">${message}</p>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button id="pConfirmCancel" style="
+                            padding: 14px 28px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+                            background: rgba(255,255,255,0.05); color: #cbd5e1; cursor: pointer;
+                            font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.2s; font-size: 1rem;
+                        ">Cancel</button>
+                        <button id="pConfirmOk" style="
+                            padding: 14px 28px; border-radius: 14px; border: none;
+                            background: ${btnColor}; color: white; cursor: pointer;
+                            font-weight: 600; font-family: 'Inter', sans-serif;
+                            box-shadow: 0 10px 25px -5px ${btnColor}60; transition: all 0.2s; font-size: 1rem;
+                        ">Confirm</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            // Animate In
+            requestAnimationFrame(() => {
+                overlay.style.opacity = '1';
+                overlay.querySelector('.premium-alert-box').style.transform = 'scale(1)';
+            });
+
+            // Hover Effects
+            const okBtn = document.getElementById('pConfirmOk');
+            okBtn.onmouseenter = () => okBtn.style.transform = 'translateY(-2px)';
+            okBtn.onmouseleave = () => okBtn.style.transform = 'translateY(0)';
+
+            // Handlers
+            const close = (result) => {
+                overlay.style.opacity = '0';
+                overlay.querySelector('.premium-alert-box').style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                    resolve(result);
+                }, 300);
+            };
+
+            document.getElementById('pConfirmCancel').onclick = () => close(false);
+            document.getElementById('pConfirmOk').onclick = () => close(true);
+        });
     },
 
     showConfirm(title, message, onConfirm, onCancel) {
@@ -3838,7 +3925,7 @@ const DashboardApp = {
     },
 
     async approvePayment(paymentId) {
-        if (!confirm('Approve this payment? Credentials will be emailed.')) return;
+        if (!await this.showPremiumConfirm('Approve Payment?', 'Are you sure you want to approve this payment? Credentials will be emailed to the user.', 'success')) return;
         try {
             const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
                 method: 'POST',
@@ -3886,7 +3973,7 @@ const DashboardApp = {
         if (action === 'EXTEND_DAYS') confirmMsg = "Grant 30 days extension to this client?";
         if (action === 'DELETE') confirmMsg = "CRITICAL: Permanently delete this client and all their data? This cannot be undone.";
 
-        if (!confirm(confirmMsg)) return;
+        if (!await this.showPremiumConfirm('Confirm Action', confirmMsg, action === 'DELETE' ? 'danger' : 'question')) return;
 
         try {
             const response = await fetch(`${this.apiBaseUrl}/admin/client-actions/`, {
