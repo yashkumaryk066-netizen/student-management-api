@@ -33,7 +33,8 @@ from .views import (
     ExamListCreateView, EventListCreateView,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
     LiveClassListCreateView, DepartmentListCreateView,
-    TeamManagementView, ClientAuditLogListView, DashboardStatsView
+    TeamManagementView, ClientAuditLogListView, DashboardStatsView,
+    GenerateIDCardView, GenerateAdmitCardView, GenerateReportCardView
 )
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
@@ -241,7 +242,6 @@ urlpatterns = [
 # =====================================================
 # PDF REPORT GENERATION URLS
 # =====================================================
-from .views import GenerateIDCardView, GenerateAdmitCardView, GenerateReportCardView
 
 urlpatterns += [
     path('generate/id-card/<int:student_id>/', GenerateIDCardView.as_view(), name='generate-id-card'),
