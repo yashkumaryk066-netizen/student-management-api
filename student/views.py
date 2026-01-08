@@ -22,9 +22,7 @@ from .Serializer import *
 from .permissions import *
 
 
-# =====================================================
 # COMMON HELPERS (SAAS ISOLATION)
-# =====================================================
 
 def get_owner_user(user):
     """
@@ -64,9 +62,7 @@ def filter_by_owner(qs, user):
     return qs.none()
 
 
-# =====================================================
 # STUDENT LIST / CREATE
-# =====================================================
 
 class StudentListCreateView(APIView):
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin, StudentLimitPermission]
@@ -116,9 +112,7 @@ class StudentListCreateView(APIView):
         return Response(serializer.errors, status=400)
 
 
-# =====================================================
 # STUDENT DETAILS
-# =====================================================
 
 class StudentDetailsView(APIView):
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
@@ -152,9 +146,7 @@ class StudentDetailsView(APIView):
         return Response(status=204)
 
 
-# =====================================================
 # SYSTEM LOGS / AUDIT (CLIENT LEVEL)
-# =====================================================
 
 class ClientAuditLogListView(APIView):
     permission_classes = [IsAuthenticated, HasPlanAccess]
@@ -171,9 +163,7 @@ class ClientAuditLogListView(APIView):
         return Response(AuditLogSerializer(logs, many=True).data)
 
 
-# =====================================================
 # TEAM MANAGEMENT (STAFF/TEACHERS)
-# =====================================================
 
 class TeamManagementView(APIView):
     permission_classes = [IsAuthenticated, HasPlanAccess]
@@ -198,9 +188,7 @@ class TeamManagementView(APIView):
         return Response({"message": "Use standard employee create for now"}, status=501)
 
 
-# =====================================================
 # TODAY ATTENDANCE (FIXED – NO DATA LEAK)
-# =====================================================
 
 class StudentTodayView(APIView):
     permission_classes = [IsAuthenticated]
@@ -228,9 +216,7 @@ class StudentTodayView(APIView):
         })
 
 
-# =====================================================
 # ATTENDANCE CREATE
-# =====================================================
 
 class AttendenceCreateView(APIView):
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
@@ -284,9 +270,7 @@ class AttendenceDetailsView(APIView):
         attendance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# =====================================================
 # PAYMENTS (FIXED OWNERSHIP)
-# =====================================================
 
 class PaymentListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -318,9 +302,7 @@ class PaymentDetailsView(APIView):
         return Response(PaymentSerializer(payment).data)
 
 
-# =====================================================
 # NOTIFICATIONS (FIXED SECURITY)
-# =====================================================
 
 class NotificationListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -352,9 +334,7 @@ class NotificationMarkReadView(APIView):
         return Response({"message": "Marked as read"})
 
 
-# =====================================================
 # LIVE CLASSES (PLACEHOLDER REMOVED)
-# =====================================================
 
 class LiveClassListView(APIView):
     permission_classes = [IsAuthenticated, HasPlanAccess]
@@ -375,9 +355,7 @@ class LiveClassListView(APIView):
         return Response(data)
 
 
-# =====================================================
 # RESTORED MISSING VIEWS
-# =====================================================
 
 class ClientSubscriptionView(APIView):
     permission_classes = [IsAuthenticated]
@@ -742,9 +720,7 @@ class DemoRequestView(APIView):
         except Exception as e:
              return Response({"error": str(e)}, status=400)
 
-# =====================================================
 # FRONTEND TEMPLATES (UNCHANGED)
-# =====================================================
 
 class LandingPageView(TemplateView):
     template_name = "index.html"
@@ -783,9 +759,7 @@ class DepartmentListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(created_by=get_owner_user(self.request.user))
-# =====================================================
 # PREMIUM DASHBOARD API
-# =====================================================
 class DashboardStatsView(APIView):
     """
     Returns Plan-Specific Statistics for the Dashboard.
@@ -833,9 +807,7 @@ class DashboardStatsView(APIView):
             
         return Response(stats)
 
-# =====================================================
 # PREMIUM REPORT GENERATION (Advance Level)
-# =====================================================
 from .report_utils import generate_admit_card_pdf, generate_report_card_pdf
 from .id_card_utils import generate_id_card_pdf
 
@@ -904,7 +876,4 @@ class GenerateIDCardView(APIView):
         except Student.DoesNotExist:
             return Response({"error": "Student not found"}, status=404)
 
-# =========================
-# BULK IMPORT (Advance Feature)
-# =========================
 
