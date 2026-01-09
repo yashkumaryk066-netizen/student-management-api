@@ -84,16 +84,29 @@ class AIServiceManager:
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", **kwargs) -> str:
         """
-        Ask AI tutor a question
+        Ask AI tutor with automatic fallback to local model
         """
-        if not self.service:
-            return f"Error: AI Service ({self.provider}) is not available. Details: {getattr(self, 'init_error', 'Unknown configuration error')}."
-            
+        # Try primary service (Gemini/ChatGPT/Claude)
+        if self.service:
+            try:
+                return self.service.ask_tutor(question, subject, context, **kwargs)
+            except Exception as e:
+                logger.warning(f"Primary AI ({self.provider}) failed: {str(e)}. Switching to backup...")
+        
+        # Fallback to Local AI (TinyLlama)
         try:
-            return self.service.ask_tutor(question, subject, context, **kwargs)
-        except Exception as e:
-            logger.error(f"AI Tutor error with {self.provider}: {str(e)}")
-            return f"I encountered an error while processing your request: {str(e)}"
+            from .local_llm import get_local_service
+            local_ai = get_local_service()
+            
+            if local_ai.is_available():
+                logger.info("🔧 Using Backup AI Engine (TinyLlama)")
+                return local_ai.ask_tutor(question, subject, context, **kwargs)
+            else:
+                return "⚠️ Primary AI service is unavailable and backup AI is not configured. Please contact support."
+                
+        except Exception as backup_error:
+            logger.error(f"Backup AI also failed: {str(backup_error)}")
+            return f"Error: Both primary and backup AI systems are unavailable. Primary: {getattr(self, 'init_error', 'Unknown')}. Backup: {str(backup_error)}"
     
     def generate_quiz(
         self,
