@@ -31,13 +31,22 @@ class AIAuthView(APIView):
         username = request.data.get('email') # Using email/phone as username
         password = request.data.get('password')
         
+        # Custom Check for Pending Approval
+        try:
+            user_check = User.objects.get(username=username)
+            if user_check.check_password(password):
+                if not user_check.is_active:
+                    return Response({"error": "ACCESS DENIED: Account is Pending Approval by Super Admin."}, status=403)
+        except User.DoesNotExist:
+            pass
+
         user = authenticate(username=username, password=password)
         
         if user is not None:
             login(request, user)
             return Response({"success": True, "redirect": "/api/ai/chat/"})
         else:
-            return Response({"error": "Invalid Credentials"}, status=401)
+            return Response({"error": "Invalid Identity or Security Key."}, status=401)
 
     def handle_signup(self, request):
         email = request.data.get('email')
@@ -51,23 +60,21 @@ class AIAuthView(APIView):
         if User.objects.filter(username=email).exists():
              return Response({"error": "User with this identity already exists. Please login."}, status=400)
 
-        # Create User
+        # Create User (INACTIVE by default)
         try:
             user = User.objects.create_user(username=email, email=email, password=password)
+            user.is_active = False # WAIT FOR SUPER ADMIN APPROVAL
+            user.save()
             
             # Create Profile with AI_USER role
-            # Assuming phone is stored somewhere, but UserProfile doesn't strictly have 'phone' field in snippets seen, 
-            # let's modify UserProfile or just store generic.
-            # Ideally UserProfile should be created.
-            
             UserProfile.objects.create(
                 user=user,
                 role='AI_USER',
-                # institution_type can be blank or 'PERSONAL'
             )
             
-            login(request, user)
-            return Response({"success": True, "redirect": "/api/ai/chat/"})
+            # Note: We do NOT login the user here.
+            
+            return Response({"success": True, "redirect": None, "message": "IDENTITY REGISTERED. STATUS: PENDING APPROVAL."})
             
         except Exception as e:
             return Response({"error": str(e)}, status=500)
