@@ -64,53 +64,71 @@ class GeminiService:
         max_tokens: Optional[int] = None
     ) -> str:
         """
-        Generate content using Gemini models
-        
-        Args:
-            prompt: Input prompt
-            model: Model to use (default: gemini-1.5-flash)
-            temperature: Creativity level (0-1)
-            max_tokens: Maximum response length
-            
-        Returns:
-            Generated text
+        Generate content with Advanced Self-Healing Model Selection.
+        If the preferred model fails (404/Not Found), it automatically reroutes 
+        computations to the next available neural engine.
         """
-        try:
-            model_name = model or self.default_model
-            
-            generation_config = {
-                "temperature": temperature if temperature is not None else self.temperature,
-                "max_output_tokens": max_tokens or self.max_tokens,
-            }
-            
-            model_instance = self.genai.GenerativeModel(
-                model_name=model_name,
-                generation_config=generation_config
-            )
+        # List of models to try in order of preference
+        # 1. Flash (Fastest, Newest)
+        # 2. Pro (Stable)
+        # 3. 1.0 Pro (Legacy Stable)
+        # 4. Gemini (Generic alias)
+        candidate_models = [
+            model or self.default_model,
+            'gemini-1.5-flash',
+            'gemini-pro',
+            'gemini-1.0-pro-latest',
+            'gemini-1.0-pro'
+        ]
+        
+        # Remove duplicates while preserving order
+        candidate_models = list(dict.fromkeys(candidate_models))
+        
+        last_error = None
+        
+        for attempt_model in candidate_models:
+            try:
+                logger.info(f"Attempting generation with Neural Engine: {attempt_model}")
+                
+                generation_config = {
+                    "temperature": temperature if temperature is not None else self.temperature,
+                    "max_output_tokens": max_tokens or self.max_tokens,
+                }
+                
+                model_instance = self.genai.GenerativeModel(
+                    model_name=attempt_model,
+                    generation_config=generation_config
+                )
 
-            # Handle Multi-modal Content
-            content_parts = [prompt]
-            
-            # If media (images/video) provided as kwargs in specific format
-            # Currently we will expect 'images' kwarg which is list of PIL images or base64
-            # NOTE: For now, assuming direct file/image inputs are handled by caller formatting
-            
-            response = model_instance.generate_content(
-                content_parts,
-                safety_settings=self.safety_settings
-            )
-            return response.text.strip()
-            
-        except Exception as e:
-            error_msg = str(e)
-            logger.error(f"Gemini API error: {error_msg}")
-            
-            if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
-                raise Exception("Gemini authentication failed. Please check API credentials.")
-            elif "quota" in error_msg.lower():
-                raise Exception("Gemini quota exceeded. Please try again later.")
-            else:
-                raise Exception(f"Gemini service error: {error_msg}")
+                content_parts = [prompt]
+                
+                response = model_instance.generate_content(
+                    content_parts,
+                    safety_settings=self.safety_settings
+                )
+                
+                # If successful, we return immediately
+                return response.text.strip()
+                
+            except Exception as e:
+                error_msg = str(e)
+                last_error = e
+                logger.warning(f"Engine {attempt_model} failed: {error_msg}. Rerouting...")
+                
+                # If it's an Auth error, no point trying other models
+                if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
+                    raise Exception("Security Clearance Failed: Invalid API Credentials.")
+                
+                # Valid 'Not Found' errors -> Continue to next model
+                if "404" in error_msg or "not found" in error_msg.lower():
+                    continue
+                    
+                # Other errors, maybe transient, continue trying others just in case
+                continue
+        
+        # If all failed
+        logger.error(f"All Neural Engines failed. Last error: {str(last_error)}")
+        raise Exception(f"AI System Offline: Unable to connect to any Neural Engine. Last Error: {str(last_error)}")
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", media_data: Optional[List] = None, **kwargs) -> str:
         """AI Universal Assistant (Y.S.M Architect Intelligence)"""
