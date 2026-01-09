@@ -10,6 +10,8 @@ from ai.manager import get_ai_manager, AIServiceManager
 import logging
 
 logger = logging.getLogger(__name__)
+from .models import AISubscription
+
 
 
 class AIProvidersListView(APIView):
@@ -58,6 +60,22 @@ class UnifiedAITutorView(APIView):
             context = request.data.get('context', '')
             provider = request.data.get('provider')  # Optional
             model = request.data.get('model')  # Optional
+
+            # --- CHECK SUBSCRIPTION ---
+            try:
+                sub = AISubscription.objects.get(user=request.user)
+                if not sub.is_access_granted:
+                     return Response({
+                        "error": "Premium Subscription Required",
+                        "status": "EXPIRED",
+                        "details": "Your 7-Day Free Trial has expired. Please subscribe to continue."
+                    }, status=status.HTTP_403_FORBIDDEN)
+            except AISubscription.DoesNotExist:
+                 # Should have been created by the View, but if accessing API directly...
+                 AISubscription.objects.create(user=request.user)
+                 # New means trial is active
+                 pass
+            # --------------------------
             
             if not question:
                 return Response({
