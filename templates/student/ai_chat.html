@@ -726,7 +726,7 @@
                 aiDiv.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightElement(block);
                 });
-                updateStats(data.usage); // Update stats with token usage
+                // updateStats(data.usage); // Usage stats momentarily disabled
             } catch (err) {
                 aiDiv.innerHTML = `
                      <div class="flex gap-4 max-w-4xl">
