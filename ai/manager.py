@@ -16,12 +16,18 @@ class AIServiceManager:
     """
     
     # Available AI providers
+    HUGGINGFACE = "huggingface"
     CHATGPT = "chatgpt"
     GEMINI = "gemini"
     CLAUDE = "claude"
     
     # Available models
     MODELS = {
+        "huggingface": {
+            "mixtral-8x7b": "Mixtral 8x7B (FREE, Powerful)",
+            "llama-2-70b": "Llama 2 70B (FREE)",
+            "codellama-34b": "CodeLlama 34B (FREE, Code Expert)"
+        },
         "chatgpt": {
             "gpt-4-turbo": "GPT-4 Turbo (Most Capable)",
             "gpt-4": "GPT-4 (Advanced)",
@@ -42,13 +48,14 @@ class AIServiceManager:
     
     def __init__(self, provider: Optional[str] = None, model: Optional[str] = None):
         """
-        Initialize AI Service Manager
+        Initialize AI Service Manager with Premium Multi-Provider Support
         
         Args:
-            provider: AI provider (chatgpt, gemini, claude) - auto-detect if None
+            provider: AI provider (huggingface, gemini, chatgpt, claude) - auto-detect if None
             model: Specific model to use - uses default if None
         """
-        self.provider = provider or config('AI_PROVIDER', default='chatgpt').lower()
+        # Default to FREE provider
+        self.provider = provider or config('AI_PROVIDER', default='huggingface').lower()
         self.model = model
         self.service = None
         
@@ -56,31 +63,69 @@ class AIServiceManager:
         self._initialize_service()
     
     def _initialize_service(self):
-        """Initialize the selected AI service"""
+        """Initialize the selected AI service with cascading fallback"""
         try:
-            if self.provider == self.CHATGPT:
+            if self.provider == self.HUGGINGFACE:
+                from .huggingface import get_huggingface_service
+                self.service = get_huggingface_service()
+                logger.info(f"✅ Initialized HuggingFace AI (FREE)")
+                
+            elif self.provider == self.CHATGPT:
                 from .chatgpt import get_chatgpt_service
                 self.service = get_chatgpt_service()
-                logger.info(f"Initialized ChatGPT service with model: {self.service.default_model}")
+                logger.info(f"✅ Initialized ChatGPT service")
                 
             elif self.provider == self.GEMINI:
                 from .gemini import get_gemini_service
                 self.service = get_gemini_service()
-                logger.info(f"Initialized Gemini service with model: {self.service.default_model}")
+                logger.info(f"✅ Initialized Gemini service")
                 
             elif self.provider == self.CLAUDE:
                 from .claude import get_claude_service
                 self.service = get_claude_service()
-                logger.info(f"Initialized Claude service with model: {self.service.default_model}")
+                logger.info(f"✅ Initialized Claude service")
                 
             else:
-                raise ValueError(f"Unsupported AI provider: {self.provider}. Use: chatgpt, gemini, or claude")
+                raise ValueError(f"Unsupported provider: {self.provider}")
                 
         except Exception as e:
-            logger.error(f"Failed to initialize {self.provider} service: {str(e)}")
+            logger.error(f"Failed to initialize {self.provider}: {str(e)}")
             self.service = None
             self.init_error = str(e)
-            # Do NOT re-raise, so we can return a friendly error message during usage
+            
+            # Try fallback providers
+            self._try_fallback_providers()
+    
+    def _try_fallback_providers(self):
+        """Try alternative FREE providers in cascade"""
+        fallback_order = ['huggingface', 'gemini']
+        
+        for fallback in fallback_order:
+            if fallback == self.provider:
+                continue  # Skip if this was the original failed provider
+                
+            try:
+                logger.info(f"🔄 Trying fallback provider: {fallback}")
+                
+                if fallback == 'huggingface':
+                    from .huggingface import get_huggingface_service
+                    self.service = get_huggingface_service()
+                    self.provider = fallback
+                    logger.info("✅ Fallback successful: HuggingFace AI")
+                    return
+                    
+                elif fallback == 'gemini':
+                    from .gemini import get_gemini_service
+                    self.service = get_gemini_service()
+                    self.provider = fallback
+                    logger.info("✅ Fallback successful: Gemini AI")
+                    return
+                    
+            except Exception as e:
+                logger.warning(f"Fallback {fallback} also failed: {str(e)}")
+                continue
+        
+        logger.error("❌ All AI providers failed. System will use error messages.")
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", **kwargs) -> str:
         """
