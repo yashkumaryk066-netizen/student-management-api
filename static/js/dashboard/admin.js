@@ -667,9 +667,9 @@ const DashboardApp = {
                     '<td>' + student.relation + '</td>' +
                     '<td>' +
                     '<button class="btn-action" onclick="DashboardApp.editStudent(' + student.id + ')" title="Edit" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px;">✏️</button>' +
-                    '<button class="btn-action" onclick="window.open(\'/api/generate/id-card/' + student.id + '/\', \'_blank\')" title="Download ID Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">🪪</button>' +
-                    '<button class="btn-action" onclick="window.open(\'/api/generate/admit-card/' + student.id + '/\', \'_blank\')" title="Download Admit Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">🎫</button>' +
-                    '<button class="btn-action" onclick="window.open(\'/api/generate/report-card/' + student.id + '/\', \'_blank\')" title="Download Report Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">📈</button>' +
+                    '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/id-card/' + student.id + '/\', \'IDCard_' + student.name + '.pdf\')" title="Download ID Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">🪪</button>' +
+                    '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/admit-card/' + student.id + '/\', \'AdmitCard_' + student.name + '.pdf\')" title="Download Admit Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">🎫</button>' +
+                    '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/report-card/' + student.id + '/\', \'ReportCard_' + student.name + '.pdf\')" title="Download Report Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">📈</button>' +
                     '<button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" title="Delete" style="padding: 4px 8px; font-size: 0.9rem;">🗑️</button>' +
                     '</td>' +
                     '</tr>'
@@ -677,14 +677,52 @@ const DashboardApp = {
             })
             .catch(err => {
                 console.error('Error fetching students:', err);
-                document.getElementById('studentsTableBody').innerHTML =
-                    `<tr>
-                    <td colspan="8" class="text-center text-danger">
-                        Failed to load data. API connection error.
-                        <button class="btn-action" onclick="DashboardApp.fetchStudents()">Retry</button>
-                    </td>
-                </tr>`;
+                // ... error handling
             });
+    },
+
+    // --- SECURE DOWNLOADER ---
+    async downloadFile(url, filename) {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                this.showAlert('Error', 'You must be logged in to download.', 'error');
+                return;
+            }
+
+            // Show toast or loader
+            this.showAlert('Downloading...', 'Generating file, please wait...', 'info');
+
+            const res = await fetch(url + '?token=' + token, { // Fallback query param just in case backend supports it, but reliant on Header
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                this.showAlert('Access Denied', 'Session expired or permission denied.', 'error');
+                if (res.status === 401) setTimeout(() => window.location.reload(), 2000);
+                return;
+            }
+            if (!res.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await res.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+
+            this.showAlert('Success', 'Download started!', 'success');
+        } catch (err) {
+            console.error(err);
+            this.showAlert('Error', 'Download failed. Please try again.', 'error');
+        }
     },
 
     showBulkImportModal() {
