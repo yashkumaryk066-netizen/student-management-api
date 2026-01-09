@@ -37,70 +37,65 @@ class AIProvidersListView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-from .models import Student, Payment, Employee
-from django.db.models import Sum
+from rest_framework.permissions import AllowAny
 
 class UnifiedAITutorView(APIView):
-    """Unified AI tutoring endpoint - supports all providers"""
+    """
+    Y.S.M Universal AI - Beyond ChatGPT
+    Supports: Text, Images, Videos, Code, All Languages
+    """
     permission_classes = [AllowAny]
-    authentication_classes = [] # Explicitly disable auth for debug
+    authentication_classes = []
     
     def post(self, request):
         """
-        Ask AI with Real-Time Database Context (RAG-lite)
+        Universal AI Endpoint
+        
+        Capabilities:
+        - Image Analysis (upload photo, get detailed explanation)
+        - Video Understanding (coming soon)
+        - Code Generation (any language)
+        - Multilingual Chat (Hindi, English, Spanish, etc.)
+        - Study Help, Math, Science, Everything
         """
         try:
             question = request.data.get('question')
             subject = request.data.get('subject', 'General')
-            context = request.data.get('context', '')
-            provider = request.data.get('provider')  # Optional
-            model = request.data.get('model')  # Optional
-            
-            # --- INTELLIGENT CONTEXT INJECTION (THE "BRAIN" UPGRADE) ---
-            # We fetch live business stats to give the AI "Eyes" on the database.
-            try:
-                total_students = Student.objects.count()
-                total_revenue = Payment.objects.filter(status='PAID').aggregate(Sum('amount'))['amount__sum'] or 0
-                total_staff = Employee.objects.count() if 'Employee' in locals() else 0
-                
-                system_context = (
-                   f" [SYSTEM DATA: Total Students: {total_students} | "
-                   f"Total Revenue collected: ₹{total_revenue} | "
-                   f"Total Staff: {total_staff}]"
-                )
-                
-                # Append this real data to the user's context
-                context += system_context
-                
-            except Exception as db_err:
-                logger.warning(f"Context Injection Failed: {db_err}")
-                # Continue without context if DB fails, don't crash
+            context = request.data.get('context', 'User is asking for advanced professional assistance.')
+            provider = request.data.get('provider')
+            model = request.data.get('model')
             
             if not question:
                 return Response({
                     "error": "Question is required"
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Get AI manager with specified provider/model
+            # File/Image Support for Multimodal AI
             files = request.data.get('files', [])
             
+            # Get the most powerful AI available
             ai = get_ai_manager(provider=provider, model=model)
             
-            answer = ai.ask_tutor(question, subject, context, media_data=files)
+            # Send to AI with all capabilities
+            answer = ai.ask_tutor(
+                question=question,
+                subject=subject,
+                context=context,
+                media_data=files
+            )
             
             return Response({
                 "success": True,
                 "question": question,
-                "subject": subject,
                 "answer": answer,
                 "provider_info": ai.get_provider_info()
             })
             
         except Exception as e:
-            logger.error(f"Unified AI Tutor error: {str(e)}")
+            logger.error(f"Universal AI error: {str(e)}")
             return Response({
-                "error": "AI tutoring service failed",
-                "details": str(e)
+                "error": f"Error: {str(e)}",
+                "details": "The AI system encountered an issue. Please try again."
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
