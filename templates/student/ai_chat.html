@@ -449,9 +449,18 @@
                                 onclick="document.getElementById('fileInput').click()" title="Upload Image/Video">
                                 <i class="fa-solid fa-paperclip"></i>
                             </button>
+                            <!-- Code Mode Button -->
                             <button class="p-2 text-purple-400 hover:text-white transition rounded-lg hover:bg-white/10"
                                 title="Code Mode">
                                 <i class="fa-solid fa-code"></i>
+                            </button>
+                            <!-- Voice Mode Button -->
+                            <button
+                                class="p-2 text-red-400 hover:text-white transition rounded-lg hover:bg-white/10 relative"
+                                title="Voice Input" onclick="toggleVoice()" id="micBtn">
+                                <i class="fa-solid fa-microphone"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-ping hidden"
+                                    id="micPing"></span>
                             </button>
                         </div>
 
@@ -477,7 +486,79 @@
     </main>
 
     <script>
-        // --- LOGIC ---
+        // --- GLOBAL VARIABLES ---
+        let attachedFiles = [];
+        let isVoiceActive = false;
+        let recognition = null;
+        let synth = window.speechSynthesis;
+
+        // --- VOICE LOGIC ---
+        function toggleVoice() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Voice input not supported in this browser. Try Chrome.");
+                return;
+            }
+
+            if (isVoiceActive) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        function startListening() {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US'; // Can be made dynamic
+
+            recognition.onstart = function () {
+                isVoiceActive = true;
+                document.getElementById('micBtn').classList.add('text-white', 'bg-red-500');
+                document.getElementById('micPing').classList.remove('hidden');
+                document.getElementById('promptInput').placeholder = "Listening...";
+            };
+
+            recognition.onend = function () {
+                stopListening();
+            };
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('promptInput').value = transcript;
+                // Auto send?
+                setTimeout(sendMessage, 500);
+            };
+
+            recognition.onerror = function (event) {
+                console.error("Speech Error", event.error);
+                stopListening();
+            };
+
+            recognition.start();
+        }
+
+        function stopListening() {
+            isVoiceActive = false;
+            if (recognition) recognition.stop();
+            document.getElementById('micBtn').classList.remove('text-white', 'bg-red-500');
+            document.getElementById('micPing').classList.add('hidden');
+            document.getElementById('promptInput').placeholder = "Command 'Antigravity' (Ask for Code, Image Analysis, Logic)...";
+        }
+
+        function speak(text) {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            // Strip markdown chars for cleaner speech
+            const cleanText = text.replace(/[*#`]/g, '');
+            const utterThis = new SpeechSynthesisUtterance(cleanText);
+            utterThis.pitch = 1;
+            utterThis.rate = 1;
+            synth.speak(utterThis);
+        }
+
+        // --- EXISTING LOGIC ---
 
         async function submitSubscriptionPayment() {
             const txnId = document.getElementById('transactionId').value.trim();
@@ -622,6 +703,13 @@
 
                 // Replace Loading with Real Response
                 let answer = data.answer || "No response received.";
+
+                // Auto-speak if it was a voice interaction or generally enabled? 
+                // Let's just speak the first sentence for effect if needed, or full text.
+                if (data.answer) {
+                    // speak(data.answer); // Optional: Uncomment to auto-speak every time
+                }
+
                 answer = parseMarkdown(answer);
 
                 aiDiv.innerHTML = `
@@ -633,6 +721,10 @@
                         </div>
                         <div class="msg-ai p-6 text-slate-300 w-full prose prose-invert max-w-none">
                            ${answer}
+                           <div class="mt-4 flex gap-2">
+                                <button onclick="speak('${escapeHtml(data.answer)}')" class="text-xs text-slate-500 hover:text-white"><i class="fa-solid fa-volume-high mr-1"></i> Read Aloud</button>
+                                <button class="text-xs text-slate-500 hover:text-white"><i class="fa-solid fa-copy mr-1"></i> Copy</button>
+                           </div>
                         </div>
                     </div>
                 `;

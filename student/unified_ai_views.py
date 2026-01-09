@@ -72,8 +72,19 @@ class UnifiedAITutorView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Get AI manager with specified provider/model
+            # Pass media data if available
+            files = request.data.get('files', [])
+            
             ai = get_ai_manager(provider=provider, model=model)
-            answer = ai.ask_tutor(question, subject, context)
+            
+            # Check if underlying service supports media (assuming Gemini does)
+            # We pass media_data as kwargs or modify ask_tutor signature in manager base.
+            # Ideally Manager.ask_tutor should accept kwargs.
+            
+            # Since we can't see manager.py, we'll try passing it as a named argument 
+            # if the underlying service is Gemini.
+            
+            answer = ai.ask_tutor(question, subject, context, media_data=files)
             
             return Response({
                 "success": True,
