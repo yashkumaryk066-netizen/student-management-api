@@ -727,7 +727,7 @@
                 const token = localStorage.getItem('authToken');
                 const csrfToken = getCookie('csrftoken'); // Ensure CSRF if session auth
 
-                const response = await fetch('/api/unified/tutor/', {
+                const response = await fetch('/api/ai/unified/tutor/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
