@@ -80,7 +80,7 @@ class AIServiceManager:
             logger.error(f"Failed to initialize {self.provider} service: {str(e)}")
             raise
     
-    def ask_tutor(self, question: str, subject: str = "General", context: str = "") -> str:
+    def ask_tutor(self, question: str, subject: str = "General", context: str = "", **kwargs) -> str:
         """
         Ask AI tutor a question
         
@@ -88,12 +88,13 @@ class AIServiceManager:
             question: Student's question
             subject: Subject area
             context: Additional context
+            **kwargs: Additional arguments like media_data
             
         Returns:
             AI's educational response
         """
         try:
-            return self.service.ask_tutor(question, subject, context)
+            return self.service.ask_tutor(question, subject, context, **kwargs)
         except Exception as e:
             logger.error(f"AI Tutor error with {self.provider}: {str(e)}")
             raise
