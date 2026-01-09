@@ -668,7 +668,7 @@ const DashboardApp = {
                     '<td>' +
                     '<button class="btn-action" onclick="DashboardApp.editStudent(' + student.id + ')" title="Edit" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px;">✏️</button>' +
                     '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/id-card/' + student.id + '/\', \'IDCard_' + student.name + '.pdf\')" title="Download ID Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">🪪</button>' +
-                    '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/admit-card/' + student.id + '/\', \'AdmitCard_' + student.name + '.pdf\')" title="Download Admit Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">🎫</button>' +
+                    '<button class="btn-action" onclick="DashboardApp.promptAndDownloadAdmitCard(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" title="Download Admit Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">🎫</button>' +
                     '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/report-card/' + student.id + '/\', \'ReportCard_' + student.name + '.pdf\')" title="Download Report Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">📈</button>' +
                     '<button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" title="Delete" style="padding: 4px 8px; font-size: 0.9rem;">🗑️</button>' +
                     '</td>' +
@@ -682,6 +682,13 @@ const DashboardApp = {
     },
 
     // --- SECURE DOWNLOADER ---
+    promptAndDownloadAdmitCard(studentId, studentName) {
+        const examName = prompt("Enter Exam Name for Admit Card:", "Annual Examination 2025");
+        if (examName) {
+            this.downloadFile(`/api/generate/admit-card/${studentId}/?exam=${encodeURIComponent(examName)}`, `AdmitCard_${studentName}.pdf`);
+        }
+    },
+
     async downloadFile(url, filename) {
         try {
             const token = localStorage.getItem('authToken');
@@ -3037,6 +3044,14 @@ const DashboardApp = {
                     <label>Parent/Guardian Relation</label>
                     <input type="text" name="relation" class="form-input" required placeholder="e.g. Father">
                 </div>
+                
+                <div class="form-group">
+                    <label>Student Photo</label>
+                    <div class="file-upload-wrapper" style="border: 2px dashed #4b5563; padding: 20px; text-align: center; border-radius: 8px; position: relative;">
+                        <input type="file" name="photo" class="form-input" accept="image/*" style="opacity: 0; position: absolute; top:0; left:0; width:100%; height:100%; cursor: pointer;">
+                        <span style="color: #9ca3af;">📸 Click to Upload Photo</span>
+                    </div>
+                </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="document.getElementById('addStudentModal').remove()">Cancel</button>
@@ -3057,7 +3072,12 @@ const DashboardApp = {
     async handleStudentSubmit(event) {
         const form = event.target;
         const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+
+        // Remove empty photo if not selected to avoid backend "empty string" errors
+        const photoFile = formData.get('photo');
+        if (photoFile && photoFile.size === 0) {
+            formData.delete('photo');
+        }
 
         // Disable button
         const btn = form.querySelector('button[type="submit"]');
@@ -3066,13 +3086,14 @@ const DashboardApp = {
         btn.disabled = true;
 
         try {
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`${this.apiBaseUrl}/students/`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${token}`
+                    // NO 'Content-Type' header! Let browser set multipart/form-data
                 },
-                body: JSON.stringify(data)
+                body: formData
             });
 
             if (!response.ok) {

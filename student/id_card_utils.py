@@ -125,8 +125,8 @@ def generate_id_card_pdf(student):
     c.drawCentredString(width/2, text_y, "STUDENT")
 
     # 6. Details Section (Clean Grid)
-    start_y = text_y - 25
-    line_h = 14
+    start_y = text_y - 15  # Moved up slightly
+    line_h = 13            # Tighter spacing
     left_margin = 25
     
     c.setFillColor(TEXT_DARK)
@@ -145,9 +145,9 @@ def generate_id_card_pdf(student):
     draw_detail_row("BLOOD GRP", student.blood_group or "N/A", start_y - line_h*3)
     draw_detail_row("PARENT", student.parent.username if student.parent else "N/A", start_y - line_h*4)
     
-    # 7. QR Code (Footer)
+    # 7. QR Code (Footer) - Moved Down
     qr_size = 40
-    qr_y = 35
+    qr_y = 20  # Lowered position to avoid overlap
     qr = qrcode.QRCode(box_size=2, border=0)
     qr_data = f"YSM|ID:{student.id}|{student.roll_number}"
     qr.add_data(qr_data)

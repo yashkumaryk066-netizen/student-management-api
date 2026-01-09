@@ -57,6 +57,7 @@ urlpatterns = [
 
     # API Endpoints
     path('api/', include('student.urls')),
+    path('api/notifications/', include('notifications.urls')),
 
     # API Documentation  
     # API Documentation

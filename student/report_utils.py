@@ -64,8 +64,20 @@ def generate_admit_card_pdf(student, exam_name, exam_date, center):
     
     # Left Side: Photo placeholder
     c.rect(60, box_top - 160, 100, 120, stroke=1, fill=0)
-    c.setFont("Helvetica", 8)
-    c.drawCentredString(110, box_top - 100, "Affix Photo Here")
+    
+    if student.photo:
+         try:
+             # Draw the actual uploaded photo
+             from reportlab.lib.utils import ImageReader
+             img = ImageReader(student.photo.path)
+             c.drawImage(img, 60, box_top - 160, width=100, height=120, preserveAspectRatio=True, anchor='c')
+         except Exception as e:
+             # Fallback if image fails
+             c.setFont("Helvetica", 8)
+             c.drawCentredString(110, box_top - 100, "Photo Error")
+    else:
+         c.setFont("Helvetica", 8)
+         c.drawCentredString(110, box_top - 100, "Affix Photo Here")
     
     # Right Side: Details
     text_x = 180
