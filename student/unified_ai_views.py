@@ -37,7 +37,8 @@ class AIProvidersListView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-from rest_framework.permissions import AllowAny
+from .models import Student, Payment, Employee
+from django.db.models import Sum
 
 class UnifiedAITutorView(APIView):
     """Unified AI tutoring endpoint - supports all providers"""
@@ -46,16 +47,7 @@ class UnifiedAITutorView(APIView):
     
     def post(self, request):
         """
-        Ask AI tutor with provider selection
-        
-        Request body:
-        {
-            "question": "What is photosynthesis?",
-            "subject": "Biology",
-            "context": "Optional context",
-            "provider": "chatgpt|gemini|claude",  // Optional
-            "model": "specific-model-name"  // Optional
-        }
+        Ask AI with Real-Time Database Context (RAG-lite)
         """
         try:
             question = request.data.get('question')
@@ -64,10 +56,25 @@ class UnifiedAITutorView(APIView):
             provider = request.data.get('provider')  # Optional
             model = request.data.get('model')  # Optional
             
-            # --- FREE ACCESS (LOGIN REQUIRED) ---
-            # IsAuthenticated handles the login check.
-            # We removed the subscription block here.
-            # ------------------------------------
+            # --- INTELLIGENT CONTEXT INJECTION (THE "BRAIN" UPGRADE) ---
+            # We fetch live business stats to give the AI "Eyes" on the database.
+            try:
+                total_students = Student.objects.count()
+                total_revenue = Payment.objects.filter(status='PAID').aggregate(Sum('amount'))['amount__sum'] or 0
+                total_staff = Employee.objects.count() if 'Employee' in locals() else 0
+                
+                system_context = (
+                   f" [SYSTEM DATA: Total Students: {total_students} | "
+                   f"Total Revenue collected: ₹{total_revenue} | "
+                   f"Total Staff: {total_staff}]"
+                )
+                
+                # Append this real data to the user's context
+                context += system_context
+                
+            except Exception as db_err:
+                logger.warning(f"Context Injection Failed: {db_err}")
+                # Continue without context if DB fails, don't crash
             
             if not question:
                 return Response({
@@ -75,17 +82,9 @@ class UnifiedAITutorView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Get AI manager with specified provider/model
-            # Pass media data if available
             files = request.data.get('files', [])
             
             ai = get_ai_manager(provider=provider, model=model)
-            
-            # Check if underlying service supports media (assuming Gemini does)
-            # We pass media_data as kwargs or modify ask_tutor signature in manager base.
-            # Ideally Manager.ask_tutor should accept kwargs.
-            
-            # Since we can't see manager.py, we'll try passing it as a named argument 
-            # if the underlying service is Gemini.
             
             answer = ai.ask_tutor(question, subject, context, media_data=files)
             

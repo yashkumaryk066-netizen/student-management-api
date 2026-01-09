@@ -3,7 +3,7 @@ import os
 from decouple import config
 
 # Try to get key from env, or hardcode the one user provided for testing
-api_key = config('GEMINI_API_KEY', default="AIzaSyDukbuezLoIrvHJYAxOVc0siBlH2MD985g")
+api_key = config('GEMINI_API_KEY', default="AIzaSyAAQ9nTflOI56IBNUKxGJl7uM5ns0RWIuE")
 genai.configure(api_key=api_key)
 
 print("🔍 Scanning Neural Engines (Available Models)...")
