@@ -42,6 +42,7 @@ from rest_framework.permissions import AllowAny
 class UnifiedAITutorView(APIView):
     """Unified AI tutoring endpoint - supports all providers"""
     permission_classes = [AllowAny]
+    authentication_classes = [] # Explicitly disable auth for debug
     
     def post(self, request):
         """
