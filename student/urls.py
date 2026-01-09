@@ -65,6 +65,7 @@ from .unified_ai_views import (
     UnifiedContentSummarizerView, UnifiedConceptExplainerView,
     UnifiedContentTranslatorView
 )
+from .ai_chat_views import AIChatView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -226,6 +227,9 @@ urlpatterns = [
     
     # DASHBOARD STATS (PLAN SPECIFIC)
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
+
+    # ==================== NEW AI CHAT INTERFACE ====================
+    path('ai/chat/', AIChatView.as_view(), name='ai-chat-interface'),
 
     # ==================== UNIFIED MULTI-MODEL AI ENDPOINTS ====================
     # List all available AI providers

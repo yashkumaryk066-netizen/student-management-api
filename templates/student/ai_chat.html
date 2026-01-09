@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y.S.M AI - The Architect</title>
+    <!-- Premium Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #f59e0b;
+            /* Amber 500 */
+            --primary-glow: rgba(245, 158, 11, 0.4);
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-darker);
+            color: #e2e8f0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Scanline Effect */
+        .scanlines {
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0),
+                    rgba(255, 255, 255, 0) 50%,
+                    rgba(0, 0, 0, 0.2) 50%,
+                    rgba(0, 0, 0, 0.2));
+            background-size: 100% 4px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.15;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(4px);
+            }
+        }
+
+        /* Sidebar Glass */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+        }
+
+        /* Chat Area */
+        .chat-container {
+            background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%);
+            position: relative;
+        }
+
+        .chat-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        /* Input Glass */
+        .input-area {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+        }
+
+        /* Premium Input */
+        .ai-input {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .ai-input:focus {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            outline: none;
+        }
+
+        /* Messages */
+        .msg-user {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px 20px 0 20px;
+        }
+
+        .msg-ai {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px 20px 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .msg-ai::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        /* Glow Text */
+        .glow-text {
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        /* Typing Dot Animation */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Code Block */
+        pre {
+            background: #0d1117 !important;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid #30363d;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .model-select {
+            appearance: none;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            color: #94a3b8;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .model-select:hover {
+            border-color: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="flex">
+
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar w-72 flex-shrink-0 flex flex-col hidden md:flex">
+        <div class="p-6 border-b border-white/10">
+            <h1 class="text-2xl font-bold flex items-center gap-2 text-white glow-text">
+                <i class="fa-solid fa-brain text-amber-500"></i>
+                <span>Y.S.M <span class="text-amber-500">AI</span></span>
+            </h1>
+            <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest">Architect Intelligence</p>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+            <div class="text-xs font-semibold text-slate-500 uppercase px-2 mb-2">Recent Chats</div>
+            <button
+                class="w-full text-left p-3 rounded-xl bg-white/5 hover:bg-white/10 transition flex items-center gap-3 border border-white/5 hover:border-amber-500/30 group">
+                <i class="fa-regular fa-message text-slate-400 group-hover:text-amber-500"></i>
+                <div class="truncate text-sm text-slate-300 group-hover:text-white">New Project Architecture</div>
+            </button>
+            <button
+                class="w-full text-left p-3 rounded-xl hover:bg-white/5 transition flex items-center gap-3 border border-transparent">
+                <i class="fa-regular fa-message text-slate-400"></i>
+                <div class="truncate text-sm text-slate-400">Database Optimization</div>
+            </button>
+            <!-- Add more fake history items for "Advance" feel -->
+        </div>
+
+        <div class="p-4 border-t border-white/10">
+            <a href="/"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="text-sm font-medium">Back to Home</span>
+            </a>
+            <div class="mt-4 flex items-center gap-3 px-3">
+                <img src="/static/assets/developer_avatar.png"
+                    onerror="this.src='https://ui-avatars.com/api/?name=Y+M&background=f59e0b&color=fff'"
+                    class="w-8 h-8 rounded-full ring-2 ring-amber-500/50">
+                <div class="text-xs">
+                    <div class="text-white font-medium">Yash Mishra</div>
+                    <div class="text-amber-500">Super Admin</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="flex-1 flex flex-col relative chat-container">
+        <!-- Top Bar -->
+        <header
+            class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <div class="md:hidden">
+                    <button class="text-slate-400"><i class="fa-solid fa-bars"></i></button>
+                </div>
+                <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                    <span class="text-amber-500 text-sm">✨</span>
+                    <select class="bg-transparent text-sm text-slate-300 outline-none cursor-pointer font-medium">
+                        <option>Y-GPT 4.0 (Architect)</option>
+                        <option>Gemini Pro Vision</option>
+                        <option>Claude 3.5 Sonnet</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="text-slate-400 hover:text-white transition" title="Clear Chat"><i
+                        class="fa-solid fa-eraser"></i></button>
+                <button class="text-slate-400 hover:text-white transition" title="Settings"><i
+                        class="fa-solid fa-gear"></i></button>
+            </div>
+        </header>
+
+        <!-- Messages Area -->
+        <div id="messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth">
+
+            <!-- Welcome Message -->
+            <div class="flex flex-col items-center justify-center h-full text-center space-y-6" id="welcome-screen">
+                <div
+                    class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/20 mb-4 animate-[bounce_3s_infinite]">
+                    <i class="fa-solid fa-brain text-4xl text-white"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-white glow-text">How can I help you, Architect?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
+                    <button
+                        class="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500/50 hover:bg-white/10 transition text-left group"
+                        onclick="setInput('Analyze my database schema for optimization')">
+                        <div class="text-amber-500 mb-2"><i class="fa-solid fa-database"></i></div>
+                        <div class="text-white font-medium group-hover:text-amber-400 transition">Optimize Database
+                        </div>
+                        <div class="text-xs text-slate-500">Analyze schema & queries</div>
+                    </button>
+                    <button
+                        class="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500/50 hover:bg-white/10 transition text-left group"
+                        onclick="setInput('Generate a secure authentication flow in Python')">
+                        <div class="text-blue-500 mb-2"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="text-white font-medium group-hover:text-blue-400 transition">Security Audit</div>
+                        <div class="text-xs text-slate-500">Generate secure flows</div>
+                    </button>
+                    <button
+                        class="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500/50 hover:bg-white/10 transition text-left group"
+                        onclick="setInput('Create a premium React component for dashboard stats')">
+                        <div class="text-purple-500 mb-2"><i class="fa-solid fa-code"></i></div>
+                        <div class="text-white font-medium group-hover:text-purple-400 transition">Generate Code</div>
+                        <div class="text-xs text-slate-500">Premium React/Vue components</div>
+                    </button>
+                    <button
+                        class="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500/50 hover:bg-white/10 transition text-left group"
+                        onclick="setInput('Explain Quantum Computing to a 5 year old')">
+                        <div class="text-green-500 mb-2"><i class="fa-solid fa-book-open"></i></div>
+                        <div class="text-white font-medium group-hover:text-green-400 transition">Deep Learning</div>
+                        <div class="text-xs text-slate-500">Explain complex topics</div>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 md:p-6 input-area">
+            <div class="max-w-4xl mx-auto relative group">
+                <div
+                    class="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-purple-600 rounded-2xl opacity-20 group-hover:opacity-40 transition blur">
+                </div>
+                <div class="relative bg-slate-900 rounded-xl flex items-end p-2 border border-white/10">
+                    <button class="p-3 text-slate-400 hover:text-white transition rounded-lg hover:bg-white/5">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                    <textarea id="promptInput" rows="1"
+                        class="w-full bg-transparent text-white placeholder-slate-500 p-3 outline-none resize-none max-h-40 font-medium"
+                        placeholder="Ask Y.S.M Intelligence anything..."
+                        oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
+                    <button id="sendBtn"
+                        class="p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-lg shadow-amber-500/20 transition-all active:scale-95"
+                        onclick="sendMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="text-center mt-2 text-xs text-slate-500 font-mono">
+                    Y.S.M AI can make mistakes. Verify important information.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- LOGIC ---
+        function setInput(text) {
+            const input = document.getElementById('promptInput');
+            input.value = text;
+            input.focus();
+            input.style.height = 'auto';
+            input.style.height = input.scrollHeight + 'px';
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('promptInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            // Hide Welcome Screen
+            const welcome = document.getElementById('welcome-screen');
+            if (welcome) welcome.style.display = 'none';
+
+            const container = document.getElementById('messages');
+
+            // 1. Add User Message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'flex justify-end';
+            userDiv.innerHTML = `
+                <div class="msg-user max-w-3xl p-4 text-white shadow-lg">
+                    ${escapeHtml(msg).replace(/\n/g, '<br>')}
+                </div>
+            `;
+            container.appendChild(userDiv);
+
+            // Clear Input
+            input.value = '';
+            input.style.height = 'auto';
+            container.scrollTop = container.scrollHeight;
+
+            // 2. Add AI Loading
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'flex justify-start';
+            aiDiv.innerHTML = `
+                <div class="flex gap-4 max-w-4xl">
+                    <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-1">
+                        <i class="fa-solid fa-brain text-xs text-white"></i>
+                    </div>
+                    <div class="msg-ai p-4 text-slate-300 shadow-none bg-transparent border-none">
+                       <div class="flex gap-1">
+                            <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
+                       </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(aiDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // 3. API Call
+            try {
+                // Check if user has token (this page might be public or protected, assume needs auth for real API)
+                // Use the Unified API
+                const token = localStorage.getItem('authToken');
+
+                const response = await fetch('/api/unified/tutor/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Include auth if you have it logged in, else might fail if endpoint protected
+                        // For this "Public" demo, we might need a public endpoint or ensure logged in.
+                        // Assuming user is logged in given context.
+                        'Authorization': token ? 'Bearer ' + token : ''
+                    },
+                    body: JSON.stringify({
+                        question: msg,
+                        provider: 'chatgpt' // Default, allows backend to fallback
+                    })
+                });
+
+                const data = await response.json();
+
+                // Replace Loading with Real Response
+                // Simple Markdown parser replacement for demo
+                // Ideally use marked.js
+                let answer = data.answer || "I'm sorry, I couldn't process that. (Check API Key)";
+                answer = parseMarkdown(answer);
+
+                aiDiv.innerHTML = `
+                     <div class="flex gap-4 max-w-4xl">
+                        <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fa-solid fa-brain text-xs text-white"></i>
+                        </div>
+                        <div class="msg-ai p-6 text-slate-300 w-full prose prose-invert max-w-none">
+                           ${answer}
+                        </div>
+                    </div>
+                `;
+
+            } catch (err) {
+                aiDiv.innerHTML = `
+                     <div class="flex gap-4 max-w-4xl">
+                        <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fa-solid fa-triangle-exclamation text-xs text-white"></i>
+                        </div>
+                        <div class="msg-ai p-4 text-red-400 border-red-500/30">
+                           Connection Error: ${err.message}. Please try again.
+                        </div>
+                    </div>
+                `;
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Simple helper to format code blocks
+        function parseMarkdown(text) {
+            // Replace code blocks
+            text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            // Replace bold
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Line breaks
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Enter key to send
+        document.getElementById('promptInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+
+</html>
