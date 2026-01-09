@@ -19,20 +19,25 @@ class HuggingFaceService:
     def __init__(self):
         """Initialize HuggingFace service"""
         try:
+            # API key is optional for public models
             self.api_key = config('HUGGINGFACE_API_KEY', default='')
             self.api_url = "https://api-inference.huggingface.co/models"
             
-            # Default to a powerful free model
+            # Use a reliable free model that works without authentication
             self.default_model = config(
                 'HUGGINGFACE_MODEL',
-                default='mistralai/Mixtral-8x7B-Instruct-v0.1'
+                default='microsoft/Phi-3-mini-4k-instruct'
             )
             
-            self.headers = {
-                "Authorization": f"Bearer {self.api_key}" if self.api_key else ""
-            }
+            # Set headers (works with or without key)
+            if self.api_key:
+                self.headers = {"Authorization": f"Bearer {self.api_key}"}
+                logger.info(f"HuggingFace initialized with API key")
+            else:
+                self.headers = {}
+                logger.info(f"HuggingFace initialized in public mode (no key)")
             
-            logger.info(f"HuggingFace AI initialized with model: {self.default_model}")
+            logger.info(f"Model: {self.default_model}")
             
         except Exception as e:
             logger.error(f"HuggingFace init error: {str(e)}")
