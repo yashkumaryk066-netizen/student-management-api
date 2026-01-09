@@ -35,6 +35,26 @@ class GeminiService:
         self.default_model = config('GEMINI_MODEL', default='gemini-1.5-flash')
         self.temperature = float(config('GEMINI_TEMPERATURE', default='0.7'))
         self.max_tokens = int(config('GEMINI_MAX_TOKENS', default='2000'))
+
+        # Safety Settings - Allow creative freedom but block explicit/harmful content
+        self.safety_settings = [
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+        ]
     
     def generate_content(
         self,
@@ -75,7 +95,10 @@ class GeminiService:
             # Currently we will expect 'images' kwarg which is list of PIL images or base64
             # NOTE: For now, assuming direct file/image inputs are handled by caller formatting
             
-            response = model_instance.generate_content(content_parts)
+            response = model_instance.generate_content(
+                content_parts,
+                safety_settings=self.safety_settings
+            )
             return response.text.strip()
             
         except Exception as e:

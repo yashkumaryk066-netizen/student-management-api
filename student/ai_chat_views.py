@@ -20,24 +20,13 @@ class AIChatView(APIView):
     def get(self, request):
         user = request.user
         
-        # Get or Create AI Subscription
-        sub, created = AISubscription.objects.get_or_create(user=user)
+        # --- FREE ACCESS MODE (LOGIN REQUIRED) ---
+        # Strictly enforces IsAuthenticated via permission_classes
         
-        # Auto-check status
-        current_status = sub.check_and_update_status()
-        
-        is_access_granted = sub.is_access_granted
-        days_remaining = 0
-        
-        if sub.status == 'TRIAL':
-            trial_end = sub.trial_start_date + timezone.timedelta(days=7)
-            delta = trial_end - timezone.now()
-            days_remaining = max(0, delta.days)
-            
         context = {
-            'is_access_granted': is_access_granted,
-            'status': sub.status,
-            'days_remaining': days_remaining,
+            'is_access_granted': True, # Always grant if logged in
+            'status': 'ACTIVE',
+            'days_remaining': '∞', # Infinite for now
             'username': user.username,
             'role': getattr(user, 'profile', None).role if hasattr(user, 'profile') else 'USER',
             'qr_code_url': '/static/img/upi_qr.jpg' 
