@@ -112,7 +112,7 @@ class GeminiService:
             else:
                 raise Exception(f"Gemini service error: {error_msg}")
     
-    def ask_tutor(self, question: str, subject: str = "General", context: str = "", media_data: Optional[List] = None) -> str:
+    def ask_tutor(self, question: str, subject: str = "General", context: str = "", media_data: Optional[List] = None, **kwargs) -> str:
         """AI Universal Assistant (Y.S.M Architect Intelligence)"""
         system_instruction = f"""You are **Y.S.M Architect Intelligence**, an advanced Artificial Intelligence architect defined by precision, capability, and security.
 
