@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Verification | Y.S.M Antigravity</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --bg-darker: #020617;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-darker);
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+            background-size: 100% 4px;
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-border {
+            position: relative;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .hud-border::before,
+        .hud-border::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            transition: all 0.5s;
+        }
+
+        .hud-border::before {
+            top: -2px;
+            left: -2px;
+            border-right: 0;
+            border-bottom: 0;
+        }
+
+        .hud-border::after {
+            bottom: -2px;
+            right: -2px;
+            border-left: 0;
+            border-top: 0;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+            outline: none;
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: scan 2s ease-in-out infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0%;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="scanlines"></div>
+
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse"
+            style="animation-delay: 1s;"></div>
+    </div>
+
+    <!-- Auth Container -->
+    <div class="hud-border w-full max-w-md p-8 rounded-xl z-20 relative overflow-hidden group">
+        <div class="scanner-line group-hover:block hidden"></div>
+
+        <div class="text-center mb-8">
+            <div
+                class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-fingerprint text-3xl text-white"></i>
+            </div>
+            <h1 class="text-2xl font-bold font-mono tracking-wider glow-text">IDENTITY VERIFICATION</h1>
+            <p class="text-xs text-slate-400 mt-2 uppercase">Antigravity Secure Access v4.0</p>
+        </div>
+
+        <!-- Forms -->
+        <div id="auth-forms" class="space-y-4">
+
+            <!-- Phone/Email Input -->
+            <div class="space-y-2">
+                <label class="text-xs text-slate-400 font-mono ml-1">PRIMARY IDENTIFIER (EMAIL)</label>
+                <div class="relative">
+                    <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-500"></i>
+                    <input type="email" id="email" placeholder="user@domain.com"
+                        class="w-full p-3 pl-10 rounded-lg font-mono placeholder-slate-600">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="space-y-2">
+                <label class="text-xs text-slate-400 font-mono ml-1">SECURITY KEY (PASSWORD)</label>
+                <div class="relative">
+                    <i class="fa-solid fa-key absolute left-4 top-3.5 text-slate-500"></i>
+                    <input type="password" id="password" placeholder="••••••••"
+                        class="w-full p-3 pl-10 rounded-lg font-mono placeholder-slate-600">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-4 grid grid-cols-2 gap-4">
+                <button onclick="handleAuth('signup')"
+                    class="p-3 rounded-lg border border-white/10 hover:bg-white/5 transition text-sm font-mono text-slate-300">
+                    <i class="fa-solid fa-user-plus mr-2"></i>REGISTER
+                </button>
+                <button onclick="handleAuth('login')"
+                    class="p-3 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:to-amber-400 transition text-sm font-bold shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i>ACCESS
+                </button>
+            </div>
+
+            <p id="status-msg" class="text-center text-xs font-mono mt-4 min-h-[1.5em] text-cyan-400"></p>
+        </div>
+
+        <div class="mt-6 border-t border-white/5 pt-4 flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>SECURE PROTOCOL: TLS 1.3</span>
+            <span>SERVER: ONLINE</span>
+        </div>
+    </div>
+
+    <script>
+        async function handleAuth(action) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const status = document.getElementById('status-msg');
+
+            if (!email || !password) {
+                status.innerText = "ERROR: MISSING CREDENTIALS";
+                status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-red-500 animate-pulse";
+                return;
+            }
+
+            status.innerText = action === 'login' ? "AUTHENTICATING..." : "REGISTERING IDENTITY...";
+            status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-amber-500 animate-pulse";
+
+            try {
+                // Get CSRF Token if needed, but we are using Basic JSON POST for this view
+                // For simulated security/verification delay
+                await new Promise(r => setTimeout(r, 800));
+
+                const response = await fetch('/api/ai/auth/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        email: email,
+                        password: password,
+                        phone: '0000000000' // Placeholder
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    status.innerText = "ACCESS GRANTED. REDIRECTING...";
+                    status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-green-500";
+                    setTimeout(() => window.location.href = data.redirect, 500);
+                } else {
+                    throw new Error(data.error || "Access Denied");
+                }
+
+            } catch (err) {
+                status.innerText = "ERROR: " + err.message.toUpperCase();
+                status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-red-500";
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+
+</html>

@@ -10,14 +10,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from rest_framework.permissions import AllowAny
+
 class AIChatView(APIView):
     """
     Serve the Premium Y.S.M AI Chat Interface.
-    Protected: Requires Login & Active Subscription (Trial or Premium).
+    Protected: Redirects unauthenticated to AI Login.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('/api/ai/auth/')
+
         user = request.user
         
         # --- FREE ACCESS MODE (LOGIN REQUIRED) ---
