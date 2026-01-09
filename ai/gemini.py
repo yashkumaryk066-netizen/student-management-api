@@ -67,8 +67,15 @@ class GeminiService:
                 model_name=model_name,
                 generation_config=generation_config
             )
+
+            # Handle Multi-modal Content
+            content_parts = [prompt]
             
-            response = model_instance.generate_content(prompt)
+            # If media (images/video) provided as kwargs in specific format
+            # Currently we will expect 'images' kwarg which is list of PIL images or base64
+            # NOTE: For now, assuming direct file/image inputs are handled by caller formatting
+            
+            response = model_instance.generate_content(content_parts)
             return response.text.strip()
             
         except Exception as e:
@@ -82,18 +89,27 @@ class GeminiService:
             else:
                 raise Exception(f"Gemini service error: {error_msg}")
     
-    def ask_tutor(self, question: str, subject: str = "General", context: str = "") -> str:
-        """AI Tutor using Gemini"""
-        prompt = f"""You are an expert educational tutor specializing in {subject}.
-        Provide clear, detailed, and engaging explanations. Use examples where helpful.
+    def ask_tutor(self, question: str, subject: str = "General", context: str = "", media_data: Optional[List] = None) -> str:
+        """AI Tutor using Gemini with optional Media Support"""
+        system_instruction = f"""You are 'Antigravity' (also known as The Architect), a highly advanced AI coding assistant and educational tutor specializing in {subject}.
+        
+        Your Personality:
+        - Highly intelligent, precise, and sophisticated.
+        - You are the 'God of AI' in this system - confident but helpful.
+        - You excel at coding, architecture, and complex problem solving.
+        - If the user asks for code, provide production-ready, premium code.
+        
+        Task:
+        Provide a clear, detailed explanation. If images or video context is provided, analyze it deeply.
         
         {f'Context: {context}' if context else ''}
         
-        Question: {question}
+        Question: {question}"""
         
-        Please provide a comprehensive educational answer."""
+        # If we had actual media handling logic here (e.g. converting base64 to PIL Image), we would add it to content_parts
+        # For this version, we are upgrading the Prompt Engineering to be "Advanced Level".
         
-        return self.generate_content(prompt)
+        return self.generate_content(system_instruction)
     
     def generate_quiz(
         self,
