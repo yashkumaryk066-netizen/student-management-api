@@ -33,6 +33,7 @@ class AIChatView(APIView):
             'status': 'ACTIVE',
             'days_remaining': '∞', # Infinite for now
             'username': user.username,
+            'display_name': user.first_name if user.first_name else user.username.split('@')[0].title(),
             'role': getattr(user, 'profile', None).role if hasattr(user, 'profile') else 'USER',
             'qr_code_url': '/static/img/upi_qr.jpg' 
         }
