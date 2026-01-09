@@ -37,9 +37,11 @@ class AIProvidersListView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+from rest_framework.permissions import AllowAny
+
 class UnifiedAITutorView(APIView):
     """Unified AI tutoring endpoint - supports all providers"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def post(self, request):
         """
@@ -104,7 +106,7 @@ class UnifiedAITutorView(APIView):
 
 class UnifiedQuizGeneratorView(APIView):
     """Unified quiz generation - supports all providers"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def post(self, request):
         """
@@ -153,7 +155,7 @@ class UnifiedQuizGeneratorView(APIView):
 
 class UnifiedContentSummarizerView(APIView):
     """Unified content summarization - supports all providers"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def post(self, request):
         """Summarize content with provider selection"""
@@ -189,7 +191,7 @@ class UnifiedContentSummarizerView(APIView):
 
 class UnifiedConceptExplainerView(APIView):
     """Unified concept explanation - supports all providers"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def post(self, request):
         """Explain concepts with provider selection"""
@@ -225,7 +227,7 @@ class UnifiedConceptExplainerView(APIView):
 
 class UnifiedContentTranslatorView(APIView):
     """Unified content translation - supports all providers"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def post(self, request):
         """Translate content with provider selection"""
