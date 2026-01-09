@@ -677,7 +677,6 @@
                     body: JSON.stringify({
                         question: msg,
                         provider: 'chatgpt',
-                        files: attachedFiles.map(f => ({ name: f.name, data: f.data })),
                         context: "User is asking for 'Advanced Level' assistance. Be 'Antigravity'."
                     })
                 });
