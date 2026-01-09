@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import AISubscription, ManualPayment
+from .models import AISubscription, Payment
 from django.utils import timezone
 from django.conf import settings
 import logging
@@ -40,7 +40,7 @@ class AIChatView(APIView):
             'days_remaining': days_remaining,
             'username': user.username,
             'role': getattr(user, 'profile', None).role if hasattr(user, 'profile') else 'USER',
-            'qr_code_url': '/static/img/payment_qr.png' # Ensure this exists or use placeholder
+            'qr_code_url': '/static/img/upi_qr.jpg' 
         }
         
         return render(request, 'student/ai_chat.html', context)
@@ -54,25 +54,26 @@ class AIPaymentSubmitView(APIView):
     def post(self, request):
         try:
             transaction_id = request.data.get('transaction_id')
-            receipt = request.FILES.get('receipt')
             
             if not transaction_id:
                 return Response({"error": "Transaction ID is required"}, status=400)
             
-            # Create Manual Payment Record tagged for AI
-            payment = ManualPayment.objects.create(
+            # Check for duplicates
+            if Payment.objects.filter(transaction_id=transaction_id).exists():
+                 return Response({"error": "This transaction ID is already used."}, status=400)
+
+            # Create Payment Record
+            payment = Payment.objects.create(
                 user=request.user,
                 amount=50.00,
                 transaction_id=transaction_id,
-                payment_method='UPI',
-                status='PENDING',
-                remarks='AI Subscription - Weekly'
+                payment_type='SUBSCRIPTION',
+                payment_mode='UPI',
+                status='PENDING_VERIFICATION',
+                description='AI Subscription - Weekly (Manual Premium)',
+                due_date=timezone.now().date(),
+                paid_date=timezone.now().date()
             )
-            
-            # Use existing Receipt model logic or save file if added to ManualPayment
-            # Assuming ManualPayment has no file field per previous context, 
-            # we might need to rely on the general Payment flow or just store ID.
-            # But the user asked for "Same as before".
             
             # Update Subscription to PENDING
             sub = AISubscription.objects.get(user=request.user)
