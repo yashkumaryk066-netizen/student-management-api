@@ -1,23 +1,23 @@
 
 import os
 import django
+from django.contrib.auth import get_user_model
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "manufatures.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'manufatures.settings')
 django.setup()
 
-from django.contrib.auth import get_user_model
 User = get_user_model()
+username = 'superadmin'
+email = 'superadmin@example.com'
+password = 'SuperPassword123!'
 
-try:
-    if User.objects.filter(username="admin").exists():
-        user = User.objects.get(username="admin")
-        user.set_password("admin123")
-        user.is_superuser = True
-        user.is_staff = True
-        user.save()
-        print("Updated existing 'admin' user password to 'admin123'")
-    else:
-        User.objects.create_superuser("admin", "admin@example.com", "admin123")
-        print("Created new superuser: admin / admin123")
-except Exception as e:
-    print(f"Error: {e}")
+if not User.objects.filter(username=username).exists():
+    print(f"Creating superuser {username}...")
+    User.objects.create_superuser(username, email, password)
+    print("Superuser created.")
+else:
+    print(f"Superuser {username} already exists. Updating password...")
+    u = User.objects.get(username=username)
+    u.set_password(password)
+    u.save()
+    print("Password updated.")

@@ -6,7 +6,7 @@ Use: DJANGO_SETTINGS_MODULE=manufatures.pythonanywhere_settings
 from .settings import *
 
 # Production mode
-DEBUG = False
+DEBUG = True
 
 # Update with YOUR PythonAnywhere username
 ALLOWED_HOSTS = ['yashamishra.pythonanywhere.com']
@@ -38,3 +38,6 @@ CORS_ALLOW_CREDENTIALS = True
 SECURE_SSL_REDIRECT = False  # PythonAnywhere handles SSL
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+# Disable strict Whitenoise manifest storage to prevent 500 errors if collectstatic failed
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'

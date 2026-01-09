@@ -183,7 +183,8 @@ const ExamAPI = {
     create: (data) => apiCall('/exams/', { method: 'POST', body: JSON.stringify(data) }),
     getResults: (id) => apiCall(`/exams/${id}/results/`)
 };
-EOF && sed -i '225r /dev/stdin' static/js/api.js <<EOF
+// EOF marker removed - End of standard module API definitions
+
 window.HostelAPI = HostelAPI;
 window.TransportAPI = TransportAPI;
 window.HRAPI = HRAPI;
@@ -258,16 +259,16 @@ const BulkAPI = {
         const formData = new FormData();
         formData.append('file', file);
         return apiCall('/auth/bulk-import/', { // Re-using auth endpoint or check views.py
-             headers: {}, // Let browser set content-type for FormData
-             method: 'POST',
-             body: formData
+            headers: {}, // Let browser set content-type for FormData
+            method: 'POST',
+            body: formData
         });
     },
     exportStudents: () => {
-         // This typically returns a blob, so apiCall might need adjustment or use direct fetch
-         return fetch(API_BASE_URL + '/students/export/', {
-             headers: { 'Authorization': 'Bearer ' + TokenStore.access }
-         }).then(res => res.blob());
+        // This typically returns a blob, so apiCall might need adjustment or use direct fetch
+        return fetch(API_BASE_URL + '/students/export/', {
+            headers: { 'Authorization': 'Bearer ' + TokenStore.access }
+        }).then(res => res.blob());
     }
 };
 window.BulkAPI = BulkAPI;
