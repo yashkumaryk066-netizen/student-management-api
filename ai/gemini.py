@@ -32,7 +32,7 @@ class GeminiService:
             raise ImportError("google-generativeai package not installed. Run: pip install google-generativeai")
         
         # Model configuration
-        self.default_model = config('GEMINI_MODEL', default='gemini-1.5-flash')
+        self.default_model = config('GEMINI_MODEL', default='gemini-pro')
         self.temperature = float(config('GEMINI_TEMPERATURE', default='0.7'))
         self.max_tokens = int(config('GEMINI_MAX_TOKENS', default='2000'))
 
