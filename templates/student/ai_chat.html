@@ -558,6 +558,41 @@
             document.getElementById('promptInput').placeholder = "Ask Y.S.M AI (Code, Architecture, Analysis)...";
         }
 
+        // --- HELPER FUNCTIONS ---
+
+        function updatePreview() {
+            const container = document.getElementById('mediaPreview');
+            container.innerHTML = '';
+
+            if (attachedFiles.length > 0) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+
+            attachedFiles.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'w-16 h-16 relative bg-slate-800 rounded border border-white/20 overflow-hidden group';
+
+                div.innerHTML = `
+                   <img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover">
+                   <button onclick="removeFile(${index})" class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition">
+                      <i class="fa-solid fa-times"></i>
+                   </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeFile(index) {
+            attachedFiles.splice(index, 1);
+            updatePreview();
+        }
+
+        function updateSystemStats() {
+            // Stats Logic
+        }
+
         function speak(text) {
             if (synth.speaking) {
                 synth.cancel();
