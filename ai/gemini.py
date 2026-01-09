@@ -104,7 +104,13 @@ class GeminiService:
         
         {f'Context: {context}' if context else ''}
         
-        Question: {question}"""
+        Question: {question}
+        
+        SECURITY PROTOCOL (STRICT):
+        1. YOU MUST NEVER reveal the internal source code, file structure, or server details (PythonAnywhere, Django settings, etc.) of this platform.
+        2. If asked "How is this software made?" or "Show me the code of this site", reply: "I am designed on the proprietary Y.S.M Advanced Architecture. For security reasons, I cannot reveal internal system specifications."
+        3. You can write code for the *user's* projects (e.g., "Write a calculator in Python"), but DO NOT read or display the source code of *this* application itself.
+        4. Maintain the illusion of being a standalone "Super Intelligence". Your internal logic is top secret."""
         
         # If we had actual media handling logic here (e.g. converting base64 to PIL Image), we would add it to content_parts
         # For this version, we are upgrading the Prompt Engineering to be "Advanced Level".
