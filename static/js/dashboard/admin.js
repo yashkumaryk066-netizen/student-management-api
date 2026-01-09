@@ -690,23 +690,26 @@ const DashboardApp = {
                 return;
             }
 
-            // Show toast or loader
             this.showAlert('Downloading...', 'Generating file, please wait...', 'info');
 
-            const res = await fetch(url + '?token=' + token, { // Fallback query param just in case backend supports it, but reliant on Header
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
+            const res = await fetch(url + '?token=' + token, {
+                headers: { 'Authorization': 'Bearer ' + token }
             });
 
             if (res.status === 401 || res.status === 403) {
                 this.showAlert('Access Denied', 'Session expired or permission denied.', 'error');
-                if (res.status === 401) setTimeout(() => window.location.reload(), 2000);
                 return;
             }
-            if (!res.ok) {
-                throw new Error('Download failed');
+
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                // It's an error message, not a file
+                const errData = await res.json();
+                this.showAlert('Download Failed', errData.error || 'Server returned an error.', 'error');
+                return;
             }
+
+            if (!res.ok) throw new Error('Download failed');
 
             const blob = await res.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
@@ -1181,6 +1184,7 @@ const DashboardApp = {
         this.fetchPayments();
     },
 
+
     async fetchPayments() {
         try {
             const res = await fetch(`${this.apiBaseUrl}/payments/`, {
@@ -1188,35 +1192,99 @@ const DashboardApp = {
             });
             const data = await res.json();
 
-            // Calculate Stats (Basic client-side calc)
-            const totalCollected = data.filter(p => p.status === 'PAID').reduce((sum, p) => sum + parseFloat(p.amount), 0);
-            const pending = data.filter(p => p.status === 'PENDING').reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            // Calculate Stats
+            const totalCollected = data.filter(p => p.status === 'PAID' || p.status === 'APPROVED').reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            const pending = data.filter(p => p.status === 'PENDING' || p.status === 'PENDING_VERIFICATION').reduce((sum, p) => sum + parseFloat(p.amount), 0);
             const overdue = data.filter(p => p.status === 'OVERDUE').reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
-            // Update stats if elements exist (simple number formatting)
-            const fmt = (n) => '₹' + n.toLocaleString();
+            // Update Stats UI (if elements exist)
+            const fmt = (n) => '₹' + n.toLocaleString('en-IN');
+
+            // Assuming elements with specific IDs or classes exist from loadFinanceManagement
+            const statCards = document.querySelectorAll('.stat-card .card-value');
+            if (statCards.length >= 3) {
+                statCards[0].textContent = fmt(totalCollected);
+                statCards[1].textContent = fmt(pending);
+                statCards[2].textContent = fmt(overdue);
+            }
 
             // Render Table
             const tbody = document.querySelector('.data-table tbody');
+            const thead = document.querySelector('.data-table thead tr');
+
+            // Ensure Actions column exists
+            if (thead && !thead.innerHTML.includes('Actions')) {
+                thead.innerHTML += '<th>Actions</th>';
+            }
+
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No transactions found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 2rem;">No transaction records found.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.map(p => `
-                 <tr>
-                    <td>${p.transaction_id || '-'}</td>
-                    <td>${p.student_name}</td>
-                    <td>₹${p.amount}</td>
-                    <td>${p.due_date}</td>
-                    <td>${p.description}</td>
-                    <td><span class="status-badge status-${p.status.toLowerCase()}">${p.status}</span></td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = data.map(p => {
+                let statusBadge = '';
+                if (p.status === 'PAID' || p.status === 'APPROVED') statusBadge = '<span class="badge badge-success">Paid</span>';
+                else if (p.status === 'PENDING') statusBadge = '<span class="badge badge-warning">Pending</span>';
+                else if (p.status === 'PENDING_VERIFICATION') statusBadge = '<span class="badge badge-info status-pulse">Verify Wait</span>';
+                else if (p.status === 'OVERDUE') statusBadge = '<span class="badge badge-danger">Overdue</span>';
+                else statusBadge = `<span class="badge">${p.status}</span>`;
+
+                let actions = '';
+                if (p.status === 'PENDING_VERIFICATION' || p.status === 'PENDING') {
+                    // Approve / Reject Actions
+                    actions = `
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="DashboardApp.updatePaymentStatus(${p.id}, 'APPROVED')" class="btn-action" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);" title="Approve Payment">✅</button>
+                            <button onclick="DashboardApp.updatePaymentStatus(${p.id}, 'REJECTED')" class="btn-action" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" title="Reject Payment">❌</button>
+                        </div>
+                    `;
+                } else if (p.status === 'PAID' || p.status === 'APPROVED') {
+                    actions = `<button class="btn-action p-download" onclick="DashboardApp.downloadFile('${this.apiBaseUrl}/payments/${p.id}/invoice/', 'Invoice_${p.id}.pdf')" title="Download Invoice">📄</button>`;
+                }
+
+                return `
+                     <tr style="transition: all 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="font-family: monospace; color: #cbd5e1;">${p.transaction_id || '#Manual'}</td>
+                        <td style="font-weight: 500; color: white;">${p.student_name}</td>
+                        <td style="font-weight: 600; color: #cbd5e1;">₹${parseFloat(p.amount).toLocaleString('en-IN')}</td>
+                        <td>${p.due_date}</td>
+                        <td>${p.description}</td>
+                        <td>${statusBadge}</td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
 
         } catch (e) {
-            console.error(e);
+            console.error("Finance Load Error", e);
+            document.querySelector('.data-table tbody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load payments.</td></tr>';
         }
+    },
+
+    async updatePaymentStatus(id, newStatus) {
+        this.showConfirm('Confirm Action', `Are you sure you want to mark this as ${newStatus}?`, async () => {
+            try {
+                this.showAlert('Processing', 'Updating payment status...', 'info');
+                const res = await fetch(`${this.apiBaseUrl}/payments/${id}/update_status/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    this.showAlert('Success', `Payment marked as ${newStatus}`, 'success');
+                    this.fetchPayments(); // Refresh
+                } else {
+                    throw new Error('Update failed');
+                }
+            } catch (e) {
+                this.showAlert('Error', 'Failed to update status', 'error');
+            }
+        });
     },
 
     loadLibraryManagement() {

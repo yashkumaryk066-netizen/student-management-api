@@ -143,6 +143,7 @@ class UserProfile(models.Model):
     institution_name = models.CharField(max_length=200, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True)
+    telegram_chat_id = models.CharField(max_length=50, blank=True, null=True, help_text="Linked Telegram Chat ID")
     
     # Plan Management
     subscription_expiry = models.DateField(null=True, blank=True)

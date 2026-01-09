@@ -307,6 +307,9 @@ TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='+12203561251')
 TWILIO_WHATSAPP_NUMBER = config('TWILIO_WHATSAPP_NUMBER', default='whatsapp:+14155238886')
 ADMIN_WHATSAPP_NUMBER = config('ADMIN_WHATSAPP_NUMBER', default='+918356926231') # SuperAdmin Number for Alerts
 
+# Telegram Configuration
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='8384943128:AAH6r2ovKp20XUMSi64asxo4J0lc_lvZvxc')
+
 # SMS Settings
 SMS_GATEWAY = config('SMS_GATEWAY', default='twilio')
 SMS_API_KEY = config('SMS_API_KEY', default='') # Optional if using Twilio
