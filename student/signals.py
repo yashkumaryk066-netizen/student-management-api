@@ -30,7 +30,7 @@ def send_approval_email(user):
         message = f"""
         Greetings {user.username},
         
-        Your access request for Y.S.M Architect Intelligence (Antigravity v4.0) has been APPROVED by the Super Admin.
+        Your access request for Y.S.M Architect Intelligence has been APPROVED by the Super Admin.
         
         You can now login securely using your registered credentials.
         
