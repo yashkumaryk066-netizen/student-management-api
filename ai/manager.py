@@ -78,26 +78,22 @@ class AIServiceManager:
                 
         except Exception as e:
             logger.error(f"Failed to initialize {self.provider} service: {str(e)}")
-            raise
+            self.service = None
+            self.init_error = str(e)
+            # Do NOT re-raise, so we can return a friendly error message during usage
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", **kwargs) -> str:
         """
         Ask AI tutor a question
-        
-        Args:
-            question: Student's question
-            subject: Subject area
-            context: Additional context
-            **kwargs: Additional arguments like media_data
-            
-        Returns:
-            AI's educational response
         """
+        if not self.service:
+            return f"Error: AI Service ({self.provider}) is not available. Details: {getattr(self, 'init_error', 'Unknown configuration error')}."
+            
         try:
             return self.service.ask_tutor(question, subject, context, **kwargs)
         except Exception as e:
             logger.error(f"AI Tutor error with {self.provider}: {str(e)}")
-            raise
+            return f"I encountered an error while processing your request: {str(e)}"
     
     def generate_quiz(
         self,
@@ -106,35 +102,48 @@ class AIServiceManager:
         difficulty: str = "medium"
     ) -> str:
         """Generate quiz questions"""
+        if not self.service:
+             # Return a valid JSON error structure for quiz if possible, or just string
+             return f"Error: AI Service ({self.provider}) not initialized."
+
         try:
             return self.service.generate_quiz(topic, num_questions, difficulty)
         except Exception as e:
             logger.error(f"Quiz generation error with {self.provider}: {str(e)}")
-            raise
+            return "Error generating quiz. Please try again."
     
     def summarize_content(self, text: str, max_length: int = 200) -> str:
         """Summarize educational content"""
+        if not self.service:
+            return f"Error: AI Service ({self.provider}) not initialized."
+
         try:
             return self.service.summarize_content(text, max_length)
         except Exception as e:
             logger.error(f"Summarization error with {self.provider}: {str(e)}")
-            raise
+            return "Error summarizing content."
     
     def explain_concept(self, concept: str, grade_level: str = "high school") -> str:
         """Explain complex concepts"""
+        if not self.service:
+            return f"Error: AI Service ({self.provider}) not initialized."
+
         try:
             return self.service.explain_concept(concept, grade_level)
         except Exception as e:
             logger.error(f"Concept explanation error with {self.provider}: {str(e)}")
-            raise
+            return "Error explaining concept."
     
     def translate_content(self, text: str, target_language: str) -> str:
         """Translate educational content"""
+        if not self.service:
+            return f"Error: AI Service ({self.provider}) not initialized."
+
         try:
             return self.service.translate_content(text, target_language)
         except Exception as e:
             logger.error(f"Translation error with {self.provider}: {str(e)}")
-            raise
+            return "Error translating content."
     
     def get_provider_info(self) -> Dict:
         """Get information about current AI provider"""
