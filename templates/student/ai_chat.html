@@ -590,53 +590,67 @@
                 // Check if user has token (this page might be public or protected, assume needs auth for real API)
                 // Use the Unified API
                 const token = localStorage.getItem('authToken');
+                const csrfToken = getCookie('csrftoken'); // Ensure CSRF if session auth
 
                 const response = await fetch('/api/unified/tutor/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Include auth if you have it logged in, else might fail if endpoint protected
-                        // For this "Public" demo, we might need a public endpoint or ensure logged in.
-                        // Assuming user is logged in given context.
-                        'Authorization': token ? 'Bearer ' + token : ''
+                        'Authorization': token ? 'Bearer ' + token : '',
+                        'X-CSRFToken': csrfToken
                     },
                     body: JSON.stringify({
                         question: msg,
-                        provider: 'chatgpt' // Default, allows backend to fallback
+                        provider: 'gemini',
+                        files: attachedFiles.map(f => ({ name: f.name, data: f.data })),
+                        context: "User is asking for 'Advanced Level' assistance. Be 'Antigravity'."
                     })
                 });
 
-                const data = await response.json();
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error("Non-JSON Response:", text.substring(0, 200)); // Log for debugging
+                    throw new Error("Antigravity System Malfunction (Server Error). Please check connection.");
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.error || data.details || "Request Failed");
+                }
 
                 // Replace Loading with Real Response
-                // Simple Markdown parser replacement for demo
-                // Ideally use marked.js
-                let answer = data.answer || "I'm sorry, I couldn't process that. (Check API Key)";
+                let answer = data.answer || "No response received.";
                 answer = parseMarkdown(answer);
 
                 aiDiv.innerHTML = `
-                     <div class="flex gap-4 max-w-4xl">
-                        <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-1">
-                            <i class="fa-solid fa-brain text-xs text-white"></i>
+                     <div class="flex gap-4 max-w-4xl w-full">
+                        <div class="w-8 h-8 rounded mt-1 overflow-hidden shadow-lg shadow-cyan-500/20 border border-cyan-500/30">
+                             <div class="w-full h-full bg-slate-900 flex items-center justify-center">
+                                 <i class="fa-solid fa-cube text-cyan-400 text-xs"></i>
+                             </div>
                         </div>
                         <div class="msg-ai p-6 text-slate-300 w-full prose prose-invert max-w-none">
                            ${answer}
                         </div>
                     </div>
                 `;
-
             } catch (err) {
                 aiDiv.innerHTML = `
                      <div class="flex gap-4 max-w-4xl">
-                        <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-1">
-                            <i class="fa-solid fa-triangle-exclamation text-xs text-white"></i>
+                        <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
                         </div>
-                        <div class="msg-ai p-4 text-red-400 border-red-500/30">
-                           Connection Error: ${err.message}. Please try again.
+                        <div class="msg-ai p-4 text-red-400 font-mono text-sm border-l-2 border-red-500 bg-red-500/5">
+                           SYSTEM_ERROR: ${err.message}
                         </div>
                     </div>
                 `;
             }
+            // Clear attachments after successful send attempt
+            attachedFiles = [];
+            updatePreview();
             container.scrollTop = container.scrollHeight;
         }
 
