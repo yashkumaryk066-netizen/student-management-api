@@ -16,7 +16,7 @@ class GeminiService:
     """
     
     def __init__(self):
-        """Initialize Gemini service with API credentials"""
+        """Initialize Gemini service with Autonomous Model Discovery"""
         try:
             self.api_key = config('GEMINI_API_KEY')
         except Exception:
@@ -31,30 +31,64 @@ class GeminiService:
         except ImportError:
             raise ImportError("google-generativeai package not installed. Run: pip install google-generativeai")
         
-        # Model configuration
-        self.default_model = config('GEMINI_MODEL', default='gemini-pro')
+        # SYSTEM SETTINGS
         self.temperature = float(config('GEMINI_TEMPERATURE', default='0.7'))
         self.max_tokens = int(config('GEMINI_MAX_TOKENS', default='2000'))
+        
+        # AUTONOMOUS MODEL DISCOVERY (AMD)
+        # Instead of guessing, we ask the matrix what engines are online.
+        self.default_model = self._discover_best_model()
+        logger.info(f"Y.S.M AI Online. Connected to Neural Engine: {self.default_model}")
 
-        # Safety Settings - Allow creative freedom but block explicit/harmful content
+        # Safety Settings
         self.safety_settings = [
-            {
-                "category": "HARM_CATEGORY_HARASSMENT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-                "category": "HARM_CATEGORY_HATE_SPEECH",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-            },
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
         ]
+
+    def _discover_best_model(self) -> str:
+        """
+        Scans available Google AI models and selects the best one.
+        Prioritizes: Pro > Flash > Any text model
+        """
+        try:
+            # Check if user forced a specific model in .env
+            configured_model = config('GEMINI_MODEL', default=None)
+            if configured_model:
+                return configured_model
+
+            available_models = []
+            for m in self.genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    available_models.append(m.name)
+            
+            if not available_models:
+                # Fallback purely just in case API list fails but keys work (rare)
+                return "gemini-1.5-flash"
+                
+            # Preferred Hierarchy
+            # We look for specific substrings in the available model names
+            priority_keywords = [
+                "gemini-1.5-pro",
+                "gemini-1.5-flash",
+                "gemini-pro",
+                "gemini-1.0-pro"
+            ]
+            
+            # 1. Try to find exact matches or best contained matches
+            for keyword in priority_keywords:
+                for model in available_models:
+                    if keyword in model:
+                        return model # Return first match (e.g. models/gemini-1.5-pro-001)
+            
+            # 2. If no priority model found, take the first available one (usually legacy or beta)
+            return available_models[0]
+
+        except Exception as e:
+            logger.error(f"Model Discovery Failed: {e}. Defaulting to safe-mode.")
+            return "gemini-pro" # Ultimate safe fallback
     
     def generate_content(
         self,
