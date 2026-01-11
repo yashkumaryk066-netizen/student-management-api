@@ -781,9 +781,9 @@
                 // If the answer contains an image markdown ![alt](url), make it a beautiful card
                 answer = answer.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
                     return `
-                        <div class="my-6 relative group w-fit mx-auto md:mx-0">
+                        <div class="my-6 relative group w-fit mx-auto md:mx-0 rounded-full overflow-hidden">
                             <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-purple-600 rounded-full blur opacity-60 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                            <img src="${url}" alt="${alt}" class="relative w-48 h-48 rounded-full bg-slate-900 object-cover border-4 border-slate-900 shadow-2xl z-10 hover:scale-105 transition-transform duration-300">
+                            <img src="${url}" alt="${alt}" class="relative w-48 h-48 rounded-full bg-slate-800 object-cover object-top scale-110 border-4 border-slate-900 shadow-2xl z-10 hover:scale-125 transition-transform duration-500">
                         </div>
                     `;
                 });
