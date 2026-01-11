@@ -33,6 +33,8 @@ from student.views import (
     DeveloperProfileView,
     ResumeView,
     service_worker,
+    robots_txt,
+    sitemap_xml,
 )
 from student.ai_chat_views import AIChatView
 
@@ -44,6 +46,10 @@ urlpatterns = [
     # Favicon Fix
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico')),
     path('service-worker.js', service_worker, name='service-worker'),
+    
+    # SEO
+    path('robots.txt', robots_txt),
+    path('sitemap.xml', sitemap_xml),
     
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),

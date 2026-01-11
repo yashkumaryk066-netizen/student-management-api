@@ -1014,3 +1014,37 @@ self.addEventListener('push', event => {
 });
 """
     return HttpResponse(js_content, content_type="application/javascript")
+
+# SEO Views
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Disallow: /dashboard/",
+        "Disallow: /api/",
+        "Allow: /",
+        "Sitemap: https://yashamishra.pythonanywhere.com/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+def sitemap_xml(request):
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://yashamishra.pythonanywhere.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://yashamishra.pythonanywhere.com/demo/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://yashamishra.pythonanywhere.com/developer/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>"""
+    return HttpResponse(xml, content_type="application/xml")
+

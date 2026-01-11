@@ -37,9 +37,38 @@
     <meta name="twitter:image" content="https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg">
 
     <!-- Additional SEO -->
-    <meta name="theme-color" content="#6366f1">
-    <meta name="msapplication-TileColor" content="#6366f1">
-    <meta name="application-name" content="Y.S.M AI">
+    <!-- PWA / Mobile App Meta Tags -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#02040a">
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('DW ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('DW ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <style>
+        /* Mobile App Fixes */
+        body {
+            overscroll-behavior-y: none;
+            /* Disables pull-to-refresh on Android */
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
 
 
     <!-- Fonts -->
@@ -1205,6 +1234,18 @@
                                     <polyline points="12 5 19 12 12 19"></polyline>
                                 </svg>
                             </button>
+
+                            <!-- NEW: Premium App Install Button -->
+                            <button id="installAppBtn" class="btn-premium btn-app-action"
+                                style="background: linear-gradient(135deg, #FF4500, #FF8C00) !important; box-shadow: 0 10px 40px rgba(255, 69, 0, 0.5) !important;">
+                                <span>DOWNLOAD APP</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                            </button>
                             <button class="btn-premium btn-demo-action" onclick="window.location.href='/demo/'">
                                 <span>LIVE DEMO</span>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2195,6 +2236,41 @@
 
         </div>
     </div>
+    <!-- PWA Install Script -->
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            installBtn.style.display = 'inline-flex';
+        });
+
+        installBtn.addEventListener('click', (e) => {
+            // Hide the app provided install promotion
+            installBtn.style.display = 'none';
+            // Show the install prompt
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // If deferredPrompt is null (e.g. on iOS or if viewed in app)
+                alert('To install the app:\n1. Tap the Share button below\n2. Select "Add to Home Screen"');
+            }
+        });
+    </script>
 </body>
 
 </html>

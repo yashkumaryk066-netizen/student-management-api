@@ -41,8 +41,8 @@ DEVELOPER_PROFILE = {
         ]
     },
     "contact": {
-        "profile_image": "/static/images/yash_profile.jpg",
-        "profile_image_alt": "/static/images/author.jpg"
+        "profile_image": "https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg",
+        "profile_image_alt": "Yash Ankush Mishra - Developer"
     },
     "social": {
         "github": "yashkumaryk066",
