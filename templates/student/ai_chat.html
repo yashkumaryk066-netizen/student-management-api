@@ -635,6 +635,52 @@
             const msg = input.value.trim();
             if (!msg) return;
 
+            // --- Y.S.M ADVANCE SECURITY PROTOCOL ---
+            // Local Pre-flight check to prevent server stress from malicious queries
+            const restrictedKeywords = ['porn', 'xxx', 'nude', 'sex', 'call girl', 'nsfw', 'hentai'];
+            const lowerMsg = msg.toLowerCase();
+
+            if (restrictedKeywords.some(keyword => lowerMsg.includes(keyword))) {
+                // 1. Add User Message
+                const userDiv = document.createElement('div');
+                userDiv.className = 'flex justify-end';
+                userDiv.innerHTML = `
+                    <div class="msg-user max-w-3xl p-4 text-white shadow-lg border border-red-500/30">
+                        ${escapeHtml(msg).replace(/\n/g, '<br>')}
+                    </div>
+                `;
+                document.getElementById('messages').appendChild(userDiv);
+
+                // 2. Add Security Alert directly
+                const securityDiv = document.createElement('div');
+                securityDiv.className = 'flex justify-start';
+                securityDiv.innerHTML = `
+                    <div class="flex gap-4 max-w-4xl">
+                        <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 mt-1 animate-pulse">
+                            <i class="fa-solid fa-shield-halved text-xs text-white"></i>
+                        </div>
+                        <div class="msg-ai p-4 text-red-200 bg-red-900/20 border-l-2 border-red-500 shadow-lg shadow-red-900/20">
+                           <div class="font-bold text-xs uppercase mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-lock"></i> Security Protocol Activated
+                           </div>
+                           <div class="text-sm">
+                                I cannot process this request. It contains content flagged by <strong>Y.S.M Safety Guidelines</strong> (Adult/Explicit Content).
+                                <br><br>
+                                <span class="text-xs opacity-70">Event ID: SEC-${Math.floor(Math.random() * 100000)} | Severity: HIGH</span>
+                           </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('messages').appendChild(securityDiv);
+
+                // Clear Input & Scroll
+                input.value = '';
+                input.style.height = 'auto';
+                document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+                return; // STOP EXECUTION HERE
+            }
+            // ---------------------------------------
+
             // Hide Welcome Screen
             const welcome = document.getElementById('welcome-screen');
             if (welcome) welcome.style.display = 'none';
