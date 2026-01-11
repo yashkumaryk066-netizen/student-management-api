@@ -32,6 +32,7 @@ from student.views import (
     ParentDashboardTemplateView,
     DeveloperProfileView,
     ResumeView,
+    service_worker,
 )
 
 urlpatterns = [
@@ -41,6 +42,7 @@ urlpatterns = [
     # Trigger reload to force update to front-end assets (V5.1)
     # Favicon Fix
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico')),
+    path('service-worker.js', service_worker, name='service-worker'),
     
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),

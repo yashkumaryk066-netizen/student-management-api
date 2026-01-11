@@ -877,3 +877,41 @@ class GenerateIDCardView(APIView):
             return Response({"error": "Student not found"}, status=404)
 
 
+
+# PWA SERVICE WORKER VIEW
+def service_worker(request):
+    js_content = """
+const CACHE_NAME = 'ysm-ai-v1';
+const urlsToCache = [
+  '/student/ai-chat/',
+  '/static/manifest.json',
+  '/static/assets/ysm_icon.png'
+];
+
+self.addEventListener('install', event => {
+  self.skipWaiting(); // Activate worker immediately
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(clients.claim()); // Become available to all pages
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+"""
+    return HttpResponse(js_content, content_type="application/javascript")
