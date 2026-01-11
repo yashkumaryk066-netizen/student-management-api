@@ -236,6 +236,25 @@ Additional Info: {context}
 
 **YOUR RESPONSE:**
 """
+        # If media (images) provided, send as multimodal request
+        if media_data:
+            content_parts = [system_instruction]
+            for media in media_data:
+                 # Standardize image format if needed, assuming base64 or URL
+                 # Gemini primarily accepts PIL images or Blob for some SDK versions
+                 # But we will pass it raw for now to "generate_content" to handle
+                 content_parts.append(media) 
+            
+            # Note: We need to adapt generate_content to handle lists, or call genai directly here
+            # For simplicity, let's try direct generation for multimodal
+            try:
+                model = self.genai.GenerativeModel('gemini-1.5-flash') # Flash supports multimodal well
+                response = model.generate_content(content_parts)
+                return response.text
+            except Exception as e:
+                logger.error(f"Multimodal Error: {e}")
+                # Fallback to text only
+                return self.generate_content(system_instruction, temperature=0.7)
         
         return self.generate_content(system_instruction, temperature=0.7)
     
