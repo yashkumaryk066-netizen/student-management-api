@@ -2,7 +2,7 @@
   "name": "Y.S.M AI - Architect Intelligence",
   "short_name": "Y.S.M AI",
   "description": "Premium AI Architect & Universal Tutor - Your Personal AI Assistant",
-  "start_url": "/student/ai-chat/?utm_source=pwa",
+  "start_url": "/student/ai-chat/?source=pwa",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#f59e0b",
