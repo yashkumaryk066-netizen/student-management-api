@@ -20,9 +20,15 @@ class AIServiceManager:
     CHATGPT = "chatgpt"
     GEMINI = "gemini"
     CLAUDE = "claude"
+    GROQ = "groq"
     
     # Available models
     MODELS = {
+        "groq": {
+            "llama3-70b-8192": "Llama 3 70B (Hyper Fast)",
+            "llama3-8b-8192": "Llama 3 8B (Instant)",
+            "mixtral-8x7b-32768": "Mixtral 8x7B (Long Context)"
+        },
         "huggingface": {
             "mixtral-8x7b": "Mixtral 8x7B (FREE, Powerful)",
             "llama-2-70b": "Llama 2 70B (FREE)",
@@ -51,7 +57,7 @@ class AIServiceManager:
         Initialize AI Service Manager with Premium Multi-Provider Support
         
         Args:
-            provider: AI provider (huggingface, gemini, chatgpt, claude) - auto-detect if None
+            provider: AI provider (huggingface, gemini, chatgpt, claude, groq) - auto-detect if None
             model: Specific model to use - uses default if None
         """
         # Default to GEMINI provider (Most Reliable)
@@ -69,6 +75,11 @@ class AIServiceManager:
                 from .huggingface import get_huggingface_service
                 self.service = get_huggingface_service()
                 logger.info(f"✅ Initialized HuggingFace AI (FREE)")
+
+            elif self.provider == self.GROQ:
+                from .groq import get_groq_service
+                self.service = get_groq_service()
+                logger.info(f"✅ Initialized Groq AI (Hyper Speed)")
                 
             elif self.provider == self.CHATGPT:
                 from .chatgpt import get_chatgpt_service
