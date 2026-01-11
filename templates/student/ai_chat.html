@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Premium Native App Viewport - Locked & Responsive -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Y.S.M AI - The Architect</title>
     <!-- PWA Settings -->
     <link rel="manifest" href="/static/manifest.json">
@@ -15,6 +17,9 @@
     <link rel="apple-touch-startup-image" href="/static/assets/ysm_icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Y.S.M AI">
+    <!-- Prevent Screenshot on iOS (Premium Security) -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
     <!-- Premium Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
@@ -28,12 +33,30 @@
     <style>
         :root {
             --primary: #f59e0b;
-            /* Amber 500 */
             --primary-glow: rgba(245, 158, 11, 0.4);
             --bg-dark: #0f172a;
             --bg-darker: #020617;
             --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(255, 255, 255, 0.1);
+
+            /* Safe Area for iOS Notch */
+            --safe-area-top: env(safe-area-inset-top);
+            --safe-area-bottom: env(safe-area-inset-bottom);
+            --safe-area-left: env(safe-area-inset-left);
+            --safe-area-right: env(safe-area-inset-right);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        html {
+            overflow: hidden;
+            height: 100vh;
+            height: -webkit-fill-available;
+            position: fixed;
+            width: 100%;
         }
 
         body {
@@ -42,8 +65,15 @@
             color: #e2e8f0;
             overflow: hidden;
             height: 100vh;
-            cursor: crosshair;
-            /* Advanced 'HUD' Feel */
+            height: -webkit-fill-available;
+            position: fixed;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overscroll-behavior: none;
+            touch-action: pan-y;
         }
 
         /* Premium Custom Scrollbar for Chat */
