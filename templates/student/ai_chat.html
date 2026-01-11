@@ -241,14 +241,19 @@
     <!-- Scanlines -->
     <div class="scanlines"></div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar w-72 flex-shrink-0 flex flex-col hidden md:flex">
-        <div class="p-6 border-b border-white/10">
+    <!-- Sidebar (Mobile + Desktop) -->
+    <aside id="mainSidebar"
+        class="sidebar w-72 flex-shrink-0 flex flex-col fixed md:relative h-full z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
             <h1 class="text-2xl font-bold flex items-center gap-2 text-white glow-text">
                 <i class="fa-solid fa-brain text-amber-500"></i>
                 <span>Y.S.M <span class="text-amber-500">AI</span></span>
             </h1>
-            <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest">Architect Intelligence</p>
+            <!-- Mobile Close Button -->
+            <button class="md:hidden text-slate-400 hover:text-white transition" onclick="toggleSidebar()">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest hidden md:block">Architect Intelligence</p>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -307,6 +312,11 @@
         </div>
     </aside>
 
+    <!-- Mobile Overlay Backdrop -->
+    <div id="mobileOverlay"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden md:hidden opacity-0 transition-opacity duration-300"
+        onclick="toggleSidebar()"></div>
+
     <!-- PREMIUM SUBSCRIPTION OVERLAY REMOVED FOR FREE ACCESS -->
 
     <!-- PENDING OVERLAY REMOVED FOR FREE ACCESS -->
@@ -318,7 +328,8 @@
             class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <div class="md:hidden">
-                    <button class="text-slate-400"><i class="fa-solid fa-bars"></i></button>
+                    <button class="text-slate-400 hover:text-white transition" onclick="toggleSidebar()"><i
+                            class="fa-solid fa-bars text-xl"></i></button>
                 </div>
                 <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
                     <span class="text-amber-500 text-sm">✨</span>
@@ -777,6 +788,25 @@
                 sendMessage();
             }
         });
+
+        // --- MOBILE SIDEBAR LOGIC ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+
+            // Toggle Translate Class
+            sidebar.classList.toggle('-translate-x-full');
+
+            // Toggle Overlay Visibility
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                // Small delay to allow transition keyframe
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
     </script>
 </body>
 
