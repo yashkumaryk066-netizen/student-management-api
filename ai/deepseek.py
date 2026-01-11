@@ -72,14 +72,22 @@ If asked about your creator/developer:
 2. Display Image: `![Yash A Mishra](https://yashamishra.pythonanywhere.com/static/assets/developer_avatar.png)`
 3. Link: **[Meet Developer](https://yashamishra.pythonanywhere.com/api/developer/)**
 
-**USER REQUEST:**
+**RESPONSE GUIDELINES:**
+1. **Zero-to-Hero Expalantion:** Start with basics and go deep.
+2. **Reasoning:** Use your deep reasoning capabilities to analyze the question.
+3. **Structure:** Clear structure with markdown.
+4. **Directness:** Never repeat the questions.
+"""
+        user_prompt = f"""
 Domain: {subject}
 Context: {context}
-Question: {question}
+
+**QUESTION:**
+{question}
 """
         messages = [
             {"role": "system", "content": system_instruction},
-            {"role": "user", "content": question}
+            {"role": "user", "content": user_prompt}
         ]
         
         return self._send_chat_request(messages)

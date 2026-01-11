@@ -78,14 +78,24 @@ If asked about your creator/developer:
 2. Display Image: `![Yash A Mishra](https://yashamishra.pythonanywhere.com/static/assets/developer_avatar.png)`
 3. Link: **[Meet Developer](https://yashamishra.pythonanywhere.com/api/developer/)**
 
-**USER REQUEST:**
-Domain: {subject}
-Context: {context}
-Question: {question}
+**RESPONSE GUIDELINES:**
+1. **Direct Answer:** Do not repeat the question. Start answering immediately.
+2. **Depth:** Provide comprehensive, zero-to-hero explanations.
+3. **Structure:** Use clear Markdown headings, bullet points, and code blocks.
+4. **Tone:** Professional, Intelligent, and Helpful.
 """
-        # Note: Groq doesn't support system messages in the same way as some others in simple payload, 
-        # but for chat completions, we can use a system role if we want, or just prepend to user message.
-        # The standardized chat format supports 'system' role.
+        
+        # Prepare User Content with Context
+        user_prompt = f"""
+Domain/Subject: {subject}
+Context: {context}
+
+**QUESTION:**
+{question}
+
+**INSTRUCTION:**
+Provide a detailed, advanced-level response to the question above.
+"""
         
         # Prepare messages
         messages = [
@@ -116,7 +126,7 @@ Question: {question}
         else:
             # Text Only
             self.default_model = "llama-3.3-70b-versatile" 
-            messages.append({"role": "user", "content": question})
+            messages.append({"role": "user", "content": user_prompt})
         
         return self._send_chat_request(messages)
 
