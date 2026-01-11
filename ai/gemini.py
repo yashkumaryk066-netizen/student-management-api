@@ -71,19 +71,19 @@ class GeminiService:
             # Preferred Hierarchy
             # We look for specific substrings in the available model names
             priority_keywords = [
+                "gemini-2.0-flash",
+                "gemini-2.5-flash",
                 "gemini-1.5-pro",
-                "gemini-1.5-flash",
-                "gemini-pro",
-                "gemini-1.0-pro"
+                "gemini-pro"
             ]
             
             # 1. Try to find exact matches or best contained matches
             for keyword in priority_keywords:
                 for model in available_models:
                     if keyword in model:
-                        return model # Return first match (e.g. models/gemini-1.5-pro-001)
+                        return model # Return first match
             
-            # 2. If no priority model found, take the first available one (usually legacy or beta)
+            # 2. If no priority model found, take the first available one that supports generateContent
             return available_models[0]
 
         except Exception as e:
@@ -109,11 +109,11 @@ class GeminiService:
         # 4. Gemini (Generic alias)
         candidate_models = [
             model or self.default_model,
-            'gemini-2.0-flash-exp',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-8b',
+            'gemini-2.0-flash',
+            'gemini-2.5-flash',
+            'gemini-flash-latest',
             'gemini-pro',
-            'gemini-1.0-pro-latest',
+            'gemini-1.5-pro',
             'gemini-1.0-pro'
         ]
         
