@@ -143,8 +143,13 @@ class GeminiService:
                     safety_settings=self.safety_settings
                 )
                 
-                # If successful, we return immediately
-                return response.text.strip()
+                # Check for safety blocks
+                try:
+                    return response.text.strip()
+                except ValueError:
+                    # If response.text fails, it's usually because the response was blocked
+                    logger.warning(f"Engine {attempt_model} blocked content due to safety filters.")
+                    return "I apologize, but I cannot fulfill this request as it violates my safety guidelines regarding sensitive or harmful content."
                 
             except Exception as e:
                 error_msg = str(e)
