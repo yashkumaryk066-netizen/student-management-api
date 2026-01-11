@@ -21,9 +21,14 @@ class AIServiceManager:
     GEMINI = "gemini"
     CLAUDE = "claude"
     GROQ = "groq"
+    DEEPSEEK = "deepseek"
     
     # Available models
     MODELS = {
+        "deepseek": {
+            "deepseek-chat": "Y.S.M Logical-Core (v6.0)",
+            "deepseek-reasoner": "Y.S.M Reasoning-MAX (R1)"
+        },
         "groq": {
             "llama-3.3-70b-versatile": "Y.S.M Hyper-Speed (v5.0)",
             "llama-3.1-8b-instant": "Y.S.M Instant (v4.0)",
@@ -57,10 +62,10 @@ class AIServiceManager:
         Initialize AI Service Manager with Premium Multi-Provider Support
         
         Args:
-            provider: AI provider (huggingface, gemini, chatgpt, claude, groq) - auto-detect if None
+            provider: AI provider (huggingface, gemini, chatgpt, claude, groq, deepseek) - auto-detect if None
             model: Specific model to use - uses default if None
         """
-        # Default to GEMINI provider (Most Reliable)
+        # Default to GROQ or GEMINI based on config
         self.provider = provider or config('AI_PROVIDER', default='gemini').lower()
         self.model = model
         self.service = None
@@ -80,6 +85,11 @@ class AIServiceManager:
                 from .groq import get_groq_service
                 self.service = get_groq_service()
                 logger.info(f"✅ Initialized Groq AI (Hyper Speed)")
+                
+            elif self.provider == self.DEEPSEEK:
+                from .deepseek import get_deepseek_service
+                self.service = get_deepseek_service()
+                logger.info(f"✅ Initialized DeepSeek AI (Reasoning Core)")
                 
             elif self.provider == self.CHATGPT:
                 from .chatgpt import get_chatgpt_service
@@ -109,8 +119,8 @@ class AIServiceManager:
     
     def _try_fallback_providers(self):
         """Try alternative FREE providers in cascade"""
-        # Order: Groq (Fastest) -> HuggingFace (Free) -> Gemini (Free Tier) -> ChatGPT
-        fallback_order = ['groq', 'huggingface', 'gemini', 'chatgpt']
+        # Order: Groq -> DeepSeek -> HuggingFace -> Gemini -> ChatGPT
+        fallback_order = ['groq', 'deepseek', 'gemini', 'chatgpt']
         
         for fallback in fallback_order:
             if fallback == self.provider:
