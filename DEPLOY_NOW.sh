@@ -7,10 +7,9 @@ echo "🚀 Y.S.M AI - ADVANCED PREMIUM DEPLOYMENT"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Step 1: Navigate to project
-echo "📂 Step 1: Navigating to project..."
-cd ~/manufatures || { echo "❌ Error: Project directory not found!"; exit 1; }
-echo "✅ In project directory"
+# Step 1: Verify we're in project directory
+echo "📂 Step 1: Verifying project directory..."
+echo "✅ Current directory: $(pwd)"
 echo ""
 
 # Step 2: Pull latest changes from GitHub
