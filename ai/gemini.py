@@ -108,6 +108,7 @@ class GeminiService:
         # 4. Gemini (Generic alias)
         candidate_models = [
             model or self.default_model,
+            'gemini-2.0-flash-lite-preview-02-05',
             'gemini-2.0-flash',
             'gemini-2.5-flash',
             'gemini-flash-latest',
