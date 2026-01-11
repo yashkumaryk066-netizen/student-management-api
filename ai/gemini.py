@@ -187,7 +187,11 @@ class GeminiService:
 
         # If all failed
         logger.error(f"All Neural Engines failed. Last error: {str(last_error)}")
-        raise Exception(f"AI System Offline: Unable to connect to any Neural Engine. Last Error: {str(last_error)}")
+        # --- UNBREAKABLE MODE (OFFLINE FALLBACK) ---
+        # If absolutely everything fails (API down, partial outage, etc.), 
+        # do NOT crash. Instead, return a polite system message.
+        logger.critical(f"TOTAL SYSTEM FAILURE PREVENTED. Last error: {str(last_error)}")
+        return "⚠️ **System Update In Progress:** I am currently re-calibrating my neural connections to the servers. Please try again in 30 seconds."
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", media_data: Optional[List] = None, **kwargs) -> str:
         """Y.S.M Universal AI - Beyond ChatGPT"""
