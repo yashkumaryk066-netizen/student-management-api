@@ -66,7 +66,7 @@ class GeminiService:
             
             if not available_models:
                 # Fallback purely just in case API list fails but keys work (rare)
-                return "gemini-1.5-flash"
+                return "gemini-2.0-flash-exp"
                 
             # Preferred Hierarchy
             # We look for specific substrings in the available model names

@@ -54,8 +54,8 @@ class AIServiceManager:
             provider: AI provider (huggingface, gemini, chatgpt, claude) - auto-detect if None
             model: Specific model to use - uses default if None
         """
-        # Default to FREE provider
-        self.provider = provider or config('AI_PROVIDER', default='huggingface').lower()
+        # Default to GEMINI provider (Most Reliable)
+        self.provider = provider or config('AI_PROVIDER', default='gemini').lower()
         self.model = model
         self.service = None
         
