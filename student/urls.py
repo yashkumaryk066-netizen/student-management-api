@@ -67,6 +67,7 @@ from .unified_ai_views import (
 )
 from .ai_chat_views import AIChatView, AIPaymentSubmitView
 from .ai_auth_views import AIAuthView
+from .ai_logout_view import AILogoutView
 
 
 from rest_framework_simplejwt.views import (
@@ -233,6 +234,7 @@ urlpatterns = [
     # ==================== NEW AI CHAT INTERFACE ====================
     path('ai/chat/', AIChatView.as_view(), name='ai-chat-interface'),
     path('ai/auth/', AIAuthView.as_view(), name='ai-auth-portal'),
+    path('ai/logout/', AILogoutView.as_view(), name='ai-logout'),
     path('ai/payment/submit/', AIPaymentSubmitView.as_view(), name='ai-payment-submit'),
 
     # ==================== UNIFIED MULTI-MODEL AI ENDPOINTS ====================
