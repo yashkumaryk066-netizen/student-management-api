@@ -7,10 +7,14 @@
     <title>Y.S.M AI - The Architect</title>
     <!-- PWA Settings -->
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Y.S.M AI">
+    <link rel="apple-touch-icon" href="/static/assets/ysm_icon.png">
+    <link rel="apple-touch-startup-image" href="/static/assets/ysm_icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Y.S.M AI">
     <!-- Premium Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
@@ -518,11 +522,27 @@
             if (installContainer) installContainer.classList.add('hidden');
         }
 
+        // Check if running as standalone app
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone ||
+            document.referrer.includes('android-app://');
+
+        if (isStandalone) {
+            console.log('Running as standalone PWA ✓');
+            // Hide install button if already installed
+            if (installContainer) installContainer.classList.add('hidden');
+        }
+
+        // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
-                    .then(reg => console.log('SW Registered!', reg))
-                    .catch(err => console.log('SW Failed', err));
+                    .then(reg => {
+                        console.log('✓ Service Worker Registered', reg.scope);
+                        // Check for updates
+                        reg.update();
+                    })
+                    .catch(err => console.error('✗ Service Worker Failed:', err));
             });
         }
 

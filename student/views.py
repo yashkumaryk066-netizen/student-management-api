@@ -878,40 +878,105 @@ class GenerateIDCardView(APIView):
 
 
 
-# PWA SERVICE WORKER VIEW
+# PWA SERVICE WORKER VIEW - PREMIUM VERSION
 def service_worker(request):
     js_content = """
-const CACHE_NAME = 'ysm-ai-v1';
-const urlsToCache = [
+const CACHE_NAME = 'ysm-ai-v2';
+const RUNTIME_CACHE = 'ysm-runtime-v2';
+
+// Core assets to cache immediately
+const CORE_ASSETS = [
   '/student/ai-chat/',
   '/static/manifest.json',
-  '/static/assets/ysm_icon.png'
+  '/static/assets/ysm_icon.png',
+  'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
+// Install - cache core assets
 self.addEventListener('install', event => {
-  self.skipWaiting(); // Activate worker immediately
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(CORE_ASSETS))
+      .catch(err => console.log('Cache install error:', err))
   );
 });
 
+// Activate - clean old caches
 self.addEventListener('activate', event => {
-  event.waitUntil(clients.claim()); // Become available to all pages
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME && key !== RUNTIME_CACHE)
+           .map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
+// Fetch - Network first, fallback to cache (for dynamic AI responses)
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
+  const { request } = event;
+  
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
+  
+  // For API calls - always try network first
+  if (request.url.includes('/api/')) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          // Clone and cache successful responses
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(RUNTIME_CACHE).then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
           return response;
-        }
-        return fetch(event.request);
+        })
+        .catch(() => {
+          // Fallback to cache if offline
+          return caches.match(request);
+        })
+    );
+    return;
+  }
+  
+  // For static assets - cache first
+  event.respondWith(
+    caches.match(request)
+      .then(cached => {
+        if (cached) return cached;
+        
+        return fetch(request).then(response => {
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(RUNTIME_CACHE).then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        });
+      })
+      .catch(() => {
+        // Return offline page or default response
+        console.log('Network and cache failed for:', request.url);
       })
   );
 });
+
+// Background sync for offline messages (future enhancement)
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-messages') {
+    event.waitUntil(syncMessages());
+  }
+});
+
+async function syncMessages() {
+  // Placeholder for future offline message sync
+  console.log('Syncing offline messages...');
+}
 """
     return HttpResponse(js_content, content_type="application/javascript")
