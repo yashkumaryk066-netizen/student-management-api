@@ -236,9 +236,6 @@ urlpatterns = [
     path('ai/auth/', AIAuthView.as_view(), name='ai-auth-portal'),
     path('ai/logout/', AILogoutView.as_view(), name='ai-logout'),
     path('ai/payment/submit/', AIPaymentSubmitView.as_view(), name='ai-payment-submit'),
-    
-    # PWA-SPECIFIC ROUTE (Session-based, no token needed)
-    path('student/ai-chat/', AIChatView.as_view(), name='pwa-ai-chat'),
 
     # ==================== UNIFIED MULTI-MODEL AI ENDPOINTS ====================
     # List all available AI providers
