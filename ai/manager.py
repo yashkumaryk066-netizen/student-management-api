@@ -109,8 +109,8 @@ class AIServiceManager:
     
     def _try_fallback_providers(self):
         """Try alternative FREE providers in cascade"""
-        # Order: HuggingFace (Free) -> Gemini (Free Tier) -> ChatGPT (Paid/Credit)
-        fallback_order = ['huggingface', 'gemini', 'chatgpt']
+        # Order: Groq (Fastest) -> HuggingFace (Free) -> Gemini (Free Tier) -> ChatGPT
+        fallback_order = ['groq', 'huggingface', 'gemini', 'chatgpt']
         
         for fallback in fallback_order:
             if fallback == self.provider:
@@ -127,6 +127,9 @@ class AIServiceManager:
                 elif fallback == 'gemini':
                     from .gemini import get_gemini_service
                     service = get_gemini_service()
+                elif fallback == 'groq':
+                    from .groq import get_groq_service
+                    service = get_groq_service()
                 elif fallback == 'chatgpt':
                     from .chatgpt import get_chatgpt_service
                     service = get_chatgpt_service()
