@@ -36,6 +36,61 @@
         content="YSM AI (Ankush AI) - Revolutionary AI-powered education platform by Rangra Developer">
     <meta name="twitter:image" content="https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg">
 
+    <!-- Schema.org JSON-LD for Google Knowledge Graph -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://yashamishra.pythonanywhere.com/#person",
+          "name": "Yash Ankush Mishra",
+          "alternateName": ["Yash A Mishra", "Rangra Developer", "Ankush AI Creator"],
+          "url": "https://yashamishra.pythonanywhere.com/developer/",
+          "image": "https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg",
+          "jobTitle": "Advanced Software Architect",
+          "worksFor": {
+            "@type": "Organization",
+            "name": "Telepathy Infotech"
+          },
+          "alumniOf": {
+            "@type": "CollegeOrUniversity",
+            "name": "Bhagalpur University"
+          },
+          "sameAs": [
+            "https://github.com/yashkumaryk066",
+            "https://www.linkedin.com/in/yash-mishra-developer"
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Y.S.M AI (Ankush AI)",
+          "operatingSystem": "Web, Android, iOS",
+          "applicationCategory": "EducationalApplication",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "INR"
+          },
+          "author": {
+            "@id": "https://yashamishra.pythonanywhere.com/#person"
+          },
+          "description": "Advanced AI-Powered Education System created by Yash Ankush Mishra. Solves complex problems, teaches coding, and manages student data."
+        },
+        {
+          "@type": "WebSite",
+          "url": "https://yashamishra.pythonanywhere.com/",
+          "name": "Y.S.M Advance Education System",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://yashamishra.pythonanywhere.com/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
+
     <!-- Additional SEO -->
     <!-- PWA / Mobile App Meta Tags -->
     <link rel="manifest" href="{% static 'manifest.json' %}">

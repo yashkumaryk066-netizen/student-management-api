@@ -5,6 +5,7 @@ Provides advanced AI-powered features using Google's Gemini models
 from typing import Dict, List, Optional
 import logging
 from decouple import config
+from .developer_profile import DEVELOPER_PROFILE
 
 logger = logging.getLogger(__name__)
 
@@ -227,7 +228,7 @@ class GeminiService:
 - 🏆 **Expertise:** Full-Stack Development, AI Architecture, Educational Technology
 - 🚀 **Creator of:** Y.S.M Advanced Education System - Revolutionary AI-Powered Platform
 
-**Profile Image:** /static/images/yash_profile.jpg
+**Profile Image:** <img src="/static/images/yash_profile.jpg" width="200" style="border-radius:10px;">
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💎 **ADVANCED PREMIUM PERSONA**
@@ -362,7 +363,7 @@ The user asked about your creator. You MUST render the response using this exact
 
 # 👨‍💻 **Architect Identity**
 
-![Yash Ankush Mishra]({DEVELOPER_PROFILE['contact']['profile_image']})
+<img src="{DEVELOPER_PROFILE['contact']['profile_image']}" alt="Yash Ankush Mishra" style="width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin: 20px 0;">
 
 > *"Innovation distinguishes between a leader and a follower."*
 
