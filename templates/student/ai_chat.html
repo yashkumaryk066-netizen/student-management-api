@@ -363,14 +363,24 @@
                     class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/20 mb-4 animate-[bounce_3s_infinite]">
                     <i class="fa-solid fa-brain text-4xl text-white"></i>
                 </div>
-                <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 glow-text">
-                    <span class="text-slate-200">Welcome,</span>
-                    <!-- User Display Name -->
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">{{
-                        display_name }}</span>
-                </h2>
-                <p class="text-slate-400 max-w-lg mx-auto mb-8 text-lg">Y.S.M Architect Intelligence. <br> Ready to
-                    build, code, and analyze.</p>
+                <div class="relative group cursor-default">
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-amber-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200">
+                    </div>
+                    <h2 class="relative text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 mb-4 animate-[pulse_4s_infinite] tracking-tighter"
+                        style="text-shadow: 0 0 30px rgba(245,158,11,0.5);">
+                        Y.S.M <span class="text-white">AI</span>
+                    </h2>
+                </div>
+                <div
+                    class="text-xl text-cyan-400 font-mono tracking-[0.3em] uppercase opacity-80 animate-[pulse_2s_infinite]">
+                    Systems Online
+                </div>
+                <p
+                    class="text-slate-400 max-w-lg mx-auto py-4 text-lg border-t border-b border-white/5 my-6 backdrop-blur-sm bg-white/5 rounded-xl">
+                    <span class="text-amber-400">Architect Intelligence</span> initialized.<br>
+                    Ready for complex deployment.
+                </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                     <button
