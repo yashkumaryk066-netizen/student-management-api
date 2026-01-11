@@ -25,8 +25,8 @@ class AIServiceManager:
     # Available models
     MODELS = {
         "groq": {
-            "llama3-70b-8192": "Llama 3 70B (Hyper Fast)",
-            "llama3-8b-8192": "Llama 3 8B (Instant)",
+            "llama-3.3-70b-versatile": "Llama 3.3 70B (Latest, Powerful)",
+            "llama-3.1-8b-instant": "Llama 3.1 8B (Super Fast)",
             "mixtral-8x7b-32768": "Mixtral 8x7B (Long Context)"
         },
         "huggingface": {

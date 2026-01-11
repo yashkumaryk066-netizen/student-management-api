@@ -22,7 +22,7 @@ class GroqService:
         if not self.api_key:
             logger.warning("GROQ_API_KEY not set. Groq service will not function.")
         
-        self.default_model = "llama3-70b-8192"
+        self.default_model = "llama-3.3-70b-versatile"
         self.temperature = float(config('GROQ_TEMPERATURE', default='0.5'))
         self.max_tokens = int(config('GROQ_MAX_TOKENS', default='2000'))
 
