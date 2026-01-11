@@ -239,7 +239,7 @@ I am currently unable to connect to my primary neural networks (Gemini/ChatGPT/H
     def get_provider_info(self) -> Dict:
         """Get information about current AI provider"""
         return {
-            "provider": self.provider,
+            "provider": "Y.S.M Neural Engine",
             "model": getattr(self.service, 'default_model', 'unknown'),
             "available_models": self.MODELS.get(self.provider, {}),
             "temperature": getattr(self.service, 'temperature', 0.7),
