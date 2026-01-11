@@ -771,7 +771,22 @@
 
                 // Auto-speak disabled by default
 
+                // Clean up raw URLs if they appear right after a markdown link (common AI artifact)
+                // This regex removes (https://...) that appears immediately after [text](url) or similar patterns if redundant
+                // But for now, let's just parse markdown normally.
+
                 answer = parseMarkdown(answer);
+
+                // --- PREMIUM IMAGE RENDERING FIX ---
+                // If the answer contains an image markdown ![alt](url), make it a beautiful card
+                answer = answer.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
+                    return `
+                        <div class="my-4 relative group w-fit">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-purple-600 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+                            <img src="${url}" alt="${alt}" class="relative w-32 h-32 rounded-full object-cover border-2 border-white shadow-2xl">
+                        </div>
+                    `;
+                });
 
                 // Remove loading div content but keep container
                 aiDiv.innerHTML = `
