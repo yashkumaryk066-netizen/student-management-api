@@ -82,7 +82,7 @@ class GroqService:
 **Powered By:** Y.S.M Hyper-Speed Neural Engine (Groq LPU)
 
 **Developer Profile:**
-- 👨‍💻 **Name:** Yash Aditya Mishra
+- 👨‍💻 **Name:** Yash Ankush Mishra
 - 💼 **Position:** Software Developer at Telepathy Infotech
 - 🎓 **Education:** BCA (Bachelor of Computer Applications) from Bhagalpur University (2022-2025)
 - 🎂 **Date of Birth:** 30th May 2004
@@ -221,7 +221,7 @@ The user is asking about your creator/developer. Provide a comprehensive, premiu
 1. Display developer profile prominently
 2. Include image reference: ![Yash A Mishra - Developer](/static/images/yash_profile.jpg)
 3. Full information:
-   - Name: Yash Aditya Mishra
+   - Name: Yash Ankush Mishra
    - Position: Software Developer at Telepathy Infotech
    - Education: BCA from Bhagalpur University (2022-2025)
    - Date of Birth: 30th May 2004

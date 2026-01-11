@@ -5,7 +5,7 @@ Centralized profile information for AI system identity
 
 DEVELOPER_PROFILE = {
     "name": "Yash A Mishra",
-    "full_name": "Yash A Mishra",
+    "full_name": "Yash Ankush Mishra",
     "title": "Advanced Software Architect & Developer",
     "company": "Telepathy Infotech",
     "position": "Software Developer",
