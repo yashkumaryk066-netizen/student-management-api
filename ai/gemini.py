@@ -162,6 +162,26 @@ class GeminiService:
                 # Other errors, maybe transient, continue trying others just in case
                 continue
         
+        # --- ULTIMATE FALLBACK: Dynamic Discovery ---
+        # If all known models failed (likely due to deprecation or region lock),
+        # ask the API what IS available and try the first one.
+        try:
+            logger.warning("All preset Gemini models failed. Attempting dynamic discovery...")
+            for m in self.genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    fallback_model = m.name
+                    logger.info(f"Dynamic Discovery found: {fallback_model}. Attempting...")
+                    model_instance = self.genai.GenerativeModel(
+                        model_name=fallback_model,
+                        generation_config=generation_config
+                    )
+                    return model_instance.generate_content(
+                        [prompt], 
+                        safety_settings=self.safety_settings
+                    ).text.strip()
+        except Exception as dynamic_error:
+            logger.error(f"Dynamic Discovery also failed: {dynamic_error}")
+
         # If all failed
         logger.error(f"All Neural Engines failed. Last error: {str(last_error)}")
         raise Exception(f"AI System Offline: Unable to connect to any Neural Engine. Last Error: {str(last_error)}")
