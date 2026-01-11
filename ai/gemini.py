@@ -187,8 +187,16 @@ class GeminiService:
         # If all failed
         logger.error(f"All Neural Engines failed. Last error: {str(last_error)}")
         # --- UNBREAKABLE MODE (OFFLINE FALLBACK) ---
-        # If absolutely everything fails (API down, partial outage, etc.), 
-        # do NOT crash. Instead, return a polite system message.
+        # If Gemini fails, try to silently switch to Groq for seamless continuity
+        logger.critical(f"Gemini Total Failure. Attempting Silent Switch to Groq Backup...")
+        try:
+            from .groq import get_groq_service
+            groq_service = get_groq_service()
+            if groq_service.api_key:
+                return groq_service.generate_content(prompt)
+        except Exception as fallback_error:
+            logger.error(f"Backup Groq also failed: {fallback_error}")
+
         logger.critical(f"TOTAL SYSTEM FAILURE PREVENTED. Last error: {str(last_error)}")
         return "⚠️ **System Update In Progress:** I am currently re-calibrating my neural connections to the servers. Please try again in 30 seconds."
     
