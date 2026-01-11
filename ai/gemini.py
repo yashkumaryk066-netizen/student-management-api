@@ -66,14 +66,13 @@ class GeminiService:
             
             if not available_models:
                 # Fallback purely just in case API list fails but keys work (rare)
-                return "gemini-2.0-flash-exp"
+                return "gemini-1.5-flash"
                 
             # Preferred Hierarchy
             # We look for specific substrings in the available model names
             priority_keywords = [
-                "gemini-2.0-flash",
-                "gemini-2.5-flash",
                 "gemini-1.5-pro",
+                "gemini-1.5-flash",
                 "gemini-pro"
             ]
             
@@ -109,12 +108,11 @@ class GeminiService:
         # 4. Gemini (Generic alias)
         candidate_models = [
             model or self.default_model,
-            'gemini-2.0-flash',
-            'gemini-2.5-flash',
-            'gemini-flash-latest',
-            'gemini-pro',
+            'gemini-1.5-flash',
             'gemini-1.5-pro',
-            'gemini-1.0-pro'
+            'gemini-pro',
+            'gemini-flash-latest',
+            'gemini-2.0-flash-exp'
         ]
         
         # Remove duplicates while preserving order
