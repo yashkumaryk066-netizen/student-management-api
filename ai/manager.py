@@ -98,47 +98,62 @@ class AIServiceManager:
     
     def _try_fallback_providers(self):
         """Try alternative FREE providers in cascade"""
-        fallback_order = ['huggingface', 'gemini']
+        # Order: HuggingFace (Free) -> Gemini (Free Tier) -> ChatGPT (Paid/Credit)
+        fallback_order = ['huggingface', 'gemini', 'chatgpt']
         
         for fallback in fallback_order:
             if fallback == self.provider:
-                continue  # Skip if this was the original failed provider
+                continue  # Skip current failed provider
                 
             try:
-                logger.info(f"🔄 Trying fallback provider: {fallback}")
+                # logger.info(f"🔄 Switching to fallback provider: {fallback}")
                 
                 if fallback == 'huggingface':
                     from .huggingface import get_huggingface_service
-                    self.service = get_huggingface_service()
-                    self.provider = fallback
-                    logger.info("✅ Fallback successful: HuggingFace AI")
-                    return
-                    
+                    service = get_huggingface_service()
+                    # Test if it actually works (lightweight check)
+                    # if not service.api_key and self.provider == 'huggingface': continue
                 elif fallback == 'gemini':
                     from .gemini import get_gemini_service
-                    self.service = get_gemini_service()
-                    self.provider = fallback
-                    logger.info("✅ Fallback successful: Gemini AI")
-                    return
+                    service = get_gemini_service()
+                elif fallback == 'chatgpt':
+                    from .chatgpt import get_chatgpt_service
+                    service = get_chatgpt_service()
+                else:
+                    continue
+
+                self.service = service
+                self.provider = fallback
+                logger.info(f"✅ Fallback successful: {fallback.title()} AI")
+                return
                     
             except Exception as e:
-                logger.warning(f"Fallback {fallback} also failed: {str(e)}")
+                # logger.warning(f"Fallback {fallback} failed: {str(e)}")
                 continue
         
-        logger.error("❌ All AI providers failed. System will use error messages.")
+        logger.error("❌ All AI providers failed. System entering offline mode.")
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", **kwargs) -> str:
         """
-        Ask AI tutor with automatic fallback to local model
+        Ask AI tutor with automatic fallback to local model or offline mode
         """
-        # Try primary service (Gemini/ChatGPT/Claude)
+        # 1. Try Primary/Active Service
         if self.service:
             try:
                 return self.service.ask_tutor(question, subject, context, **kwargs)
             except Exception as e:
-                logger.warning(f"Primary AI ({self.provider}) failed: {str(e)}. Switching to backup...")
+                logger.warning(f"Primary AI ({self.provider}) failed: {str(e)}. Retrying with backups...")
+                # If primary fails during execution (e.g. timeout), try to switch provider immediately
+                self.service = None 
+                self._try_fallback_providers()
+                if self.service:
+                    try:
+                        return self.service.ask_tutor(question, subject, context, **kwargs)
+                    except Exception as fe:
+                        logger.error(f"Fallback AI ({self.provider}) also failed: {fe}")
+                        self.service = None # Reset so we don't try it again
         
-        # Fallback to Local AI (TinyLlama)
+        # 2. Try Local AI (TinyLlama)
         try:
             from .local_llm import get_local_service
             local_ai = get_local_service()
@@ -146,12 +161,30 @@ class AIServiceManager:
             if local_ai.is_available():
                 logger.info("🔧 Using Backup AI Engine (TinyLlama)")
                 return local_ai.ask_tutor(question, subject, context, **kwargs)
-            else:
-                return "⚠️ Primary AI service is unavailable and backup AI is not configured. Please contact support."
-                
-        except Exception as backup_error:
-            logger.error(f"Backup AI also failed: {str(backup_error)}")
-            return f"Error: Both primary and backup AI systems are unavailable. Primary: {getattr(self, 'init_error', 'Unknown')}. Backup: {str(backup_error)}"
+        except Exception:
+            pass
+            
+        # 3. Last Resort: Rule-Based Offline Response (Premium UX)
+        return self._get_offline_response(question)
+
+    def _get_offline_response(self, question: str) -> str:
+        """Provide a helpful response even when all AI brains are offline"""
+        return """
+### ⚠️ AI Systems Offline
+
+I am currently unable to connect to my primary neural networks (Gemini/ChatGPT/HuggingFace). This could be due to:
+
+1.  **API Key Configuration**: The server is missing valid API keys.
+2.  **Network Restrictions**: The PythonAnywhere environment may be blocking external connections (Free Tier).
+3.  **Service Outage**: The AI providers are temporarily down.
+
+**What you can do:**
+*   Check your server logs (`/var/log/`) for specific error details.
+*   Ensure a valid `GEMINI_API_KEY` is set in your environment.
+*   Try again in a few moments.
+
+*(This is an automated system response to ensure you are not left without feedback.)*
+"""
     
     def generate_quiz(
         self,

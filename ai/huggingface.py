@@ -21,7 +21,8 @@ class HuggingFaceService:
         try:
             # API key is optional for public models
             self.api_key = config('HUGGINGFACE_API_KEY', default='')
-            self.api_url = "https://api-inference.huggingface.co/models"
+            # Use Serverless Inference API (new router endpoint)
+            self.api_url = "https://router.huggingface.co/models"
             
             # Use a reliable free model that works without authentication
             self.default_model = config(
@@ -56,7 +57,20 @@ class HuggingFaceService:
                 }
             }
             
-            response = requests.post(
+            # Create session with retries
+            self.session = requests.Session()
+            from requests.adapters import HTTPAdapter
+            from urllib3.util.retry import Retry
+            
+            retries = Retry(
+                total=3,
+                backoff_factor=1,
+                status_forcelist=[500, 502, 503, 504],
+                allowed_methods=["POST"]
+            )
+            self.session.mount("https://", HTTPAdapter(max_retries=retries))
+            
+            response = self.session.post(
                 f"{self.api_url}/{self.default_model}",
                 headers=self.headers,
                 json=payload,
