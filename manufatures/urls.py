@@ -35,6 +35,7 @@ from student.views import (
     service_worker,
     robots_txt,
     sitemap_xml,
+    google_verification,
 )
 from student.ai_chat_views import AIChatView
 
@@ -50,6 +51,7 @@ urlpatterns = [
     # SEO
     path('robots.txt', robots_txt),
     path('sitemap.xml', sitemap_xml),
+    path('google123456789.html', google_verification),
     
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),

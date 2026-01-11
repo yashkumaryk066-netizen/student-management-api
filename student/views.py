@@ -1048,3 +1048,7 @@ def sitemap_xml(request):
 </urlset>"""
     return HttpResponse(xml, content_type="application/xml")
 
+def google_verification(request):
+    return HttpResponse("google-site-verification: google123456789.html", content_type="text/plain")
+
+
