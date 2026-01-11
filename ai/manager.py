@@ -25,24 +25,24 @@ class AIServiceManager:
     # Available models
     MODELS = {
         "groq": {
-            "llama-3.3-70b-versatile": "Llama 3.3 70B (Latest, Powerful)",
-            "llama-3.1-8b-instant": "Llama 3.1 8B (Super Fast)",
-            "mixtral-8x7b-32768": "Mixtral 8x7B (Long Context)"
+            "llama-3.3-70b-versatile": "Y.S.M Hyper-Speed (v5.0)",
+            "llama-3.1-8b-instant": "Y.S.M Instant (v4.0)",
+            "mixtral-8x7b-32768": "Y.S.M Context-Pro (v4.5)"
         },
         "huggingface": {
-            "mixtral-8x7b": "Mixtral 8x7B (FREE, Powerful)",
-            "llama-2-70b": "Llama 2 70B (FREE)",
-            "codellama-34b": "CodeLlama 34B (FREE, Code Expert)"
+            "mixtral-8x7b": "Y.S.M Open-Access (v3.0)",
+            "llama-2-70b": "Y.S.M Large-Scale (v2.0)",
+            "codellama-34b": "Y.S.M Code-Master (v2.5)"
         },
         "chatgpt": {
-            "gpt-4-turbo": "GPT-4 Turbo (Most Capable)",
-            "gpt-4": "GPT-4 (Advanced)",
-            "gpt-3.5-turbo": "GPT-3.5 Turbo (Fast & Economical)"
+            "gpt-4-turbo": "Y.S.M Omni-Brain (Max)",
+            "gpt-4": "Y.S.M Legacy-Brain (Pro)",
+            "gpt-3.5-turbo": "Y.S.M Lite-Brain (Fast)"
         },
         "gemini": {
-            "gemini-1.5-pro": "Gemini 1.5 Pro (High)",
-            "gemini-1.5-flash": "Gemini 1.5 Flash (Fast)",
-            "gemini-pro": "Gemini Pro (Balanced)"
+            "gemini-1.5-pro": "Y.S.M Neural-MAX (Vision)",
+            "gemini-1.5-flash": "Y.S.M Neural-Flash (Vision)",
+            "gemini-pro": "Y.S.M Neural-Pro (Text)"
         },
         "claude": {
             "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet (Latest)",
@@ -254,7 +254,7 @@ I am currently unable to connect to my primary neural networks (Gemini/ChatGPT/H
         """Get information about current AI provider"""
         return {
             "provider": "Y.S.M Neural Engine",
-            "model": getattr(self.service, 'default_model', 'unknown'),
+            "model": "Y.S.M v5.0 (Architect Edition)",
             "available_models": self.MODELS.get(self.provider, {}),
             "temperature": getattr(self.service, 'temperature', 0.7),
             "max_tokens": getattr(self.service, 'max_tokens', 2000)
