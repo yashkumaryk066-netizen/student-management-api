@@ -87,12 +87,12 @@ git pull origin main
 ### Step 2: Submit to Google Search Console (FREE - 5 minutes)
 1. Go to: https://search.google.com/search-console
 2. Click **"Add Property"**
-3. Enter: `https://yashkumaryk066.pythonanywhere.com`
+3. Enter: `https://yashamishra.pythonanywhere.com`
 4. Verify using **HTML tag method**:
    - They'll give you a meta tag
    - I can add it for you!
 5. Submit your sitemap:
-   - URL: `https://yashkumaryk066.pythonanywhere.com/static/sitemap.xml`
+   - URL: `https://yashamishra.pythonanywhere.com/static/sitemap.xml`
 
 ### Step 3: Speed Up Indexing (Optional)
 - Share your website link on:
@@ -107,7 +107,7 @@ git pull origin main
 
 ### Week 1-2:
 ```
-Search on Google: site:yashkumaryk066.pythonanywhere.com
+Search on Google: site:yashamishra.pythonanywhere.com
 ```
 Should show your pages!
 

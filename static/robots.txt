@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://yashkumaryk066.pythonanywhere.com/sitemap.xml
+Sitemap: https://yashamishra.pythonanywhere.com/sitemap.xml
 
 # Allow all major search engines
 User-agent: Googlebot

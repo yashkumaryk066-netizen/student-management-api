@@ -38,7 +38,7 @@ cd ~/manufatures && git pull origin main && bash DEPLOY_NOW.sh
 
 **Option A: Web Interface (Recommended)**
 1. **"Web"** tab पर जाएं
-2. Your app find करें (`yashkumaryk066.pythonanywhere.com`)
+2. Your app find करें (`yashamishra.pythonanywhere.com`)
 3. बड़ा green **"Reload"** button click करें
 4. Wait for confirmation ✅
 
@@ -54,17 +54,17 @@ touch /var/www/yashkumaryk066_pythonanywhere_com_wsgi.py
 ### Method 1: Google Instant Indexing (FREE - 2 Minutes)
 
 **Step 1: Request Indexing**
-1. Go to: https://www.google.com/ping?sitemap=https://yashkumaryk066.pythonanywhere.com/static/sitemap.xml
+1. Go to: https://www.google.com/ping?sitemap=https://yashamishra.pythonanywhere.com/static/sitemap.xml
 2. Press Enter
 3. ✅ Done! Google notified
 
 **Step 2: Manual URL Submit**
-- Search Google for: `site:yashkumaryk066.pythonanywhere.com`
+- Search Google for: `site:yashamishra.pythonanywhere.com`
 - If not found, submit here: https://www.google.com/webmasters/tools/submit-url
 
 ### Method 2: Bing Instant Submit (FREE)
 ```
-https://www.bing.com/webmasters/ping.aspx?siteMap=https://yashkumaryk066.pythonanywhere.com/static/sitemap.xml
+https://www.bing.com/webmasters/ping.aspx?siteMap=https://yashamishra.pythonanywhere.com/static/sitemap.xml
 ```
 
 ### Method 3: Social Share (Fastest Indexing!)
@@ -81,7 +81,7 @@ https://www.bing.com/webmasters/ping.aspx?siteMap=https://yashkumaryk066.pythona
 
 Created by Yash Ankush Mishra (Rangra Developer)
 
-Try it: https://yashkumaryk066.pythonanywhere.com
+Try it: https://yashamishra.pythonanywhere.com
 
 #YSMAI #AI #EdTech #ArtificialIntelligence #Education #India
 ```
@@ -99,7 +99,7 @@ Try it: https://yashkumaryk066.pythonanywhere.com
 
 ### Test 1: AI Response
 ```
-1. Open: https://yashkumaryk066.pythonanywhere.com
+1. Open: https://yashamishra.pythonanywhere.com
 2. Go to AI Chat
 3. Ask: "Who created you?"
 4. Should show: Yash Ankush Mishra ✅
@@ -116,7 +116,7 @@ Try it: https://yashkumaryk066.pythonanywhere.com
 ### Test 3: Google Crawl Status
 ```bash
 # Check if Google can access robots.txt:
-curl https://yashkumaryk066.pythonanywhere.com/static/robots.txt
+curl https://yashamishra.pythonanywhere.com/static/robots.txt
 
 # Should show:
 # User-agent: *
@@ -132,7 +132,7 @@ Add to your GitHub repo README:
 ```markdown
 # Y.S.M AI - Advanced Education System
 
-🚀 Live Demo: https://yashkumaryk066.pythonanywhere.com
+🚀 Live Demo: https://yashamishra.pythonanywhere.com
 
 Created by **Yash Ankush Mishra** (Rangra Developer)
 - AI-Powered Education
@@ -194,7 +194,7 @@ Answer and mention Y.S.M AI with link!
 
 2. **Check Indexing:**
    ```
-   site:yashkumaryk066.pythonanywhere.com
+   site:yashamishra.pythonanywhere.com
    ```
 
 3. **Check Rankings:**
@@ -210,7 +210,7 @@ Answer and mention Y.S.M AI with link!
 
 ### 1. QR Code Generator
 ```
-Generate QR for: https://yashkumaryk066.pythonanywhere.com
+Generate QR for: https://yashamishra.pythonanywhere.com
 Share on: WhatsApp, Instagram, LinkedIn
 ```
 
@@ -226,7 +226,7 @@ Add to your email signature:
 ---
 Yash Ankush Mishra
 Software Developer | Telepathy Infotech
-Creator of Y.S.M AI: https://yashkumaryk066.pythonanywhere.com
+Creator of Y.S.M AI: https://yashamishra.pythonanywhere.com
 ```
 
 ---
@@ -283,7 +283,7 @@ I built using cutting-edge AI technology!
 ✨ Features include intelligent tutoring, code generation, and 
 multilingual support.
 
-Check it out: https://yashkumaryk066.pythonanywhere.com
+Check it out: https://yashamishra.pythonanywhere.com
 
 #AI #EdTech #MachineLearning #Education #YSMAI
 ```
