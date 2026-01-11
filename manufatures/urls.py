@@ -34,6 +34,7 @@ from student.views import (
     ResumeView,
     service_worker,
 )
+from student.ai_chat_views import AIChatView
 
 urlpatterns = [
     # Django Admin Panel
@@ -56,6 +57,9 @@ urlpatterns = [
     path('dashboard/teacher/', TeacherDashboardTemplateView.as_view(), name='teacher-dashboard'),
     path('dashboard/student/', StudentDashboardTemplateView.as_view(), name='student-dashboard'),
     path('dashboard/parent/', ParentDashboardTemplateView.as_view(), name='parent-dashboard'),
+    
+    # PWA AI Chat (Direct route, no API prefix)
+    path('student/ai-chat/', AIChatView.as_view(), name='pwa-ai-chat-direct'),
 
     # API Endpoints
     path('api/', include('student.urls')),
