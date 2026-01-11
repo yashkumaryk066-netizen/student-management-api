@@ -420,7 +420,8 @@
                     <div class="flex items-end gap-2">
                         <!-- Tools/Upload -->
                         <div class="flex flex-col gap-1">
-                            <input type="file" id="fileInput" class="hidden" multiple accept="image/*,video/*">
+                            <input type="file" id="fileInput" class="hidden" multiple accept="image/*"
+                                onchange="handleFileSelect(this)">
 
                             <button class="p-2 text-cyan-400 hover:text-white transition rounded-lg hover:bg-white/10"
                                 onclick="document.getElementById('fileInput').click()" title="Upload Image/Video">
@@ -476,6 +477,16 @@
         let isVoiceActive = false;
         let recognition = null;
         let synth = window.speechSynthesis;
+
+        function handleFileSelect(input) {
+            if (input.files && input.files.length > 0) {
+                for (let i = 0; i < input.files.length; i++) {
+                    attachedFiles.push(input.files[i]);
+                }
+                updatePreview();
+                input.value = ''; // Reset
+            }
+        }
 
         // --- VOICE LOGIC ---
         function toggleVoice() {
@@ -739,6 +750,25 @@
                 const token = localStorage.getItem('authToken');
                 const csrfToken = getCookie('csrftoken'); // Ensure CSRF if session auth
 
+                // Process Files (Base64)
+                let filesData = [];
+                if (attachedFiles.length > 0) {
+                    filesData = await Promise.all(attachedFiles.map(file => {
+                        return new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const base64String = reader.result.split(',')[1];
+                                resolve({
+                                    mime_type: file.type,
+                                    data: base64String
+                                });
+                            };
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                        });
+                    }));
+                }
+
                 const response = await fetch('/api/ai/unified/tutor/', {
                     method: 'POST',
                     headers: {
@@ -748,6 +778,7 @@
                     },
                     body: JSON.stringify({
                         question: msg,
+                        files: filesData,
                         provider: localStorage.getItem('preferred_ai_provider') || null,
                         context: "User is asking for 'Advanced Level' assistance. Be 'Antigravity'."
                     })

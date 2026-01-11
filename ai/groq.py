@@ -87,10 +87,36 @@ Question: {question}
         # but for chat completions, we can use a system role if we want, or just prepend to user message.
         # The standardized chat format supports 'system' role.
         
+        # Prepare messages
         messages = [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": question}
+            {"role": "system", "content": system_instruction}
         ]
+
+        if media_data:
+            # Switch to Vision Model
+            self.default_model = "llama-3.2-11b-vision-preview"
+            
+            user_content = [{"type": "text", "text": question}]
+            
+            for media in media_data:
+                # media is expected to be { 'mime_type': '...', 'data': '...' }
+                # Groq expects data URI
+                mime = media.get('mime_type', 'image/jpeg')
+                b64_data = media.get('data', '')
+                image_url = f"data:{mime};base64,{b64_data}"
+                
+                user_content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": image_url
+                    }
+                })
+            
+            messages.append({"role": "user", "content": user_content})
+        else:
+            # Text Only
+            self.default_model = "llama-3.3-70b-versatile" 
+            messages.append({"role": "user", "content": question})
         
         return self._send_chat_request(messages)
 
