@@ -1049,6 +1049,6 @@ def sitemap_xml(request):
     return HttpResponse(xml, content_type="application/xml")
 
 def google_verification(request):
-    return HttpResponse("google-site-verification: google123456789.html", content_type="text/plain")
+    return HttpResponse("google-site-verification: google7ec15807e3134773.html", content_type="text/plain")
 
 

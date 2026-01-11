@@ -51,7 +51,7 @@ urlpatterns = [
     # SEO
     path('robots.txt', robots_txt),
     path('sitemap.xml', sitemap_xml),
-    path('google123456789.html', google_verification),
+    path('google7ec15807e3134773.html', google_verification),
     
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),
