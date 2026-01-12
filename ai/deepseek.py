@@ -248,9 +248,12 @@ Context: {context}
 
 **QUERY TYPE ANALYSIS & FORMATTING RULES:**
 
-1. **IF CODING QUESTION:**
-   - **Header:** 🛠️ **Professional Solution**
-   - **Style:** Logic -> Code -> Explanation. Deep Reasoning.
+1. **IF CODING/DEBUGGING:**
+   - **Header:** 🛠️ **Architectural Solution**
+   - **Methodology:**
+     1. **Root Cause Analysis:** Deeply analyze why the error occurred.
+     2. **The Fix:** Provide the corrected code with comments.
+     3. **Explanation:** Explain the fix and how to prevent it.
 
 2. **IF EXPLANATION:**
    - **Header:** 📘 **Deep Dive Analysis**
