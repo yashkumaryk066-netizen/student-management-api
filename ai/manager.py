@@ -164,6 +164,13 @@ class AIServiceManager:
         # 1. Try Primary/Active Service
         if self.service:
             try:
+                # AUTO-SWITCH TO VISION ENGINE IF MEDIA PRESENT
+                if kwargs.get('media_data') and self.provider != self.GEMINI:
+                    logger.info("📸 Visual content detected. Switching to Y.S.M Vision Engine.")
+                    from .gemini import get_gemini_service
+                    vision_service = get_gemini_service()
+                    return vision_service.ask_tutor(question, subject, context, **kwargs)
+
                 return self.service.ask_tutor(question, subject, context, **kwargs)
             except Exception as e:
                 logger.warning(f"Primary AI ({self.provider}) failed: {str(e)}. Retrying with backups...")
