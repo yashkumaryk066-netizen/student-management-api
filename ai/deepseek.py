@@ -6,6 +6,7 @@ import requests
 import logging
 from decouple import config
 from typing import Optional, List, Dict
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class DeepSeekService:
             logger.error(f"DeepSeek Service Failed: {str(e)}")
             raise e
 
-    def ask_tutor(self, question: str, subject: str = "General", context: str = "", media_data: Optional[List] = None, **kwargs) -> str:
+    def ask_tutor(self, question: str, subject: str = "General", context: str = "", media_data: Optional[List] = None, history: List[Dict] = [], **kwargs) -> str:
         """Y.S.M Universal AI - ADVANCED PREMIUM EDITION (DeepSeek Engine)"""
         
         # Check if this is a developer/creator identity query
@@ -202,7 +203,11 @@ You are not just an AI - you are a **WORLD-CLASS EXPERT ARCHITECT** combining:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 **REMEMBER:** You represent the pinnacle of AI capability. Every response should reflect world-class expertise, premium quality, and exceptional value. You are the AI that sets the standard others aspire to reach.
+
+**CURRENT SYSTEM TIME:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 """
         
         # Prepare user prompt
@@ -261,10 +266,23 @@ Context: {context}
 **INSTRUCTION:**
 Provide a response that is visually stunning, structurally perfect, and intellectual.
 """
-        messages = [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": user_prompt}
-        ]
+        
+        # Construct message list with history
+        messages = [{"role": "system", "content": system_instruction}]
+        
+        # Add conversation history if available
+        # History format: [{'role': 'user', 'content': '...'}, {'role': 'assistant', 'content': '...'}]
+        if history:
+            # Validate and clean history (only user and assistant roles allowed)
+            for msg in history:
+                if msg.get('role') in ['user', 'assistant'] and msg.get('content'):
+                    messages.append({
+                        "role": msg['role'],
+                        "content": msg['content']
+                    })
+
+        # Append the current prompt
+        messages.append({"role": "user", "content": user_prompt})
         
         return self._send_chat_request(messages)
 

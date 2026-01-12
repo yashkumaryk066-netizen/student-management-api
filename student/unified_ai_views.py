@@ -72,6 +72,7 @@ class UnifiedAITutorView(APIView):
             
             # File/Image Support for Multimodal AI
             files = request.data.get('files', [])
+            history = request.data.get('history', [])
             
             # Get the most powerful AI available
             ai = get_ai_manager(provider=provider, model=model)
@@ -81,7 +82,8 @@ class UnifiedAITutorView(APIView):
                 question=question,
                 subject=subject,
                 context=context,
-                media_data=files
+                media_data=files,
+                history=history
             )
             
             return Response({
@@ -91,8 +93,6 @@ class UnifiedAITutorView(APIView):
                 "provider_info": ai.get_provider_info()
             })
             
-        except Exception as e:
-            logger.error(f"Universal AI error: {str(e)}")
         except Exception as e:
             logger.error(f"Universal AI error: {str(e)}")
             # FAILSAFE: Return 200 OK with error message as chat response to prevent "System Offline"

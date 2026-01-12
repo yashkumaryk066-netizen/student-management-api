@@ -30,6 +30,15 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- ADVANCED AI VISUALIZATIONS (Math + Diagrams) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <!-- MARKED for Advanced Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --primary: #f59e0b;
@@ -112,6 +121,47 @@
             opacity: 0.15;
             animation: scanline 10s linear infinite;
         }
+
+        /* Sci-Fi Typing Indicator */
+        .neural-loader {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 20px;
+        }
+
+        .neural-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: neural-pulse 1.5s infinite ease-in-out;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .neural-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .neural-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes neural-pulse {
+
+            0%,
+            100% {
+                transform: scale(0.5);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+
 
         @keyframes scanline {
             0% {
@@ -445,8 +495,13 @@
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <button class="text-slate-400 hover:text-white transition" title="Clear Chat"><i
+                <button class="text-slate-400 hover:text-white transition" title="Clear Chat" onclick="clearChat()"><i
                         class="fa-solid fa-eraser"></i></button>
+
+                <button class="text-slate-400 hover:text-white transition relative" title="Toggle Voice Response"
+                    onclick="toggleAutoSpeak()" id="btnAutoSpeak">
+                    <i class="fa-solid fa-volume-xmark"></i>
+                </button>
                 <button class="text-slate-400 hover:text-white transition" title="Settings"><i
                         class="fa-solid fa-gear"></i></button>
             </div>
@@ -574,6 +629,15 @@
         let isVoiceActive = false;
         let recognition = null;
         let synth = window.speechSynthesis;
+        let chatHistory = [];
+
+        // Initialize Mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+
+        // --- GLOBAL SOUNDS ---
+        const sfxSend = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3'); // Sci-fi click
+        const sfxReceive = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3'); // Sci-fi chirp
+        let isAutoSpeak = false; // Toggle for Jarvis Mode
 
         // --- PWA LOGIC ---
         let deferredPrompt;
@@ -893,11 +957,23 @@
             const userDiv = document.createElement('div');
             userDiv.className = 'flex justify-end';
             userDiv.innerHTML = `
-                <div class="msg-user max-w-3xl p-4 text-white shadow-lg">
+                <div class="msg-user max-w-3xl p-4 text-white shadow-lg transform transition-all duration-300 translate-y-4 opacity-0 animate-[slideIn_0.3s_forwards]">
                     ${escapeHtml(msg).replace(/\n/g, '<br>')}
                 </div>
             `;
             container.appendChild(userDiv);
+
+            // Play Sound
+            sfxSend.volume = 0.2;
+            sfxSend.play().catch(e => console.log("Audio play failed"));
+
+            // Add to History
+
+            // Add to History
+            chatHistory.push({ role: 'user', content: msg });
+
+            // Limit history to last 10 turns to save tokens
+            if (chatHistory.length > 20) chatHistory = chatHistory.slice(chatHistory.length - 20);
 
             // Clear Input
             input.value = '';
@@ -961,7 +1037,8 @@
                         question: msg,
                         files: filesData,
                         provider: localStorage.getItem('preferred_ai_provider') || null,
-                        context: "User is asking for 'Advanced Level' assistance. Be 'Antigravity'."
+                        context: "User is asking for 'Advanced Level' assistance. Be 'Antigravity'.",
+                        history: chatHistory // Send conversation history
                     })
                 });
 
@@ -988,6 +1065,22 @@
                 // But for now, let's just parse markdown normally.
 
                 answer = parseMarkdown(answer);
+
+                // Add AI response to history
+                chatHistory.push({ role: 'assistant', content: answer });
+
+                // Play Receive Sound
+                sfxReceive.volume = 0.3;
+                sfxReceive.play().catch(e => console.log("Audio play failed"));
+
+                // Auto Speak if Enabled
+                if (isAutoSpeak) {
+                    // Extract just text for speech (remove markdown)
+                    const temp = document.createElement("div");
+                    temp.innerHTML = marked.parse(data.answer);
+                    const speakText = temp.textContent || temp.innerText || "";
+                    speak(speakText.substring(0, 200)); // Limit to first 200 chars for sanity
+                }
 
                 // --- PREMIUM IMAGE RENDERING FIX ---
                 // If the answer contains an image markdown ![alt](url), make it a beautiful card
@@ -1029,6 +1122,33 @@
                     hljs.highlightElement(block);
                 });
 
+                // Render Math (KaTeX)
+                if (window.renderMathInElement) {
+                    renderMathInElement(aiDiv, {
+                        delimiters: [
+                            { left: '$$', right: '$$', display: true },
+                            { left: '$', right: '$', display: false },
+                            { left: '\\(', right: '\\)', display: false },
+                            { left: '\\[', right: '\\]', display: true }
+                        ]
+                    });
+                }
+
+                // Render Mermaid Diagrams
+                aiDiv.querySelectorAll('.mermaid').forEach((element, index) => {
+                    const id = 'mermaid-' + Math.floor(Math.random() * 10000) + '-' + index;
+                    const graphDefinition = element.innerText;
+                    element.id = id;
+                    try {
+                        mermaid.render(id + '-svg', graphDefinition).then(({ svg }) => {
+                            element.innerHTML = svg;
+                        });
+                    } catch (e) {
+                        console.error("Mermaid Render Error", e);
+                        element.innerHTML = `<div class="text-red-400 text-xs">Diagram Error</div>`;
+                    }
+                });
+
                 // Smooth Scroll to bottom
                 requestAnimationFrame(() => {
                     container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
@@ -1051,15 +1171,59 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Simple helper to format code blocks
+        // Advanced Content Parser (God-Tier)
         function parseMarkdown(text) {
-            // Replace code blocks
-            text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-            // Replace bold
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // Line breaks
-            text = text.replace(/\n/g, '<br>');
-            return text;
+            // 1. Extract Deep Reasoning (<think> tags)
+            const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/);
+            let reasoningHTML = '';
+
+            if (thinkMatch) {
+                const thoughtContent = thinkMatch[1].trim();
+                text = text.replace(thinkMatch[0], ''); // Remove from main text
+
+                reasoningHTML = `
+                    <div class="mb-4">
+                        <details class="group bg-slate-900/50 rounded-xl border border-white/5 open:border-amber-500/30 overflow-hidden transition-all duration-300">
+                            <summary class="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/5 transition select-none">
+                                <div class="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                    <i class="fa-solid fa-brain text-xs animate-pulse"></i>
+                                </div>
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider group-open:text-amber-500 transition">Deep Reasoning Process</span>
+                                <i class="fa-solid fa-chevron-down ml-auto text-xs text-slate-600 group-open:rotate-180 transition"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-slate-400/80 text-sm font-mono border-t border-white/5 bg-black/20">
+                                <div class="prose prose-invert max-w-none text-xs leading-relaxed opacity-80">
+                                    ${marked.parse(thoughtContent)}
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                `;
+            }
+
+            // 2. Parse Markdown with Marked
+            let parsed = marked.parse(text);
+
+            // 3. Post-Process for Mermaid
+            // Convert <pre><code class="language-mermaid">...</code></pre> to <div class="mermaid">...</div>
+            // Note: Marked renders code blocks as <pre><code>...
+
+            // We need a temporary DOM parser to manipulate the HTML string safely
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = parsed;
+
+            const mermaidBlocks = tempDiv.querySelectorAll('code.language-mermaid');
+            mermaidBlocks.forEach(block => {
+                const graphDef = block.innerText;
+                const div = document.createElement('div');
+                div.className = 'mermaid my-4 bg-transparent flex justify-center';
+                div.innerText = graphDef;
+                // Replace the parent <pre>
+                const pre = block.parentElement;
+                pre.replaceWith(div);
+            });
+
+            return reasoningHTML + tempDiv.innerHTML;
         }
 
         function escapeHtml(text) {
@@ -1097,6 +1261,43 @@
                 setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
+
+        function clearChat() {
+            if (confirm("Start a new conversation? This will clear current memory.")) {
+                document.getElementById('messages').innerHTML = ''; // Clear UI
+                chatHistory = []; // Clear Memory
+
+                // Show Welcome Screen again
+                const welcome = document.getElementById('welcome-screen');
+                if (welcome) {
+                    welcome.style.display = 'flex';
+                    document.getElementById('messages').appendChild(welcome);
+                } else {
+                    window.location.reload();
+                }
+            }
+        }
+
+        function toggleAutoSpeak() {
+            isAutoSpeak = !isAutoSpeak;
+            const btn = document.getElementById('btnAutoSpeak');
+            if (isAutoSpeak) {
+                btn.innerHTML = '<i class="fa-solid fa-volume-high text-amber-500"></i>';
+                btn.classList.add('text-amber-500');
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                btn.classList.remove('text-amber-500');
+            }
+        }
+
+        // Add global keyframes for animations if not present
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes slideIn {
+                to { transform: translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
     </script>
 </body>
 
