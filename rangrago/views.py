@@ -19,12 +19,36 @@ def index(request):
     """Rider / Passenger View (Main App)"""
     return render(request, 'rangrago/index.html')
 
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
+
 def driver_login(request):
-    """Driver Portal Entry"""
+    """Driver Portal Entry with Auto-Login Logic"""
     if request.user.is_authenticated:
-        # Check if user has a driver profile
-        if hasattr(request.user, 'rangrago_driver'):
-            return redirect('rangrago:driver_dashboard')
+        return redirect('rangrago:driver_dashboard')
+        
+    if request.method == 'POST':
+        phone = request.POST.get('phone')
+        # Simple MVP Logic: If user exists, login. Else create.
+        # In prod, use OTP. Here we use phone as username.
+        username = phone.replace(' ', '').replace('+', '')
+        
+        user = User.objects.filter(username=username).first()
+        if not user:
+            # Create new Driver User
+            user = User.objects.create_user(username=username, password='password123')
+            # Create Driver Profile
+            Driver.objects.create(
+                user=user,
+                vehicle_number="BR-10-NEW",
+                license_number=f"DL-{username}",
+                is_verified=True
+            )
+            
+        # Log them in (Bypassing password for MVP Demo speed)
+        login(request, user)
+        return redirect('rangrago:driver_dashboard')
+        
     return render(request, 'rangrago/driver_login.html')
 
 @login_required
