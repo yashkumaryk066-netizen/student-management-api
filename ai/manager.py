@@ -50,10 +50,10 @@ class AIServiceManager:
             "gemini-pro": "Y.S.M Neural-Pro (Text)"
         },
         "claude": {
-            "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet (Latest)",
-            "claude-3-opus-20240229": "Claude 3 Opus (Most Capable)",
-            "claude-3-sonnet-20240229": "Claude 3 Sonnet (Balanced)",
-            "claude-3-haiku-20240307": "Claude 3 Haiku (Fast)"
+            "claude-3-5-sonnet-20241022": "Y.S.M Architect (Latest)",
+            "claude-3-opus-20240229": "Y.S.M Quantum (Most Capable)",
+            "claude-3-sonnet-20240229": "Y.S.M Balanced (Pro)",
+            "claude-3-haiku-20240307": "Y.S.M Flash (Fast)"
         }
     }
     
@@ -196,11 +196,11 @@ class AIServiceManager:
         return """
 ### ⚠️ AI Systems Offline
 
-I am currently unable to connect to my primary neural networks (Gemini/ChatGPT/HuggingFace). This could be due to:
+I am currently unable to connect to my primary neural networks (Y.S.M Core/Y.S.M Vision). This could be due to:
 
-1.  **API Key Configuration**: The server is missing valid API keys.
-2.  **Network Restrictions**: The PythonAnywhere environment may be blocking external connections (Free Tier).
-3.  **Service Outage**: The AI providers are temporarily down.
+1.  **Server Configuration**: The server is missing valid API keys.
+2.  **Network Restrictions**: The environment may be blocking external connections.
+3.  **Service Outage**: The neural providers are temporarily down.
 
 **What you can do:**
 *   Check your server logs (`/var/log/`) for specific error details.
@@ -280,7 +280,7 @@ I am currently unable to connect to my primary neural networks (Gemini/ChatGPT/H
             from decouple import config
             if config('OPENAI_API_KEY', default=None):
                 providers['chatgpt'] = {
-                    "name": "ChatGPT (OpenAI)",
+                    "name": "Y.S.M Omni-Brain (OpenAI)",
                     "status": "configured",
                     "models": cls.MODELS['chatgpt']
                 }
@@ -291,7 +291,7 @@ I am currently unable to connect to my primary neural networks (Gemini/ChatGPT/H
         try:
             if config('GEMINI_API_KEY', default=None):
                 providers['gemini'] = {
-                    "name": "Google Gemini",
+                    "name": "Y.S.M Neural-Vision (G-Core)",
                     "status": "configured",
                     "models": cls.MODELS['gemini']
                 }
@@ -302,7 +302,7 @@ I am currently unable to connect to my primary neural networks (Gemini/ChatGPT/H
         try:
             if config('CLAUDE_API_KEY', default=None):
                 providers['claude'] = {
-                    "name": "Anthropic Claude",
+                    "name": "Y.S.M Quantum Architect (A-Core)",
                     "status": "configured",
                     "models": cls.MODELS['claude']
                 }

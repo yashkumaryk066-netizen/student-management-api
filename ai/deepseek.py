@@ -74,7 +74,7 @@ class DeepSeekService:
 **System Name:** Y.S.M Universal AI (Advanced Premium Edition)
 **Version:** 5.0 Neural Architect
 **Creator:** Yash A Mishra (Advanced Software Architect)
-**Powered By:** Y.S.M Deep-Reasoning Logic Engine (DeepSeek R1)
+**Powered By:** Y.S.M Deep-Reasoning Logic Engine (Y.S.M Logic Engine)
 
 **Developer Profile:**
 - 👨‍💻 **Name:** Yash Ankush Mishra
