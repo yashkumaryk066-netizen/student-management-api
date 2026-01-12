@@ -66,8 +66,8 @@ urlpatterns = [
     path('dashboard/student/', StudentDashboardTemplateView.as_view(), name='student-dashboard'),
     path('dashboard/parent/', ParentDashboardTemplateView.as_view(), name='parent-dashboard'),
     
-    # PWA AI Chat (Direct route, no API prefix)
-    path('student/ai-chat/', AIChatView.as_view(), name='pwa-ai-chat-direct'),
+    # PWA AI Chat (Direct route)
+    path('ai-chat/', AIChatView.as_view(), name='pwa-ai-chat-direct'),
 
     # API Endpoints
     path('api/', include('student.urls')),

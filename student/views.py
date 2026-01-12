@@ -887,7 +887,7 @@ const RUNTIME_CACHE = `ysm-runtime-${VERSION}`;
 
 // Core assets to cache immediately
 const CORE_ASSETS = [
-  '/student/ai-chat/',
+  '/ai-chat/',
   '/static/manifest.json',
   '/static/assets/ysm_icon.png',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap',
@@ -1041,12 +1041,27 @@ def sitemap_xml(request):
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://yashamishra.pythonanywhere.com/ai-chat/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://yashamishra.pythonanywhere.com/developer/</loc>
-    <changefreq>monthly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://yashamishra.pythonanywhere.com/resume/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://yashamishra.pythonanywhere.com/demo/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://yashamishra.pythonanywhere.com/login/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
