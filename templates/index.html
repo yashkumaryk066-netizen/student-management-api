@@ -1282,45 +1282,41 @@
                             management platform.
                             Built for modern schools, colleges, and universities.
                         </p>
-                        <div class="hero-buttons">
-                            <button class="btn-premium btn-call-to-action" onclick="window.location.href='/login/'">
+                        <div class="hero-buttons"
+                            style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 30px; position: relative; z-index: 10;">
+
+                            <!-- 1. RANGRAGO MAIN (Golden, Prominent) -->
+                            <a href="/rangrago/login/" class="btn-premium"
+                                style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4); display: flex; align-items: center; gap: 10px; padding: 16px 32px; border-radius: 16px; font-weight: 800; text-decoration: none;">
+                                <span>BOOK RIDE</span>
+                                <i class="fa-solid fa-taxi" style="font-size: 1.2rem;"></i>
+                            </a>
+
+                            <!-- 2. GET STARTED (Purple) -->
+                            <a href="/login/" class="btn-premium"
+                                style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); display: flex; align-items: center; gap: 10px; padding: 16px 32px; border-radius: 16px; font-weight: 700; text-decoration: none;">
                                 <span>GET STARTED</span>
-                                <svg class="icon-pulse" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="3" stroke-linecap="round"
-                                    stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                     <polyline points="12 5 19 12 12 19"></polyline>
                                 </svg>
-                            </button>
+                            </a>
 
-                            <!-- RANGRAGO MAIN BUTTON -->
-                            <button class="btn-premium btn-demo-action" onclick="window.location.href='/rangrago/'"
-                                style="background: rgba(245, 158, 11, 0.1) !important; border-color: #f59e0b !important; color: #f59e0b !important; box-shadow: 0 0 30px rgba(245, 158, 11, 0.2) !important;">
-                                <span>BOOK RIDE</span>
-                                <i class="fa-solid fa-taxi" style="font-size: 1.2rem;"></i>
-                            </button>
-
-                            <!-- NEW: Premium App Install Button -->
-                            <button id="installAppBtn" class="btn-premium btn-app-action"
-                                style="background: linear-gradient(135deg, #FF4500, #FF8C00) !important; box-shadow: 0 10px 40px rgba(255, 69, 0, 0.5) !important;">
-                                <span>DOWNLOAD APP</span>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                            </button>
-
-                            <button class="btn-premium btn-pricing-action" onclick="window.lenis.scrollTo('#pricing')"
-                                style="background: linear-gradient(135deg, #10b981, #059669) !important; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4) !important;">
-                                <span>BUY NOW</span>
+                            <!-- 3. PRICING / BUY NOW (Green) -->
+                            <button onclick="document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})"
+                                class="btn-premium"
+                                style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); display: flex; align-items: center; gap: 10px; padding: 16px 32px; border-radius: 16px; font-weight: 700; cursor: pointer;">
+                                <span>PRICING</span>
                                 <span style="font-size: 1.2rem;">💰</span>
                             </button>
-                            <button class="btn-premium btn-dev-action" onclick="window.location.href='/api/developer/'">
-                                <span>MEET DEVELOPER</span>
+
+                            <!-- 4. MEET DEVELOPER (Glass) -->
+                            <a href="/api/developer/" class="btn-premium"
+                                style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; gap: 10px; padding: 16px 32px; border-radius: 16px; font-weight: 600; text-decoration: none;">
+                                <span>DEVELOPER</span>
                                 <span style="font-size: 1.5rem;">👨‍💻</span>
-                            </button>
+                            </a>
                         </div>
                         <script>
                             // Safety Fallback: Ensure sections are visible if GSAP fails
