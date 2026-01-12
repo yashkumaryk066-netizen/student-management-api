@@ -128,12 +128,57 @@
             </div>
         </div>
 
+        <!-- Active Ride Panel (OTP / Navigation) -->
+        <div id="activeRidePanel" class="hidden fixed bottom-0 left-0 w-full p-4 z-50">
+            <div
+                class="glass-card p-5 rounded-2xl shadow-2xl bg-slate-800 border-t border-green-500/50 animate-[slideUp_0.3s_ease-out]">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-black font-bold text-xl">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Rider Name</h2>
+                            <!-- Placeholder, populate via JS -->
+                            <div class="text-xs text-green-400 font-bold uppercase tracking-wider">ON TRIP</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <a href="#"
+                            class="inline-block bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-full mb-1"><i
+                                class="fa-solid fa-location-arrow"></i></a>
+                        <div class="text-[10px] text-slate-400">NAVIGATE</div>
+                    </div>
+                </div>
+
+                <!-- OTP Input Section (Pre-Start) -->
+                <div id="otpSection" class="mb-4">
+                    <input type="number" id="otpInput" placeholder="Enter Start OTP"
+                        class="w-full bg-slate-700 text-white text-center text-2xl font-mono p-3 rounded-xl border border-slate-600 focus:border-amber-500 focus:outline-none tracking-widest">
+                    <button onclick="startTrip()"
+                        class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl mt-3 shadow-lg shadow-green-500/30">
+                        VERIFY & START TRIP
+                    </button>
+                </div>
+
+                <!-- End Trip Section (Post-Start) -->
+                <div id="endTripSection" class="hidden">
+                    <button onclick="completeTrip()"
+                        class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-500/30">
+                        COMPLETE RIDE
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         let isOnline = false;
         let pollInterval = null;
         let currentRideProposal = null; // Store ride ID for acceptance
+        let activeRideId = null;
 
         async function toggleOnline() {
             try {
@@ -166,7 +211,7 @@
 
         function startLookingForRides() {
             pollInterval = setInterval(async () => {
-                if (!isOnline) return;
+                if (!isOnline || activeRideId) return; // Don't poll if busy
 
                 try {
                     const res = await fetch('/rangrago/api/driver/poll/');
@@ -205,14 +250,52 @@
                 const data = await res.json();
 
                 if (data.success) {
+                    activeRideId = currentRideProposal;
                     alert(`Ride Accepted! Passenger: ${data.rider_name}`);
+
+                    // Hide Request Popup
                     document.getElementById('rideRequest').classList.add('hidden');
-                    // Redirect to Navigation Mode (Not implemented in this single view yet)
+
+                    // Show Active Panel
+                    document.getElementById('activeRidePanel').classList.remove('hidden');
+                    document.getElementById('otpSection').classList.remove('hidden');
+                    document.getElementById('endTripSection').classList.add('hidden');
+
                 } else {
                     alert("Error: " + data.msg || data.error);
                     document.getElementById('rideRequest').classList.add('hidden');
                 }
             } catch (e) { alert("Network Error"); }
+        }
+
+        async function startTrip() {
+            const otp = document.getElementById('otpInput').value;
+            if (otp.length !== 4) return alert("Enter 4-digit OTP");
+
+            const formData = new FormData();
+            formData.append('ride_id', activeRideId);
+            formData.append('otp', otp);
+
+            const res = await fetch('/rangrago/api/driver/start/', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById('otpSection').classList.add('hidden');
+                document.getElementById('endTripSection').classList.remove('hidden');
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function completeTrip() {
+            const res = await fetch(`/rangrago/api/driver/complete/${activeRideId}/`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert("Ride Completed! Earnings added.");
+                document.getElementById('activeRidePanel').classList.add('hidden');
+                activeRideId = null;
+                // Resume Polling
+            }
         }
 
         function rejectRide() {

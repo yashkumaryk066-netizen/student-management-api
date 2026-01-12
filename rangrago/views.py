@@ -202,13 +202,10 @@ def accept_ride(request, ride_id):
     if request.method == 'POST':
         try:
             driver = request.user.rangrago_driver
-            # Atomic transaction to prevent double booking
             from django.db import transaction
             
             with transaction.atomic():
-               # Lock row
                ride = Ride.objects.select_for_update().get(id=ride_id)
-               
                if ride.status != 'SEARCHING':
                    return JsonResponse({'success': False, 'msg': 'Ride already taken!'})
                
@@ -220,6 +217,39 @@ def accept_ride(request, ride_id):
         except Exception as e:
              return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False})
+
+@login_required
+@csrf_exempt
+def start_ride(request):
+    """Driver enters OTP to start the journey"""
+    if request.method == 'POST':
+        ride_id = request.POST.get('ride_id')
+        otp = request.POST.get('otp')
+        
+        try:
+            ride = Ride.objects.get(id=ride_id, driver__user=request.user)
+            if ride.otp == otp:
+                ride.status = 'ONGOING'
+                ride.started_at = timezone.now()
+                ride.save()
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid OTP'})
+        except Ride.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Ride not found'})
+            
+@login_required
+@csrf_exempt
+def complete_ride(request, ride_id):
+    """Driver marks ride as complete"""
+    try:
+        ride = Ride.objects.get(id=ride_id, driver__user=request.user)
+        ride.status = 'COMPLETED'
+        ride.completed_at = timezone.now()
+        ride.save()
+        return JsonResponse({'success': True})
+    except:
+        return JsonResponse({'success': False})
 
 @login_required
 def toggle_driver_status(request):

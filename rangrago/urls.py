@@ -23,4 +23,6 @@ urlpatterns = [
     path('api/driver/toggle/', views.toggle_driver_status, name='toggle_driver_status'),
     path('api/driver/poll/', views.fetch_available_rides, name='fetch_available_rides'),
     path('api/driver/accept/<int:ride_id>/', views.accept_ride, name='accept_ride'),
+    path('api/driver/start/', views.start_ride, name='start_ride'),
+    path('api/driver/complete/<int:ride_id>/', views.complete_ride, name='complete_ride'),
 ]
