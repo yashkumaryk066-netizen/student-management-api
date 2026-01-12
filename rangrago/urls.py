@@ -4,8 +4,11 @@ from . import views
 app_name = 'rangrago'
 
 urlpatterns = [
+    # Main Landing 'Who are you?'
+    path('', views.welcome, name='welcome'),
+    
     # Rider App
-    path('', views.index, name='index'), 
+    path('ride/', views.index, name='index'), 
     path('login/', views.rider_login, name='rider_login'),
     
     # Driver App

@@ -26,6 +26,10 @@ def index(request):
         return redirect('rangrago:driver_dashboard')
     return render(request, 'rangrago/index.html')
 
+def welcome(request):
+    """Main Landing Split Screen"""
+    return render(request, 'rangrago/welcome.html')
+
 def rider_login(request):
     """
     Rider Access Portal

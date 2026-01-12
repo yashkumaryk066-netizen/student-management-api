@@ -129,7 +129,7 @@
 
     <script>
         // Init Map
-        const map = L.map('map').setView([25.26, 87.01], 13); // Bhagalpur dummy coords
+        const map = L.map('map').setView([25.26, 87.01], 15); // Default Bhagalpur
 
         // Dark Mode Map Tiles
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -138,18 +138,51 @@
             maxZoom: 20
         }).addTo(map);
 
+        // Map Pin Logic (Draggable Center)
+        let centerMarker = L.marker(map.getCenter(), {
+            icon: L.divIcon({
+                className: 'custom-pin',
+                html: '<div style="background-color:#f59e0b; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow:0 0 10px #f59e0b;"></div>',
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            }),
+            zIndexOffset: 1000
+        }).addTo(map);
+
+        // Overlay text for picking location
+        const mapOverlay = document.createElement('div');
+        mapOverlay.innerHTML = `
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -100%); z-index:400; pointer-events:none; text-align:center;">
+                <div style="background:black; color:white; padding:5px 10px; border-radius:15px; font-size:12px; font-weight:bold; margin-bottom:5px;">Set Pickup</div>
+                <i class="fa-solid fa-location-dot text-4xl text-amber-500 drop-shadow-lg animate-bounce"></i>
+            </div>
+        `;
+        document.getElementById('map').appendChild(mapOverlay);
+
+        map.on('move', function () {
+            // centerMarker.setLatLng(map.getCenter()); // Optional: if using marker
+            document.getElementById('pickupInput').value = `Lat: ${map.getCenter().lat.toFixed(4)}, Lng: ${map.getCenter().lng.toFixed(4)}`;
+            // In real app, call Reverse Geocoding API here to get address
+        });
+
         // UI Logic
         function selectVehicle(btn, type) {
             document.querySelectorAll('.vehicle-card').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
         }
 
+        // Global state
+        let currentRideId = null;
+        let pollInterval = null;
+
         async function bookRide() {
-            const pickup = document.getElementById('pickupInput').value;
+            const center = map.getCenter();
+            const pickup = `Lat: ${center.lat.toFixed(4)}, Lng: ${center.lng.toFixed(4)}`; // Use Map Center
             const drop = document.getElementById('dropInput').value;
 
-            if (!pickup || !drop) {
-                alert("Please enter locations!");
+            if (!drop) {
+                alert("Please enter drop location!");
+                document.getElementById('dropInput').focus();
                 return;
             }
 
@@ -158,21 +191,76 @@
             document.getElementById('findingDriver').classList.remove('hidden');
             document.getElementById('findingDriver').classList.add('flex');
 
-            // Simulate API Call
+            submitBooking(pickup, drop, center.lat, center.lng);
+        }
+
+        async function submitBooking(pickup, drop, lat, lng) {
             const formData = new FormData();
             formData.append('pickup', pickup);
             formData.append('drop', drop);
+            formData.append('lat', lat);
+            formData.append('lng', lng);
 
-            // Mock API delay
-            setTimeout(() => {
-                // In real app: fetch('/rangrago/api/book/', ...)
-                alert("Ride Request sent to nearby drivers! (Demo Mode)");
-                // Reset for demo
-                // window.location.reload();
-            }, 3000);
+            try {
+                const res = await fetch('/rangrago/api/book/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentRideId = data.ride_id;
+                    startPolling();
+                } else {
+                    alert("Booking Failed: " + data.error);
+                    cancelSearch();
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Network Error");
+                cancelSearch();
+            }
+        }
+
+        function startPolling() {
+            pollInterval = setInterval(async () => {
+                if (!currentRideId) return;
+
+                try {
+                    const res = await fetch(`/rangrago/api/status/${currentRideId}/`);
+                    const data = await res.json();
+
+                    if (data.status === 'ACCEPTED') {
+                        clearInterval(pollInterval);
+                        displayDriverFound(data);
+                    }
+                } catch (e) { console.error(e); }
+            }, 3000); // Poll every 3 seconds
+        }
+
+        function displayDriverFound(data) {
+            document.getElementById('findingDriver').innerHTML = `
+                <div class="text-green-500 text-6xl mb-4"><i class="fa-solid fa-circle-check"></i></div>
+                <h3 class="text-xl font-bold">Driver on the way!</h3>
+                <div class="glass-panel p-4 rounded-xl mt-4 text-left w-full max-w-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-400 text-xs">PILOT</span>
+                        <span class="text-amber-500 font-bold">${data.driver_name}</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-400 text-xs">VEHICLE</span>
+                        <span class="text-white font-mono">${data.vehicle}</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/10 text-center">
+                        <div class="text-4xl font-mono font-bold tracking-widest text-white">${data.otp}</div>
+                         <span class="text-slate-500 text-[10px] uppercase">Start OTP</span>
+                    </div>
+                </div>
+             `;
         }
 
         function cancelSearch() {
+            clearInterval(pollInterval);
             document.getElementById('bookingForm').classList.remove('hidden');
             document.getElementById('findingDriver').classList.add('hidden');
             document.getElementById('findingDriver').classList.remove('flex');
