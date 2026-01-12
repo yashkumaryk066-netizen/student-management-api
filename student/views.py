@@ -1036,12 +1036,17 @@ def sitemap_xml(request):
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://yashamishra.pythonanywhere.com/demo/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://yashamishra.pythonanywhere.com/rangrago/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://yashamishra.pythonanywhere.com/developer/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://yashamishra.pythonanywhere.com/resume/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
