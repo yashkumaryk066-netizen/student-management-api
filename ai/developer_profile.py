@@ -12,8 +12,8 @@ DEVELOPER_PROFILE = {
     "education": {
         "degree": "BCA (Bachelor of Computer Applications)",
         "university": "Bhagalpur University",
-        "completion_year": "2025",
-        "period": "2022-2025"
+        "completion_year": "2024",
+        "period": "2021-2024"
     },
     "personal": {
         "dob": "30/05/2004",

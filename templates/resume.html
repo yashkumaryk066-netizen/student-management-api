@@ -5,159 +5,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yash Kumar - Chief Software Architect CV</title>
+    <title>Yash A Mishra - Rangra Developer | Y.S.M AI Creator</title>
+    <meta name="description"
+        content="Resume of Yash A Mishra (Rangra Developer), the creator of Y.S.M AI (Ankush AI). Chief Software Architect specializing in AI and Scalable Systems.">
+    <meta name="keywords"
+        content="Yash A Mishra, Rangra Developer, Ankush AI, YSM AI, Yash Kumar Mishra, Software Architect, Python Developer India">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #0f172a;
-            --accent: #3b82f6;
+            --accent: #f59e0b;
+            /* Updated to Gold for Premium feel */
             --text-main: #334155;
             --text-light: #64748b;
             --bg-light: #f1f5f9;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
+        /* ... existing styles ... */
+    </style>
+</head>
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #cbd5e1;
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 40px 0;
-        }
+<body>
+    <div class="cv-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-photo">
+                <img src="{% static 'images/yash_profile.jpg' %}" alt="Yash A Mishra Rangra Developer">
+            </div>
 
-        .cv-container {
-            width: 210mm;
-            min-height: 297mm;
-            background: white;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            position: relative;
-        }
+            <div class="sidebar-section">
+                <h3>Contact</h3>
+                <ul class="contact-list">
+                    <li><i class="fas fa-phone"></i> +91 83569 26231</li>
+                    <li><i class="fas fa-envelope"></i> yashkumaryk066@gmail.com</li>
+                    <li><i class="fab fa-linkedin"></i> linkedin.com/in/yash-mishra-rangra</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
+            </div>
 
-        /* Left Sidebar */
-        .sidebar {
-            background: var(--primary);
-            color: white;
-            padding: 40px 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-        }
+            <!-- Skills Section (Keep existing) -->
+            <!-- ... -->
 
-        .profile-photo {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 4px solid var(--accent);
-            margin: 0 auto;
-            overflow: hidden;
-            background: #1e293b;
-        }
+        </aside>
 
-        .profile-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center top;
-        }
+        <!-- Main Content -->
+        <main class="main">
+            <header class="header">
+                <h1 class="name">Yash A Mishra</h1>
+                <div class="role-title">Rangra Developer | Y.S.M AI Creator</div>
+                <p class="intro">
+                    Visionary technology leader known as <strong>"Rangra Developer"</strong>. Creator of <strong>Y.S.M
+                        AI (Ankush AI)</strong> and <strong>RangraGo</strong>.
+                    Specializing in Advanced AI Architecture, Distributed Systems, and transforming education through
+                    technology.
+                </p>
+            </header>
 
-        .sidebar-section h3 {
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            color: var(--accent);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-        }
-
-        .contact-list {
-            list-style: none;
-            font-size: 0.9rem;
-        }
-
-        .contact-list li {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .contact-list i {
-            width: 20px;
-            color: var(--accent);
-        }
-
-        .skill-group {
-            margin-bottom: 20px;
-        }
-
-        .skill-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-
-        .skill-bar {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .skill-level {
-            height: 100%;
-            background: var(--accent);
-        }
-
-        /* Main Content */
-        .main {
-            padding: 50px 40px;
-        }
-
-        .header {
-            margin-bottom: 50px;
-        }
-
-        .name {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .role-title {
-            font-size: 1.4rem;
-            color: var(--accent);
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .intro {
-            color: var(--text-light);
-            line-height: 1.7;
-            margin-top: 20px;
-        }
-
-        .section {
+            .section {
             margin-bottom: 40px;
-        }
+            }
 
-        .section-title {
+            .section-title {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--primary);
@@ -167,23 +77,23 @@
             display: flex;
             align-items: center;
             gap: 15px;
-        }
+            }
 
-        .section-title::after {
+            .section-title::after {
             content: '';
             flex: 1;
             height: 2px;
             background: #e2e8f0;
-        }
+            }
 
-        .exp-card {
+            .exp-card {
             margin-bottom: 30px;
             position: relative;
             padding-left: 25px;
             border-left: 2px solid #e2e8f0;
-        }
+            }
 
-        .exp-card::before {
+            .exp-card::before {
             content: '';
             position: absolute;
             left: -6px;
@@ -192,21 +102,21 @@
             height: 10px;
             background: var(--accent);
             border-radius: 50%;
-        }
+            }
 
-        .exp-role {
+            .exp-role {
             font-size: 1.1rem;
             font-weight: 700;
             color: var(--primary);
-        }
+            }
 
-        .exp-company {
+            .exp-company {
             color: var(--text-light);
             font-weight: 500;
             margin-bottom: 5px;
-        }
+            }
 
-        .exp-date {
+            .exp-date {
             font-size: 0.85rem;
             color: var(--accent);
             font-weight: 600;
@@ -215,37 +125,37 @@
             background: #eff6ff;
             padding: 2px 8px;
             border-radius: 4px;
-        }
+            }
 
-        .exp-details {
+            .exp-details {
             font-size: 0.95rem;
             color: #475569;
             line-height: 1.6;
-        }
+            }
 
-        .project-grid {
+            .project-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-        }
+            }
 
-        .project-card {
+            .project-card {
             background: #f8fafc;
             padding: 20px;
             border-radius: 12px;
             border: 1px solid #e2e8f0;
-        }
+            }
 
-        /* Actions */
-        .actions {
+            /* Actions */
+            .actions {
             position: fixed;
             bottom: 40px;
             right: 40px;
             display: flex;
             gap: 20px;
-        }
+            }
 
-        .btn {
+            .btn {
             padding: 15px 30px;
             border-radius: 50px;
             text-decoration: none;
@@ -256,200 +166,210 @@
             gap: 10px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
-        }
+            }
 
-        .btn-download {
+            .btn-download {
             background: var(--accent);
-        }
+            }
 
-        .btn-download:hover {
+            .btn-download:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
-        }
+            }
 
-        .btn-home {
+            .btn-home {
             background: var(--primary);
-        }
+            }
 
-        @media print {
+            @media print {
             body {
-                padding: 0;
-                background: white;
-                display: block;
+            padding: 0;
+            background: white;
+            display: block;
             }
 
             .cv-container {
-                box-shadow: none;
-                margin: 0;
-                width: 100%;
-                height: auto;
-                min-height: 100vh;
+            box-shadow: none;
+            margin: 0;
+            width: 100%;
+            height: auto;
+            min-height: 100vh;
             }
 
             .actions {
-                display: none;
+            display: none;
             }
 
             .sidebar {
-                -webkit-print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
             }
-        }
-    </style>
-</head>
+            }
+            </style>
+            </head>
 
-<body>
-    <div class="cv-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="profile-photo">
-                <img src="{% static 'images/yash_profile.jpg' %}" alt="Yash Kumar">
-            </div>
+            <body>
+                <div class="cv-container">
+                    <!-- Sidebar -->
+                    <aside class="sidebar">
+                        <div class="profile-photo">
+                            <img src="{% static 'images/yash_profile.jpg' %}" alt="Yash Kumar">
+                        </div>
 
-            <div class="sidebar-section">
-                <h3>Contact</h3>
-                <ul class="contact-list">
-                    <li><i class="fas fa-phone"></i> +91 83569 26231</li>
-                    <li><i class="fas fa-envelope"></i> yashkumaryk066@gmail.com</li>
-                    <li><i class="fab fa-linkedin"></i> linkedin.com/in/yash-kumar-342330213</li>
-                    <li><i class="fas fa-map-marker-alt"></i> India</li>
-                </ul>
-            </div>
+                        <div class="sidebar-section">
+                            <h3>Contact</h3>
+                            <ul class="contact-list">
+                                <li><i class="fas fa-phone"></i> +91 83569 26231</li>
+                                <li><i class="fas fa-envelope"></i> yashkumaryk066@gmail.com</li>
+                                <li><i class="fab fa-linkedin"></i> linkedin.com/in/yash-kumar-342330213</li>
+                                <li><i class="fas fa-map-marker-alt"></i> India</li>
+                            </ul>
+                        </div>
 
-            <div class="sidebar-section">
-                <h3>Skills</h3>
+                        <div class="sidebar-section">
+                            <h3>Skills</h3>
 
-                <div class="skill-group">
-                    <div class="skill-name">Python & Django</div>
-                    <div class="skill-bar">
-                        <div class="skill-level" style="width: 98%"></div>
-                    </div>
+                            <div class="skill-group">
+                                <div class="skill-name">Python & Django</div>
+                                <div class="skill-bar">
+                                    <div class="skill-level" style="width: 98%"></div>
+                                </div>
+                            </div>
+
+                            <div class="skill-group">
+                                <div class="skill-name">System Architecture</div>
+                                <div class="skill-bar">
+                                    <div class="skill-level" style="width: 95%"></div>
+                                </div>
+                            </div>
+
+                            <div class="skill-group">
+                                <div class="skill-name">Cloud (AWS/Azure)</div>
+                                <div class="skill-bar">
+                                    <div class="skill-level" style="width: 90%"></div>
+                                </div>
+                            </div>
+
+                            <div class="skill-group">
+                                <div class="skill-name">AI & Machine Learning</div>
+                                <div class="skill-bar">
+                                    <div class="skill-level" style="width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <div class="skill-group">
+                                <div class="skill-name">React & Frontend</div>
+                                <div class="skill-bar">
+                                    <div class="skill-level" style="width: 88%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <h3>Education</h3>
+                            <div style="margin-bottom: 15px;">
+                                <div style="font-weight: 700; color: white;">M.C.A (Master of Computer Applications)
+                                </div>
+                                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">Bengaluru University
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--accent);">Completed</div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <div style="font-weight: 700; color: white;">B.C.A (Bachelor of Computer Applications)
+                                </div>
+                                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">G.B College, Bhagalpur
+                                    University
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--accent);">Completed</div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Main Content -->
+                    <main class="main">
+                        <header class="header">
+                            <h1 class="name">Yash Kumar</h1>
+                            <div class="role-title">Chief Software Architect</div>
+                            <p class="intro">
+                                Visionary technology leader with extensive experience in designing scalable distributed
+                                systems,
+                                microservices architecture, and AI-native applications. Passionate about transforming
+                                complex
+                                business
+                                requirements into elegant, high-performance technical solutions.
+                            </p>
+                        </header>
+
+                        <section class="section">
+                            <h2 class="section-title"><i class="fas fa-briefcase"></i> Experience</h2>
+
+                            <div class="exp-card">
+                                <div class="exp-role">High Level Software Architect</div>
+                                <div class="exp-company">Telepathy Infotech</div>
+                                <div class="exp-date">2025 - Present</div>
+                                <div class="exp-details">
+                                    Spearheading the development of "NextGen ERP", an enterprise-grade management
+                                    system.
+                                    Implemented event-driven microservices reducing system latency by 40%. Leading a
+                                    team of 15+
+                                    engineers.
+                                </div>
+                            </div>
+
+                            <div class="exp-card">
+                                <div class="exp-role">Senior Full Stack Developer</div>
+                                <div class="exp-company">Telepathy Infotech (Previous)</div>
+                                <div class="exp-date">2021 - 2025</div>
+                                <div class="exp-details">
+                                    Architected high-scale SaaS platforms serving 50k+ daily users. Optimized database
+                                    performance
+                                    resulting in 60% faster query execution. integrated Generative AI for automated
+                                    reporting.
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="section">
+                            <h2 class="section-title"><i class="fas fa-rocket"></i> Key Projects</h2>
+                            <div class="project-grid">
+                                <div class="project-card">
+                                    <h4 style="color: var(--primary); margin-bottom: 5px;">Enterprise ERP System</h4>
+                                    <p style="font-size: 0.9rem; color: #64748b;">
+                                        Comprehensive management solution with Finance, HR, and IoT modules.
+                                    </p>
+                                </div>
+                                <div class="project-card">
+                                    <h4 style="color: var(--primary); margin-bottom: 5px;">AI Analytics Engine</h4>
+                                    <p style="font-size: 0.9rem; color: #64748b;">
+                                        Predictive modeling for student performance using TensorFlow.
+                                    </p>
+                                </div>
+                                <div class="project-card">
+                                    <h4 style="color: var(--primary); margin-bottom: 5px;">Smart Campus IoT</h4>
+                                    <p style="font-size: 0.9rem; color: #64748b;">
+                                        Real-time tracking system for transport and attendance.
+                                    </p>
+                                </div>
+                                <div class="project-card">
+                                    <h4 style="color: var(--primary); margin-bottom: 5px;">FinTech Payment Gateway</h4>
+                                    <p style="font-size: 0.9rem; color: #64748b;">
+                                        Secure, PCI-DSS compliant payment processing integration.
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
                 </div>
 
-                <div class="skill-group">
-                    <div class="skill-name">System Architecture</div>
-                    <div class="skill-bar">
-                        <div class="skill-level" style="width: 95%"></div>
-                    </div>
+                <div class="actions">
+                    <!-- Developer Profile Link -->
+                    <a href="/developer/" class="btn btn-home">
+                        <i class="fas fa-arrow-left"></i> Back to Profile
+                    </a>
+                    <!-- Print/Download Button -->
+                    <a href="#" onclick="window.print(); return false;" class="btn btn-download">
+                        <i class="fas fa-download"></i> Download PDF
+                    </a>
                 </div>
-
-                <div class="skill-group">
-                    <div class="skill-name">Cloud (AWS/Azure)</div>
-                    <div class="skill-bar">
-                        <div class="skill-level" style="width: 90%"></div>
-                    </div>
-                </div>
-
-                <div class="skill-group">
-                    <div class="skill-name">AI & Machine Learning</div>
-                    <div class="skill-bar">
-                        <div class="skill-level" style="width: 85%"></div>
-                    </div>
-                </div>
-
-                <div class="skill-group">
-                    <div class="skill-name">React & Frontend</div>
-                    <div class="skill-bar">
-                        <div class="skill-level" style="width: 88%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>Education</h3>
-                <div style="margin-bottom: 15px;">
-                    <div style="font-weight: 700; color: white;">M.C.A (Master of Computer Applications)</div>
-                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">Bengaluru University</div>
-                    <div style="font-size: 0.8rem; color: var(--accent);">Completed</div>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <div style="font-weight: 700; color: white;">B.C.A (Bachelor of Computer Applications)</div>
-                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">G.B College, Bhagalpur University
-                    </div>
-                    <div style="font-size: 0.8rem; color: var(--accent);">Completed</div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main">
-            <header class="header">
-                <h1 class="name">Yash Kumar</h1>
-                <div class="role-title">Chief Software Architect</div>
-                <p class="intro">
-                    Visionary technology leader with extensive experience in designing scalable distributed systems,
-                    microservices architecture, and AI-native applications. Passionate about transforming complex
-                    business
-                    requirements into elegant, high-performance technical solutions.
-                </p>
-            </header>
-
-            <section class="section">
-                <h2 class="section-title"><i class="fas fa-briefcase"></i> Experience</h2>
-
-                <div class="exp-card">
-                    <div class="exp-role">High Level Software Architect</div>
-                    <div class="exp-company">Telepathy Infotech</div>
-                    <div class="exp-date">2025 - Present</div>
-                    <div class="exp-details">
-                        Spearheading the development of "NextGen ERP", an enterprise-grade management system.
-                        Implemented event-driven microservices reducing system latency by 40%. Leading a team of 15+
-                        engineers.
-                    </div>
-                </div>
-
-                <div class="exp-card">
-                    <div class="exp-role">Senior Full Stack Developer</div>
-                    <div class="exp-company">Telepathy Infotech (Previous)</div>
-                    <div class="exp-date">2021 - 2025</div>
-                    <div class="exp-details">
-                        Architected high-scale SaaS platforms serving 50k+ daily users. Optimized database performance
-                        resulting in 60% faster query execution. integrated Generative AI for automated reporting.
-                    </div>
-                </div>
-            </section>
-
-            <section class="section">
-                <h2 class="section-title"><i class="fas fa-rocket"></i> Key Projects</h2>
-                <div class="project-grid">
-                    <div class="project-card">
-                        <h4 style="color: var(--primary); margin-bottom: 5px;">Enterprise ERP System</h4>
-                        <p style="font-size: 0.9rem; color: #64748b;">
-                            Comprehensive management solution with Finance, HR, and IoT modules.
-                        </p>
-                    </div>
-                    <div class="project-card">
-                        <h4 style="color: var(--primary); margin-bottom: 5px;">AI Analytics Engine</h4>
-                        <p style="font-size: 0.9rem; color: #64748b;">
-                            Predictive modeling for student performance using TensorFlow.
-                        </p>
-                    </div>
-                    <div class="project-card">
-                        <h4 style="color: var(--primary); margin-bottom: 5px;">Smart Campus IoT</h4>
-                        <p style="font-size: 0.9rem; color: #64748b;">
-                            Real-time tracking system for transport and attendance.
-                        </p>
-                    </div>
-                    <div class="project-card">
-                        <h4 style="color: var(--primary); margin-bottom: 5px;">FinTech Payment Gateway</h4>
-                        <p style="font-size: 0.9rem; color: #64748b;">
-                            Secure, PCI-DSS compliant payment processing integration.
-                        </p>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <div class="actions">
-        <!-- Developer Profile Link -->
-        <a href="/developer/" class="btn btn-home">
-            <i class="fas fa-arrow-left"></i> Back to Profile
-        </a>
-        <!-- Print/Download Button -->
-        <a href="#" onclick="window.print(); return false;" class="btn btn-download">
-            <i class="fas fa-download"></i> Download PDF
-        </a>
-    </div>
-</body>
+            </body>
 
 </html>
