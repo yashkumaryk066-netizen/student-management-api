@@ -265,6 +265,8 @@ Context: {context}
 
 **INSTRUCTION:**
 Provide a response that is visually stunning, structurally perfect, and intellectual.
+At the very end, provide 3 short, relevant follow-up questions in this format:
+`///_SUGGESTIONS_/// ["Question 1", "Question 2", "Question 3"]`
 """
         
         # Construct message list with history

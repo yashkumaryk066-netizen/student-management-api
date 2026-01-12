@@ -416,6 +416,8 @@ Context: {context}
 
 **INSTRUCTION:**
 Provide a response that is visually stunning, structurally perfect, and intellectual. Use the formatting rules above.
+At the very end, provide 3 short, relevant follow-up questions in this format:
+`///_SUGGESTIONS_/// ["Next Question 1", "Next Question 2", "Next Question 3"]`
 """
         # If media (images) provided, send as multimodal request
         if media_data:
