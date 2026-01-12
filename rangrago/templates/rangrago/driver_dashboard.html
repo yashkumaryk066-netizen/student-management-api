@@ -132,36 +132,92 @@
 
     <script>
         let isOnline = false;
+        let pollInterval = null;
+        let currentRideProposal = null; // Store ride ID for acceptance
 
-        function toggleOnline() {
-            const toggle = document.getElementById('toggle');
+        async function toggleOnline() {
+            try {
+                const res = await fetch('/rangrago/api/driver/toggle/');
+                const data = await res.json();
+
+                if (data.success) {
+                    isOnline = data.is_online;
+                    updateUIStatus(isOnline);
+
+                    if (isOnline) {
+                        startLookingForRides();
+                    } else {
+                        stopLookingForRides();
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function updateUIStatus(online) {
             const statusText = document.getElementById('statusText');
-
-            if (toggle.checked) {
-                isOnline = true;
+            if (online) {
                 statusText.innerText = "ONLINE";
                 statusText.classList.replace('text-slate-400', 'text-green-400');
-
-                // Simulate Incoming Request
-                setTimeout(() => {
-                    document.getElementById('rideRequest').classList.remove('hidden');
-                    // Play notification sound if possible
-                }, 3000);
             } else {
-                isOnline = false;
                 statusText.innerText = "OFFLINE";
                 statusText.classList.replace('text-green-400', 'text-slate-400');
-                document.getElementById('rideRequest').classList.add('hidden');
             }
         }
 
-        function acceptRide() {
-            alert("Ride Accepted! Redirecting to navigation...");
+        function startLookingForRides() {
+            pollInterval = setInterval(async () => {
+                if (!isOnline) return;
+
+                try {
+                    const res = await fetch('/rangrago/api/driver/poll/');
+                    const data = await res.json();
+
+                    // If rides available and popup not already shown
+                    if (data.rides && data.rides.length > 0 && document.getElementById('rideRequest').classList.contains('hidden')) {
+                        const ride = data.rides[0]; // Take first available
+                        showRideRequest(ride);
+                    }
+                } catch (e) { console.error(e); }
+            }, 3000);
+        }
+
+        function stopLookingForRides() {
+            clearInterval(pollInterval);
             document.getElementById('rideRequest').classList.add('hidden');
+        }
+
+        function showRideRequest(ride) {
+            currentRideProposal = ride.id;
+
+            // Update UI with Ride Details
+            // Note: In a full implementation, we'd update the DOM elements for pickup/drop text here
+            // For now we just show the popup
+
+            document.getElementById('rideRequest').classList.remove('hidden');
+            // Play sound if possible
+        }
+
+        async function acceptRide() {
+            if (!currentRideProposal) return;
+
+            try {
+                const res = await fetch(`/rangrago/api/driver/accept/${currentRideProposal}/`, { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(`Ride Accepted! Passenger: ${data.rider_name}`);
+                    document.getElementById('rideRequest').classList.add('hidden');
+                    // Redirect to Navigation Mode (Not implemented in this single view yet)
+                } else {
+                    alert("Error: " + data.msg || data.error);
+                    document.getElementById('rideRequest').classList.add('hidden');
+                }
+            } catch (e) { alert("Network Error"); }
         }
 
         function rejectRide() {
             document.getElementById('rideRequest').classList.add('hidden');
+            // Ideally tell backend to ignore this ride for 30s
         }
     </script>
 
