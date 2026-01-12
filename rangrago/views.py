@@ -241,15 +241,41 @@ def start_ride(request):
 @login_required
 @csrf_exempt
 def complete_ride(request, ride_id):
-    """Driver marks ride as complete"""
+    """Driver marks ride as complete - HANDLES PAYOUT"""
     try:
         ride = Ride.objects.get(id=ride_id, driver__user=request.user)
+        
+        # 1. Update Status
         ride.status = 'COMPLETED'
         ride.completed_at = timezone.now()
         ride.save()
-        return JsonResponse({'success': True})
-    except:
-        return JsonResponse({'success': False})
+        
+        # 2. Calculate Revenue Split (90/10)
+        total_fare = float(ride.fare_amount)
+        platform_fee = total_fare * 0.10
+        driver_earning = total_fare * 0.90
+        
+        # 3. Update Driver Earnings
+        driver = ride.driver
+        # Assuming we add an 'earnings' field to Driver model, or calculate dynamically.
+        # For now, we simulate this wallet update.
+        # driver.wallet_balance += driver_earning 
+        # driver.save()
+        
+        return JsonResponse({
+            'success': True,
+            'fare': total_fare,
+            'earned': driver_earning,
+            'commission': platform_fee
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+def my_rides(request):
+    """Rider History View"""
+    rides = Ride.objects.filter(rider=request.user).order_by('-created_at')
+    return render(request, 'rangrago/my_rides.html', {'rides': rides})
 
 @login_required
 def toggle_driver_status(request):

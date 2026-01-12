@@ -9,6 +9,7 @@ urlpatterns = [
     
     # Rider App
     path('ride/', views.index, name='index'), 
+    path('history/', views.my_rides, name='my_rides'),
     path('login/', views.rider_login, name='rider_login'),
     
     # Driver App
