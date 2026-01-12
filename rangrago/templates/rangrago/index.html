@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RangraGo - Premium Ride</title>
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            color: white;
+            overflow: hidden;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100vw;
+            z-index: 0;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .vehicle-card {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .vehicle-card.selected {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Map Backend -->
+    <div id="map"></div>
+
+    <!-- UI Overlay -->
+    <div class="absolute top-0 left-0 w-full h-full pointer-events-none z-10 flex flex-col md:flex-row">
+
+        <!-- Sidebar Panel -->
+        <div
+            class="pointer-events-auto w-full md:w-[400px] h-3/4 md:h-full glass-panel flex flex-col p-6 shadow-2xl relative mt-auto md:mt-0">
+            <!-- Header -->
+            <div class="flex items-center gap-3 mb-8">
+                <div
+                    class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Rangra<span class="text-amber-500">Go</span></h1>
+                    <p class="text-xs text-slate-400">Premium Mobility Solution</p>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <div id="bookingForm" class="space-y-4">
+                <div class="nav-input space-y-3">
+                    <div class="flex items-center gap-3 bg-slate-800 p-3 rounded-xl border border-slate-700">
+                        <i class="fa-solid fa-circle-dot text-green-500 text-xs"></i>
+                        <input type="text" placeholder="Pickup Location (e.g. Home)"
+                            class="bg-transparent w-full outline-none text-sm font-medium" id="pickupInput">
+                    </div>
+                    <div class="h-4 border-l border-dashed border-slate-600 ml-5 -my-2"></div>
+                    <div class="flex items-center gap-3 bg-slate-800 p-3 rounded-xl border border-slate-700">
+                        <i class="fa-solid fa-location-dot text-red-500 text-xs"></i>
+                        <input type="text" placeholder="Where to?"
+                            class="bg-transparent w-full outline-none text-sm font-medium" id="dropInput">
+                    </div>
+                </div>
+
+                <!-- Vehicle Selection -->
+                <div class="grid grid-cols-3 gap-2 mt-6">
+                    <button class="vehicle-card p-2 rounded-xl bg-slate-800 text-center selected"
+                        onclick="selectVehicle(this, 'bike')">
+                        <i class="fa-solid fa-motorcycle text-2xl mb-1 text-slate-300"></i>
+                        <div class="text-xs font-bold">Bike</div>
+                        <div class="text-[10px] text-green-400">Fastest</div>
+                    </button>
+                    <button class="vehicle-card p-2 rounded-xl bg-slate-800 text-center"
+                        onclick="selectVehicle(this, 'auto')">
+                        <i class="fa-solid fa-truck-pickup text-2xl mb-1 text-slate-300"></i>
+                        <!-- Best FontAwesome match for Auto/TukTuk? maybe taxi -->
+                        <div class="text-xs font-bold">Auto</div>
+                        <div class="text-[10px] text-slate-400">₹45</div>
+                    </button>
+                    <button class="vehicle-card p-2 rounded-xl bg-slate-800 text-center"
+                        onclick="selectVehicle(this, 'car')">
+                        <i class="fa-solid fa-car text-2xl mb-1 text-slate-300"></i>
+                        <div class="text-xs font-bold">Prime</div>
+                        <div class="text-[10px] text-slate-400">AC</div>
+                    </button>
+                </div>
+
+                <button onclick="bookRide()"
+                    class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold py-4 rounded-xl shadow-lg shadow-amber-500/20 transition-all mt-6 flex items-center justify-center gap-2">
+                    <span>Book RangraGo</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Finding Driver State (Hidden) -->
+            <div id="findingDriver" class="hidden flex-col items-center justify-center h-60 text-center">
+                <div class="w-20 h-20 rounded-full border-4 border-amber-500/30 border-t-amber-500 animate-spin mb-4">
+                </div>
+                <h3 class="text-xl font-bold">Connecting Driver...</h3>
+                <p class="text-sm text-slate-400 mt-2">Connecting to nearby Rangra Pilots</p>
+                <button onclick="cancelSearch()"
+                    class="mt-8 text-red-400 text-sm font-semibold hover:text-red-300">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Init Map
+        const map = L.map('map').setView([25.26, 87.01], 13); // Bhagalpur dummy coords
+
+        // Dark Mode Map Tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // UI Logic
+        function selectVehicle(btn, type) {
+            document.querySelectorAll('.vehicle-card').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        async function bookRide() {
+            const pickup = document.getElementById('pickupInput').value;
+            const drop = document.getElementById('dropInput').value;
+
+            if (!pickup || !drop) {
+                alert("Please enter locations!");
+                return;
+            }
+
+            // Show Loading
+            document.getElementById('bookingForm').classList.add('hidden');
+            document.getElementById('findingDriver').classList.remove('hidden');
+            document.getElementById('findingDriver').classList.add('flex');
+
+            // Simulate API Call
+            const formData = new FormData();
+            formData.append('pickup', pickup);
+            formData.append('drop', drop);
+
+            // Mock API delay
+            setTimeout(() => {
+                // In real app: fetch('/rangrago/api/book/', ...)
+                alert("Ride Request sent to nearby drivers! (Demo Mode)");
+                // Reset for demo
+                // window.location.reload();
+            }, 3000);
+        }
+
+        function cancelSearch() {
+            document.getElementById('bookingForm').classList.remove('hidden');
+            document.getElementById('findingDriver').classList.add('hidden');
+            document.getElementById('findingDriver').classList.remove('flex');
+        }
+    </script>
+</body>
+
+</html>

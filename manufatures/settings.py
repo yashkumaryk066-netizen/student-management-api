@@ -71,6 +71,9 @@ INSTALLED_APPS = [
     # 'library_system',
     # 'finance',
     'drf_spectacular',
+    'notifications',
+    'ai',
+    'rangrago', # RangraGo Ride Module
 ]
 
 MIDDLEWARE = [
