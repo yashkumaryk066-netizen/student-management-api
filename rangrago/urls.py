@@ -6,6 +6,7 @@ app_name = 'rangrago'
 urlpatterns = [
     # Rider App
     path('', views.index, name='index'), 
+    path('login/', views.rider_login, name='rider_login'),
     
     # Driver App
     path('drive/', views.driver_login, name='driver_login'),

@@ -15,23 +15,56 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     return R * c
 
+@login_required
 def index(request):
-    """Rider / Passenger View (Main App)"""
+    """
+    Rider / Passenger Main View
+    If not logged in, redirects to Rider Login.
+    If logged in as Driver, redirects to Driver Dashboard (Safety Check).
+    """
+    if hasattr(request.user, 'rangrago_driver'):
+        return redirect('rangrago:driver_dashboard')
     return render(request, 'rangrago/index.html')
 
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.models import User
+def rider_login(request):
+    """
+    Rider Access Portal
+    Distinct from Driver Login.
+    """
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'rangrago_driver'):
+            return redirect('rangrago:driver_dashboard')
+        return redirect('rangrago:index')
+
+    if request.method == 'POST':
+        phone = request.POST.get('phone')
+        username = f"RIDER-{phone.replace(' ', '')}"
+        
+        user = User.objects.filter(username=username).first()
+        if not user:
+            # Auto-Register New Rider
+            user = User.objects.create_user(username=username, password='password123')
+            user.first_name = "New User"
+            user.save()
+        
+        login(request, user)
+        return redirect('rangrago:index')
+        
+    return render(request, 'rangrago/rider_login.html')
 
 def driver_login(request):
     """Driver Portal Entry with Auto-Login Logic"""
     if request.user.is_authenticated:
-        return redirect('rangrago:driver_dashboard')
-        
+        if hasattr(request.user, 'rangrago_driver'):
+            return redirect('rangrago:driver_dashboard')
+        # If user is logged in but not a driver, maybe logout or show error?
+        # For simplicity in this demo, we allow switching if needed, but usually we redirect.
+        # Let's simple redirect to index if not driver
+        return redirect('rangrago:index') 
+
     if request.method == 'POST':
         phone = request.POST.get('phone')
-        # Simple MVP Logic: If user exists, login. Else create.
-        # In prod, use OTP. Here we use phone as username.
-        username = phone.replace(' ', '').replace('+', '')
+        username = f"DRIVER-{phone.replace(' ', '')}" # Distinct Username Namespace
         
         user = User.objects.filter(username=username).first()
         if not user:
@@ -40,12 +73,11 @@ def driver_login(request):
             # Create Driver Profile
             Driver.objects.create(
                 user=user,
-                vehicle_number="BR-10-NEW",
+                vehicle_number=request.POST.get('vehicle', 'TEMP-NEW'),
                 license_number=f"DL-{username}",
                 is_verified=True
             )
             
-        # Log them in (Bypassing password for MVP Demo speed)
         login(request, user)
         return redirect('rangrago:driver_dashboard')
         
@@ -55,14 +87,12 @@ def driver_login(request):
 def driver_dashboard(request):
     """
     Driver Dashboard: Toggle Active Status, View Requests
-    Auto-creates profile if missing (Advanced MVP Feature)
     """
-    driver, created = Driver.objects.get_or_create(user=request.user, defaults={
-        'vehicle_number': f"BR-10-DEMO-{request.user.id}",
-        'license_number': f"LIC-RANGRA-{request.user.id}",
-        'is_verified': True,
-        'vehicle_type': VehicleType.BIKE
-    })
+    try:
+        driver = request.user.rangrago_driver
+    except:
+        return redirect('rangrago:driver_login') # Safety Fallback
+        
     return render(request, 'rangrago/driver_dashboard.html', {'driver': driver})
 
 # --- REAL APIs ---
