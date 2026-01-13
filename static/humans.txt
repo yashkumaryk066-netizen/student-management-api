@@ -1,0 +1,17 @@
+/* Team */
+  Author: Yash A Mishra (Rangra Developer)
+  Role: Creator of Best AI in World
+  Location: Rangra, Bhagalpur, Bihar, India
+  Contact: yashkumaryk066@gmail.com
+  Twitter: @RangraDeveloper
+  LinkedIn: linkedin.com/in/yash-mishra-rangra
+
+/* Site */
+  Software: YSM AI (Y.S.M AI)
+  Type: Best Education Software in India
+  BuiltWith: HTML5, CSS3, JavaScript, Python, Django, AI
+  LastUpdated: 2026-01-13
+
+/* Mission */
+  To provide the Sabse Achha AI (Best AI) educational tools to the world from Bihar.
+  Dominate Global Search Rankings for 'Best Education Software'.

@@ -3,17 +3,20 @@ Allow: /
 Allow: /developer/
 Allow: /resume/
 Allow: /ai-chat/
-Allow: /demo/
+Allow: /rangrago/
 Allow: /static/
+Allow: /static/images/
 
-# Disallow backend paths to save Crawl Budget for your Profile
+# Disallow backend paths to save Crawl Budget
 Disallow: /admin/
 Disallow: /api/
-Disallow: /dashboard/
 Disallow: /auth/
+
+# Explicitly Allow Google Image Bot
+User-agent: Googlebot-Image
+Allow: /
+Allow: /static/images/
+Allow: /static/img/
 
 # Sitemap Location
 Sitemap: https://yashamishra.pythonanywhere.com/static/sitemap.xml
-
-# Crawl Specifics
-Crawl-delay: 1
