@@ -6,8 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, Avg
 from .chat_models import ChatConversation, ChatMessage, UserNotification
+from .models import Student, Attendence, Grade, Exam, Payment, Subject
+from django.utils import timezone
 from ai.manager import get_ai_manager
 import logging
 import time
@@ -20,13 +22,77 @@ class ChatSendMessageView(APIView):
     REAL AI Chat - Sends message to AI and saves to database
     """
     permission_classes = [IsAuthenticated]
-    
+
+    def _get_rag_context(self, user):
+        """
+        Build REAL-TIME context about the student for RAG.
+        This allows AI to know the student's marks, attendance, and status.
+        """
+        context_lines = []
+        
+        # Check if user is a student
+        try:
+            # Access related name 'student_profile' from Student model
+            student = getattr(user, 'student_profile', None)
+            if not student:
+                # Fallback: check if user has a profile with role
+                role = getattr(user, 'profile', None).role if hasattr(user, 'profile') else 'User'
+                return f"User Role: {role}"
+                
+        except Exception:
+            return "User Type: Standard User"
+
+        # 1. Basic Info
+        context_lines.append(f"Student Profile: {student.name} (Grade {student.grade})")
+        
+        # 2. Attendance Summary
+        total_days = Attendence.objects.filter(student=student).count()
+        if total_days > 0:
+            present_days = Attendence.objects.filter(student=student, is_present=True).count()
+            attendance_pct = (present_days / total_days * 100)
+            context_lines.append(f"Attendance Record: {attendance_pct:.1f}% ({present_days}/{total_days} days present)")
+        else:
+            context_lines.append("Attendance Record: No data yet.")
+        
+        # 3. Recent Academic Performance (Last 5 Grades)
+        recent_grades = Grade.objects.filter(student=student).select_related('exam', 'exam__subject').order_by('-exam__exam_date')[:5]
+        if recent_grades:
+            context_lines.append("Recent Exam Results:")
+            for g in recent_grades:
+                subject_name = g.exam.subject.name if g.exam.subject else 'General'
+                context_lines.append(f"- {g.exam.name} ({subject_name}): {g.marks_obtained}/{g.exam.total_marks} ({g.status})")
+        else:
+            context_lines.append("Academic Results: No grades recorded yet.")
+        
+        # 4. Upcoming Exams (Next 30 days)
+        today = timezone.now().date()
+        upcoming_exams = Exam.objects.filter(
+            grade_class__icontains=str(student.grade),
+            exam_date__gte=today
+        ).order_by('exam_date')[:3]
+        
+        if upcoming_exams:
+            context_lines.append("Upcoming Exams:")
+            for e in upcoming_exams:
+                days_left = (e.exam_date - today).days
+                context_lines.append(f"- {e.name}: {e.exam_date} (in {days_left} days)")
+
+        # 5. Fee Status
+        overdue_payments = Payment.objects.filter(student=student, status='OVERDUE').count()
+        if overdue_payments > 0:
+            context_lines.append(f"Fee Status: ⚠️ {overdue_payments} Overdue Payments")
+        else:
+            context_lines.append("Fee Status: All clear")
+            
+        return "\n".join(context_lines)
+
     def post(self, request):
         try:
             conversation_id = request.data.get('conversation_id')
             user_message = request.data.get('message')
             ai_model = request.data.get('model', 'gemini-2.0-flash')
             system_prompt = request.data.get('system_prompt', '')
+            images = request.data.get('images', [])  # List of Base64 strings
             
             if not user_message:
                 return Response({
@@ -72,6 +138,24 @@ class ChatSendMessageView(APIView):
                 ).order_by('timestamp')[:10]  # Last 10 messages
                 
                 context = []
+                
+                # --- INJECT RAG CONTEXT (Student Data) ---
+                student_data = self._get_rag_context(request.user)
+                rag_message = f"""
+SYSTEM CONTEXT (REAL-TIME USER DATA):
+You have access to the following live data about the student you are chatting with:
+{student_data}
+
+INSTRUCTIONS:
+- Use this data to answer questions like "What are my marks?", "How is my attendance?", or "Any upcoming exams?".
+- If marks are low, offer study tips.
+- If attendance is low, suggest catching up.
+- This is PRIVATE data, do not share it unless asked.
+"""
+                # Add as system context
+                context.append({'role': 'system', 'content': rag_message})
+                # -----------------------------------------
+                
                 for msg in previous_messages:
                     context.append({
                         'role': 'user' if msg.role == 'user' else 'assistant',
@@ -96,7 +180,8 @@ class ChatSendMessageView(APIView):
                     user_message=user_message,
                     mode=mode,
                     context=context,
-                    detect_errors=True  # ✅ ALWAYS detect and fix errors automatically
+                    detect_errors=True,  # ✅ ALWAYS detect and fix errors automatically
+                    images=images # Pass images if any
                 )
                 
                 response_time = int((time.time() - start_time) * 1000)  # ms

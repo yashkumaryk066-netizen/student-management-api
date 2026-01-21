@@ -3,8 +3,11 @@ Google Gemini AI Integration Service
 Provides advanced AI-powered features using Google's Gemini models
 NOW WITH EXPERT SYSTEM TRAINING
 """
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 import logging
+import base64
+import io
+from PIL import Image
 from decouple import config
 from .developer_profile import DEVELOPER_PROFILE
 from .expert_system_prompt import get_expert_prompt_for_mode, EXPERT_SYSTEM_PROMPT_V4
@@ -97,24 +100,18 @@ class GeminiService:
         prompt: str,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None
+        max_tokens: Optional[int] = None,
+        images: Optional[List[str]] = None
     ) -> str:
         """
-        Generate content with Advanced Self-Healing Model Selection.
-        If the preferred model fails (404/Not Found), it automatically reroutes 
-        computations to the next available neural engine.
+        Generate content with Advanced Self-Healing Model Selection + Vision Support.
         """
         # List of models to try in order of preference
-        # 1. Flash (Fastest, Newest)
-        # 2. Pro (Stable)
-        # 3. 1.0 Pro (Legacy Stable)
-        # 4. Gemini (Generic alias)
         candidate_models = [
             model or self.default_model,
-            'gemini-2.0-flash-lite-preview-02-05',
             'gemini-2.0-flash',
-            'gemini-2.5-flash',
-            'gemini-flash-latest',
+            'gemini-1.5-flash',
+            'gemini-pro-vision', # Fallback for vision
         ]
         
         # Remove duplicates while preserving order
@@ -124,6 +121,12 @@ class GeminiService:
         
         for attempt_model in candidate_models:
             try:
+                # If images are present, ensure we are using a vision-capable model
+                if images and 'vision' not in attempt_model and 'flash' not in attempt_model and '1.5' not in attempt_model:
+                     # Gemini Pro (legacy) didn't support vision, but Pro 1.5/Flash does.
+                     # We trust the self-healing list above which prioritizes Flash (Vision capable).
+                     pass
+
                 logger.info(f"Attempting generation with Neural Engine: {attempt_model}")
                 
                 generation_config = {
@@ -138,40 +141,44 @@ class GeminiService:
 
                 content_parts = [prompt]
                 
+                # --- PROCESS IMAGES ---
+                if images:
+                    for img_b64 in images:
+                        try:
+                            # Strip header if present (data:image/jpeg;base64,...)
+                            if ',' in img_b64:
+                                img_b64 = img_b64.split(',')[1]
+                            image_data = base64.b64decode(img_b64)
+                            image = Image.open(io.BytesIO(image_data))
+                            content_parts.append(image)
+                        except Exception as img_err:
+                            logger.error(f"Failed to process image: {img_err}")
+                
+                # Generate
                 response = model_instance.generate_content(
-                    content_parts,
+                    content_parts, 
                     safety_settings=self.safety_settings
                 )
                 
-                # Check for safety blocks
-                try:
-                    return response.text.strip()
-                except ValueError:
-                    # If response.text fails, it's usually because the response was blocked
-                    logger.warning(f"Engine {attempt_model} blocked content due to safety filters.")
-                    return "I apologize, but I cannot fulfill this request as it violates my safety guidelines regarding sensitive or harmful content."
+                return response.text.strip()
                 
             except Exception as e:
-                error_msg = str(e)
+                logger.warning(f"Engine {attempt_model} failed: {e}. Rerouting...")
                 last_error = e
-                logger.warning(f"Engine {attempt_model} failed: {error_msg}. Rerouting...")
-                
-                # If it's an Auth error, no point trying other models
-                if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
-                    raise Exception("Security Clearance Failed: Invalid API Credentials.")
-                
-                # Valid 'Not Found' errors -> Continue to next model
-                if "404" in error_msg or "not found" in error_msg.lower():
-                    continue
-                    
-                # Other errors, maybe transient, continue trying others just in case
                 continue
-        
+                
         # --- ULTIMATE FALLBACK: Dynamic Discovery ---
         # If all known models failed (likely due to deprecation or region lock),
         # ask the API what IS available and try the first one.
         try:
             logger.warning("All preset Gemini models failed. Attempting dynamic discovery...")
+            
+            # Re-define config for fallback
+            generation_config = {
+                "temperature": temperature if temperature is not None else self.temperature,
+                "max_output_tokens": max_tokens or self.max_tokens,
+            }
+            
             for m in self.genai.list_models():
                 if 'generateContent' in m.supported_generation_methods:
                     fallback_model = m.name
@@ -180,6 +187,7 @@ class GeminiService:
                         model_name=fallback_model,
                         generation_config=generation_config
                     )
+                    # Note: We don't pass images in fallback mode to be safe
                     return model_instance.generate_content(
                         [prompt], 
                         safety_settings=self.safety_settings
