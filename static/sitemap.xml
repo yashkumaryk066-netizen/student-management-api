@@ -3,51 +3,52 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://yashamishra.pythonanywhere.com/</loc>
-    <lastmod>2026-01-13</lastmod>
+    <lastmod>2026-01-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
-      <image:title>ysm ai - yashankushmishra - yashamishra</image:title>
-      <image:caption>yashrangra - rangradevloper - jaipurdevloper - bhagalpurdevloper</image:caption>
+      <image:title>Yash A Mishra - Rangra Developer 2026 - YSM AI Creator</image:title>
+      <image:caption>Yash A Mishra, Rangra Developer, Bihar Best Developer 2026, YSM AI Creator, Ankush AI Founder, Best Software Architect India</image:caption>
     </image:image>
   </url>
   <url>
     <loc>https://yashamishra.pythonanywhere.com/developer/</loc>
-    <lastmod>2026-01-13</lastmod>
+    <lastmod>2026-01-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
-      <image:title>yashrank - yashankushmishra - yashamishra</image:title>
-      <image:caption>yashrangra - rangradevloper - jaipurdevloper - bhagalpurdevloper - Best AI</image:caption>
+      <image:title>Yash A Mishra Portfolio 2026 - Rangra Developer Projects</image:title>
+      <image:caption>Professional portfolio of Yash A Mishra, Rangra Developer from Bihar, Best AI Developer India, 100+ projects</image:caption>
     </image:image>
   </url>
   <url>
     <loc>https://yashamishra.pythonanywhere.com/resume/</loc>
-    <lastmod>2026-01-13</lastmod>
+    <lastmod>2026-01-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <image:image>
       <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
-      <image:title>ysm ai - yashankushmishra - yashrangra</image:title>
-      <image:caption>Resume of yashamishra - rangradevloper - jaipurdevloper - bhagalpurdevloper</image:caption>
+      <image:title>Yash A Mishra Resume 2026 - Software Architect CV</image:title>
+      <image:caption>Resume of Yash A Mishra, Software Architect from Rangra Bihar, YSM AI Creator, Full Stack Developer</image:caption>
     </image:image>
   </url>
   <url>
     <loc>https://yashamishra.pythonanywhere.com/rangrago/</loc>
-    <lastmod>2026-01-13</lastmod>
+    <lastmod>2026-01-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://yashamishra.pythonanywhere.com/ai-chat/</loc>
-    <lastmod>2026-01-13</lastmod>
+    <lastmod>2026-01-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://yashamishra.pythonanywhere.com/login/</loc>
+    <lastmod>2026-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
