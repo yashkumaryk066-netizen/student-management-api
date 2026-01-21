@@ -59,28 +59,45 @@ class ChatSendMessageView(APIView):
                 model=ai_model
             )
             
-            # Call REAL AI
+            # Call REAL AI with EXPERT MODE (Auto error detection + correction)
             start_time = time.time()
             try:
-                ai_manager = get_ai_manager()
+                # Import expert Gemini directly for full control
+                from ai.gemini import get_gemini_service
+                ai_service = get_gemini_service()
                 
                 # Build message history for context
                 previous_messages = ChatMessage.objects.filter(
                     conversation=conversation
                 ).order_by('timestamp')[:10]  # Last 10 messages
                 
-                messages = []
-                if system_prompt:
-                    messages.append({'role': 'system', 'content': system_prompt})
-                
+                context = []
                 for msg in previous_messages:
-                    messages.append({
+                    context.append({
                         'role': 'user' if msg.role == 'user' else 'assistant',
                         'content': msg.content
                     })
                 
-                # Get AI response
-                ai_response = ai_manager.chat(user_message, context=messages)
+                # Detect mode based on message content
+                mode = 'general'
+                if any(keyword in user_message.lower() for keyword in ['error', 'bug', 'fix', 'wrong', 'не работает']):
+                    mode = 'debug'
+                elif any(keyword in user_message.lower() for keyword in ['review', 'check', 'optimize']):
+                    mode = 'code_review'
+                elif any(keyword in user_message.lower() for keyword in ['deploy', 'production', 'pythonanywhere']):
+                    mode = 'production'
+                elif any(keyword in user_message.lower() for keyword in ['security', 'safe', 'secure','vulnerable']):
+                    mode = 'security'
+                elif any(keyword in user_message.lower() for keyword in ['slow', 'fast', 'performance', 'optimize']):
+                    mode = 'performance'
+                
+                # Use EXPERT CHAT with auto error detection
+                ai_response = ai_service.expert_chat(
+                    user_message=user_message,
+                    mode=mode,
+                    context=context,
+                    detect_errors=True  # ✅ ALWAYS detect and fix errors automatically
+                )
                 
                 response_time = int((time.time() - start_time) * 1000)  # ms
                 
