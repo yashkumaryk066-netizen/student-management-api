@@ -69,6 +69,13 @@ from .ai_chat_views import AIChatView, AIPaymentSubmitView
 from .ai_auth_views import AIAuthView
 from .ai_logout_view import AILogoutView
 
+# REAL CHAT API IMPORTS
+from .chat_api import (
+    ChatSendMessageView, ChatHistoryView, ChatLoadConversationView,
+    ChatSearchView, NotificationListView as ChatNotificationListView,
+    ChatDeleteView
+)
+
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -247,6 +254,25 @@ urlpatterns = [
     path('ai/unified/summarize/', UnifiedContentSummarizerView.as_view(), name='ai-unified-summarize'),
     path('ai/unified/explain/', UnifiedConceptExplainerView.as_view(), name='ai-unified-explain'),
     path('ai/unified/translate/', UnifiedContentTranslatorView.as_view(), name='ai-unified-translate'),
+    
+    # ==================== REAL CHAT API (NEW) ====================
+    # Send message to AI and save to database
+    path('api/chat/send/', ChatSendMessageView.as_view(), name='chat-send-message'),
+    
+    # Get all conversations
+    path('api/chat/history/', ChatHistoryView.as_view(), name='chat-history'),
+    
+    # Load specific conversation
+    path('api/chat/conversation/<int:conversation_id>/', ChatLoadConversationView.as_view(), name='chat-load-conversation'),
+    
+    # Search in chats
+    path('api/chat/search/', ChatSearchView.as_view(), name='chat-search'),
+    
+    # Get notifications
+    path('api/notifications/', ChatNotificationListView.as_view(), name='chat-notifications'),
+    
+    # Delete conversation
+    path('api/chat/delete/<int:conversation_id>/', ChatDeleteView.as_view(), name='chat-delete'),
 ]
 
 # =====================================================

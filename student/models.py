@@ -1033,3 +1033,8 @@ class AISubscription(models.Model):
                 return 'EXPIRED'
                 
         return self.status
+
+
+# ===== CHAT & NOTIFICATION MODELS =====
+# Import real chat conversation, message, and notification models
+from .chat_models import ChatConversation, ChatMessage, UserNotification
