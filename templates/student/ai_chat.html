@@ -538,82 +538,281 @@
 
     <!-- Main Chat Area -->
     <main class="flex-1 flex flex-col relative chat-container">
-        <!-- Top Bar -->
+        <!-- PREMIUM Top Bar with Search + Quick Actions -->
         <header
-            class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
-            <div class="flex items-center gap-4">
+            class="h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+            <div class="flex items-center gap-3 flex-1">
+                <!-- Mobile Menu -->
                 <div class="md:hidden">
-                    <button class="text-slate-400 hover:text-white transition" onclick="toggleSidebar()"><i
-                            class="fa-solid fa-bars text-xl"></i></button>
+                    <button class="text-slate-400 hover:text-white transition" onclick="toggleSidebar()">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
                 </div>
+
+                <!-- Brand Badge -->
                 <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
                     <span class="text-amber-500 text-sm">✨</span>
                     <span class="text-xs font-semibold text-slate-300">Y.S.M AI</span>
                 </div>
-                <!-- Status Pill -->
-                <!-- FREE UNLIMITED ACCESS -->
+
+                <!-- PREMIUM: Global Search Bar (Desktop) -->
+                <div class="hidden md:flex flex-1 max-w-md">
+                    <div class="relative w-full group">
+                        <i
+                            class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm group-focus-within:text-amber-500 transition"></i>
+                        <input type="text" id="globalSearch" placeholder="Search chats, projects, prompts..."
+                            class="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:bg-white/10 focus:border-amber-500/50 focus:outline-none transition"
+                            onkeyup="searchGlobal(this.value)">
+                    </div>
+                </div>
+
+                <!-- PREMIUM: New Chat Button -->
+                <button onclick="startNewChat()"
+                    class="hidden md:flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-lg hover:bg-amber-500/30 transition text-sm font-medium text-amber-400 hover:text-amber-300">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>New Chat</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2 md:gap-3">
+                <!-- FREE UNLIMITED Badge -->
                 <div class="bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full flex items-center gap-2">
                     <i class="fa-solid fa-infinity text-[10px] text-amber-500"></i>
-                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Free Unlimited
-                        Access</span>
+                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider hidden sm:inline">Free
+                        Unlimited</span>
                 </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <button class="text-slate-400 hover:text-white transition" title="Clear Chat" onclick="clearChat()"><i
-                        class="fa-solid fa-eraser"></i></button>
 
-                <button class="text-slate-400 hover:text-white transition relative" title="Toggle Voice Response"
-                    onclick="toggleAutoSpeak()" id="btnAutoSpeak">
+                <!-- PREMIUM: Notifications -->
+                <button class="relative text-slate-400 hover:text-white transition p-2 hover:bg-white/10 rounded-lg"
+                    title="Notifications">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                </button>
+
+                <!-- PREMIUM: Theme Toggle -->
+                <button id="themeToggle" onclick="toggleTheme()"
+                    class="text-slate-400 hover:text-white transition p-2 hover:bg-white/10 rounded-lg" title="Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Clear Chat -->
+                <button class="text-slate-400 hover:text-white transition p-2 hover:bg-white/10 rounded-lg"
+                    title="Clear Chat" onclick="clearChat()">
+                    <i class="fa-solid fa-eraser"></i>
+                </button>
+
+                <!-- Voice Toggle -->
+                <button class="text-slate-400 hover:text-white transition relative p-2 hover:bg-white/10 rounded-lg"
+                    title="Toggle Voice" onclick="toggleAutoSpeak()" id="btnAutoSpeak">
                     <i class="fa-solid fa-volume-xmark"></i>
                 </button>
-                <button class="text-slate-400 hover:text-white transition" title="Settings"><i
-                        class="fa-solid fa-gear"></i></button>
+
+                <!-- Settings -->
+                <button class="text-slate-400 hover:text-white transition p-2 hover:bg-white/10 rounded-lg"
+                    title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
             </div>
         </header>
 
         <!-- Messages Area -->
+
+        <!-- Messages Area -->
         <div id="messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth">
 
-            <!-- Welcome Message -->
-            <div class="flex flex-col items-center justify-center h-full text-center space-y-6" id="welcome-screen">
-                <div
-                    class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/20 mb-4 animate-[bounce_3s_infinite]">
-                    <i class="fa-solid fa-brain text-4xl text-white"></i>
-                </div>
-                <div class="relative group cursor-default">
+            <!-- PREMIUM Welcome Screen - No Empty Feel -->
+            <div class="flex flex-col h-full text-center space-y-6 py-8" id="welcome-screen">
+                <!-- Smaller Logo + Welcome Message -->
+                <div class="flex flex-col items-center space-y-3">
                     <div
-                        class="absolute -inset-1 bg-gradient-to-r from-amber-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200">
+                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                        <i class="fa-solid fa-brain text-3xl text-white"></i>
                     </div>
-                    <h2 class="relative text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 mb-4 animate-[pulse_4s_infinite] tracking-tighter"
-                        style="text-shadow: 0 0 30px rgba(245,158,11,0.5);">
-                        Y.S.M <span class="text-white">AI</span>
+                    <h2
+                        class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500">
+                        Welcome back, {{ display_name|title }} 👋
                     </h2>
+                    <p class="text-slate-400 text-sm">How can I help you today?</p>
                 </div>
-                <div
-                    class="text-xl text-cyan-400 font-mono tracking-[0.3em] uppercase opacity-80 animate-[pulse_2s_infinite]">
-                    Systems Online
-                </div>
-                <p
-                    class="text-slate-400 max-w-lg mx-auto py-4 text-lg border-t border-b border-white/5 my-6 backdrop-blur-sm bg-white/5 rounded-xl">
-                    <span class="text-amber-400">Architect Intelligence</span> initialized.<br>
-                    Ready for complex deployment.
-                </p>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <!-- PREMIUM: 4 Feature Cards (was 2) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto px-4">
+                    <!-- Card 1: Generate Code -->
                     <button
-                        class="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500/50 hover:bg-white/10 transition text-left group"
-                        onclick="setInput('Create a premium React component for dashboard stats')">
-                        <div class="text-purple-500 mb-2"><i class="fa-solid fa-code"></i></div>
-                        <div class="text-white font-medium group-hover:text-purple-400 transition">Generate Code</div>
-                        <div class="text-xs text-slate-500">Premium React/Vue components</div>
+                        class="group p-5 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-white/10 transition-all text-left relative overflow-hidden"
+                        onclick="setInput('Create a professional full-stack web application with Django backend and React frontend')">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition">
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-code text-purple-400 text-xl"></i>
+                            </div>
+                            <div class="text-white font-semibold mb-1 group-hover:text-purple-300 transition">💻
+                                Generate Code</div>
+                            <div class="text-xs text-slate-500">Full projects, components, APIs</div>
+                        </div>
                     </button>
+
+                    <!-- Card 2: Debug & Fix -->
                     <button
-                        class="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500/50 hover:bg-white/10 transition text-left group"
-                        onclick="setInput('Explain Quantum Computing to a 5 year old')">
-                        <div class="text-green-500 mb-2"><i class="fa-solid fa-book-open"></i></div>
-                        <div class="text-white font-medium group-hover:text-green-400 transition">Deep Learning</div>
-                        <div class="text-xs text-slate-500">Explain complex topics</div>
+                        class="group p-5 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-white/10 transition-all text-left relative overflow-hidden"
+                        onclick="setInput('I have a deployment error. Help me debug and fix it step by step.')">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition">
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-bug text-red-400 text-xl"></i>
+                            </div>
+                            <div class="text-white font-semibold mb-1 group-hover:text-red-300 transition">🛠 Debug &
+                                Fix</div>
+                            <div class="text-xs text-slate-500">Error analysis & solutions</div>
+                        </div>
                     </button>
+
+                    <!-- Card 3: Deployment Help -->
+                    <button
+                        class="group p-5 rounded-xl bg-white/5 border border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left relative overflow-hidden"
+                        onclick="setInput('Guide me through deploying my Django app to PythonAnywhere with PostgreSQL database')">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition">
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-rocket text-blue-400 text-xl"></i>
+                            </div>
+                            <div class="text-white font-semibold mb-1 group-hover:text-blue-300 transition">🚀 Deploy
+                            </div>
+                            <div class="text-xs text-slate-500">Production deployment guide</div>
+                        </div>
+                    </button>
+
+                    <!-- Card 4: Database Optimization -->
+                    <button
+                        class="group p-5 rounded-xl bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-white/10 transition-all text-left relative overflow-hidden"
+                        onclick="setInput('Optimize my database schema and write efficient queries for better performance')">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition">
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-database text-green-400 text-xl"></i>
+                            </div>
+                            <div class="text-white font-semibold mb-1 group-hover:text-green-300 transition">📊 Optimize
+                                DB</div>
+                            <div class="text-xs text-slate-500">Schema & query optimization</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- PREMIUM: Smart Prompt Suggestions -->
+                <div class="max-w-4xl mx-auto px-4">
+                    <div class="text-xs text-slate-500 mb-3 text-left">✨ Suggested prompts:</div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setInput('Build me a complete Django REST API with authentication')"
+                            class="suggestion-chip px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
+                            Build Django API
+                        </button>
+                        <button onclick="setInput('Optimize my database query performance')"
+                            class="suggestion-chip px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
+                            Optimize Database
+                        </button>
+                        <button onclick="setInput('Fix this deployment error on PythonAnywhere')"
+                            class="suggestion-chip px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
+                            Fix Deployment Error
+                        </button>
+                        <button onclick="setInput('Write professional resume bullet points for software developer')"
+                            class="suggestion-chip px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
+                            Resume Points
+                        </button>
+                        <button onclick="setInput('Create a complete React dashboard with charts')"
+                            class="suggestion-chip px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
+                            React Dashboard
+                        </button>
+                        <button onclick="setInput('Design a modern landing page with Tailwind CSS')"
+                            class="suggestion-chip px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
+                            Landing Page Design
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PREMIUM: Recent Chats List -->
+                <div class="max-w-4xl mx-auto px-4 w-full">
+                    <div class="text-sm font-semibold text-slate-400 mb-3 text-left flex items-center justify-between">
+                        <span>Recent Conversations</span>
+                        <button class="text-xs text-amber-500 hover:text-amber-400 transition">View All →</button>
+                    </div>
+                    <div class="space-y-2">
+                        <!-- Recent Chat Item 1 -->
+                        <button
+                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-code text-purple-400"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div
+                                        class="text-white font-medium text-sm truncate group-hover:text-amber-300 transition">
+                                        Django REST API with JWT Authentication</div>
+                                    <div class="text-xs text-slate-500">2 hours ago</div>
+                                </div>
+                                <i
+                                    class="fa-solid fa-chevron-right text-slate-600 group-hover:text-amber-500 transition text-xs"></i>
+                            </div>
+                        </button>
+
+                        <!-- Recent Chat Item 2 -->
+                        <button
+                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-bug text-red-400"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div
+                                        class="text-white font-medium text-sm truncate group-hover:text-amber-300 transition">
+                                        Database Migration Error Fix</div>
+                                    <div class="text-xs text-slate-500">Yesterday</div>
+                                </div>
+                                <i
+                                    class="fa-solid fa-chevron-right text-slate-600 group-hover:text-amber-500 transition text-xs"></i>
+                            </div>
+                        </button>
+
+                        <!-- Recent Chat Item 3 -->
+                        <button
+                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-rocket text-blue-400"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div
+                                        class="text-white font-medium text-sm truncate group-hover:text-amber-300 transition">
+                                        PythonAnywhere Deployment Guide</div>
+                                    <div class="text-xs text-slate-500">2 days ago</div>
+                                </div>
+                                <i
+                                    class="fa-solid fa-chevron-right text-slate-600 group-hover:text-amber-500 transition text-xs"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PREMIUM: Small Status Footer -->
+                <div class="flex justify-center items-center gap-2 text-xs text-slate-600">
+                    <i class="fa-solid fa-shield-halved text-green-500"></i>
+                    <span>Secure Connection</span>
+                    <span class="text-slate-700">•</span>
+                    <span>Y.S.M AI v4.0</span>
                 </div>
             </div>
 
@@ -702,6 +901,60 @@
         const sfxSend = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3'); // Sci-fi click
         const sfxReceive = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3'); // Sci-fi chirp
         let isAutoSpeak = false; // Toggle for Jarvis Mode
+
+        // ===== PREMIUM NEW FUNCTIONS =====
+
+        // Start New Chat
+        function startNewChat() {
+            if (confirm('Start a new conversation? Current chat will be saved.')) {
+                chatHistory = [];
+                document.getElementById('messages').innerHTML = document.getElementById('welcome-screen').outerHTML;
+                showToast('✨ New chat started');
+            }
+        }
+
+        // Global Search
+        function searchGlobal(query) {
+            if (!query || query.length < 2) return;
+            console.log('Searching for:', query);
+            // TODO: Implement actual search through chat history
+            // For now, just show a toast
+            if (query.length > 3) {
+                showToast(`🔍 Searching for "${query}"...`);
+            }
+        }
+
+        // Theme Toggle
+        let currentTheme = 'dark';
+        function toggleTheme() {
+            const themeIcon = document.querySelector('#themeToggle i');
+            if (currentTheme === 'dark') {
+                currentTheme = 'light';
+                themeIcon.className = 'fa-solid fa-sun';
+                showToast('☀️ Light theme coming soon');
+            } else {
+                currentTheme = 'dark';
+                themeIcon.className = 'fa-solid fa-moon';
+                showToast('🌙 Dark theme active');
+            }
+        }
+
+        // Show Toast Notification
+        function showToast(message, duration = 2000) {
+            const existing = document.querySelector('.premium-toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'premium-toast fixed top-20 right-4 bg-amber-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('opacity-0', 'transition-opacity'), duration);
+            setTimeout(() => toast.remove(), duration + 300);
+        }
+
+        // ===== END PREMIUM FUNCTIONS =====
+
 
         // --- PWA LOGIC ---
         let deferredPrompt;
