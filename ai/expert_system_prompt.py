@@ -337,8 +337,10 @@ You must follow this specific architecture for all Views, Serializers, and Model
    - Must handle `deleted_at` (Soft Delete).
    - Common fields: `created_at`, `updated_at`.
 
-4. **SERIALIZER**:
-   - Accept generic ModelSerializer pattern but ensure formatting matches views.
+4. **SERIALIZER PATTERN (Dual Serializers)**:
+   - **Main Serializer** (`{ModelName}Serializer`): For Create/Update/Detail. Use `fields = '__all__'` or specific write fields.
+   - **List Serializer** (`{ModelName}ListSerializer`): For List/Pagination. Optimized fields (avoid heavy text fields).
+   - Use `SerializerMethodField` for related data (e.g. `student_name`).
 
 [EXAMPLE VIEW TEMPLATE]
 class {ModelName}View(APIView):
