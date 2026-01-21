@@ -37,17 +37,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-zl*#qy0_q$sj9&pmm=q^+82g@)1bg7-usxj-(_2vhc+bj-g#@z')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # config('DEBUG', default=False, cast=bool)
+# Set DEBUG=False in production .env file
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,yashamishra.pythonanywhere.com').split(',')
 
 # PRODUCTION SECURITY SETTINGS
-# Force HTTPS for all connections
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# Only enable HTTPS settings if using custom domain with SSL certificate
+# PythonAnywhere FREE tier doesn't support custom HTTPS, so keep this False
+HTTPS_ENABLED = config('HTTPS_ENABLED', default=False, cast=bool)
+
+# Force HTTPS for all connections (only if HTTPS is available)
+SECURE_SSL_REDIRECT = HTTPS_ENABLED
+SESSION_COOKIE_SECURE = HTTPS_ENABLED
+CSRF_COOKIE_SECURE = HTTPS_ENABLED
+SECURE_HSTS_SECONDS = 31536000 if HTTPS_ENABLED else 0  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = HTTPS_ENABLED
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 

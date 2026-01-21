@@ -5,8 +5,9 @@ Use: DJANGO_SETTINGS_MODULE=manufatures.pythonanywhere_settings
 
 from .settings import *
 
-# Production mode
-DEBUG = True
+# Production mode - controlled by environment variable
+# Set DEBUG=False in PythonAnywhere Web tab → Environment variables
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 # Update with YOUR PythonAnywhere username
 ALLOWED_HOSTS = ['yashamishra.pythonanywhere.com']
