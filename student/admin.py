@@ -744,3 +744,29 @@ class PayrollAdmin(admin.ModelAdmin):
     search_fields = ['employee__user__username', 'transaction_id']
     list_editable = ['status']
     ordering = ['-year', '-month']
+
+# ==================== AI CHAT MANAGEMENT ====================
+from .chat_models import ChatConversation, ChatMessage
+
+class ChatMessageInline(admin.TabularInline):
+    model = ChatMessage
+    extra = 0
+    readonly_fields = ['role', 'content', 'timestamp', 'tokens_used', 'model', 'response_time_ms']
+    can_delete = False
+    ordering = ['timestamp']
+
+@admin.register(ChatConversation)
+class ChatConversationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'user', 'ai_model', 'total_messages', 'created_at', 'is_archived']
+    list_filter = ['ai_model', 'created_at', 'is_archived']
+    search_fields = ['title', 'user__username', 'user__email']
+    date_hierarchy = 'created_at'
+    inlines = [ChatMessageInline]
+    readonly_fields = ['total_messages', 'total_tokens']
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ['role', 'conversation', 'timestamp', 'model', 'response_time_ms']
+    list_filter = ['role', 'model', 'timestamp']
+    search_fields = ['content', 'conversation__user__username']
+    ordering = ['-timestamp']
