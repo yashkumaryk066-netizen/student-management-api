@@ -133,9 +133,11 @@ class ChatSendMessageView(APIView):
                 ai_service = get_gemini_service()
                 
                 # Build message history for context
+                # Build message history for context (Fetch NEWEST, then reverse)
                 previous_messages = ChatMessage.objects.filter(
                     conversation=conversation
-                ).order_by('timestamp')[:10]  # Last 10 messages
+                ).order_by('-timestamp')[:10]  # Get last 10 messages
+                previous_messages = reversed(previous_messages) # Convert to chronological order
                 
                 context = []
                 
