@@ -337,10 +337,26 @@ You must follow this specific architecture for all Views, Serializers, and Model
    - Must handle `deleted_at` (Soft Delete).
    - Common fields: `created_at`, `updated_at`.
 
-4. **SERIALIZER PATTERN (Dual Serializers)**:
-   - **Main Serializer** (`{ModelName}Serializer`): For Create/Update/Detail. Use `fields = '__all__'` or specific write fields.
-   - **List Serializer** (`{ModelName}ListSerializer`): For List/Pagination. Optimized fields (avoid heavy text fields).
-   - Use `SerializerMethodField` for related data (e.g. `student_name`).
+4. **SERIALIZER PATTERNS (Dual + Nested Transactions)**:
+   - **Write Serializer** (`{ModelName}Serializer`): 
+     - Handle Nested Writes (Many-to-Many / Reverse FK) in `create()` and `update()`.
+     - ALWAYS use `@transaction.atomic`.
+     - For Updates: Use `instance.field.clear()` then adding new items (Full Replacement Strategy).
+     - Example:
+       ```python
+       @transaction.atomic
+       def create(self, validated_data):
+           items = validated_data.pop('nested_field', [])
+           instance = super().create(validated_data)
+           for item in items:
+               obj = NestedModel.objects.create(**item)
+               instance.nested_field.add(obj)
+           return instance
+       ```
+   - **Read/Mini Serializer** (`Mini{ModelName}Serializer`): 
+     - Used for nested representations or lightweight lists.
+     - Use `MiniNestedSerializer` for child fields to show full details (not just IDs).
+   - **List Serializer** (`{ModelName}ListSerializer`): For pagination (can inherit from Mini).
 
 [EXAMPLE VIEW TEMPLATE]
 class {ModelName}View(APIView):
