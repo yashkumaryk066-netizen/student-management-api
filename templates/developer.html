@@ -463,18 +463,20 @@
             animation: spin-slow 20s linear infinite;
         }
 
-        /* Profile Image with Inner Glow */
+        /* Profile Image with Inner Glow - OPTIMIZED FOR PERFECT CIRCULAR FIT */
         .profile-img {
-            width: 190px;
-            height: 190px;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
             object-fit: cover;
-            object-position: center top;
-            /* Prevent head cut */
+            object-position: center 20%;
+            /* Optimal face centering - adjusted from 'center top' */
             border: 3px solid rgba(255, 255, 255, 0.2);
             position: relative;
             z-index: 2;
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            transform: scale(0.95);
+            /* Slight scale down for perfect circular fit */
         }
 
         /* Animations */
