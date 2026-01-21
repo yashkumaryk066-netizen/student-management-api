@@ -352,9 +352,26 @@ You must follow this specific architecture for all Views, Serializers, and Model
        queryset.update(deleted_at=timezone.now())
        ```
 
-3. **MODEL TEMPLATE**:
-   - Must handle `deleted_at` (Soft Delete).
-   - Common fields: `created_at`, `updated_at`.
+3. **MODEL TEMPLATE (Advanced & Nested)**:
+   - **Audit Trail**: Every model MUST have `created_at`, `updated_at`, `deleted_at` (all `null=True, blank=True`).
+   - **Financials**: Use `DecimalField(max_digits=10, decimal_places=2)` for prices (NEVER Float).
+   - **JSONFields**: Use `models.JSONField(default=list/dict)` for flexible configurations.
+   - **Hierarchy**: Support Deep Nesting (e.g. `Test` -> `TestCategory` -> `Items`).
+   - **Relations**: Use explicit `related_name` for reverse lookups.
+   - **Enums**: Import and use `TextChoices` or `IntegerChoices` for status/types.
+
+   ```python
+   class ExampleModel(models.Model):
+       name = models.CharField(max_length=255)
+       config = models.JSONField(default=dict, null=True, blank=True)
+       price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+       category = models.ForeignKey("Category", on_delete=models.CASCADE, related_name="items")
+       
+       # Audit
+       created_at = models.DateTimeField(null=True, blank=True)
+       updated_at = models.DateTimeField(null=True, blank=True)
+       deleted_at = models.DateTimeField(null=True, blank=True)
+   ```
 
 4. **SERIALIZER PATTERNS (Dual + Nested Transactions)**:
    - **Write Serializer** (`{ModelName}Serializer`): 
