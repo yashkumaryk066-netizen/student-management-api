@@ -22,6 +22,7 @@ class AIServiceManager:
     CLAUDE = "claude"
     GROQ = "groq"
     DEEPSEEK = "deepseek"
+    MISTRAL = "mistral"  # ← NEW: European AI provider
     
     # Available models
     MODELS = {
@@ -33,6 +34,11 @@ class AIServiceManager:
             "llama-3.3-70b-versatile": "Y.S.M Hyper-Speed (v5.0)",
             "llama-3.1-8b-instant": "Y.S.M Instant (v4.0)",
             "mixtral-8x7b-32768": "Y.S.M Context-Pro (v4.5)"
+        },
+        "mistral": {  # ← NEW
+            "mistral-large-latest": "Y.S.M Europa-MAX (Flagship)",
+            "mistral-small-latest": "Y.S.M Europa-Fast (Efficient)",
+            "open-mistral-7b": "Y.S.M Europa-Lite (Open)"
         },
         "huggingface": {
             "mixtral-8x7b": "Y.S.M Open-Access (v3.0)",
@@ -95,6 +101,11 @@ class AIServiceManager:
                 from .chatgpt import get_chatgpt_service
                 self.service = get_chatgpt_service()
                 logger.info(f"✅ Initialized ChatGPT service")
+                
+            elif self.provider == self.MISTRAL:
+                from .mistral import get_mistral_service
+                self.service = get_mistral_service()
+                logger.info(f"✅ Initialized Mistral AI (Europa Engine)")
                 
             elif self.provider == self.GEMINI:
                 from .gemini import get_gemini_service

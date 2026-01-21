@@ -13,9 +13,22 @@ requests
 pycryptodome
 reportlab
 razorpay
+
+#  AI/ML Providers (Core)
 openai>=1.3.0
 google-generativeai>=0.3.0
 anthropic>=0.18.0
+
+# Advanced AI Providers (100% Capability)
+mistralai>=0.0.7  # European AI provider
+groq>=0.4.0  # Hyper-speed inference
+# cohere>=4.0.0  # Optional: Enterprise AI (uncomment if using)
+
+# Vector Database & Memory
+chromadb>=0.4.0  # Conversation memory with semantic search
+sentence-transformers  # Embeddings for ChromaDB
+
+# Utilities
 colorama
 qrcode
 openpyxl
