@@ -1,11 +1,13 @@
 """
 Google Gemini AI Integration Service
 Provides advanced AI-powered features using Google's Gemini models
+NOW WITH EXPERT SYSTEM TRAINING
 """
 from typing import Dict, List, Optional
 import logging
 from decouple import config
 from .developer_profile import DEVELOPER_PROFILE
+from .expert_system_prompt import get_expert_prompt_for_mode, EXPERT_SYSTEM_PROMPT_V4
 
 logger = logging.getLogger(__name__)
 
@@ -487,6 +489,80 @@ At the very end, provide 3 short, relevant follow-up questions in this format:
         """Translate using Gemini"""
         prompt = f"Translate the following text to {target_language}. Maintain educational tone:\n\n{text}"
         return self.generate_content(prompt)
+    
+    def expert_chat(
+        self, 
+        user_message: str, 
+        mode: str = 'general',
+        context: Optional[List[Dict]] = None,
+        detect_errors: bool = True
+    ) -> str:
+        """
+        EXPERT AI Chat with advanced capabilities:
+        - Auto error detection and correction
+        - Multi-domain expertise (Django, APIs, databases, etc.)
+        - Code review and optimization
+        - Schema reading (Swagger, OpenAPI)
+        - Deployment troubleshooting
+        
+        Args:
+            user_message: User's question or code
+            mode: 'general', 'debug', 'code_review', 'learning', 'production', 'security', 'performance'
+            context: Previous conversation history
+            detect_errors: Auto-detect and fix code errors
+            
+        Returns:
+            Expert AI response with error detection and solutions
+        """
+        # Get expert system prompt for the mode
+        system_prompt = get_expert_prompt_for_mode(mode)
+        
+        # Check if user provided code (likely needs error detection)
+        code_indicators = ['def ', 'class ', 'import ', 'from ', '{', 'function', 'const ', 'var ', 'let ']
+        likely_code = any(indicator in user_message for indicator in code_indicators)
+        
+        # Build enhanced prompt
+        if likely_code and detect_errors:
+            enhanced_prompt = f"""{system_prompt}
+
+USER PROVIDED CODE/QUESTION:
+{user_message}
+
+INSTRUCTIONS:
+1. Analyze the code for ANY errors (syntax, logic, security, performance)
+2. If errors found, provide corrected code with explanations
+3. If no errors, suggest improvements
+4. Be thorough and expert-level
+
+RESPONSE FORMAT:
+Use the structured format from your training for code analysis.
+"""
+        else:
+            enhanced_prompt = f"""{system_prompt}
+
+USER QUESTION:
+{user_message}
+
+Provide an expert-level response following your training guidelines.
+"""
+        
+        # Add conversation context if provided
+        if context:
+            conversation_text = "\n\nCONVERSATION HISTORY:\n"
+            for msg in context[-5:]:  # Last 5 messages for context
+                role = "User" if msg.get('role') == 'user' else "AI"
+                conversation_text += f"{role}: {msg.get('content', '')}\n"
+            enhanced_prompt = conversation_text + "\n" + enhanced_prompt
+        
+        try:
+            # Use Gemini with expert prompt
+            response = self.generate_content(enhanced_prompt)
+            return response
+            
+        except Exception as e:
+            logger.error(f"Expert chat error: {e}")
+            # Fallback to basic response
+            return f"⚠️ Error in expert mode: {str(e)}\n\nPlease try again or provide more details."
 
 
 # Singleton instance
