@@ -313,25 +313,44 @@ You must follow this specific architecture for all Views, Serializers, and Model
    - `from django.shortcuts import get_object_or_404`
 
 2. **VIEW STRUCTURE** (Must be APIView, NOT ViewSet):
-   - **GET (List/Retrieve)**:
-     - Check permissions: `check_permissions(request, ['view_modelname'])` or `['list_modelname']`.
-     - Always filter soft-deleted: `.filter(deleted_at__isnull=True)`.
-     - Use `paginate_queryset(queryset, request, SerializerClass, view=self)`.
+   - **GET (List)**:
+     - **Permissions**: `check_permissions(request, ['list_modelname'])`.
+     - **Context Filter**: ALWAYS filter by User's Scope (e.g. `hospital=request.user.hospital` or `created_by=request.user`).
+     - **Search Logic**: 
+       ```python
+       search = request.query_params.get("search", "").strip()
+       queryset = Model.objects.filter(hospital=request.user.hospital, deleted_at__isnull=True).order_by("-id")
+       if search:
+           queryset = queryset.filter(
+               Q(name__icontains=search) | Q(phone__icontains=search)
+           )
+       ```
+     - **Pagination**: `return paginate_queryset(queryset, request, ListSerializer, view=self)`
+
+   - **GET (Retrieve)**:
+     - `instance = get_object_or_404(Model, id=id, hospital=request.user.hospital, deleted_at__isnull=True)`
+     - Return **Mini/List Serializer**.
+
    - **POST (Create)**:
-     - Decorator: `@log_activity(UserActivityLog.CREATE, 'Title')`
-     - Check permissions: `check_permissions(request, ['add_modelname'])`
-     - Return: `ResponseHandler.create_success('Title')`
+     - Validate Serializer.
+     - **Inject Context**: `serializer.save(hospital=request.user.hospital, created_at=timezone.now())`
+     - Return: `ResponseHandler.create_success`
+
    - **PUT (Update)**:
-     - Decorator: `@log_activity(UserActivityLog.UPDATE, 'Title')`
-     - Check permissions: `check_permissions(request, ['change_modelname'])`
-     - Return: `ResponseHandler.update_success('Title')`
-   - **DELETE (Bulk Soft Delete)**:
-     - Decorator: `@log_activity(UserActivityLog.DELETE, 'Title')`
-     - Check permissions: `check_permissions(request, ['delete_modelname'])`
-     - Expect `ids` list in body.
-     - Check refs: `check_references_and_get_deletable_instances`.
-     - Perform Soft Delete: `queryset.update(deleted_at=timezone.now())`.
-     - Return: `ResponseHandler.delete_success("Title")`
+     - Fetch instance with **Context Filter** (Security).
+     - Update with `partial=True`.
+     - Return: `ResponseHandler.update_success`
+
+   - **DELETE (Bulk Safe Delete)**:
+     - Fetch IDs from body.
+     - **Reference Check (Critical)**:
+       ```python
+       queryset = Model.objects.filter(id__in=ids, hospital=request.user.hospital, deleted_at__isnull=True)
+       _, reference_details = check_references_and_get_deletable_instances(Model, ids)
+       if reference_details:
+           return ResponseHandler.dependency_error(ResponseMessages.protected_error("Title"))
+       queryset.update(deleted_at=timezone.now())
+       ```
 
 3. **MODEL TEMPLATE**:
    - Must handle `deleted_at` (Soft Delete).
