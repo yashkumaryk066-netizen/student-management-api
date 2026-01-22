@@ -768,9 +768,10 @@
 
                 <!-- PREMIUM: Notifications -->
                 <button class="relative text-slate-400 hover:text-white transition p-2 hover:bg-white/10 rounded-lg"
-                    title="Notifications">
+                    title="Notifications" onclick="toggleNotifications()">
                     <i class="fa-solid fa-bell"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"
+                        id="notif-badge"></span>
                 </button>
 
                 <!-- PREMIUM: Theme Toggle -->
@@ -793,7 +794,7 @@
 
                 <!-- Settings -->
                 <button class="text-slate-400 hover:text-white transition p-2 hover:bg-white/10 rounded-lg"
-                    title="Settings">
+                    title="Settings" onclick="toggleSettings()">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
@@ -1069,6 +1070,134 @@
         </div>
 
     </main>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="toggleSettings()"></div>
+        <!-- Modal Content -->
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-[scaleIn_0.2s_ease-out]">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-amber-500"></i> Settings
+                </h3>
+                <button onclick="toggleSettings()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+
+                <!-- Section 1: AI Brain -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">AI Brain Model</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setProvider('openai')" id="prov-openai"
+                            class="p-3 rounded-xl border border-white/10 bg-slate-800 hover:border-amber-500/50 hover:bg-amber-500/10 transition flex flex-col items-center gap-2 group provider-btn active">
+                            <i class="fa-solid fa-bolt text-green-400 text-xl group-hover:scale-110 transition"></i>
+                            <span class="text-xs font-medium text-slate-300">GPT-4 Turbo</span>
+                        </button>
+                        <button onclick="setProvider('gemini')" id="prov-gemini"
+                            class="p-3 rounded-xl border border-white/10 bg-slate-800 hover:border-amber-500/50 hover:bg-amber-500/10 transition flex flex-col items-center gap-2 group provider-btn">
+                            <i class="fa-solid fa-star text-purple-400 text-xl group-hover:scale-110 transition"></i>
+                            <span class="text-xs font-medium text-slate-300">Gemini Ultra</span>
+                        </button>
+                        <button onclick="setProvider('groq')" id="prov-groq"
+                            class="p-3 rounded-xl border border-white/10 bg-slate-800 hover:border-amber-500/50 hover:bg-amber-500/10 transition flex flex-col items-center gap-2 group provider-btn">
+                            <i class="fa-solid fa-fire text-red-400 text-xl group-hover:scale-110 transition"></i>
+                            <span class="text-xs font-medium text-slate-300">Groq Fast</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section 2: Voice Settings -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Voice Output</label>
+                    <div class="bg-slate-800 p-4 rounded-xl border border-white/5 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-300">Auto-Read Responses</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="settingAutoData" class="sr-only peer"
+                                    onchange="toggleAutoSpeakSetting(this)">
+                                <div
+                                    class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500">
+                                </div>
+                            </label>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Speed</span>
+                                <span id="speedVal">1.0x</span>
+                            </div>
+                            <input type="range" min="0.5" max="2" step="0.1" value="1"
+                                class="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                oninput="document.getElementById('speedVal').innerText = this.value + 'x'; window.speechRate = this.value;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Notification -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">System</label>
+                    <button onclick="clearChat()"
+                        class="w-full p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash"></i> Clear Chat History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-white/5 bg-white/5 flex justify-end">
+                <button onclick="toggleSettings()"
+                    class="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-white font-medium rounded-lg shadow-lg shadow-amber-500/20 transition">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION PANEL -->
+    <div id="notifPanel"
+        class="fixed top-16 right-4 w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-[90] hidden transform transition-all duration-300 origin-top-right">
+        <div class="px-4 py-3 border-b border-white/5 flex justify-between items-center bg-white/5 rounded-t-2xl">
+            <h3 class="text-sm font-bold text-white">Notifications</h3>
+            <button onclick="markAllRead()" class="text-xs text-amber-500 hover:text-amber-400">Mark all read</button>
+        </div>
+        <div class="max-h-80 overflow-y-auto" id="notifList">
+            <!-- Notif Item 1 -->
+            <div class="p-4 border-b border-white/5 hover:bg-white/5 transition cursor-pointer flex gap-3">
+                <div
+                    class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 text-green-400">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                    <div class="text-sm text-white font-medium">System Update v4.0</div>
+                    <div class="text-xs text-slate-400 mt-1">Y.S.M AI has been upgraded with new brain functionality.
+                    </div>
+                    <div class="text-[10px] text-slate-500 mt-1">Just now</div>
+                </div>
+            </div>
+            <!-- Notif Item 2 -->
+            <div class="p-4 border-b border-white/5 hover:bg-white/5 transition cursor-pointer flex gap-3">
+                <div
+                    class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 text-purple-400">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <div class="text-sm text-white font-medium">High Traffic Alert</div>
+                    <div class="text-xs text-slate-400 mt-1">Servers are experiencing high load. Switching to Turbo
+                        mode.</div>
+                    <div class="text-[10px] text-slate-500 mt-1">10 mins ago</div>
+                </div>
+            </div>
+        </div>
+        <div class="p-2 text-center border-t border-white/5">
+            <button class="text-xs text-slate-500 hover:text-white transition">View All History</button>
+        </div>
+    </div>
 
     <script>
         // --- GLOBAL VARIABLES ---
@@ -1981,7 +2110,82 @@
             }
         }
 
-        // Add global keyframes for animations if not present
+        // --- SETTINGS LOGIC ---
+        function toggleSettings() {
+            const modal = document.getElementById('settingsModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function setProvider(provider) {
+            localStorage.setItem('preferred_ai_provider', provider);
+
+            // Visual Update
+            document.querySelectorAll('.provider-btn').forEach(btn => {
+                btn.classList.remove('border-amber-500', 'bg-amber-500/10');
+                btn.classList.add('border-white/10', 'bg-slate-800');
+            });
+
+            const activeBtn = document.getElementById('prov-' + provider);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-white/10', 'bg-slate-800');
+                activeBtn.classList.add('border-amber-500', 'bg-amber-500/10');
+            }
+
+            showToast(`✅ Switched to ${provider.toUpperCase()}`);
+        }
+
+        function toggleAutoSpeakSetting(checkbox) {
+            isAutoSpeak = checkbox.checked;
+            const btn = document.getElementById('btnAutoSpeak');
+            if (isAutoSpeak) {
+                btn.innerHTML = '<i class="fa-solid fa-volume-high text-amber-500"></i>';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            }
+        }
+
+        // --- NOTIFICATION LOGIC ---
+        function toggleNotifications() {
+            const panel = document.getElementById('notifPanel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                // Hide badge
+                document.getElementById('notif-badge').style.display = 'none';
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        function markAllRead() {
+            const list = document.getElementById('notifList');
+            list.innerHTML = `
+                <div class="p-8 text-center text-slate-500 flex flex-col items-center">
+                    <i class="fa-regular fa-bell-slash text-2xl mb-2"></i>
+                    <span class="text-xs">No new notifications</span>
+                </div>
+             `;
+            showToast('Notifications cleared');
+        }
+
+        // Initialize Settings from Storage
+        window.addEventListener('DOMContentLoaded', () => {
+            const provider = localStorage.getItem('preferred_ai_provider') || 'openai';
+            setProvider(provider);
+
+            // Keyframe for modal
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes scaleIn {
+                    from { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+                    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                }
+             `;
+            document.head.appendChild(style);
+        });
         const styleSheet = document.createElement("style");
         styleSheet.innerText = `
             @keyframes slideIn {
