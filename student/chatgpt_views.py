@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from ai.chatgpt import get_chatgpt_service
+from .models import Student
+from django.shortcuts import get_object_or_404
 import logging
 
 logger = logging.getLogger(__name__)

@@ -4181,11 +4181,11 @@ const DashboardApp = {
         <div class="module-header">
             <div>
                 <h1 class="page-title">👥 Team & Permissions</h1>
-                <p class="page-subtitle">Manage staff access levels and monitor their activities.</p>
+                <p class="page-subtitle">Create user accounts for your staff and control their access.</p>
             </div>
             <div style="display:flex; gap:10px;">
-                <button class="btn-action" onclick="DashboardApp.showAlert('Demo', 'Staff creation is handled via HR module.', 'warning')">
-                    + Add Staff Member
+                <button class="btn-action" onclick="DashboardApp.showAddStaffModal()">
+                    + Add New Staff
                 </button>
             </div>
         </div>
@@ -4198,13 +4198,12 @@ const DashboardApp = {
                         <th>Name</th>
                         <th>Role</th>
                         <th>Department</th>
-                        <th>Last Login</th>
                         <th>Access Level</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="teamTableBody">
-                    <tr><td colspan="7" class="text-center">Loading team data...</td></tr>
+                    <tr><td colspan="6" class="text-center">Loading team data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -4218,7 +4217,7 @@ const DashboardApp = {
             const tbody = document.getElementById('teamTableBody');
 
             if (!data.employees || data.employees.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center">No staff found. Create them in HR module first.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center">No staff found. Click "Add New Staff" to get started.</td></tr>`;
                 return;
             }
 
@@ -4227,28 +4226,135 @@ const DashboardApp = {
                     <td>#${emp.employee_id || emp.id}</td>
                     <td>
                         <div style="font-weight:600;">${emp.fullname}</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">${emp.user_email || ''}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">@${emp.user_username || 'user'}</div>
                     </td>
                     <td><span class="badge" style="background:rgba(59, 130, 246, 0.1); color:#3b82f6;">${emp.designation_title || 'Staff'}</span></td>
-                    <td>${emp.department_name || 'N/A'}</td>
-                    <td>Today, 10:24 AM</td>
+                    <td>${emp.department_name || 'General'}</td>
                     <td>
-                        <select onchange="DashboardApp.showAlert('Updated', 'Permissions updated for ${emp.fullname}', 'success')" 
-                                style="background:rgba(255,255,255,0.05); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:2px 5px; font-size:0.8rem;">
-                            <option>Basic Access</option>
-                            <option selected>Advanced Access</option>
-                            <option>Full Admin</option>
-                            <option>Read Only</option>
-                        </select>
+                         <span class="status-badge status-active">Active</span>
                     </td>
                     <td>
-                        <button class="btn-action" style="padding:4px 8px; font-size:0.8rem;" onclick="DashboardApp.loadSystemLogs()">🔍 View Logs</button>
+                        <button class="btn-action" style="padding:4px 8px; font-size:0.8rem;" onclick="DashboardApp.loadSystemLogs()">🔍 Audit</button>
                     </td>
                 </tr>
             `).join('');
         } catch (e) {
             console.error('Failed to load team:', e);
-            document.getElementById('teamTableBody').innerHTML = `<tr><td colspan="7" class="text-center text-danger">Failed to connect to API.</td></tr>`;
+            document.getElementById('teamTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to connect to API.</td></tr>`;
+        }
+    },
+
+    showAddStaffModal() {
+        // Modal for adding staff with permissions
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px;">
+                <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button>
+                <h2 style="color:white; margin-bottom:20px;">Add New Staff Member</h2>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
+                    <div>
+                        <label style="color:#94a3b8; font-size:0.9rem;">First Name</label>
+                        <input type="text" id="staffFName" class="form-input" placeholder="John">
+                    </div>
+                    <div>
+                        <label style="color:#94a3b8; font-size:0.9rem;">Last Name</label>
+                        <input type="text" id="staffLName" class="form-input" placeholder="Doe">
+                    </div>
+                    <div>
+                        <label style="color:#94a3b8; font-size:0.9rem;">Username</label>
+                        <input type="text" id="staffUsername" class="form-input" placeholder="johndoe123">
+                    </div>
+                    <div>
+                        <label style="color:#94a3b8; font-size:0.9rem;">Password</label>
+                        <input type="password" id="staffPassword" class="form-input" placeholder="******">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <label style="color:#94a3b8; font-size:0.9rem;">Role</label>
+                    <select id="staffRole" class="form-input" style="background:#0f172a; color:white;">
+                        <option value="STAFF">Staff (General)</option>
+                        <option value="TEACHER">Teacher</option>
+                        <option value="HR">HR Manager</option>
+                        <option value="ACCOUNTANT">Accountant</option>
+                    </select>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:20px;">
+                    <label style="color:white; font-weight:600; margin-bottom:10px; display:block;">Access Permissions</label>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <label style="color:#cbd5e1; display:flex; align-items:center;">
+                            <input type="checkbox" class="perm-check" value="students"> Students (Add/Edit)
+                        </label>
+                        <label style="color:#cbd5e1; display:flex; align-items:center;">
+                            <input type="checkbox" class="perm-check" value="fees"> Fees & Payments
+                        </label>
+                        <label style="color:#cbd5e1; display:flex; align-items:center;">
+                            <input type="checkbox" class="perm-check" value="attendance"> Attendance
+                        </label>
+                        <label style="color:#cbd5e1; display:flex; align-items:center;">
+                            <input type="checkbox" class="perm-check" value="reports"> View Reports
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="DashboardApp.submitAddStaff()" class="btn-primary" style="width:100%; padding:12px;">Create Account</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('.modal-content').style.display = 'block'; // Ensure visibility logic matches CSS
+        modal.style.display = 'flex'; // Overlay flex
+    },
+
+    async submitAddStaff() {
+        const fname = document.getElementById('staffFName').value;
+        const lname = document.getElementById('staffLName').value;
+        const username = document.getElementById('staffUsername').value;
+        const password = document.getElementById('staffPassword').value;
+        const role = document.getElementById('staffRole').value;
+
+        // Collect Permissions
+        const permissions = {};
+        document.querySelectorAll('.perm-check:checked').forEach(cb => {
+            permissions[cb.value] = { view: true, edit: true }; // Simplified for now
+        });
+
+        if (!username || !password || !fname) {
+            this.showAlert('Missing Info', 'Please fill all required fields', 'error');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/team/manage/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    first_name: fname,
+                    last_name: lname,
+                    username: username,
+                    password: password,
+                    role: role,
+                    permissions: permissions
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                this.showAlert('Success', 'Staff member added successfully!', 'success');
+                document.querySelector('.modal-overlay').remove();
+                this.loadTeamManagement(); // Refresh list
+            } else {
+                this.showAlert('Error', data.error || 'Failed to create account', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            this.showAlert('Error', 'Network error occurred', 'error');
         }
     },
 
@@ -4312,8 +4418,115 @@ const DashboardApp = {
             console.error('Failed to load logs:', e);
             document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to connect to Security Service.</td></tr>`;
         }
+        document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to connect to Security Service.</td></tr>`;
+    }
+},
+
+    // --- APPROVALS MODULE (CLIENT ADMIN) ---
+    async loadApprovalsModule() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+        <div class="module-header">
+            <div>
+                <h1 class="page-title">🛂 Approval Center</h1>
+                <p class="page-subtitle">Verify requests from your staff before activation.</p>
+            </div>
+            <button class="btn-action" onclick="DashboardApp.loadApprovalsModule()">🔄 Refresh</button>
+        </div>
+
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Request Type</th>
+                        <th>Name</th>
+                        <th>Requested By</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="approvalsTableBody">
+                    <tr><td colspan="6" class="text-center">Loading pending requests...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        try {
+            // Updated Endpoint: Fetches strictly unapproved items
+            const res = await fetch(`${this.apiBaseUrl}/students/?is_approved=False`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const data = await res.json();
+            const students = Array.isArray(data) ? data : (data.results || []);
+
+            const tbody = document.getElementById('approvalsTableBody');
+
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:40px; color:var(--text-muted);">
+                    <div style="font-size:2rem; margin-bottom:10px;">✨</div>
+                    All caught up! No pending requests.
+                </td></tr>`;
+
+                // Update badge
+                const badge = document.getElementById('approvalBadge');
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+
+            // Update badge
+            const badge = document.getElementById('approvalBadge');
+            if (badge) {
+                badge.innerText = students.length;
+                badge.style.display = 'inline-block';
+            }
+
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td><span class="badge" style="background:rgba(99, 102, 241, 0.1); color:#6366f1;">New Student</span></td>
+                    <td style="font-weight:600; color:white;">${s.name}</td>
+                    <td>${s.created_by_name || 'Staff Member'}</td>
+                    <td>${new Date(s.created_at || Date.now()).toLocaleDateString()}</td>
+                    <td><span class="status-badge status-pending">Pending</span></td>
+                    <td>
+                        <button class="btn-primary" style="padding:4px 12px; font-size:0.8rem;" onclick="DashboardApp.processStudentApproval(${s.id}, true)">Approve</button>
+                        <button class="btn-secondary" style="padding:4px 12px; font-size:0.8rem; color:#ef4444; border-color:#ef4444;" onclick="DashboardApp.processStudentApproval(${s.id}, false)">Reject</button>
+                    </td>
+                </tr>
+            `).join('');
+
+        } catch (e) {
+            console.error(e);
+            document.getElementById('approvalsTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to load requests.</td></tr>`;
+        }
     },
-};
+
+        async processStudentApproval(id, isApproved) {
+    if (!confirm(isApproved ? "Approve this student?" : "Reject and delete this request?")) return;
+
+    try {
+        const endpoint = isApproved
+            ? `${this.apiBaseUrl}/students/${id}/approve/`
+            : `${this.apiBaseUrl}/students/${id}/`; // Delete if rejected (for now)
+
+        const method = isApproved ? 'POST' : 'DELETE';
+
+        const res = await fetch(endpoint, {
+            method: method,
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        });
+
+        if (res.ok) {
+            this.showAlert('Success', isApproved ? 'Student Approved & Activated' : 'Request Rejected', 'success');
+            this.loadApprovalsModule(); // Refresh list
+        } else {
+            this.showAlert('Error', 'Action failed', 'error');
+        }
+    } catch (e) {
+        this.showAlert('Error', 'Network error', 'error');
+    }
+},
 
 // Universal Menu Toggle (Premium UX - Auto-Close on Click)
 document.addEventListener('DOMContentLoaded', function () {

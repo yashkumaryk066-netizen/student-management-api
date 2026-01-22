@@ -60,6 +60,7 @@ from .chatgpt_views import (
     ContentTranslatorView, LessonPlanGeneratorView, WritingAnalyzerView,
     CustomAIPromptView
 )
+from .approval_views import StudentApprovalView
 from .unified_ai_views import (
     AIProvidersListView, UnifiedAITutorView, UnifiedQuizGeneratorView,
     UnifiedContentSummarizerView, UnifiedConceptExplainerView,

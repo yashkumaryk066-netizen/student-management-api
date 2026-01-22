@@ -98,17 +98,32 @@ class StudentListCreateView(APIView):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
             owner = get_owner_user(request.user)
-            student = serializer.save(created_by=owner)
+            
+            # CHECK APPROVAL LOGIC
+            # If the creator (request.user) is NOT the owner (Client Admin),
+            # then it's a staff member creating a student -> REQUIRE APPROVAL.
+            is_approved = True
+            msg = "Student created successfully"
+            
+            if request.user != owner:
+                is_approved = False
+                msg = "Student request submitted for Admin Verification"
+
+            student = serializer.save(created_by=owner, is_approved=is_approved)
             
             # Log Activity
             AuditLog.objects.create(
                 created_by=request.user,
-                action='STUDENT_CREATED',
-                description=f"Added new student: {student.name}",
+                action='STUDENT_REQUEST' if not is_approved else 'STUDENT_CREATED',
+                description=f"{'Requested' if not is_approved else 'Added'} new student: {student.name}",
                 ip_address=request.META.get('REMOTE_ADDR')
             )
             
-            return Response(serializer.data, status=201)
+            response_data = serializer.data
+            response_data['message'] = msg
+            response_data['is_approved'] = is_approved
+            
+            return Response(response_data, status=201)
         return Response(serializer.errors, status=400)
 
 
@@ -184,8 +199,59 @@ class TeamManagementView(APIView):
         })
 
     def post(self, request):
-        """Add new staff member"""
-        return Response({"message": "Use standard employee create for now"}, status=501)
+        """Add new staff member with permissions"""
+        try:
+            data = request.data
+            # Ensure only Client Admin (Owner) can add staff
+            if hasattr(request.user, 'profile') and request.user.profile.role != 'CLIENT':
+                 return Response({"error": "Only the Account Owner can add team members"}, status=403)
+                 
+            owner = request.user 
+            
+            # 1. Create User
+            if User.objects.filter(username=data['username']).exists():
+                return Response({"error": "Username already taken"}, status=400)
+                
+            user = User.objects.create_user(
+                username=data['username'],
+                email=data.get('email', ''),
+                password=data['password'],
+                first_name=data.get('first_name', ''),
+                last_name=data.get('last_name', '')
+            )
+            
+            # 2. Create Profile with Role & Permissions
+            # Inherit institution type and plan expiry from Owner
+            UserProfile.objects.create(
+                user=user,
+                role=data.get('role', 'STAFF'),
+                institution_type=owner.profile.institution_type,
+                permissions=data.get('permissions', {}), # Store granular permissions
+                subscription_expiry=owner.profile.subscription_expiry 
+            )
+            
+            # 3. Create Employee Record
+            # Handle optional foreign keys safely
+            dept_id = data.get('department_id') or None
+            desig_id = data.get('designation_id') or None
+            
+            Employee.objects.create(
+                user=user,
+                created_by=owner,
+                joining_date=data.get('joining_date', timezone.now().date()),
+                basic_salary=data.get('basic_salary', 0),
+                contract_type=data.get('contract_type', 'PERMANENT'),
+                designation_id=desig_id,
+                department_id=dept_id
+            )
+            
+            return Response({"message": "Team member added successfully", "user_id": user.id}, status=201)
+            
+        except Exception as e:
+            # Cleanup if partially created
+            if 'user' in locals() and user.id: 
+                user.delete()
+            return Response({"error": str(e)}, status=400)
 
 
 # TODAY ATTENDANCE (FIXED – NO DATA LEAK)
