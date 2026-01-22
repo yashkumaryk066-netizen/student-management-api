@@ -26,7 +26,9 @@ from student.views import (
     LandingPageView,
     LoginPageView,
     DemoPageView,
+    DemoPageView,
     AdminDashboardTemplateView,
+    SuperAdminDashboardTemplateView,
     TeacherDashboardTemplateView,
     StudentDashboardTemplateView,
     ParentDashboardTemplateView,
@@ -61,6 +63,7 @@ urlpatterns = [
     path('resume/', ResumeView.as_view(), name='resume-view-root'),
     
     # Dashboard Pages (after login)
+    path('dashboard/super-admin/', SuperAdminDashboardTemplateView.as_view(), name='super-admin-dashboard'),
     path('dashboard/admin/', AdminDashboardTemplateView.as_view(), name='admin-dashboard'),
     path('dashboard/teacher/', TeacherDashboardTemplateView.as_view(), name='teacher-dashboard'),
     path('dashboard/student/', StudentDashboardTemplateView.as_view(), name='student-dashboard'),

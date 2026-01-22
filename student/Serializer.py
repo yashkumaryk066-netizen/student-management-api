@@ -32,11 +32,16 @@ class AttendenceSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
+    is_superuser = serializers.BooleanField(source='user.is_superuser', read_only=True)
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'email', 'role', 'phone', 'institution_type', 'created_at']
+        fields = ['id', 'username', 'email', 'role', 'phone', 'institution_type', 'created_at', 'is_superuser', 'full_name']
         read_only_fields = ['created_at']
+
+    def get_full_name(self, obj):
+        return obj.user.get_full_name() or obj.user.username
 
 
 class PaymentSerializer(serializers.ModelSerializer):

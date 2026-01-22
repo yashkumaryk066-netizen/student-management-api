@@ -731,6 +731,9 @@ class LoginPageView(TemplateView):
 class AdminDashboardTemplateView(TemplateView):
     template_name = "dashboard/admin.html"
 
+class SuperAdminDashboardTemplateView(TemplateView):
+    template_name = "dashboard/super_admin.html"
+
 class TeacherDashboardTemplateView(TemplateView):
     template_name = "dashboard/teacher.html"
 

@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     try {
                         const profile = await AuthAPI.getProfile();
-                        redirectToDashboard((profile.role || 'student').toLowerCase());
+                        redirectToDashboard(profile);
                     } catch {
                         redirectFallback();
                     }
@@ -231,7 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    function redirectToDashboard(role) {
+    function redirectToDashboard(profile) {
+        // High Priority: Super Admin
+        if (profile.is_superuser === true || profile.is_superuser === 'true') {
+            window.location.href = '/dashboard/super-admin/';
+            return;
+        }
+
+        const role = (profile.role || 'student').toLowerCase();
         const routes = {
             admin: '/dashboard/admin/',
             client: '/dashboard/admin/',

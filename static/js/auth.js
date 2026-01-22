@@ -62,7 +62,7 @@ const AuthEngine = (() => {
         try {
             const profile = await fetchProfile();
             syncProfile(profile);
-            if (page.includes('/login')) redirect(profile.role);
+            if (page.includes('/login')) redirect(profile);
         } catch (err) {
             if (err.message === 'TOKEN_EXPIRED') {
                 try {
@@ -92,7 +92,14 @@ const AuthEngine = (() => {
     }
 
     /* ---------- REDIRECT ---------- */
-    function redirect(role) {
+    function redirect(profile) {
+        // High Priority: Super Admin
+        if (profile.is_superuser === true || profile.is_superuser === 'true') {
+            location.href = '/dashboard/super-admin/';
+            return;
+        }
+
+        const role = (profile.role || 'student').toLowerCase();
         const routes = {
             admin: '/dashboard/admin/',
             client: '/dashboard/admin/',
@@ -117,7 +124,7 @@ const AuthEngine = (() => {
 
         const profile = await fetchProfile();
         syncProfile(profile);
-        redirect(profile.role);
+        redirect(profile);
     }
 
     /* ---------- LOGOUT ---------- */

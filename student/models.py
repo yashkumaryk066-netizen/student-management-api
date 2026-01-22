@@ -1038,3 +1038,58 @@ class AISubscription(models.Model):
 # ===== CHAT & NOTIFICATION MODELS =====
 # Import real chat conversation, message, and notification models
 from .chat_models import ChatConversation, ChatMessage, UserNotification
+
+# ==================== SUPPORT SYSTEM ====================
+
+class SupportTicket(models.Model):
+    """Support Ticket System for SuperAdmin"""
+    PRIORITY_CHOICES = [
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+        ('CRITICAL', 'Critical'),
+    ]
+    STATUS_CHOICES = [
+        ('OPEN', 'Open'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('RESOLVED', 'Resolved'),
+        ('CLOSED', 'Closed'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_tickets')
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='MEDIUM')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tickets')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # SLA Tracking
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"#{self.id} - {self.subject} ({self.status})"
+
+class GlobalAnnouncement(models.Model):
+    """System-wide Announcements"""
+    RECIPIENT_CHOICES = [
+        ('ALL', 'All Users'),
+        ('ADMINS', 'School Admins Only'),
+        ('TEACHERS', 'Teachers Only'),
+        ('NOBODY', 'Draft'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    recipient_group = models.CharField(max_length=20, choices=RECIPIENT_CHOICES, default='ALL')
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    scheduled_for = models.DateTimeField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.title

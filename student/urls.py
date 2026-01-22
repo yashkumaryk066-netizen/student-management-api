@@ -44,7 +44,7 @@ from .admin_dashboard_views import (
     AdminPaymentApprovalView, PendingPaymentsListView, PublicSubscriptionSubmitView,
     SuperAdminClientActionView, SuperAdminDashboardView
 )
-from .super_admin_views import SuperAdminAdvancedDashboardView, AuditLogView
+from .super_admin_views import SuperAdminAdvancedDashboardView, AuditLogView, AdminApprovalActionView
 from .subscription_views import (
     SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
     verify_payment_api
@@ -192,8 +192,12 @@ urlpatterns = [
     
     # SUPER ADMIN DASHBOARD
     path('admin/subscriptions/overview/', SuperAdminDashboardView.as_view(), name='superadmin-overview'),
-    path('admin/client-actions/', SuperAdminClientActionView.as_view(), name='admin-client-actions'),
+    path('admin/client-actions/', SuperAdminClientActionView.as_view(), name='admin-client-actions'), # Legacy
     path('admin/advanced/dashboard/', SuperAdminAdvancedDashboardView.as_view(), name='superadmin-advanced-dashboard'),
+    
+    # NEW: Admin Approval Actions
+    path('admin/action/<str:action_type>/<int:item_id>/', AdminApprovalActionView.as_view(), name='admin-approval-action'),
+
     path('team/manage/', TeamManagementView.as_view(), name='team-manage'),
     path('audit/logs/client/', ClientAuditLogListView.as_view(), name='client-audit-logs'),
 

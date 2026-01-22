@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperAdmin Control - Y.S.M Enterprise</title>
+    <link rel="icon" type="image/png" href="/static/img/ysm_logo.png">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --kpi-bg: rgba(255, 255, 255, 0.03);
+            --kpi-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Enterprise Level Overrides */
+        .sidebar {
+            background: #0f172a;
+            border-right: 1px solid #1e293b;
+        }
+
+        .sidebar-title {
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--kpi-bg);
+            border: var(--kpi-border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        /* Status Badge for Server */
+        .server-status-card {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px;
+            color: #94a3b8;
+            border-bottom: 1px solid #334155;
+            font-size: 13px;
+        }
+
+        .data-table td {
+            padding: 12px;
+            color: #f1f5f9;
+            border-bottom: 1px solid #1e293b;
+            font-size: 14px;
+        }
+
+        .status-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            margin-right: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-view {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                height: 100%;
+                z-index: 50;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Verification Modal -->
+    <div class="modal-overlay" id="verificationModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">×</button>
+            <h2 style="color: white; margin-bottom: 5px; font-size: 18px;">Verify Request</h2>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Review details before taking action.</p>
+
+            <div id="modalDetails" style="margin-bottom: 20px; font-size: 14px; color: #e2e8f0; line-height: 1.6;">
+                <!-- Details injected here -->
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="processRequest('REJECT')"
+                    style="flex: 1; padding: 10px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; cursor: pointer; font-weight: 600;">Reject</button>
+                <button onclick="processRequest('APPROVE')"
+                    style="flex: 1; padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">Approve
+                    & Activate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header" style="padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="/static/img/ysm_logo.png" style="width: 32px; height: 32px;">
+                <div>
+                    <h2 class="sidebar-title" style="font-size: 18px; margin: 0;">Y.S.M</h2>
+                    <span style="font-size: 11px; color: #64748b; letter-spacing: 1px;">ENTERPRISE ADMIN</span>
+                </div>
+            </div>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-category">Global Control</li>
+                <li class="nav-item"><a href="#overview" class="nav-link active" onclick="switchTab('overview')"><span
+                            class="nav-icon">🌍</span> System Overview</a></li>
+                <li class="nav-item"><a href="#approvals" class="nav-link" onclick="switchTab('approvals')">
+                        <span class="nav-icon">🛡️</span> Verify Requests
+                        <span id="pendingBadge" class="nav-badge"
+                            style="background:#ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.4); display: none;">0</span>
+                    </a></li>
+                <li class="nav-item"><a href="#institutes" class="nav-link" onclick="switchTab('institutes')"><span
+                            class="nav-icon">🏛️</span> Institutes</a></li>
+
+                <li class="nav-category">Management</li>
+                <li class="nav-item"><a href="#billing" class="nav-link" onclick="switchTab('billing')"><span
+                            class="nav-icon">💳</span> Billing</a></li>
+                <li class="nav-item"><a href="#users" class="nav-link" onclick="switchTab('users')"><span
+                            class="nav-icon">👥</span> Users</a></li>
+
+                <li class="nav-category">Support & Audit</li>
+                <li class="nav-item"><a href="#support" class="nav-link" onclick="switchTab('support')"><span
+                            class="nav-icon">🎫</span> Tickets</a></li>
+                <li class="nav-item"><a href="#logs" class="nav-link" onclick="switchTab('logs')"><span
+                            class="nav-icon">📜</span> Logs</a></li>
+            </ul>
+        </nav>
+
+        <div style="margin-top: auto; padding: 20px;">
+            <button onclick="logout()"
+                style="width: 100%; padding: 12px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                🚪 Logout Securely
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" style="padding: 30px; background: #0b1120;">
+
+        <!-- Header -->
+        <header
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 5px;">SuperAdmin Dashboard
+                </h1>
+                <p style="color: #94a3b8; font-size: 14px;">Real-time System Monitoring</p>
+            </div>
+
+            <div class="server-status-card">
+                <div class="status-dot"></div>
+                <div style="font-size: 12px; font-weight: 600; color: #10b981;">SYSTEM ONLINE</div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD TABS -->
+
+        <!-- 1. OVERVIEW -->
+        <div id="tab-overview" class="dashboard-tab">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">🏛️</div>
+                        <div style="color: #10b981; font-size: 12px; font-weight: 600;">ACTIVE</div>
+                    </div>
+                    <div class="kpi-value" id="activeInstitutes">--</div>
+                    <div class="kpi-label">Active Institutes</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">👥</div>
+                    </div>
+                    <div class="kpi-value" id="totalStudents">--</div>
+                    <div class="kpi-label">Total Students</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">💰</div>
+                    </div>
+                    <div class="kpi-value" id="totalRevenue">₹ --</div>
+                    <div class="kpi-label">Total Revenue</div>
+                </div>
+
+                <div class="kpi-card" onclick="switchTab('approvals')"
+                    style="cursor: pointer; border: 1px dashed #eab308;">
+                    <div class="kpi-header">
+                        <div class="kpi-icon" style="background: rgba(234, 179, 8, 0.1); color: #eab308;">⚡</div>
+                    </div>
+                    <div class="kpi-value" id="pendingCount">0</div>
+                    <div class="kpi-label" style="color: #eab308;">Pending Requests</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <h3 style="color: white; margin-bottom: 20px;">System Health Status</h3>
+                <div class="kpi-grid" style="margin-bottom: 0;">
+                    <div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">DATABASE</div>
+                        <div style="color: #10b981; font-weight: 600;">Connected (PostgreSQL)</div>
+                    </div>
+                    <div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">STORAGE</div>
+                        <div style="color: #f59e0b; font-weight: 600;">45% Used</div>
+                    </div>
+                    <div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">LATENCY</div>
+                        <div style="color: #3b82f6; font-weight: 600;">24ms</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. APPROVALS (The Main Feature) -->
+        <div id="tab-approvals" class="dashboard-tab" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: white; font-size: 20px;">Pending Approvals</h2>
+                <div style="display: flex; gap: 10px;">
+                    <!-- Filters could go here -->
+                </div>
+            </div>
+
+            <div id="approvalListContainer"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+                <!-- Filled via JS -->
+                <div style="color: #64748b; text-align: center; grid-column: 1/-1; padding: 40px;">
+                    Loading requests...
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. INSTITUTES -->
+        <div id="tab-institutes" class="dashboard-tab" style="display: none;">
+            <div class="kpi-card">
+                <h3 style="color: white; margin-bottom: 20px;">Recent Institutes</h3>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Institute Name</th>
+                                <th>Type</th>
+                                <th>Plan</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="instituteListTable">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Tabs Placeholders -->
+        <div id="tab-billing" class="dashboard-tab" style="display: none;">
+            <h2 style="color: white;">Billing</h2>
+            <p style="color:#94a3b8">Details coming soon...</p>
+        </div>
+        <div id="tab-users" class="dashboard-tab" style="display: none;">
+            <h2 style="color: white;">Users</h2>
+            <p style="color:#94a3b8">Details coming soon...</p>
+        </div>
+        <div id="tab-support" class="dashboard-tab" style="display: none;">
+            <h2 style="color: white;">Support</h2>
+            <p style="color:#94a3b8">Details coming soon...</p>
+        </div>
+        <div id="tab-logs" class="dashboard-tab" style="display: none;">
+            <h2 style="color: white;">Logs</h2>
+            <p style="color:#94a3b8">Details coming soon...</p>
+        </div>
+
+    </main>
+
+    <script>
+        // --- AUTH & API HELPERS ---
+        function getAccessToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        function checkAuth() {
+            const token = getAccessToken();
+            if (!token) {
+                window.location.href = '/login/';
+                return false;
+            }
+            return true;
+        }
+
+        // --- GLOBAL STATE ---
+        let currentModalItem = null;
+
+        // --- TABS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.dashboard-tab').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.style.display = 'block';
+
+            // Mark nav active
+            const navLink = document.querySelector(`a[href="#${tabId}"]`);
+            if (navLink) navLink.classList.add('active');
+        }
+
+        // --- API FETCH & RENDER ---
+        async function fetchDashboardData() {
+            if (!checkAuth()) return;
+
+            try {
+                const token = getAccessToken();
+                const response = await fetch('/admin/advanced/dashboard/', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    // Token expired or invalid
+                    logout();
+                    return;
+                }
+
+                if (!response.ok) throw new Error('API Error');
+                const data = await response.json();
+
+
+                // 1. Overview Stats
+                document.getElementById('activeInstitutes').textContent = data.stats.active_institutes;
+                document.getElementById('totalStudents').textContent = data.stats.students;
+                document.getElementById('totalRevenue').textContent = '₹' + parseFloat(data.stats.revenue || 0).toLocaleString('en-IN');
+
+                // Pending Count (Badge)
+                const pendingCount = (data.approvals || []).length;
+                document.getElementById('pendingCount').textContent = pendingCount;
+                const badge = document.getElementById('pendingBadge');
+                if (pendingCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = pendingCount;
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                // 2. Render Approvals
+                renderApprovals(data.approvals);
+
+                // 3. Render Institutes Table
+                renderInstitutes(data.institutes);
+
+            } catch (e) {
+                console.error("Dashboard Error", e);
+            }
+        }
+
+        function renderApprovals(list) {
+            const container = document.getElementById('approvalListContainer');
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div style="color: #64748b; text-align: center; grid-column: 1/-1; padding: 40px; border: 1px dashed #334155; border-radius: 12px;">
+                        <div style="font-size: 30px; margin-bottom: 10px;">✅</div>
+                        All caught up! No pending requests.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div class="kpi-card" style="border-left: 4px solid ${item.type === 'SUBSCRIPTION' ? '#eab308' : '#3b82f6'}; padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <span style="background: rgba(255, 255, 255, 0.05); color: #94a3b8; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">
+                            ${item.type}
+                        </span>
+                        <span style="color: #64748b; font-size: 11px;">${item.time_ago}</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div style="width: 45px; height: 45px; background: #1e293b; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                            ${item.icon}
+                        </div>
+                        <div>
+                            <h3 style="color: white; font-size: 16px; margin: 0 0 4px 0;">${item.entity_name}</h3>
+                            <div style="color: #94a3b8; font-size: 13px;">${item.sub_text}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #64748b; font-size: 12px;"">Amount:</span>
+                            <span style="color: #fff; font-weight: 600;">₹${item.amount}</span>
+                        </div>
+                         <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #64748b; font-size: 12px;"">Ref ID:</span>
+                            <span style="color: #3b82f6; font-size: 12px; font-family: monospace;">${item.transaction_id}</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick='openVerifyModal(${JSON.stringify(item)})' 
+                        style="width: 100%; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s;">
+                        Review & Take Action
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderInstitutes(list) {
+            const tbody = document.getElementById('instituteListTable');
+            if (list && list.length > 0) {
+                tbody.innerHTML = list.map(inst => `
+                        <tr>
+                            <td>${inst.name}</td>
+                            <td>${inst.type}</td>
+                            <td>${inst.plan}</td>
+                            <td><span class="status-tag ${inst.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}">${inst.status}</span></td>
+                            <td>${inst.joined}</td>
+                        </tr>
+                    `).join('');
+            }
+        }
+
+        // --- MODAL ACTION ---
+        function openVerifyModal(item) {
+            currentModalItem = item; // Store for action
+            const modal = document.getElementById('verificationModal');
+            const details = document.getElementById('modalDetails');
+
+            // Build Detailed View
+            details.innerHTML = `
+                <div style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                    <div style="color: #94a3b8; font-size: 12px;">Applicant Name</div>
+                    <div style="font-size: 16px; color: white; font-weight: 600;">${item.entity_name}</div>
+                </div>
+                
+                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                         <div style="color: #94a3b8; font-size: 12px;">Request Type</div>
+                         <div style="color: #e2e8f0;">${item.type}</div>
+                    </div>
+                     <div>
+                         <div style="color: #94a3b8; font-size: 12px;">Amount Paid</div>
+                         <div style="color: #10b981; font-weight: 600;">₹${item.amount}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                     <div style="color: #94a3b8; font-size: 12px;">Transaction / Reference ID</div>
+                     <div style="background: #0f172a; padding: 8px; border-radius: 4px; font-family: monospace; color: #3b82f6;">${item.transaction_id}</div>
+                </div>
+                
+                 <div>
+                     <div style="color: #94a3b8; font-size: 12px;">Submitted On</div>
+                     <div style="color: #e2e8f0;">${new Date(item.created_at).toLocaleString()}</div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('verificationModal').style.display = 'none';
+            currentModalItem = null;
+        }
+
+        async function processRequest(action) {
+            if (!currentModalItem) return;
+
+            const btnText = action === 'APPROVE' ? 'Approving...' : 'Rejecting...';
+            // Optimistic UI could go here, but let's wait for API
+
+            try {
+                // Determine URL based on Item ID and Type
+                const url = `/admin/action/${currentModalItem.type}/${currentModalItem.id}/`;
+
+                const csrfMatch = document.cookie.match(/csrftoken=([\w-]+)/);
+                const csrfToken = csrfMatch ? csrfMatch[1] : '';
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + getAccessToken(),
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        reason: 'Admin Dashboard Action'
+                    })
+                });
+
+                if (response.ok) {
+                    // Success
+                    closeModal();
+                    fetchDashboardData(); // Refresh list
+                    alert(`Request ${action === 'APPROVE' ? 'Approved' : 'Rejected'} Successfully`);
+                } else {
+                    alert('Action Failed. Check logs.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Network Error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login/';
+        }
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', fetchDashboardData);
+    </script>
+</body>
+
+</html>
