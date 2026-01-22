@@ -77,7 +77,7 @@ INSTALLED_APPS = [
     # 'finance',
     'drf_spectacular',
     'notifications',
-    # 'ai', # Disabled to save space
+    'ai', # AI Restored
     # 'rangrago', # RangraGo Ride Module - Disabled
 ]
 
