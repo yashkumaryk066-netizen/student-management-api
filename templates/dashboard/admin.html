@@ -29,6 +29,39 @@
 </head>
 
 <body>
+    <script>
+        // --- SUPER ADMIN REDIRECTOR ---
+        // If this user is a superadmin, they shouldn't be here.
+        // Redirect them to the ADVANCED dashboard immediately.
+        (async function checkSuperAdmin() {
+            const token = localStorage.getItem('authToken');
+            if (!token) return; // Not logged in, let normal flow handle it
+
+            // 1. Fast Check (Local Storage)
+            const isSuper = localStorage.getItem('isSuperuser');
+            if (isSuper === 'true') {
+                window.location.replace('/dashboard/super-admin/');
+                return;
+            }
+
+            // 2. Strong Check (Profile API) - In case local storage is empty
+            try {
+                const res = await fetch('/api/profile/', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const profile = await res.json();
+                    if (profile.is_superuser) {
+                        localStorage.setItem('isSuperuser', 'true');
+                        window.location.replace('/dashboard/super-admin/');
+                    }
+                }
+            } catch (e) {
+                // Console only, don't block
+                console.log("Profile check failed", e);
+            }
+        })();
+    </script>
 
 
     <!-- Sidebar Overlay Backdrop -->
