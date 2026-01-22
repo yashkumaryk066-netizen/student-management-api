@@ -1344,15 +1344,92 @@
             // Stats Logic
         }
 
-        function speak(text) {
+        // --- PREMIUM FUNCTIONALITY FIXES ---
+
+        // 1. Advance Copy Function
+        function copyContent(msgId) {
+            const container = document.getElementById(msgId);
+            if (!container) return;
+
+            // Try to get raw data first (Best for code preservation)
+            const raw = decodeURIComponent(container.getAttribute('data-raw') || '');
+
+            // Fallback to text content if raw is missing
+            const textToCopy = raw || container.querySelector('.msg-ai').innerText;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Visual Feedback
+                const btn = container.querySelector('button[onclick^="copyContent"]');
+                const originalHtml = btn.innerHTML;
+
+                btn.innerHTML = `<i class="fa-solid fa-check text-green-400"></i> <span class="text-green-400">Copied!</span>`;
+                btn.classList.add('border-green-500/50', 'bg-green-500/10');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('border-green-500/50', 'bg-green-500/10');
+                }, 2000);
+            }).catch(err => {
+                console.error('Copy failed', err);
+                showToast('❌ Copy failed: ' + err);
+            });
+        }
+
+        // 2. Advance Read Aloud (Neural Voice)
+        function readAloud(msgId) {
+            const container = document.getElementById(msgId);
+            if (!container) return;
+
+            // Stop any current speech
             if (synth.speaking) {
                 synth.cancel();
             }
-            // Strip markdown chars for cleaner speech
-            const cleanText = text.replace(/[*#`]/g, '');
-            const utterThis = new SpeechSynthesisUtterance(cleanText);
+
+            // Get content
+            const raw = decodeURIComponent(container.getAttribute('data-raw') || '');
+
+            // Clean text for speech (Remove Markdown artifacts)
+            // Remove code blocks for brevity? No, read them.
+            // Just remove headers hashes and bold stars
+            let textToRead = raw
+                .replace(/###/g, '')
+                .replace(/##/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/`/g, '')
+                .replace(/!\[.*?\]\(.*?\)/g, 'Image.') // Replace images with "Image"
+                .replace(/\[.*?\]\(.*?\)/g, 'Link.'); // Replace links
+
+            const utterThis = new SpeechSynthesisUtterance(textToRead);
             utterThis.pitch = 1;
-            utterThis.rate = 1;
+            utterThis.rate = 1.1; // Slightly faster for pro feel
+
+            // Try to select a better voice
+            const voices = synth.getVoices();
+            // Prefer Google US English or similar
+            const preferredVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
+            if (preferredVoice) utterThis.voice = preferredVoice;
+
+            // Visual State functionality
+            const btn = container.querySelector('button[onclick^="readAloud"]');
+            btn.innerHTML = `<i class="fa-solid fa-stop text-amber-500 animate-pulse"></i> <span class="text-amber-500">Speaking...</span>`;
+
+            utterThis.onend = () => {
+                btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Read</span>`;
+            };
+
+            // Add Click-to-Stop functionality
+            btn.onclick = () => {
+                synth.cancel();
+                btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Read</span>`;
+                btn.onclick = () => readAloud(msgId); // Reset handler
+            };
+
+            synth.speak(utterThis);
+        }
+
+        function speak(text) {
+            // Legacy fallback
+            const utterThis = new SpeechSynthesisUtterance(text);
             synth.speak(utterThis);
         }
 
@@ -1602,23 +1679,36 @@
                     `;
                 });
 
+                // Generate Unique ID for this message
+                const msgId = 'ai-msg-' + Date.now();
+                const rawContent = encodeURIComponent(data.answer); // Store raw for copy
+
                 // Remove loading div content but keep container
                 aiDiv.innerHTML = `
-                     <div class="flex gap-4 max-w-4xl w-full animate-[fadeIn_0.5s_ease-in-out]">
-                        <div class="w-8 h-8 rounded mt-1 overflow-hidden shadow-lg shadow-cyan-500/20 border border-cyan-500/30">
+                     <div class="flex gap-4 max-w-4xl w-full animate-[fadeIn_0.5s_ease-in-out]" id="${msgId}" data-raw="${rawContent}">
+                        <div class="w-8 h-8 rounded mt-1 overflow-hidden shadow-lg shadow-cyan-500/20 border border-cyan-500/30 flex-shrink-0">
                              <div class="w-full h-full bg-slate-900 flex items-center justify-center">
                                  <i class="fa-solid fa-cube text-cyan-400 text-xs"></i>
                              </div>
                         </div>
-                        <div class="msg-ai p-6 text-slate-300 w-full prose prose-invert max-w-none">
+                        <div class="msg-ai p-6 text-slate-300 w-full prose prose-invert max-w-none relative group/msg">
                            ${answer}
-                            <div class="mt-4 flex gap-2 items-center justify-between border-t border-white/5 pt-2">
+                            
+                            <!-- PREMIUM ACTION BAR -->
+                            <div class="mt-4 flex gap-3 items-center justify-between border-t border-white/5 pt-3 opacity-80 group-hover/msg:opacity-100 transition">
                                 <div class="flex gap-2">
-                                    <button onclick="speak('${escapeHtml(data.answer).replace(/'/g, "\\'")}')" class="text-xs text-slate-500 hover:text-white transition"><i class="fa-solid fa-volume-high mr-1"></i> Read Aloud</button>
-                                    <button class="text-xs text-slate-500 hover:text-white transition" onclick="navigator.clipboard.writeText('${escapeHtml(data.answer).replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy mr-1"></i> Copy</button>
+                                    <button onclick="readAloud('${msgId}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-amber-500/20 text-xs font-medium text-slate-400 hover:text-amber-400 transition border border-transparent hover:border-amber-500/30">
+                                        <i class="fa-solid fa-volume-high"></i> 
+                                        <span>Read</span>
+                                    </button>
+                                    <button onclick="copyContent('${msgId}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-xs font-medium text-slate-400 hover:text-cyan-400 transition border border-transparent hover:border-cyan-500/30 group/copy">
+                                        <i class="fa-regular fa-copy group-hover/copy:hidden"></i>
+                                        <i class="fa-solid fa-check hidden group-hover/copy:block text-cyan-400"></i>
+                                        <span class="btn-copy-text">Copy</span>
+                                    </button>
                                 </div>
-                                <div class="text-[10px] text-slate-600 font-mono uppercase flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                <div class="text-[10px] text-slate-600 font-mono uppercase flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                     ${data.provider_info ? data.provider_info.provider : 'Y.S.M AI'}
                                 </div>
                            </div>
