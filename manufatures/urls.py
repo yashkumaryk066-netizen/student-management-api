@@ -72,7 +72,7 @@ urlpatterns = [
     # API Endpoints
     path('api/', include('student.urls')),
     path('api/notifications/', include('notifications.urls')),
-    path('rangrago/', include('rangrago.urls')), # RangraGo Ride App
+    # path('rangrago/', include('rangrago.urls')), # RangraGo - Disabled
 
     # API Documentation  
     # API Documentation

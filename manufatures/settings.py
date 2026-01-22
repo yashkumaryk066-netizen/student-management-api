@@ -77,8 +77,8 @@ INSTALLED_APPS = [
     # 'finance',
     'drf_spectacular',
     'notifications',
-    'ai',
-    'rangrago', # RangraGo Ride Module
+    # 'ai', # Disabled to save space
+    # 'rangrago', # RangraGo Ride Module - Disabled
 ]
 
 MIDDLEWARE = [
