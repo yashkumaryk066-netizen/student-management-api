@@ -380,3 +380,43 @@ class SubscriptionRenewView(APIView):
             "amount_to_pay": str(price),
             "next_step": "/api/subscription/submit-renewal/"
         })
+
+
+# =========================
+# MANUAL PAYMENT & RENEWAL SUBMISSION
+# =========================
+class ManualPaymentSubmitView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        amount = request.data.get('amount')
+        txn_id = request.data.get('transaction_id')
+        p_type = request.data.get('payment_type', 'SUBSCRIPTION')
+        desc = request.data.get('description', 'Manual Payment')
+        
+        if not amount or not txn_id:
+            return Response({"error": "Start Amount and Transaction ID are required"}, status=400)
+
+        try:
+            Payment.objects.create(
+                user=request.user,
+                transaction_id=txn_id,
+                amount=amount,
+                payment_type=p_type,
+                status=PAYMENT_PENDING,
+                description=desc,
+                metadata={
+                    "user_id": request.user.id,
+                    "email": request.user.email,
+                    "plan_type": "RENEWAL" if p_type == 'SUBSCRIPTION' else 'MANUAL'
+                }
+            )
+            return Response({"status": "SUBMITTED", "message": "Payment submitted for approval"})
+        except Exception as e:
+            logger.error(f"Payment Submit Error: {e}")
+            return Response({"error": "Submission Failed"}, status=500)
+
+# Aliases for URL compatibility
+RenewalSubmissionView = ManualPaymentSubmitView
+ClientSubscriptionView = SubscriptionStatusView
+SubscriptionRenewalView = SubscriptionRenewView

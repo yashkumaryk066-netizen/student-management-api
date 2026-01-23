@@ -38,7 +38,7 @@ from .views import (
     GlobalSearchView, HolidayListCreateView, RoutineListCreateView, BulkImportView
 )
 from .report_views import ReportListView, ReportDownloadView
-from .subscription_views import ClientSubscriptionView, SubscriptionRenewalView, RenewalSubmissionView
+from .subscription_views import ClientSubscriptionView, SubscriptionRenewalView, RenewalSubmissionView, ManualPaymentSubmitView
 from .student_portal_views import (
     StudentMyResultView, 
     StudentDownloadReportCardView, 
