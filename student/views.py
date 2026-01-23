@@ -1111,11 +1111,7 @@ def sitemap_xml(request):
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  <url>
-    <loc>https://yashamishra.pythonanywhere.com/rangrago/</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
+
   <url>
     <loc>https://yashamishra.pythonanywhere.com/ai-chat/</loc>
     <changefreq>daily</changefreq>

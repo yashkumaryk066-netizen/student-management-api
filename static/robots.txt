@@ -3,7 +3,7 @@ Allow: /
 Allow: /developer/
 Allow: /resume/
 Allow: /ai-chat/
-Allow: /rangrago/
+
 Allow: /static/
 Allow: /static/images/
 
