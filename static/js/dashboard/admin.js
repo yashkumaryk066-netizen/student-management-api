@@ -7,6 +7,12 @@ const DashboardApp = {
 
     dashboardMarkup: null,
 
+    // CSRF Token Helper - CRITICAL for POST/PUT/DELETE requests
+    getCsrfToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+        return cookie ? cookie.split('=')[1] : '';
+    },
+
     init() {
         console.log("%c NextGen ERP v3.8 Loaded ", "background: #3b82f6; color: white; padding: 4px; border-radius: 4px;");
         // Capture initial dashboard state for SPA navigation
@@ -210,7 +216,9 @@ const DashboardApp = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken(),
+                        'X-CSRFToken': this.getCsrfToken()
                     },
                     body: JSON.stringify({ lat, long })
                 });
@@ -1177,7 +1185,8 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(attendanceData)
             });
@@ -1370,7 +1379,8 @@ const DashboardApp = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                     },
                     body: JSON.stringify({ status: newStatus })
                 });
@@ -1831,7 +1841,8 @@ const DashboardApp = {
             const response = await fetch(`${this.apiBaseUrl}/library/`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                 },
                 body: formData
             });
@@ -2161,7 +2172,9 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken(),
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(data)
             });
@@ -2384,7 +2397,9 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken(),
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify({ type: type.toUpperCase() })
             });
@@ -2414,7 +2429,9 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken(),
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify({ type: 'ANALYTICS_SUMMARY' })
             });
@@ -2581,7 +2598,8 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(data)
             });
@@ -3271,7 +3289,8 @@ const DashboardApp = {
             const response = await fetch(`${this.apiBaseUrl}/profile/`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                     // Content-Type must NOT be set when sending FormData
                 },
                 body: formData
@@ -4011,7 +4030,8 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(data)
             });
@@ -4048,7 +4068,8 @@ const DashboardApp = {
             const res = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                 }
             });
 
@@ -4400,7 +4421,8 @@ const DashboardApp = {
         try {
             const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken() },
                 body: JSON.stringify({ payment_id: paymentId, action: 'approve' })
             });
             const result = await response.json();
@@ -4421,7 +4443,8 @@ const DashboardApp = {
         try {
             const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken() },
                 body: JSON.stringify({ payment_id: paymentId, action: 'reject', notes: reason })
             });
             const result = await response.json();
@@ -4451,7 +4474,8 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify({ client_id: userId, action: action })
             });
@@ -4762,6 +4786,7 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'X-CSRFToken': this.getCsrfToken(),
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
