@@ -93,11 +93,20 @@ class SuperAdminAdvancedDashboardView(APIView):
         # Pending Payments (Manual/Bank Transfer)
         pending_payments = Payment.objects.filter(status='PENDING_VERIFICATION').select_related('user').order_by('-created_at')
         for pay in pending_payments:
+            # SAFE: Handle payments without user (public subscriptions from landing page)
+            if pay.user:
+                entity_name = pay.user.username
+                payment_email = pay.user.email
+            else:
+                # Extract from metadata (public payment)
+                entity_name = pay.metadata.get('email', 'Unknown') if pay.metadata else 'Unknown'
+                payment_email = pay.metadata.get('email', 'N/A') if pay.metadata else 'N/A'
+            
             approvals.append({
                 "id": pay.id,
                 "type": "PAYMENT",
-                "entity_name": pay.user.username,
-                "sub_text": f"Payment via {pay.payment_mode}",
+                "entity_name": entity_name,
+                "sub_text": f"Payment via {pay.payment_mode} • {payment_email}",
                 "plan": "Payment Top-up",
                 "amount": str(pay.amount),
                 "transaction_id": pay.transaction_id or "N/A",
