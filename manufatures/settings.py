@@ -42,6 +42,9 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,yashamishra.pythonanywhere.com').split(',')
 
+# The base URL for the site, used for absolute link generation in emails/sitemaps
+SITE_URL = config('SITE_URL', default='https://yashamishra.pythonanywhere.com').rstrip('/')
+
 # PRODUCTION SECURITY SETTINGS
 # Only enable HTTPS settings if using custom domain with SSL certificate
 # PythonAnywhere FREE tier doesn't support custom HTTPS, so keep this False

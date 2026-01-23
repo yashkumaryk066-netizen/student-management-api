@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from datetime import date, timedelta
 
@@ -515,10 +516,10 @@ class ClientSubscriptionView(APIView):
             try:
                 from .models import ClientSubscription
                 from datetime import date
-                # Create an EXPIRED 'INSTITUTE' subscription so they see the plan and can Renew
+                # Create an EXPIRED 'COACHING' subscription to minimize access risk
                 ClientSubscription.objects.create(
                     user=request.user,
-                    plan_type='INSTITUTE',
+                    plan_type='COACHING', # Corrected from INSTITUTE to COACHING
                     status='EXPIRED',
                     start_date=date.today(),
                     end_date=date.today()
@@ -551,6 +552,7 @@ class LibraryBookListCreateView(generics.ListCreateAPIView):
     queryset = LibraryBook.objects.all()
     serializer_class = LibraryBookSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         return filter_by_owner(self.queryset, self.request.user)
@@ -747,6 +749,7 @@ class LiveClassListCreateView(generics.ListCreateAPIView):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get(self, request):
         from .plan_permissions import get_user_features
@@ -762,7 +765,14 @@ class ProfileView(APIView):
             "available_features": list(get_user_features(user).keys())
         }
         if hasattr(user, 'profile'):
-             data.update(UserProfileSerializer(user.profile).data)
+             profile_data = UserProfileSerializer(user.profile).data
+             # Ensure full URLs for images
+             if user.profile.institution_logo:
+                 profile_data['institution_logo'] = request.build_absolute_uri(user.profile.institution_logo.url)
+             if user.profile.digital_signature:
+                 profile_data['digital_signature'] = request.build_absolute_uri(user.profile.digital_signature.url)
+             data.update(profile_data)
+             
         return Response(data)
     
     def put(self, request):
@@ -791,10 +801,12 @@ class ProfileView(APIView):
                 profile.address = data['address']
             
             # File Uploads (Branding)
-            if 'institution_logo' in data:
-                profile.institution_logo = data['institution_logo']
-            if 'digital_signature' in data:
-                profile.digital_signature = data['digital_signature']
+            # request.FILES contains the files when using MultiPartParser
+            if 'institution_logo' in request.FILES:
+                profile.institution_logo = request.FILES['institution_logo']
+            
+            if 'digital_signature' in request.FILES:
+                profile.digital_signature = request.FILES['digital_signature']
 
             profile.save()
         
@@ -1179,47 +1191,49 @@ self.addEventListener('push', event => {
 
 # SEO Views
 def robots_txt(request):
+    base_url = request.build_absolute_uri('/')
     lines = [
         "User-agent: *",
         "Disallow: /admin/",
         "Disallow: /dashboard/",
         "Disallow: /api/",
         "Allow: /",
-        "Sitemap: https://yashamishra.pythonanywhere.com/sitemap.xml",
+        f"Sitemap: {base_url}sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 def sitemap_xml(request):
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
+    base_url = request.build_absolute_uri('/')
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://yashamishra.pythonanywhere.com/</loc>
+    <loc>{base_url}</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://yashamishra.pythonanywhere.com/ai-chat/</loc>
+    <loc>{base_url}ai-chat/</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://yashamishra.pythonanywhere.com/developer/</loc>
+    <loc>{base_url}developer/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://yashamishra.pythonanywhere.com/resume/</loc>
+    <loc>{base_url}resume/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://yashamishra.pythonanywhere.com/demo/</loc>
+    <loc>{base_url}demo/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://yashamishra.pythonanywhere.com/login/</loc>
+    <loc>{base_url}login/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1230,3 +1244,240 @@ def google_verification(request):
     return HttpResponse("google-site-verification: google7ec15807e3134773.html", content_type="text/plain")
 
 
+
+# GLOBAL SEARCH
+# =========================
+
+class GlobalSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get('q', '').strip()
+        if not query or len(query) < 2:
+            return Response([])
+
+        user = request.user
+        results = []
+
+        # 1. Search Students
+        students = Student.objects.select_related('parent').filter(
+            Q(name__icontains=query) | 
+            Q(roll_number__icontains=query) |
+            Q(parent__username__icontains=query)
+        )
+        # Apply Isolation
+        students = filter_by_owner(students, user)[:5]
+        
+        for s in students:
+            results.append({
+                'type': 'Student',
+                'title': s.name,
+                'subtitle': f"Roll: {s.roll_number} | Class: {s.grade}",
+                'url': f"#students/{s.id}",
+                'icon': '👤'
+            })
+
+        # 2. Search Courses/Batches (Coaching/Institute)
+        if hasattr(user, 'profile') and user.profile.institution_type != 'SCHOOL':
+            courses = Course.objects.filter(name__icontains=query)
+            courses = filter_by_owner(courses, user)[:3]
+            for c in courses:
+                results.append({
+                    'type': 'Course',
+                    'title': c.name,
+                    'subtitle': f"Fee: ₹{c.fee}",
+                    'url': f"#courses/{c.id}",
+                    'icon': '📚'
+                })
+
+        # 3. Search Batches
+        batches = Batch.objects.select_related('course').filter(name__icontains=query)
+        batches = filter_by_owner(batches, user)[:3]
+        for b in batches:
+             results.append({
+                'type': 'Batch',
+                'title': b.name,
+                'subtitle': f"Course: {b.course.name if b.course else 'N/A'}",
+                'url': f"#batches",
+                'icon': '👥'
+            })
+        
+        return Response(results)
+
+# =========================
+# HOLIDAY CALENDAR API
+# =========================
+from .models import Holiday
+
+class HolidayListCreateView(generics.ListCreateAPIView):
+    serializer_class = None # We'll build response manually for speed or add serializer later
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        # Strict Isolation
+        holidays = Holiday.objects.filter(owner=user.profile.get_owner() if hasattr(user, 'profile') else user)
+        # Also include owner's own holidays (if user is owner)
+        holidays |= Holiday.objects.filter(owner=user)
+        
+        holidays = holidays.distinct().order_by('date')
+        
+        data = [{
+            'id': h.id,
+            'title': h.name,
+            'start': h.date,
+            'end': h.end_date, 
+            'type': h.type,
+            'description': h.description,
+            'className': f"holiday-{h.type.lower()}" # CSS class for fullcalendar
+        } for h in holidays]
+        
+        return Response(data)
+
+    def post(self, request):
+        if not request.user.profile.is_admin_or_owner():
+             return Response({"error": "Permission Denied"}, status=403)
+             
+        data = request.data
+        Holiday.objects.create(
+            owner=request.user,
+            name=data.get('name'),
+            date=data.get('date'),
+            type=data.get('type', 'ACADEMIC'),
+            description=data.get('description')
+        )
+        return Response({"message": "Holiday Created"}, status=201)
+
+# =========================
+# TIMETABLE API
+# =========================
+from .models import ClassRoutine, Batch
+
+class RoutineListCreateView(generics.ListCreateAPIView):
+    serializer_class = None 
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        routines = ClassRoutine.objects.filter(owner=user.profile.get_owner() if hasattr(user, 'profile') else user)
+        
+        # Filter by specific context
+        batch_id = request.query_params.get('batch_id')
+        grade = request.query_params.get('grade')
+        
+        if batch_id:
+            routines = routines.filter(batch_id=batch_id)
+        if grade:
+            routines = routines.filter(grade=grade)
+            
+        data = [{
+            'id': r.id,
+            'day': r.day_of_week,
+            'subject': r.subject,
+            'teacher': r.teacher_name,
+            'start': r.start_time.strftime('%H:%M'),
+            'end': r.end_time.strftime('%H:%M'),
+            'room': r.room_number,
+            'batch_name': r.batch.name if r.batch else (f"Class {r.grade}" if r.grade else "General")
+        } for r in routines]
+        
+        return Response(data)
+
+    def post(self, request):
+        if not request.user.profile.is_admin_or_owner():
+             return Response({"error": "Permission Denied"}, status=403)
+             
+        data = request.data
+        b_id = data.get('batch_id')
+        batch = Batch.objects.get(id=b_id) if b_id else None
+        
+        ClassRoutine.objects.create(
+            owner=request.user,
+            batch=batch,
+            grade=data.get('grade'),
+            subject=data.get('subject'),
+            teacher_name=data.get('teacher'),
+            day_of_week=data.get('day'),
+            start_time=data.get('start'),
+            end_time=data.get('end'),
+            room_number=data.get('room')
+        )
+        return Response({"message": "Routine Added"}, status=201)
+
+
+# =========================
+# BULK IMPORT OPERATIONS
+# =========================
+import csv
+import io
+
+class BulkImportView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        if not request.user.profile.is_admin_or_owner():
+            return Response({"error": "Permission Denied"}, status=403)
+
+        file_obj = request.FILES.get('file')
+        import_type = request.data.get('type')
+        
+        if not file_obj:
+            return Response({"error": "No file uploaded"}, status=400)
+
+        # Basic CSV Parsing
+        try:
+            decoded_file = file_obj.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.DictReader(io_string)
+            
+            count = 0
+            errors = []
+            
+            for row in reader:
+                try:
+                    self._process_row(row, import_type, request.user)
+                    count += 1
+                except Exception as e:
+                    errors.append(f"Row {count+1}: {str(e)}")
+            
+            return Response({
+                "message": f"Successfully imported {count} records.",
+                "errors": errors
+            })
+            
+        except Exception as e:
+            return Response({"error": f"Import failed: {str(e)}"}, status=500)
+
+    def _process_row(self, row, type, user):
+        # Helper to route to specific logic
+        from .models import Student, LibraryBook, Employee
+        
+        if type == 'STUDENT':
+            Student.objects.create(
+                user=user, # Link to owner
+                name=row.get('name'),
+                phone=row.get('phone', ''),
+                email=row.get('email', ''),
+                address=row.get('address', '')
+                # Add more fields as per CSV headers
+            )
+        elif type == 'BOOK':
+             LibraryBook.objects.create(
+                created_by=user,
+                title=row.get('title'),
+                author=row.get('author'),
+                isbn=row.get('isbn', '0000000000'),
+                total_copies=int(row.get('copies', 1)),
+                price=0
+             )
+        elif type == 'STAFF':
+            Employee.objects.create(
+                user=user, # Temporarily link user as placeholder
+                first_name=row.get('first_name'),
+                last_name=row.get('last_name'),
+                email=row.get('email'),
+                phone=row.get('phone')
+            )
+        else:
+            raise ValueError("Invalid Import Type")

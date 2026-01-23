@@ -1,7 +1,7 @@
 // Dashboard SPA System - Main Application Logic
 const DashboardApp = {
     currentModule: 'dashboard',
-    apiBaseUrl: 'https://yashamishra.pythonanywhere.com/api',
+    apiBaseUrl: window.location.origin + '/api',
 
     currentUser: null, // Store user profile here
 
@@ -589,6 +589,9 @@ const DashboardApp = {
                 break;
             case 'exams':
                 this.loadExamManagement();
+                break;
+            case 'timetable':
+                this.loadRoutineManagement();
                 break;
             case 'events':
                 this.loadEventManagement();
@@ -1186,7 +1189,7 @@ const DashboardApp = {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken()
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(attendanceData)
             });
@@ -1748,79 +1751,102 @@ const DashboardApp = {
     },
 
     addBook() {
-        // ... modal setup ...
         const modal = `
-            <div class="modal-overlay" id="addBookModal">
-                <div class="modal-card">
-                    <div class="modal-header">
-                        <h2>+ Add New Book</h2>
-                        <button class="close-btn" onclick="document.getElementById('addBookModal').remove()">×</button>
+            <div class="modal-overlay" id="addBookModal" style="z-index: 10000; background: rgba(0,0,0,0.85);">
+                <div class="modal-card" style="max-width: 600px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);">
+                    <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px;">
+                        <h2 style="color:white; font-family: 'Space Grotesk', sans-serif;">📖 Add Book to Catalog</h2>
+                        <button class="close-btn" onclick="document.getElementById('addBookModal').remove()" style="color:#94a3b8;">×</button>
                     </div>
-                    <form id="addBookForm" onsubmit="event.preventDefault(); DashboardApp.submitAddBook();">
-                        <div class="form-group">
-                            <label>Book Title</label>
-                            <input type="text" name="title" class="form-input" required>
-                        </div>
-                        
-                        <div class="row" style="display:flex; gap:15px;">
-                            <div class="form-group" style="flex:1;">
-                                <label>Author</label>
-                                <input type="text" name="author" class="form-input" required>
-                            </div>
-                            <div class="form-group" style="flex:1;">
-                                <label>ISBN</label>
-                                <input type="text" name="isbn" class="form-input" required>
-                            </div>
+                    
+                    <form id="addBookForm" onsubmit="event.preventDefault(); DashboardApp.submitAddBook();" style="padding: 25px;">
+                        <!-- Cover Image Upload (Premium) -->
+                        <div style="margin-bottom: 25px; text-align: center;">
+                            <label style="cursor: pointer; display: inline-block;">
+                                <div id="coverPreview" style="width: 120px; height: 160px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s;">
+                                    <span style="font-size: 2rem; margin-bottom: 5px;">📷</span>
+                                    <span style="font-size: 0.8rem; color: #94a3b8;">Upload Cover</span>
+                                </div>
+                                <input type="file" name="cover_image" accept="image/*" style="display: none;" onchange="DashboardApp.previewCover(this)">
+                            </label>
                         </div>
 
-                        <div class="row" style="display:flex; gap:15px;">
-                             <div class="form-group" style="flex:1;">
-                                <label>Publisher</label>
-                                <input type="text" name="publisher" class="form-input">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Book Title <span style="color:#ef4444">*</span></label>
+                                <input type="text" name="title" class="form-input premium-input" required placeholder="e.g. Concepts of Physics">
                             </div>
-                             <div class="form-group" style="flex:1;">
-                                <label>Category</label>
-                                <select name="category" class="form-input">
-                                    <option value="FICTION">Fiction</option>
-                                    <option value="NON_FICTION">Non-Fiction</option>
+
+                            <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">ISBN/Barcode <span style="color:#ef4444">*</span></label>
+                                <input type="text" name="isbn" class="form-input premium-input" required placeholder="ISBN-13">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Author <span style="color:#ef4444">*</span></label>
+                                <input type="text" name="author" class="form-input premium-input" required placeholder="e.g. H.C. Verma">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Category</label>
+                                <select name="category" class="form-input premium-input" style="background-color: #1e293b;"> 
                                     <option value="TEXTBOOK">Textbook</option>
                                     <option value="REFERENCE">Reference</option>
+                                    <option value="FICTION">Fiction</option>
+                                    <option value="NON_FICTION">Non-Fiction</option>
+                                    <option value="MAGAZINE">Magazine</option>
+                                    <option value="JOURNAL">Journal</option>
                                 </select>
                             </div>
+
+                             <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Publisher</label>
+                                <input type="text" name="publisher" class="form-input premium-input" placeholder="Publisher Name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Published Year</label>
+                                <input type="number" name="published_year" class="form-input premium-input" value="2024">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Edition</label>
+                                <input type="text" name="edition" class="form-input premium-input" value="1st">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Total Copies</label>
+                                <input type="number" name="total_copies" class="form-input premium-input" value="1" min="1">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:5px;">Price (₹)</label>
+                                <input type="number" name="price" class="form-input premium-input" placeholder="0.00">
+                            </div>
                         </div>
 
-                         <div class="row" style="display:flex; gap:15px;">
-                            <div class="form-group" style="flex:1;">
-                                <label>Total Copies</label>
-                                <input type="number" name="total_copies" class="form-input" value="1" min="1">
-                            </div>
-                            <div class="form-group" style="flex:1;">
-                                <label>Price (₹)</label>
-                                <input type="number" name="price" class="form-input">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                             <label>Cover Image</label>
-                             <div class="file-upload-wrapper" style="border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px;">
-                                <input type="file" name="cover_image" accept="image/*" class="form-input" style="padding:5px;">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea name="description" class="form-input" rows="3"></textarea>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn-secondary" onclick="document.getElementById('addBookModal').remove()">Cancel</button>
-                            <button type="submit" class="btn-primary">Add Book</button>
+                        <div class="modal-footer" style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 10px;">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addBookModal').remove()" style="background:transparent; border:1px solid #475569; color:#cbd5e1;">Cancel</button>
+                            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #6366f1, #4f46e5); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);">Save to Catalog</button>
                         </div>
                     </form>
                 </div>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    previewCover(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('coverPreview');
+                preview.style.background = `url(${e.target.result}) center/cover no-repeat`;
+                preview.style.border = '2px solid #6366f1';
+                preview.innerHTML = ''; // Remove icon/text
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
     },
 
     async submitAddBook() {
@@ -1842,7 +1868,7 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken()
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: formData
             });
@@ -2173,7 +2199,7 @@ const DashboardApp = {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken(),
+                    'X-CSRFToken': this.getCsrfToken(),
                     'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(data)
@@ -2198,38 +2224,238 @@ const DashboardApp = {
         }
     },
 
-    loadEventManagement() {
+    async loadEventManagement() {
         const container = document.getElementById('dashboardView');
+        const today = new Date();
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // State for Calendar Navigation
+        if (!window.currentCalDate) window.currentCalDate = new Date();
+
         container.innerHTML = `
         <div class="module-header">
             <div>
-                 <h1 class="page-title">📅 Events & Calendar</h1>
-                 <p class="page-subtitle">Organize cultural, sports, and academic events.</p>
+                 <h1 class="page-title">📅 Academic Calendar</h1>
+                 <p class="page-subtitle">Smart Holiday & Event Management</p>
             </div>
-            <button class="btn-action" onclick="DashboardApp.createEvent()">+ Create Event</button>
+            <div style="display:flex; gap:10px;">
+                 <div style="background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; padding:5px 10px; border:1px solid rgba(255,255,255,0.1);">
+                    <button onclick="DashboardApp.changeMonth(-1)" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">❮</button>
+                    <span id="calMonthDisplay" style="margin:0 15px; font-weight:700; color:white; width:140px; text-align:center;">${monthNames[today.getMonth()]} ${today.getFullYear()}</span>
+                    <button onclick="DashboardApp.changeMonth(1)" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">❯</button>
+                 </div>
+                 <button class="btn-action" onclick="DashboardApp.showAddHolidayModal()">+ Add Holiday</button>
+            </div>
         </div>
 
-    <div class="data-table-container">
-        <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
-            <h3 style="color: white; margin-bottom: 5px;">Event Calendar</h3>
+        <div style="display:grid; grid-template-columns: 3fr 1fr; gap:20px;">
+            <!-- MAIN CALENDAR GRID -->
+            <div class="calendar-container" style="background: rgba(15, 23, 42, 0.6); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); min-height:600px;">
+                <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px; text-align:center; margin-bottom:15px; color:var(--text-muted); font-weight:600;">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <div id="calendarGrid" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px;">
+                     <!-- Days render here -->
+                     <div class="loader">Loading...</div>
+                </div>
+            </div>
+
+            <!-- UPCOMING SIDEBAR -->
+            <div class="upcoming-sidebar" style="background: rgba(15, 23, 42, 0.4); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                <h3 style="color:white; font-size:1.1rem; margin-bottom:20px;">Upcoming Holidays</h3>
+                <div id="upcomingList" style="display:flex; flex-direction:column; gap:15px;">
+                     <!-- List renders here -->
+                </div>
+            </div>
         </div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Event Name</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="eventTableBody">
-                <tr><td colspan="5" class="text-center">Loading events...</td></tr>
-            </tbody>
-        </table>
-    </div>
-`;
-        this.fetchEvents();
+        `;
+
+        await this.renderCalendar();
+    },
+
+    changeMonth(delta) {
+        if (!window.currentCalDate) window.currentCalDate = new Date();
+        window.currentCalDate.setMonth(window.currentCalDate.getMonth() + delta);
+        this.renderCalendar();
+    },
+
+    async renderCalendar() {
+        const date = window.currentCalDate || new Date();
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // Update Header
+        const display = document.getElementById('calMonthDisplay');
+        if (display) display.innerText = `${monthNames[month]} ${year}`;
+
+        // Fetch Holidays
+        let holidays = [];
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/calendar/holidays/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            if (res.ok) holidays = await res.json();
+        } catch (e) { console.error(e); }
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+
+        const grid = document.getElementById('calendarGrid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+
+        // Empty slots for previous month
+        for (let i = 0; i < startingDay; i++) {
+            grid.innerHTML += `<div style="padding:15px;"></div>`;
+        }
+
+        const todayDate = new Date();
+
+        // Render Days
+        for (let i = 1; i <= daysInMonth; i++) {
+            const currentDayDate = new Date(year, month, i);
+            const dateStr = currentDayDate.toISOString().split('T')[0];
+
+            // Find events for this day
+            const dayEvents = holidays.filter(h => h.start === dateStr);
+            const isToday = (i === todayDate.getDate() && month === todayDate.getMonth() && year === todayDate.getFullYear());
+
+            let eventHtml = '';
+            dayEvents.forEach(ev => {
+                let color = '#3b82f6'; // Academic
+                if (ev.type === 'NATIONAL') color = '#ef4444';
+                if (ev.type === 'REGIONAL') color = '#f59e0b';
+
+                eventHtml += `<div style="background:${color}; padding:2px 6px; border-radius:4px; font-size:0.7rem; color:white; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.title}</div>`;
+            });
+
+            grid.innerHTML += `
+            <div style="background: ${isToday ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.03)'}; 
+                        border: 1px solid ${isToday ? '#6366f1' : 'rgba(255,255,255,0.05)'}; 
+                        border-radius:10px; padding:10px; min-height:80px; transition:all 0.2s; cursor:pointer;"
+                 onmouseenter="this.style.background='rgba(255,255,255,0.08)'"
+                 onmouseleave="this.style.background='${isToday ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.03)'}'"
+                 onclick="DashboardApp.showAddHolidayModal('${dateStr}')">
+                 
+                 <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:${isToday ? '#818cf8' : 'white'};">${i}</span>
+                    ${dayEvents.length > 0 ? '<span style="width:6px; height:6px; background:#ef4444; border-radius:50%;"></span>' : ''}
+                 </div>
+                 <div style="margin-top:5px;">
+                    ${eventHtml}
+                 </div>
+            </div>`;
+        }
+
+        // Render Upcoming List
+        this.renderUpcomingList(holidays);
+    },
+
+    renderUpcomingList(holidays) {
+        const list = document.getElementById('upcomingList');
+        if (!list) return;
+
+        const today = new Date().toISOString().split('T')[0];
+        const upcoming = holidays
+            .filter(h => h.start >= today)
+            .sort((a, b) => new Date(a.start) - new Date(b.start))
+            .slice(0, 5);
+
+        if (upcoming.length === 0) {
+            list.innerHTML = `<div style="color:var(--text-muted); text-align:center;">No upcoming holidays.</div>`;
+            return;
+        }
+
+        list.innerHTML = upcoming.map(h => {
+            let icon = '📅';
+            if (h.type === 'NATIONAL') icon = '🇮🇳';
+            if (h.type === 'REGIONAL') icon = '🎉';
+
+            return `
+             <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border-left: 3px solid #6366f1;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="font-weight:600; color:white;">${icon} ${h.title}</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">${h.start}</span>
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">${h.description || h.type}</div>
+             </div>
+             `;
+        }).join('');
+    },
+
+    showAddHolidayModal(dateStr) {
+        const modal = `
+            <div class="modal-overlay" id="holidayModal">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h2>📅 Add Holiday / Event</h2>
+                        <button class="close-btn" onclick="document.getElementById('holidayModal').remove()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label">Event Name</label>
+                        <input type="text" id="holidayName" class="form-input" placeholder="e.g. Diwali Vacation">
+                        
+                        <label class="form-label">Date</label>
+                        <input type="date" id="holidayDate" class="form-input" value="${dateStr || ''}">
+                        
+                        <label class="form-label">Type</label>
+                        <select id="holidayType" class="form-input">
+                            <option value="ACADEMIC" selected>Academic Holiday</option>
+                            <option value="NATIONAL">National Holiday</option>
+                            <option value="REGIONAL">Regional Festival</option>
+                            <option value="EMERGENCY">Emergency Off</option>
+                        </select>
+                        
+                        <label class="form-label">Description</label>
+                        <textarea id="holidayDesc" class="form-input" rows="3" placeholder="Optional notes..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick="document.getElementById('holidayModal').remove()">Cancel</button>
+                        <button class="btn-primary" onclick="DashboardApp.submitHoliday()">Create Event</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    async submitHoliday() {
+        const name = document.getElementById('holidayName').value;
+        const date = document.getElementById('holidayDate').value;
+        const type = document.getElementById('holidayType').value;
+        const desc = document.getElementById('holidayDesc').value;
+
+        if (!name || !date) {
+            alert('Name and Date are required');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/calendar/holidays/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({ name, date, type, description: desc })
+            });
+
+            if (res.ok) {
+                this.showAlert('Success', 'Holiday Added!', 'success');
+                document.getElementById('holidayModal').remove();
+                this.renderCalendar();
+            } else {
+                alert('Failed to add holiday.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error adding holiday');
+        }
     },
 
     async fetchEvents() {
@@ -2326,6 +2552,7 @@ const DashboardApp = {
             const reports = await response.json();
 
             const tbody = document.getElementById('reportsTableBody');
+
             if (reports.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center">No reports generated yet.</td></tr>';
                 return;
@@ -2333,22 +2560,270 @@ const DashboardApp = {
 
             tbody.innerHTML = reports.map(r => `
                 <tr>
-                    <td>${r.name}</td>
-                    <td>${r.type}</td>
+                    <td style="font-weight:600; color:white;">${r.name}</td>
+                    <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">${r.type}</span></td>
                     <td>${r.date}</td>
                     <td><span class="status-badge status-active">${r.status}</span></td>
                     <td>
-                        <button onclick="DashboardApp.downloadReport(${r.id}, '${r.name}')" class="btn-action" style="padding:4px 10px; font-size:0.8rem;">
-                            Download
+                        <button class="btn-action" onclick="DashboardApp.downloadFile('${this.apiBaseUrl}/reports/download/${r.id}/', '${r.name}.pdf')">
+                            ⬇️ Download
                         </button>
                     </td>
                 </tr>
             `).join('');
 
-        } catch (error) {
-            console.error(error);
-            document.getElementById('reportsTableBody').innerHTML = '<tr><td colspan="5" class="text-center">Failed to load reports.</td></tr>';
+        } catch (e) {
+            console.error("Reports Load Error", e);
+            document.getElementById('reportsTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load reports.</td></tr>';
         }
+    },
+
+    async exportAnalyticsPDF() {
+        const btn = document.getElementById('btnExportPdf');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Generating...';
+        btn.disabled = true;
+
+        try {
+            // Check if we have an existing recent report to download? 
+            // For now, let's force generate a new Analytics Summary
+            const res = await fetch(`${this.apiBaseUrl}/reports/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({ type: 'ANALYTICS_SUMMARY' })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                this.showAlert('Success', 'PDF Generated!', 'success');
+                // Auto Download
+                this.downloadFile(`${this.apiBaseUrl}/reports/download/${data.report_id}/`, `Analytics_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+                this.loadReportsAnalytics(); // Refresh table
+            } else {
+                const err = await res.json();
+                this.showAlert('Failed', err.error || 'Could not export PDF', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            this.showAlert('Error', 'Export failed', 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    },
+
+    generateReport() {
+        const modal = `
+            <div class="modal-overlay" id="genReportModal" style="z-index: 10000; background: rgba(0,0,0,0.85);">
+                <div class="modal-card" style="max-width: 500px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="modal-header">
+                        <h2 style="color:white; font-family: 'Space Grotesk', sans-serif;">⚡ Generate New Report</h2>
+                        <button class="close-btn" onclick="document.getElementById('genReportModal').remove()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="color:#94a3b8; margin-bottom: 20px;">Select the type of intelligence report to generate:</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <button onclick="DashboardApp.triggerReportGen('FINANCE')" class="report-btn">💰 Financial</button>
+                            <button onclick="DashboardApp.triggerReportGen('ATTENDANCE')" class="report-btn">✅ Attendance</button>
+                            <button onclick="DashboardApp.triggerReportGen('EXAM')" class="report-btn">📝 Exam/Result</button>
+                            <button onclick="DashboardApp.triggerReportGen('HR')" class="report-btn">👥 HR & Staff</button>
+                            <button onclick="DashboardApp.triggerReportGen('ANALYTICS_SUMMARY')" class="report-btn" style="grid-column: span 2; background: linear-gradient(90deg, #6366f1, #4f46e5); color: white; border: none;">📊 Full Analytics Summary</button>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    .report-btn {
+                        padding: 15px;
+                        background: rgba(255,255,255,0.05);
+                        border: 1px solid rgba(255,255,255,0.1);
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+                    .report-btn:hover {
+                        background: rgba(255,255,255,0.1);
+                        transform: translateY(-2px);
+                        border-color: #6366f1;
+                    }
+                </style>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    async triggerReportGen(type) {
+        document.getElementById('genReportModal').remove();
+        this.showAlert('Generating', `Preparing ${type} Report...`, 'info');
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/reports/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({ type: type })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                this.showAlert('Success', 'Report Ready!', 'success');
+                this.loadReportsAnalytics(); // Refresh list
+            } else {
+                const err = await res.json();
+                this.showAlert('Failed', err.error || 'Server permission denied', 'error');
+            }
+        } catch (e) {
+            this.showAlert('Error', 'Connection failed', 'error');
+        }
+    },
+
+
+    async loadRoutineManagement() {
+        const container = document.getElementById('dashboardView');
+        container.innerHTML = `
+        <div class="module-header">
+            <div>
+                 <h1 class="page-title">📅 Class Timetable</h1>
+                 <p class="page-subtitle">Manage weekly class routines and schedules.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                 <select id="routineFilter" class="form-input premium-input" onchange="DashboardApp.fetchRoutine()" style="width:200px;">
+                    <option value="">Select Class/Batch</option>
+                    <option value="CLASS_10">Class 10</option>
+                    <option value="CLASS_12">Class 12</option>
+                 </select>
+                 <button class="btn-action" onclick="DashboardApp.showAddRoutineModal()">+ Add Period</button>
+            </div>
+        </div>
+
+        <div class="data-table-container" style="background: rgba(15, 23, 42, 0.6);">
+            <div id="routineGrid" class="routine-grid" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:15px; padding:20px; overflow-x:auto;">
+                <div class="day-col"><h3 class="day-header">Monday</h3><div class="day-periods" id="day-MON"></div></div>
+                <div class="day-col"><h3 class="day-header">Tuesday</h3><div class="day-periods" id="day-TUE"></div></div>
+                <div class="day-col"><h3 class="day-header">Wednesday</h3><div class="day-periods" id="day-WED"></div></div>
+                <div class="day-col"><h3 class="day-header">Thursday</h3><div class="day-periods" id="day-THU"></div></div>
+                <div class="day-col"><h3 class="day-header">Friday</h3><div class="day-periods" id="day-FRI"></div></div>
+                <div class="day-col"><h3 class="day-header">Saturday</h3><div class="day-periods" id="day-SAT"></div></div>
+            </div>
+        </div>
+        
+        <style>
+            .day-header { color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+            .period-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 12px; margin-bottom: 10px; border-radius: 8px; transition: all 0.2s; position: relative; }
+            .period-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-2px); border-color: #6366f1; }
+            .period-time { font-size: 0.75rem; color: #60a5fa; font-weight: 700; display: block; margin-bottom: 4px; }
+            .period-subject { font-size: 0.95rem; color: white; font-weight: 600; display: block; }
+            .period-teacher { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; display: block; }
+        </style>
+        `;
+
+        this.fetchRoutine();
+    },
+
+    async fetchRoutine() {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/academic/routine/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            if (res.ok) {
+                const routines = await res.json();
+                this.renderRoutine(routines);
+            }
+        } catch (e) { console.error(e); }
+    },
+
+    renderRoutine(routines) {
+        ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].forEach(d => {
+            const col = document.getElementById(`day-${d}`);
+            if (col) col.innerHTML = '';
+        });
+
+        routines.forEach(r => {
+            const col = document.getElementById(`day-${r.day}`);
+            if (col) {
+                col.innerHTML += `
+                <div class="period-card">
+                    <span class="period-time">${r.start} - ${r.end}</span>
+                    <span class="period-subject">${r.subject}</span>
+                    <span class="period-teacher">👤 ${r.teacher}</span>
+                    <div style="font-size:0.7rem; color:#64748b; margin-top:5px;">Room: ${r.room || 'N/A'}</div>
+                </div>
+                `;
+            }
+        });
+    },
+
+    showAddRoutineModal() {
+        const modal = `
+            <div class="modal-overlay" id="routineModal" style="z-index: 99999;">
+                <div class="modal-card" style="background:#0f172a; border:1px solid #334155;">
+                    <div class="modal-header">
+                        <h2>+ Add Class Period</h2>
+                        <button class="close-btn" onclick="document.getElementById('routineModal').remove()">×</button>
+                    </div>
+                    <form onsubmit="event.preventDefault(); DashboardApp.submitRoutine()" id="routineForm" style="padding:20px;">
+                        <input type="text" id="rSubject" class="form-input premium-input" placeholder="Subject" required style="margin-bottom:10px;">
+                        <input type="text" id="rTeacher" class="form-input premium-input" placeholder="Teacher Name" required style="margin-bottom:10px;">
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <select id="rDay" class="form-input premium-input">
+                                <option value="MON">Monday</option>
+                                <option value="TUE">Tuesday</option>
+                                <option value="WED">Wednesday</option>
+                                <option value="THU">Thursday</option>
+                                <option value="FRI">Friday</option>
+                                <option value="SAT">Saturday</option>
+                            </select>
+                            <input type="text" id="rRoom" class="form-input premium-input" placeholder="Room No">
+                        </div>
+                        <div style="display:flex; gap:10px; margin-bottom:20px;">
+                             <input type="time" id="rStart" class="form-input premium-input" required>
+                             <input type="time" id="rEnd" class="form-input premium-input" required>
+                        </div>
+                        <button class="btn-primary" type="submit" style="width:100%;">Save Period</button>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    async submitRoutine() {
+        const data = {
+            subject: document.getElementById('rSubject').value,
+            teacher: document.getElementById('rTeacher').value,
+            day: document.getElementById('rDay').value,
+            start: document.getElementById('rStart').value,
+            end: document.getElementById('rEnd').value,
+            room: document.getElementById('rRoom').value
+        };
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/academic/routine/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                this.showAlert('Success', 'Period Added', 'success');
+                document.getElementById('routineModal').remove();
+                this.fetchRoutine();
+            } else {
+                this.showAlert('Error', 'Failed to add', 'error');
+            }
+        } catch (e) { console.error(e); }
     },
 
     async downloadReport(id, name) {
@@ -2398,7 +2873,7 @@ const DashboardApp = {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken(),
+                    'X-CSRFToken': this.getCsrfToken(),
                     'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify({ type: type.toUpperCase() })
@@ -2430,7 +2905,7 @@ const DashboardApp = {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken(),
+                    'X-CSRFToken': this.getCsrfToken(),
                     'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify({ type: 'ANALYTICS_SUMMARY' })
@@ -2599,7 +3074,7 @@ const DashboardApp = {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken()
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(data)
             });
@@ -3290,7 +3765,7 @@ const DashboardApp = {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken()
+                    'X-CSRFToken': this.getCsrfToken()
                     // Content-Type must NOT be set when sending FormData
                 },
                 body: formData
@@ -3554,7 +4029,8 @@ const DashboardApp = {
             const response = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
                 method: 'PUT', // or PATCH
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: formData
             });
@@ -4031,7 +4507,7 @@ const DashboardApp = {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken()
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify(data)
             });
@@ -4069,7 +4545,7 @@ const DashboardApp = {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken()
+                    'X-CSRFToken': this.getCsrfToken()
                 }
             });
 
@@ -4421,8 +4897,10 @@ const DashboardApp = {
         try {
             const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken() },
+                headers: {
+                    'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
                 body: JSON.stringify({ payment_id: paymentId, action: 'approve' })
             });
             const result = await response.json();
@@ -4443,8 +4921,10 @@ const DashboardApp = {
         try {
             const response = await fetch(`${this.apiBaseUrl}/admin/payments/approve/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken() },
+                headers: {
+                    'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
                 body: JSON.stringify({ payment_id: paymentId, action: 'reject', notes: reason })
             });
             const result = await response.json();
@@ -4475,7 +4955,7 @@ const DashboardApp = {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken()
+                    'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify({ client_id: userId, action: action })
             });
@@ -4786,7 +5266,7 @@ const DashboardApp = {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'X-CSRFToken': this.getCsrfToken(),
+                    'X-CSRFToken': this.getCsrfToken(),
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({

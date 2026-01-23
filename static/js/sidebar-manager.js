@@ -56,9 +56,8 @@ class PremiumSidebarManager {
         if (storedPlan) {
             this.currentPlan = storedPlan;
         } else {
-            // Default to 'institute' for full access
-            // Change this to 'coaching' or 'school' to test different plans
-            this.currentPlan = 'institute';
+            // Default to 'coaching' for limited access (Security First)
+            this.currentPlan = 'coaching';
             localStorage.setItem('userPlan', this.currentPlan);
         }
 

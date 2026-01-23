@@ -7,7 +7,7 @@ Centralized permission system for different subscription tiers
 # Feature definitions for each plan
 PLAN_FEATURES = {
     'COACHING': {
-        'students', 'batches', 'attendance', 'fees', 'notifications', 'reports'
+        'students', 'batches', 'attendance', 'fees', 'notifications', 'reports', 'live_classes'
     },
     'SCHOOL': {
         'students', 'classes', 'attendance', 'fees', 'notifications', 'reports',
@@ -66,6 +66,13 @@ def has_feature_access(user, feature_name):
     # Get allowed features for this plan
     allowed_features = PLAN_FEATURES.get(plan_type, PLAN_FEATURES['COACHING'])
     
+    # STRICT EXPIRY CHECK
+    if hasattr(user, 'profile') and user.profile.is_plan_expired():
+        # Only allow absolutely basic features when expired
+        if feature_name in ['dashboard', 'subscription', 'payments']:
+             return True
+        return False
+
     return feature_name in allowed_features
 
 

@@ -10,7 +10,7 @@ from .settings import *
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 # Update with YOUR PythonAnywhere username
-ALLOWED_HOSTS = ['yashamishra.pythonanywhere.com']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='yashamishra.pythonanywhere.com').split(',')
 
 # MySQL Database (PythonAnywhere provides MySQL for free)
 # Note: User must manually configure this in secret settings if using MySQL, 
@@ -30,9 +30,7 @@ STATIC_ROOT = '/home/yashamishra/student-management-api/staticfiles'
 STATIC_URL = '/static/'
 
 # CORS - Update with your frontend URL
-CORS_ALLOWED_ORIGINS = [
-    'https://yashamishra.pythonanywhere.com',
-]
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='https://yashamishra.pythonanywhere.com').split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 # Security settings for production

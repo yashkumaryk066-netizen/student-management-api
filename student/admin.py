@@ -313,7 +313,7 @@ We are thrilled to inform you that your **{plan_name} Subscription** has been su
 
 We have attached your **official Tax Invoice** to this email.
 
-🚀 **Go to Dashboard:** https://yashamishra.pythonanywhere.com/dashboard/
+🚀 **Go to Dashboard:** {settings.SITE_URL}/dashboard/
 
 Thank you for continuing your journey with Y.S.M Advance Education System.
 
@@ -326,7 +326,7 @@ Y.S.M Billing Team
                     user.set_password(temp_password)
                     user.save()
                     
-                    login_url = "https://yashamishra.pythonanywhere.com/"
+                    login_url = settings.SITE_URL + "/"
                     subject = f'🎉 Welcome Aboard! Your {plan_name} Plan is ACTIVE - Credentials Inside'
                     message = f"""
 Dear {user.get_full_name() or user.username},
@@ -552,7 +552,7 @@ Your request for *{plan_type} Management System* has been approved!
 You have been granted access for **30 days** starting today.
 
 🔐 *Your Login Credentials:*
-URL: https://yashamishra.pythonanywhere.com/admin/
+URL: {settings.SITE_URL}/admin/
 Username: *{username}*
 Password: *{password}*
 

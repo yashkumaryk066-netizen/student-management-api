@@ -209,7 +209,10 @@ body {
         0 0 20px rgba(59, 130, 246, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    /* Changed from hidden to visible */
+    min-height: 80px;
+    /* Ensure height accommodates wrapped text */
 }
 
 .sidebar-header::before,
@@ -266,6 +269,11 @@ body {
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
     animation: textGlow 2s ease-in-out infinite alternate;
+    white-space: normal;
+    /* Allow text wrapping */
+    word-break: break-word;
+    /* Prevent overflow */
+    line-height: 1.2;
 }
 
 @keyframes textGlow {
@@ -289,8 +297,10 @@ body {
     list-style: none;
     flex: 1;
     overflow-y: auto;
-    padding-right: 8px;
-    padding-left: 8px;
+    padding-right: 4px;
+    /* Reduced for better width */
+    padding-left: 4px;
+    /* Reduced for better width */
 }
 
 /* Premium Scrollbar for Nav Menu */
@@ -357,7 +367,12 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 12px 14px;
+    /* Adjusted padding */
+    width: 100%;
+    /* Ensure full width */
+    box-sizing: border-box;
+    /* Include padding in width */
     border-radius: 10px;
     color: #94a3b8;
     text-decoration: none;
@@ -391,6 +406,8 @@ body {
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
+    font-size: 0.85rem;
+    /* Slightly reduced for better fit */
 }
 
 /* Hover State - Subtle Glow */
@@ -3289,3 +3306,109 @@ screen and (min-resolution: 192dpi) {
 .top-header {
     z-index: 9999 !important;
 }
+/* ============================
+   PREMIUM DROPDOWNS & LOADER
+   Fixes based on User Feedback
+   ============================ */
+
+/* Fix 1: Premium Select/Dropdowns */
+select.form-input, 
+select.premium-input,
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23b0c4de%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.8rem auto;
+    background-color: rgba(30, 41, 59, 0.8) !important;
+    color: white;
+    padding: 12px 15px;
+    padding-right: 40px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+select.form-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
+select option {
+    background-color: #0f172a;
+    color: white;
+    padding: 12px;
+}
+
+/* Fix 3: Premium Preloader Animation */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #020617; /* Deep Space */
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+#preloader.loaded {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader-branding {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(to right, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+    animation: pulseGlow 2s infinite;
+}
+
+.loader-spinner {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.loader-spinner:before, .loader-spinner:after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid transparent;
+}
+
+.loader-spinner:before {
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-top-color: #3b82f6;
+    animation: spin 1.5s linear infinite;
+}
+
+.loader-spinner:after {
+    top: 5px; left: 5px; right: 5px; bottom: 5px;
+    border-top-color: #8b5cf6;
+    animation: spin 3s linear infinite reverse;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 5px rgba(99,102,241,0.5)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(99,102,241,0.8)); }
+}
+

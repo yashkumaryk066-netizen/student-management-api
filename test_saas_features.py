@@ -92,8 +92,8 @@ def verify_saas_features():
     
     if response_admin.status_code == 200:
         data = response_admin.data
-        if 'server_status' in data and 'peak_usage' in data:
-            print("✅ Super Admin Dashboard returned expected metrics.")
+        if 'stats' in data and 'health' in data:
+            print("✅ Super Admin Dashboard returned expected metrics (Advanced Architecture).")
         else:
              print(f"❌ Dashboard missing keys: {data.keys()}")
     else:

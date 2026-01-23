@@ -34,7 +34,7 @@ def send_approval_email(user):
         
         You can now login securely using your registered credentials.
         
-        Access Portal: https://yashamishra.pythonanywhere.com/api/ai/auth/
+        Access Portal: {settings.SITE_URL}/api/ai/auth/
         
         Regards,
         System Admin

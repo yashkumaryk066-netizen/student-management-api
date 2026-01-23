@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load plan_extras %}
 
 <head>
     <meta charset="UTF-8">
@@ -29,11 +30,26 @@
 </head>
 
 <body>
+    <!-- PREMIUM PRELOADER -->
+    <div id="preloader">
+        <div class="loader-branding">Y.S.M SYSTEM</div>
+        <div class="loader-spinner"></div>
+        <div
+            style="margin-top:20px; color:#64748b; font-family:'Inter', sans-serif; font-size:0.8rem; letter-spacing:1px;">
+            INITIALIZING SECURE ENVIRONMENT...</div>
+    </div>
     <script>
         // --- SUPER ADMIN REDIRECTOR ---
         // If this user is a superadmin, they shouldn't be here.
         // Redirect them to the ADVANCED dashboard immediately.
         (async function checkSuperAdmin() {
+            // Bypass logic: If allow_admin=true is present in the URL, don't redirect.
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('allow_admin') === 'true') {
+                console.log("🛡️ SuperAdmin bypass active.");
+                return;
+            }
+
             const token = localStorage.getItem('authToken');
             if (!token) return; // Not logged in, let normal flow handle it
 
@@ -71,14 +87,14 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header premium-branding" id="brandingContainer">
             <div class="glow-effect"></div>
-            <img src="/static/img/ysm_logo.png" alt="Logo" class="sidebar-logo-img premium-logo">
+            <!-- Dynamic Logo -->
+            <img src="/static/img/ysm_logo.png" alt="Logo" class="sidebar-logo-img premium-logo" id="sidebarLogo"
+                onerror="this.src='/static/img/ysm_logo.png'">
             <div class="brand-text">
-                <h2 class="sidebar-title premium-title" id="instName" contenteditable="true" spellcheck="false">Y.S.M
-                </h2>
-                <span class="sidebar-subtitle premium-subtitle" id="instType" contenteditable="true"
-                    spellcheck="false">Advance Education System</span>
+                <!-- Dynamic Name -->
+                <h2 class="sidebar-title premium-title" id="instName">Y.S.M</h2>
+                <span class="sidebar-subtitle premium-subtitle" id="instType">Advance Education System</span>
             </div>
-            <div class="edit-hint">Click to edit name</div>
         </div>
 
         <nav>
@@ -103,17 +119,23 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#students" class="nav-link" data-module="students">
+                    <a href="#students" class="nav-link {% if not user|has_feature:'students' %}locked{% endif %}"
+                        data-module="students">
                         <span class="nav-icon">👥</span>
                         <span class="nav-text">Student Management</span>
                         <span class="nav-badge" id="studentCount">1,234</span>
+                        {% if not user|has_feature:'students' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#courses" class="nav-link" data-module="courses" data-plan="coaching">
+                    <a href="#courses" class="nav-link {% if not user|has_feature:'courses' %}locked{% endif %}"
+                        data-module="courses" data-plan="coaching">
                         <span class="nav-icon">🎓</span>
                         <span class="nav-text">Courses & Batches</span>
+                        {% if not user|has_feature:'courses' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
@@ -125,10 +147,13 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#finance" class="nav-link" data-module="payments">
+                    <a href="#finance" class="nav-link {% if not user|has_feature:'payments' %}locked{% endif %}"
+                        data-module="payments">
                         <span class="nav-icon">💰</span>
                         <span class="nav-text">Finance & Payments</span>
                         <span class="nav-badge" id="pendingCount">47</span>
+                        {% if not user|has_feature:'payments' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
@@ -146,16 +171,29 @@
                 <li class="nav-category">Academic Management</li>
 
                 <li class="nav-item">
-                    <a href="#library" class="nav-link" data-module="library" data-plan="school">
+                    <a href="#library" class="nav-link {% if not user|has_feature:'library' %}locked{% endif %}"
+                        data-module="library" data-plan="school">
                         <span class="nav-icon">📚</span>
                         <span class="nav-text">Library Management</span>
+                        {% if not user|has_feature:'library' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#exams" class="nav-link" data-module="exams" data-plan="school">
+                    <a href="#exams" class="nav-link {% if not user|has_feature:'exams' %}locked{% endif %}"
+                        data-module="exams" data-plan="school">
                         <span class="nav-icon">📝</span>
                         <span class="nav-text">Exams & Grading</span>
+                        {% if not user|has_feature:'exams' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#timetable" class="nav-link" data-module="timetable">
+                        <span class="nav-icon">📅</span>
+                        <span class="nav-text">Class Timetable</span>
                     </a>
                 </li>
 
@@ -171,23 +209,32 @@
                 <li class="nav-category">Operations & Facilities</li>
 
                 <li class="nav-item">
-                    <a href="#hostel" class="nav-link" data-module="hostel" data-plan="institute">
+                    <a href="#hostel" class="nav-link {% if not user|has_feature:'hostel' %}locked{% endif %}"
+                        data-module="hostel" data-plan="institute">
                         <span class="nav-icon">🏢</span>
                         <span class="nav-text">Hostel Management</span>
+                        {% if not user|has_feature:'hostel' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#transport" class="nav-link" data-module="transport" data-plan="institute">
+                    <a href="#transport" class="nav-link {% if not user|has_feature:'transport' %}locked{% endif %}"
+                        data-module="transport" data-plan="institute">
                         <span class="nav-icon">🚌</span>
                         <span class="nav-text">Transportation</span>
+                        {% if not user|has_feature:'transport' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#hr" class="nav-link" data-module="hr" data-plan="school">
+                    <a href="#hr" class="nav-link {% if not user|has_feature:'hr' %}locked{% endif %}" data-module="hr"
+                        data-plan="school">
                         <span class="nav-icon">👔</span>
                         <span class="nav-text">HR & Payroll</span>
+                        {% if not user|has_feature:'hr' %}<span class="lock-icon"
+                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
@@ -259,18 +306,61 @@
                     <div class="premium-brand-glow"></div>
                 </div>
 
-                <div class="header-search">
-                    <input type="text" class="search-input" placeholder="Search students, courses, or anything...">
+                <div class="header-search" style="position:relative;">
+                    <input type="text" class="search-input" id="globalSearchInput"
+                        placeholder="Search students, courses, or anything..." autocomplete="off">
+                    <!-- Search Results Dropdown -->
+                    <div id="searchResults" style="
+                        position: absolute;
+                        top: 110%;
+                        left: 0;
+                        right: 0;
+                        background: rgba(30, 41, 59, 0.98);
+                        border: 1px solid rgba(59, 130, 246, 0.3);
+                        border-radius: 12px;
+                        backdrop-filter: blur(20px);
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                        z-index: 10001; /* Higher than sidebar overlay */
+                        display: none;
+                        max-height: 400px;
+                        overflow-y: auto;
+                    ">
+                        <!-- Results injected here -->
+                    </div>
                 </div>
             </div>
 
             <div class="header-actions">
-                <div
-                    style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                    <span
-                        style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
-                    LIVE SERVER
+                <div id="envBadge"
+                    style="padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <span id="envDot" style="width: 8px; height: 8px; border-radius: 50%;"></span>
+                    <span id="envText">CHECKING...</span>
                 </div>
+                <script>
+                    (function () {
+                        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                        const badge = document.getElementById('envBadge');
+                        const dot = document.getElementById('envDot');
+                        const text = document.getElementById('envText');
+
+                        if (isLocal) {
+                            badge.style.background = 'rgba(59, 130, 246, 0.1)';
+                            badge.style.border = '1px solid rgba(59, 130, 246, 0.2)';
+                            badge.style.color = '#3b82f6';
+                            dot.style.background = '#3b82f6';
+                            dot.style.boxShadow = '0 0 10px #3b82f6';
+                            text.textContent = 'LOCAL DEV';
+                        } else {
+                            badge.style.background = 'rgba(16, 185, 129, 0.1)';
+                            badge.style.border = '1px solid rgba(16, 185, 129, 0.2)';
+                            badge.style.color = '#10b981';
+                            dot.style.background = '#10b981';
+                            dot.style.boxShadow = '0 0 10px #10b981';
+                            dot.style.animation = 'pulse 2s infinite';
+                            text.textContent = 'LIVE SERVER';
+                        }
+                    })();
+                </script>
 
                 <div class="notification-wrapper" style="position: relative;">
                     <button class="header-btn" id="notificationBtn">
@@ -772,6 +862,50 @@
     <script src="/static/js/analytics.js?v=1.1"></script>
     </div>
     </div>
+    <!-- Branding Fetch Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            try {
+                // Fetch Profile Data for Branding
+                const res = await fetch('/api/profile/', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (res.ok) {
+                    const profile = await res.json();
+
+                    // Update Institution Name
+                    if (profile.institution_name) {
+                        const nameEl = document.getElementById('instName');
+                        if (nameEl) nameEl.textContent = profile.institution_name.toUpperCase();
+                    }
+
+                    // Update Type/Subtitle
+                    if (profile.institution_type) {
+                        const typeEl = document.getElementById('instType');
+                        if (typeEl) {
+                            // Format: "COACHING SYSTEM" or "SCHOOL SYSTEM"
+                            const typeText = profile.institution_type + (profile.institution_type.toLowerCase().includes('system') ? '' : ' SYSTEM');
+                            typeEl.textContent = typeText.toUpperCase();
+                        }
+                    }
+
+                    // Update Logo
+                    if (profile.institution_logo) {
+                        const logoEl = document.getElementById('sidebarLogo');
+                        if (logoEl) {
+                            logoEl.src = profile.institution_logo;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("Branding fetch failed", err);
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -71,6 +71,14 @@ async function handleLogin(e) {
 
 /* ---------- REDIRECT ---------- */
 function redirectToDashboard(role) {
+    // 1. Check SuperAdmin First (High Priority)
+    const isSuperuser = localStorage.getItem('isSuperuser');
+    if (isSuperuser === 'true' || isSuperuser === true) {
+        window.location.href = '/dashboard/super-admin/';
+        return;
+    }
+
+    // 2. Role Based Routing
     const routes = {
         admin: '/dashboard/admin/',
         client: '/dashboard/admin/',

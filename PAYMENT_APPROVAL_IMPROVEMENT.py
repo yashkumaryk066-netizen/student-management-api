@@ -63,7 +63,7 @@ Your {plan_name} Plan subscription has been renewed successfully!
 
 Continue enjoying full access to all {plan_name} features!
 
-Dashboard: https://yashamishra.pythonanywhere.com/dashboard
+Dashboard: {settings.SITE_URL}/dashboard/
 
 Thank you for your continued trust!
 Best Regards,
@@ -71,7 +71,7 @@ Y.S.M ADVANCE EDUCATION SYSTEM
                 """
             else:
                 # FIRST PURCHASE - Send credentials
-                login_url = "https://yashamishra.pythonanywhere.com/admin/"
+                login_url = f"{settings.SITE_URL}/admin/"
                 subject = f'🎉 Welcome! Your {plan_name} Plan is Active'
                 message = f"""
 Dear {user.get_full_name() or user.username},

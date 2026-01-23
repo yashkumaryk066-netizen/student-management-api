@@ -24,7 +24,7 @@ from .views import (
     DeveloperProfileView,
     ResumeView,
     # New Views for Client Subscriptions
-    ClientSubscriptionView, SubscriptionRenewalView,
+    ClientSubscriptionView, SubscriptionRenewalView, RenewalSubmissionView,
     # New Module Views
     LibraryBookListCreateView, LibraryBookDetailView, BookIssueListCreateView,
     HostelListCreateView, RoomListCreateView, HostelAllocationListCreateView,
@@ -34,8 +34,11 @@ from .views import (
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
     LiveClassListCreateView, DepartmentListCreateView,
     ClientAuditLogListView, DashboardStatsView,
-    GenerateIDCardView, GenerateAdmitCardView, GenerateReportCardView
+    ClientAuditLogListView, DashboardStatsView,
+    GenerateIDCardView, GenerateAdmitCardView, GenerateReportCardView,
+    GlobalSearchView, HolidayListCreateView, RoutineListCreateView, BulkImportView
 )
+from .report_views import ReportListView, ReportDownloadView
 from .student_portal_views import (
     StudentMyResultView, 
     StudentDownloadReportCardView, 
@@ -193,6 +196,7 @@ urlpatterns = [
     path('subscription/status/', ClientSubscriptionView.as_view(), name='subscription-status'),
     path('subscription/renew/', SubscriptionRenewalView.as_view(), name='subscription-renew'),
     path('subscription/submit/', PublicSubscriptionSubmitView.as_view(), name='subscription-submit-public'),
+    path('subscription/submit-renewal/', RenewalSubmissionView.as_view(), name='subscription-submit-renewal'),
     
     # ADMIN PAYMENT VERIFICATION
     path('admin/payments/pending/', PendingPaymentsListView.as_view(), name='admin-pending-payments'),
@@ -249,6 +253,12 @@ urlpatterns = [
     
     # DASHBOARD STATS (PLAN SPECIFIC)
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
+    path('search/global/', GlobalSearchView.as_view(), name='global-search'),
+    path('calendar/holidays/', HolidayListCreateView.as_view(), name='calendar-holidays'),
+    path('academic/routine/', RoutineListCreateView.as_view(), name='academic-routine'),
+    path('management/bulk-import/', BulkImportView.as_view(), name='bulk-import'),
+    path('reports/', ReportListView.as_view(), name='reports-list'),
+    path('reports/download/<int:pk>/', ReportDownloadView.as_view(), name='reports-download'),
 
     # ==================== NEW AI CHAT INTERFACE ====================
     path('ai/chat/', AIChatView.as_view(), name='ai-chat-interface'),

@@ -45,52 +45,92 @@ def generate_password(length=10):
 # =========================
 class PublicSubscriptionSubmitView(APIView):
     permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
         email = request.data.get('email')
-        plan_type = request.data.get('plan_type')
+        plan_type_raw = request.data.get('plan_type')
         amount = request.data.get('amount')
         utr = request.data.get('utr')
+        
+        # Branding Fields
+        inst_name = request.data.get('institution_name')
+        inst_logo = request.FILES.get('institution_logo')
+        dig_sig = request.FILES.get('digital_signature')
 
         # Map frontend names to backend enums
         PLAN_MAP = {
             'Coaching Center': 'COACHING',
             'School': 'SCHOOL',
-            'Institute': 'INSTITUTE'
+            'Institute': 'INSTITUTE',
+            'COACHING': 'COACHING',
+            'SCHOOL': 'SCHOOL',
+            'INSTITUTE': 'INSTITUTE'
         }
-        plan_type = PLAN_MAP.get(plan_type, 'SCHOOL')
+        
+        plan_type = PLAN_MAP.get(plan_type_raw)
+        if not plan_type:
+            return Response({"error": "Invalid Plan Type"}, status=400)
 
-        if not all([email, plan_type, amount, utr]):
-            return Response(
-                {'error': 'email, plan_type, amount, utr are required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
+        # Basic Check
         if Payment.objects.filter(transaction_id=utr).exists():
-            return Response(
-                {'error': 'Duplicate UTR detected'},
-                status=status.HTTP_400_BAD_REQUEST
+            return Response({"error": "Duplicate UTR/Transaction ID"}, status=400)
+
+        with transaction.atomic():
+            # Create/Get User
+            username = email.split('@')[0]
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={'username': username}
+            )
+            if created:
+                user.set_unusable_password()
+                user.save()
+
+            # Create/Get Profile
+            profile, _ = UserProfile.objects.get_or_create(
+                user=user,
+                defaults={'role': 'CLIENT', 'institution_type': plan_type}
+            )
+            
+            # Save Branding Details
+            if inst_name:
+                profile.institution_name = inst_name
+            if inst_logo:
+                profile.institution_logo = inst_logo
+            if dig_sig:
+                profile.digital_signature = dig_sig
+            
+            # Ensure type is correct if updating existing profile
+            profile.institution_type = plan_type
+            profile.save()
+
+            # Create Payment Record
+            payment = Payment.objects.create(
+                user=user,
+                amount=amount,
+                transaction_id=utr,
+                payment_mode='BANK_TRANSFER',
+                status='PENDING_VERIFICATION',
+                description=f"New Subscription: {plan_type}",
+                # Store metadata for easy debugging
+                metadata={
+                    "plan_raw": plan_type_raw,
+                    "branding_provided": bool(inst_name or inst_logo)
+                }
             )
 
-        Payment.objects.create(
-            amount=Decimal(str(amount)),
-            transaction_id=utr,
-            status=PAYMENT_PENDING,
-            payment_type='SUBSCRIPTION',
-            due_date=date.today(),
-            description=f"Subscription: {plan_type}",
-            metadata={
-                'email': email,
-                'plan_type': plan_type
-            }
-        )
+            # Create Subscription (Inactive)
+            ClientSubscription.objects.create(
+                client=user,
+                plan_type=plan_type,
+                start_date=date.today(),
+                end_date=date.today(), # Expired until approved
+                is_active=False,
+                payment=payment
+            )
 
-        logger.info(f"New payment submitted | {email} | {utr}")
-
-        return Response(
-            {'message': 'Payment submitted. Admin will verify.'},
-            status=status.HTTP_201_CREATED
-        )
+        return Response({"message": "Subscription request submitted successfully. Admin verification pending."}, status=201)
 
 
 # =========================

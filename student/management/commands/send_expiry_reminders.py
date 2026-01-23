@@ -30,7 +30,7 @@ Your {profile.institution_type} Subscription will expire on {profile.subscriptio
 
 To ensure uninterrupted access to your data and features, please renew your plan now.
 
-Login to Dashboard: https://yashamishra.pythonanywhere.com/
+Login to Dashboard: {settings.SITE_URL}/
 
 Thank you,
 NextGen ERP Team
@@ -48,7 +48,7 @@ This is a final reminder that your subscription expires TODAY ({profile.subscrip
 
 After today, your account will be restricted to READ-ONLY mode. You will not be able to add new data.
 
-Renew Now: https://yashamishra.pythonanywhere.com/
+Renew Now: {settings.SITE_URL}/
 
 Thank you,
 NextGen ERP Team
@@ -67,7 +67,7 @@ Your account is now in READ-ONLY mode.
 
 Please renew immediately to restore full access.
 
-Renew Now: https://yashamishra.pythonanywhere.com/
+Renew Now: {settings.SITE_URL}/
 
 Thank you,
 NextGen ERP Team

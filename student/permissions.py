@@ -162,15 +162,16 @@ class HasPlanAccess(permissions.BasePermission):
         if not hasattr(request.user, 'profile'):
             return False
 
-        plan = (request.user.profile.institution_type or '').upper()
+        # Use centralized permission logic
+        from .plan_permissions import has_feature_access
+        
         required_feature = getattr(view, 'required_feature', None)
-
         if not required_feature:
             return True
 
-        allowed = self.PLAN_FEATURES.get(plan, [])
-        if required_feature not in allowed:
-            self.message = f"{required_feature} not available in {plan} plan."
+        # strict check using the centralized function (which now includes expiry check)
+        if not has_feature_access(request.user, required_feature):
+            self.message = f"Feature '{required_feature}' is locked for your current plan."
             return False
 
         return True

@@ -1817,6 +1817,28 @@
                                     style="width:100%; padding:14px; background:rgba(15, 23, 42, 0.8); border:1px solid rgba(59, 130, 246, 0.5); color:white; border-radius:10px; font-family:monospace; letter-spacing:2px; font-size:1.1rem; outline:none; transition:all 0.3s; text-align:center;">
                                 <div id="utrError" style="color:#ef4444; font-size:0.85rem; margin-top:10px; display:none; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);"></div>
                             </div>
+                            
+                            <!-- BRANDING SECTION (NEW) -->
+                            <div style="margin-bottom:25px; text-align:left; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                                <h4 style="color:white; margin-bottom:15px; font-size:1rem;">Institute Branding (Optional)</h4>
+                                
+                                <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.85rem;">Institute Name</label>
+                                <input type="text" id="instNameInput" placeholder="E.g. Delhi Public School"
+                                    style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; margin-bottom:15px;">
+                                
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.85rem;">Logo (PNG/JPG)</label>
+                                        <input type="file" id="instLogoInput" accept="image/*"
+                                            style="width:100%; font-size:0.8rem; color:var(--text-muted);">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.85rem;">Signature (PNG)</label>
+                                        <input type="file" id="digSigInput" accept="image/*"
+                                            style="width:100%; font-size:0.8rem; color:var(--text-muted);">
+                                    </div>
+                                </div>
+                            </div>
 
                             <button id="verifyBtn" onclick="verifyManualPayment('${manualOrderId}')" class="btn-primary" style="width:100%; padding:16px; font-size:1.1rem; margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:10px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">
                                 <i class="fas fa-shield-alt"></i> VERIFY & ACTIVATE
@@ -1852,22 +1874,31 @@
                     btn.innerHTML = `<span class="spinner" style="border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin-right: 10px;"></span> Verifying Transaction...`;
 
                     try {
+                        const instName = document.getElementById('instNameInput').value;
+                        const instLogo = document.getElementById('instLogoInput').files[0];
+                        const digSig = document.getElementById('digSigInput').files[0];
+
+                        const formData = new FormData();
+                        formData.append('email', email);
+                        formData.append('phone', phone);
+                        formData.append('plan_type', selectedPlan);
+                        formData.append('utr', utr);
+                        formData.append('amount', selectedAmount.toString());
+
+                        // Add Branding
+                        if (instName) formData.append('institution_name', instName);
+                        if (instLogo) formData.append('institution_logo', instLogo);
+                        if (digSig) formData.append('digital_signature', digSig);
+
                         // CRITICAL FIX: Add CSRF Token
                         const csrftoken = getCookie('csrftoken');
 
                         const response = await fetch('/api/subscription/submit/', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
                                 'X-CSRFToken': csrftoken
                             },
-                            body: JSON.stringify({
-                                email: email,
-                                phone: phone,
-                                plan_type: selectedPlan,
-                                utr: utr,
-                                amount: selectedAmount.toString()
-                            })
+                            body: formData
                         });
 
                         const text = await response.text();

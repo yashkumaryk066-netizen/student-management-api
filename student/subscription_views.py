@@ -11,7 +11,8 @@ import logging
 from decimal import Decimal
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -70,30 +71,47 @@ class SubscriptionPurchaseView(APIView):
 # =========================
 # VERIFY PAYMENT (UTR)
 # =========================
+# =========================
+# VERIFY PAYMENT (NEW SIGNUP)
+# =========================
 @csrf_exempt
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([permissions.AllowAny])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def verify_payment_api(request):
+    """
+    Handle payment verification for NEW signups.
+    Accepts multipart/form-data for Logo/Signature uploads.
+    """
     try:
+        # Support both JSON and Form Data
         email = request.data.get('email')
         phone = request.data.get('phone')
         plan_type = request.data.get('plan_type')
         utr = request.data.get('utr_number')
         amount = request.data.get('amount')
+        
+        # Branding Fields
+        inst_name = request.data.get('institution_name')
+        inst_logo = request.FILES.get('institution_logo')
+        dig_sig = request.FILES.get('digital_signature')
 
         if not all([email, plan_type, utr, amount]):
             return JsonResponse({"error": "Missing required fields"}, status=400)
 
         if Payment.objects.filter(transaction_id=utr).exists():
-            return JsonResponse({"error": "Duplicate UTR"}, status=400)
+            return JsonResponse({"error": "Duplicate UTR/Transaction ID"}, status=400)
 
         amount = Decimal(str(amount))
+        
+        # Verify amount matches plan
         expected = PLAN_PRICING.get(plan_type)
         if not expected or amount < expected:
-            return JsonResponse({"error": "Invalid amount"}, status=400)
+            return JsonResponse({"error": f"Invalid amount. {plan_type} requires {expected}"}, status=400)
 
         with transaction.atomic():
+            # Check if user exists
             user, created = User.objects.get_or_create(
                 email=email,
                 defaults={'username': email.split('@')[0]}
@@ -102,39 +120,108 @@ def verify_payment_api(request):
             if created:
                 user.set_unusable_password()
                 user.save()
-
-            UserProfile.objects.get_or_create(
+            
+            # Ensure profile exists or update it
+            profile, _ = UserProfile.objects.get_or_create(
                 user=user,
                 defaults={
                     'role': 'CLIENT',
                     'institution_type': plan_type,
-                    'phone': phone or ''
                 }
             )
+            
+            # Update Profile Data
+            profile.phone = phone or profile.phone
+            if inst_name:
+                profile.institution_name = inst_name
+            if inst_logo:
+                profile.institution_logo = inst_logo
+            if dig_sig:
+                profile.digital_signature = dig_sig
+            
+            profile.save()
 
             payment = Payment.objects.create(
+                user=user, # Link the payment to the user!
                 transaction_id=utr,
                 amount=amount,
                 due_date=date.today(),
                 status=PAYMENT_PENDING,
-                description=f"{plan_type} Plan - Bank Transfer",
+                description=f"{plan_type} Plan - Signup Payment",
+                payment_mode='BANK_TRANSFER',
                 metadata={
                     "email": email,
                     "plan_type": plan_type,
-                    "user_id": user.id
+                    "user_id": user.id,
+                    "type": "NEW_SIGNUP"
                 }
             )
 
-        logger.info(f"Payment submitted | {email} | {utr}")
+        logger.info(f"Signup Payment submitted | {email} | {utr}")
 
         return JsonResponse({
             "status": "SUBMITTED_FOR_VERIFICATION",
-            "utr": utr
+            "utr": utr,
+            "message": "Payment submitted. Admin will verify and activate your account."
         })
 
     except Exception as e:
         logger.exception("Payment submit failed")
-        return JsonResponse({"error": "Server error"}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+# =========================
+# RENEWAL PAYMENT SUBMISSION (AUTHENTICATED)
+# =========================
+class RenewalSubmissionView(APIView):
+    """
+    Handle payment submission for EXISTING users (Renewals).
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            utr = request.data.get('utr_number')
+            amount = request.data.get('amount')
+            plan_type = request.data.get('plan_type')
+
+            if not all([utr, amount, plan_type]):
+                return Response({"error": "Missing UTR, Amount or Plan Type"}, status=400)
+
+            if Payment.objects.filter(transaction_id=utr).exists():
+                return Response({"error": "Duplicate UTR/Transaction ID"}, status=400)
+
+            amount = Decimal(str(amount))
+            expected = PLAN_PRICING.get(plan_type)
+            if not expected or amount < expected:
+                 return Response({"error": f"Invalid amount for {plan_type} plan"}, status=400)
+
+            # Create Payment record linked to current user
+            Payment.objects.create(
+                user=request.user,
+                transaction_id=utr,
+                amount=amount,
+                due_date=date.today(),
+                status=PAYMENT_PENDING,
+                payment_type='SUBSCRIPTION',
+                payment_mode='UPI', # Assuming UPI/Bank Transfer
+                description=f"{plan_type} Plan Renewal",
+                metadata={
+                    "email": request.user.email,
+                    "plan_type": plan_type,
+                    "user_id": request.user.id,
+                    "type": "RENEWAL"
+                }
+            )
+            
+            return Response({
+                "status": "SUBMITTED", 
+                "message": "Renewal request submitted. Access will be extended upon approval."
+            })
+
+        except Exception as e:
+            logger.exception("Renewal submission failed")
+            return Response({"error": "Submission failed"}, status=500)
 
 
 # =========================
@@ -194,7 +281,7 @@ class AdminPaymentApprovalView(APIView):
 Your {plan_type} subscription is active.
 
 Login URL:
-https://yashamishra.pythonanywhere.com/login/
+/login/
 Username: {user.username}
 """
                         if password:
@@ -291,5 +378,5 @@ class SubscriptionRenewView(APIView):
             "status": "RENEWAL_PAYMENT_PENDING",
             "plan_type": plan_type,
             "amount_to_pay": str(price),
-            "next_step": "/api/subscription/verify-payment/"
+            "next_step": "/api/subscription/submit-renewal/"
         })

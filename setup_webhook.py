@@ -1,8 +1,12 @@
 import requests
 import time
 
-BOT_TOKEN = "8384943128:AAH6r2ovKp20XUMSi64asxo4J0lc_lvZvxc"
-WEBHOOK_URL = "https://yashamishra.pythonanywhere.com/api/notifications/telegram/webhook/"
+from decouple import config
+
+BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default="8384943128:AAH6r2ovKp20XUMSi64asxo4J0lc_lvZvxc")
+# Use the base site URL for webhook
+SITE_URL = config('SITE_URL', default="https://yashamishra.pythonanywhere.com").rstrip('/')
+WEBHOOK_URL = f"{SITE_URL}/api/notifications/telegram/webhook/"
 
 def init_webhook():
     print("--------------------------------------------------")

@@ -23,7 +23,7 @@ Your enterprise-grade management portal is now live with full administrative pri
 
 ACCESS DETAILS:
 ------------------------------------------
-Portal URL: https://yashamishra.pythonanywhere.com/login/
+Portal URL: {settings.SITE_URL}/login/
 Username:   {user.username}
 Password:   {password}
 ------------------------------------------
@@ -55,7 +55,7 @@ Your current system access, configurations, and data isolation protocols remain 
 
 RENEWAL CONFIRMATION:
 ------------------------------------------
-Portal URL: https://yashamishra.pythonanywhere.com/login/
+Portal URL: {settings.SITE_URL}/login/
 Status:     ACTIVE
 ------------------------------------------
 
