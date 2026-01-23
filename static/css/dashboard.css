@@ -31,7 +31,7 @@
     --text-muted: #94a3b8;
 
     /* Dimensions */
-    --sidebar-w: 280px;
+    --sidebar-w: 320px;
     --header-h: 70px;
 }
 
@@ -134,30 +134,34 @@ body {
 }
 
 /* Premium Custom Scrollbar for Sidebar */
+/* Premium Ultra-Smooth Scrollbar */
 .sidebar::-webkit-scrollbar,
-.dash-sidebar::-webkit-scrollbar {
-    width: 6px;
+.dash-sidebar::-webkit-scrollbar,
+.nav-menu::-webkit-scrollbar {
+    width: 5px;
 }
 
 .sidebar::-webkit-scrollbar-track,
-.dash-sidebar::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.5);
-    border-radius: 10px;
-    margin: 10px 0;
+.dash-sidebar::-webkit-scrollbar-track,
+.nav-menu::-webkit-scrollbar-track {
+    background: transparent;
+    /* Invisible track for cleaner look */
+    margin: 4px;
 }
 
 .sidebar::-webkit-scrollbar-thumb,
-.dash-sidebar::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
-    border-radius: 10px;
-    border: 2px solid rgba(15, 23, 42, 0.5);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+.dash-sidebar::-webkit-scrollbar-thumb,
+.nav-menu::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 20px;
+    transition: background 0.3s ease;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover,
-.dash-sidebar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #60a5fa, #a78bfa);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.9);
+.dash-sidebar::-webkit-scrollbar-thumb:hover,
+.nav-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
 /* Enhanced Glow When Active */
@@ -285,8 +289,8 @@ body {
     list-style: none;
     flex: 1;
     overflow-y: auto;
-    padding-right: 4px;
-    padding-left: 4px;
+    padding-right: 8px;
+    padding-left: 8px;
 }
 
 /* Premium Scrollbar for Nav Menu */
@@ -357,7 +361,7 @@ body {
     border-radius: 10px;
     color: #94a3b8;
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid transparent;
     font-weight: 500;
     font-size: 0.9rem;
@@ -382,6 +386,11 @@ body {
     z-index: 2;
     transition: all 0.3s;
     flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
 }
 
 /* Hover State - Subtle Glow */
@@ -3216,6 +3225,7 @@ screen and (min-resolution: 192dpi) {
     border: 1px solid rgba(59, 130, 246, 0.3) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
 }
+
 /* ============================================
    MOBILE DROPDOWN ENHANCEMENTS
    ============================================ */
@@ -3223,23 +3233,32 @@ screen and (min-resolution: 192dpi) {
     .mobile-user-info {
         display: block !important;
     }
-    
+
     .profile-dropdown {
         width: 260px !important;
-        right: -10px !important; /* Slight offset for padding */
+        right: -10px !important;
+        /* Slight offset for padding */
     }
 }
 
 @keyframes dropdownFade {
-    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* ============================================
    CRITICAL FIX: Z-INDEX LAYERING (PREMIUM)
    ============================================ */
 /* Ensure Sidebar is ALWAYS above the overlay */
-.sidebar, .dash-sidebar {
+.sidebar,
+.dash-sidebar {
     z-index: 10002 !important;
 }
 
@@ -3259,8 +3278,10 @@ screen and (min-resolution: 192dpi) {
 }
 
 /* Fix for blurry sidebar on some devices */
-.sidebar, .dash-sidebar {
-    transform: translateZ(0); /* Force GPU */
+.sidebar,
+.dash-sidebar {
+    transform: translateZ(0);
+    /* Force GPU */
     -webkit-font-smoothing: antialiased;
 }
 
