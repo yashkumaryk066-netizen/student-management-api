@@ -30,6 +30,7 @@
         .sidebar-title {
             background: linear-gradient(90deg, #38bdf8, #818cf8);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -354,15 +355,15 @@
                 <div class="kpi-grid" style="margin-bottom: 0;">
                     <div>
                         <div style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">DATABASE</div>
-                        <div style="color: #10b981; font-weight: 600;">Connected (PostgreSQL)</div>
+                        <div id="sysDbStatus" style="color: #10b981; font-weight: 600;">Connected (PostgreSQL)</div>
                     </div>
                     <div>
                         <div style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">STORAGE</div>
-                        <div style="color: #f59e0b; font-weight: 600;">45% Used</div>
+                        <div id="sysStorage" style="color: #f59e0b; font-weight: 600;">45% Used</div>
                     </div>
                     <div>
                         <div style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">LATENCY</div>
-                        <div style="color: #3b82f6; font-weight: 600;">24ms</div>
+                        <div id="sysLatency" style="color: #3b82f6; font-weight: 600;">24ms</div>
                     </div>
                 </div>
             </div>
@@ -466,7 +467,7 @@
 
             try {
                 const token = getAccessToken();
-                const response = await fetch('/admin/advanced/dashboard/', {
+                const response = await fetch('/api/admin/advanced/dashboard/', {
                     headers: {
                         'Authorization': 'Bearer ' + token,
                         'Content-Type': 'application/json'
@@ -504,6 +505,17 @@
 
                 // 3. Render Institutes Table
                 renderInstitutes(data.institutes);
+
+                // 4. Update System Health (Dynamic)
+                if (data.health) {
+                    const dbEl = document.getElementById('sysDbStatus');
+                    if (dbEl) {
+                        dbEl.textContent = data.health.db_status === 'HEALTHY' ? 'Connected (PostgreSQL)' : 'Connection Failed';
+                        dbEl.style.color = data.health.db_status === 'HEALTHY' ? '#10b981' : '#ef4444';
+                    }
+                    if (data.health.storage_usage) document.getElementById('sysStorage').textContent = data.health.storage_usage + ' Used';
+                    if (data.health.latency) document.getElementById('sysLatency').textContent = data.health.latency;
+                }
 
             } catch (e) {
                 console.error("Dashboard Error", e);
@@ -626,7 +638,7 @@
 
             try {
                 // Determine URL based on Item ID and Type
-                const url = `/admin/action/${currentModalItem.type}/${currentModalItem.id}/`;
+                const url = `/api/admin/action/${currentModalItem.type}/${currentModalItem.id}/`;
 
                 const csrfMatch = document.cookie.match(/csrftoken=([\w-]+)/);
                 const csrfToken = csrfMatch ? csrfMatch[1] : '';
