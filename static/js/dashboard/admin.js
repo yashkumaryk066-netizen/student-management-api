@@ -4585,86 +4585,177 @@ const DashboardApp = {
     },
 
     addStaff() {
-        // Modal for adding staff with permissions
+        // Premium Employee Onboarding Wizard
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
+        modal.style.zIndex = '10000'; // Ensure it's on top
         modal.innerHTML = `
-            <div class="modal-content" style="max-width: 600px;">
-                <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button>
-                <h2 style="color:white; margin-bottom:20px;">Add New Staff Member</h2>
+            <div class="modal-content premium-modal" style="max-width: 800px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                <!-- Header -->
+                <div style="background: linear-gradient(90deg, #1e293b, #0f172a); padding: 20px 30px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="color:white; margin:0; font-family: 'Space Grotesk', sans-serif;">New Employee Onboarding</h2>
+                        <p style="color:#94a3b8; font-size:0.85rem; margin: 5px 0 0 0;">Create user account & staff profile in one go</p>
+                    </div>
+                    <button class="close-modal" onclick="this.closest('.modal-overlay').remove()" style="font-size: 2rem; color: #64748b; background: none; border: none; cursor: pointer;">&times;</button>
+                </div>
                 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
-                    <div>
-                        <label style="color:#94a3b8; font-size:0.9rem;">First Name</label>
-                        <input type="text" id="staffFName" class="form-input" placeholder="John">
+                <div style="padding: 30px; overflow-y: auto; max-height: 70vh;">
+                    
+                    <!-- Step 1: Personal Information -->
+                    <div class="form-section">
+                        <h3 style="color: #60a5fa; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid rgba(96, 165, 250, 0.2); padding-bottom: 5px;">1. Personal Details</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <label class="form-label">First Name</label>
+                                <input type="text" id="staffFName" class="form-input premium-input" placeholder="e.g. Rahul">
+                            </div>
+                            <div>
+                                <label class="form-label">Last Name</label>
+                                <input type="text" id="staffLName" class="form-input premium-input" placeholder="e.g. Sharma">
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <label class="form-label">Email Address (Official)</label>
+                                <input type="email" id="staffEmail" class="form-input premium-input" placeholder="rahul.sharma@institution.edu">
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label style="color:#94a3b8; font-size:0.9rem;">Last Name</label>
-                        <input type="text" id="staffLName" class="form-input" placeholder="Doe">
+
+                    <!-- Step 2: Account Setup -->
+                    <div class="form-section" style="margin-top: 30px;">
+                        <h3 style="color: #a78bfa; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid rgba(167, 139, 250, 0.2); padding-bottom: 5px;">2. System Access</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <label class="form-label">Username</label>
+                                <div style="position: relative;">
+                                    <input type="text" id="staffUsername" class="form-input premium-input" placeholder="Auto-generated if empty">
+                                    <button onclick="document.getElementById('staffUsername').value = (document.getElementById('staffFName').value + Math.floor(Math.random()*1000)).toLowerCase()" style="position: absolute; right: 8px; top: 8px; background: none; border: none; color: #94a3b8; font-size: 0.8rem; cursor: pointer;">Auto</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Initial Password</label>
+                                <div style="position: relative;">
+                                    <input type="text" id="staffPassword" class="form-input premium-input" value="Welcome@123">
+                                    <span style="position: absolute; right: 10px; top: 35px; font-size: 0.7rem; color: #64748b;">Default: Welcome@123</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">System Role</label>
+                                <select id="staffRole" class="form-input premium-input" onchange="DashboardApp.togglePermissionsPreview(this.value)">
+                                    <option value="STAFF">Staff (General)</option>
+                                    <option value="TEACHER">Teacher / Faculty</option>
+                                    <option value="HR">HR Manager</option>
+                                    <option value="ACCOUNTANT">Accountant</option>
+                                    <option value="LIBRARIAN">Librarian</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Joining Date</label>
+                                <input type="date" id="staffJoinDate" class="form-input premium-input">
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label style="color:#94a3b8; font-size:0.9rem;">Username</label>
-                        <input type="text" id="staffUsername" class="form-input" placeholder="johndoe123">
-                    </div>
-                    <div>
-                        <label style="color:#94a3b8; font-size:0.9rem;">Password</label>
-                        <input type="password" id="staffPassword" class="form-input" placeholder="******">
+
+                    <!-- Step 3: Compensation (Optional) -->
+                    <div class="form-section" style="margin-top: 30px;">
+                        <h3 style="color: #34d399; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid rgba(52, 211, 153, 0.2); padding-bottom: 5px;">3. Contract & Pay</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <label class="form-label">Contract Type</label>
+                                <select id="staffContract" class="form-input premium-input">
+                                    <option value="PERMANENT">Permanent (Full-time)</option>
+                                    <option value="CONTRACT">Contractual</option>
+                                    <option value="PART_TIME">Part Time</option>
+                                    <option value="INTERN">Internship</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Base Salary (₹)</label>
+                                <input type="number" id="staffSalary" class="form-input premium-input" placeholder="e.g. 25000">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div style="margin-bottom:20px;">
-                    <label style="color:#94a3b8; font-size:0.9rem;">Role</label>
-                    <select id="staffRole" class="form-input" style="background:#0f172a; color:white;">
-                        <option value="STAFF">Staff (General)</option>
-                        <option value="TEACHER">Teacher</option>
-                        <option value="HR">HR Manager</option>
-                        <option value="ACCOUNTANT">Accountant</option>
-                    </select>
+                <!-- Footer Actions -->
+                <div style="background: rgba(15, 23, 42, 0.8); padding: 20px 30px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: flex-end; gap: 15px;">
+                    <button class="btn-action" style="background: transparent; border: 1px solid #475569; color: #cbd5e1;" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    <button onclick="DashboardApp.submitAddStaff()" class="btn-primary" style="padding: 10px 30px; font-size: 1rem; border-radius: 8px;">
+                        <span id="btnIcon">✨</span> Create Employee Profile
+                    </button>
                 </div>
-
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:20px;">
-                    <label style="color:white; font-weight:600; margin-bottom:10px; display:block;">Access Permissions</label>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <label style="color:#cbd5e1; display:flex; align-items:center;">
-                            <input type="checkbox" class="perm-check" value="students"> Students (Add/Edit)
-                        </label>
-                        <label style="color:#cbd5e1; display:flex; align-items:center;">
-                            <input type="checkbox" class="perm-check" value="fees"> Fees & Payments
-                        </label>
-                        <label style="color:#cbd5e1; display:flex; align-items:center;">
-                            <input type="checkbox" class="perm-check" value="attendance"> Attendance
-                        </label>
-                        <label style="color:#cbd5e1; display:flex; align-items:center;">
-                            <input type="checkbox" class="perm-check" value="reports"> View Reports
-                        </label>
-                    </div>
-                </div>
-
-                <button onclick="DashboardApp.submitAddStaff()" class="btn-primary" style="width:100%; padding:12px;">Create Account</button>
             </div>
+            
+            <style>
+                .premium-modal {
+                    background: #1e293b; 
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 16px;
+                    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .form-label {
+                    display: block; 
+                    color: #94a3b8; 
+                    font-size: 0.85rem; 
+                    margin-bottom: 8px; 
+                    font-weight: 500;
+                }
+                .premium-input {
+                    background: rgba(15, 23, 42, 0.6); 
+                    border: 1px solid rgba(59, 130, 246, 0.2); 
+                    color: white; 
+                    padding: 12px; 
+                    border-radius: 8px;
+                    width: 100%;
+                    transition: all 0.2s;
+                }
+                .premium-input:focus {
+                    background: rgba(15, 23, 42, 0.9);
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+                    outline: none;
+                }
+                @keyframes modalSlideUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            </style>
         `;
         document.body.appendChild(modal);
-        modal.querySelector('.modal-content').style.display = 'block'; // Ensure visibility logic matches CSS
-        modal.style.display = 'flex'; // Overlay flex
+        modal.querySelector('.modal-content').style.display = 'flex';
+        modal.style.display = 'flex';
+
+        // Set Default Date
+        document.getElementById('staffJoinDate').valueAsDate = new Date();
+    },
+
+    togglePermissionsPreview(role) {
+        // Future: Show dynamic permissions based on role
+        console.log("Selected role:", role);
     },
 
     async submitAddStaff() {
         const fname = document.getElementById('staffFName').value;
         const lname = document.getElementById('staffLName').value;
-        const username = document.getElementById('staffUsername').value;
+        const email = document.getElementById('staffEmail').value;
+        const username = document.getElementById('staffUsername').value || (fname + Math.floor(Math.random() * 100)).toLowerCase();
         const password = document.getElementById('staffPassword').value;
         const role = document.getElementById('staffRole').value;
+        const contract = document.getElementById('staffContract').value;
+        const salary = document.getElementById('staffSalary').value;
+        const joinDate = document.getElementById('staffJoinDate').value;
 
-        // Collect Permissions
-        const permissions = {};
-        document.querySelectorAll('.perm-check:checked').forEach(cb => {
-            permissions[cb.value] = { view: true, edit: true }; // Simplified for now
-        });
-
-        if (!username || !password || !fname) {
-            this.showAlert('Missing Info', 'Please fill all required fields', 'error');
+        if (!fname || !role) {
+            this.showAlert('Missing Info', 'First Name and Role are required', 'error');
             return;
         }
+
+        // Show Loading State
+        const submitBtn = document.querySelector('.premium-modal .btn-primary');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner"></span> Creating...';
+        submitBtn.disabled = true;
 
         try {
             const res = await fetch(`${this.apiBaseUrl}/team/manage/`, {
@@ -4678,23 +4769,31 @@ const DashboardApp = {
                     last_name: lname,
                     username: username,
                     password: password,
+                    email: email,
                     role: role,
-                    permissions: permissions
+                    contract_type: contract,
+                    salary: salary,
+                    joining_date: joinDate,
+                    permissions: { view: true, edit: false } // Default basic permissions
                 })
             });
 
             const data = await res.json();
 
             if (res.ok) {
-                this.showAlert('Success', 'Staff member added successfully!', 'success');
+                this.showAlert('Success', 'Employee Onboarded Successfully! Credentials sent.', 'success');
                 document.querySelector('.modal-overlay').remove();
                 this.loadTeamManagement(); // Refresh list
             } else {
                 this.showAlert('Error', data.error || 'Failed to create account', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
         } catch (e) {
             console.error(e);
             this.showAlert('Error', 'Network error occurred', 'error');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     },
 
