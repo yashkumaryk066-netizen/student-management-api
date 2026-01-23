@@ -37,7 +37,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'email', 'role', 'phone', 'institution_type', 'created_at', 'is_superuser', 'full_name']
+        fields = ['id', 'username', 'email', 'role', 'phone', 'institution_type', 'institution_name', 'institution_logo', 'digital_signature', 'created_at', 'is_superuser', 'full_name']
         read_only_fields = ['created_at']
 
     def get_full_name(self, obj):

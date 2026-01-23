@@ -10,161 +10,240 @@ import os
 
 def generate_id_card_pdf(student):
     """
-    Generate Advanced "Big School" Level ID Card
-    Vertical Premium Design (54mm x 85.6mm)
+    Generate Premium "International Level" Student ID Card.
+    Dimensions: ISO ID-1 (CR80) - 2.125 x 3.37 inches (53.98 x 85.60 mm)
     """
-    # 0. Get Dynamic Institution Details
-    owner = student.created_by
+    # --- Dimensions & Canvas Setup ---
+    width_mm, height_mm = 53.98, 85.60
+    width_pt, height_pt = width_mm * 2.83465, height_mm * 2.83465
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=(width_pt, height_pt))
+    
+    # --- Color Palette (International Premium) ---
+    COLOR_PRIMARY = colors.HexColor("#0f172a")    # Deep Navy/Slate
+    COLOR_ACCENT = colors.HexColor("#f59e0b")     # Amber/Gold
+    COLOR_SECONDARY = colors.HexColor("#334155")  # Lighter Slate
+    COLOR_BG = colors.HexColor("#f8fafc")         # Off-white
+    COLOR_TEXT_MAIN = colors.HexColor("#1e293b")
+    COLOR_TEXT_MUTED = colors.HexColor("#64748b")
+    
+    # --- Background & Watermark ---
+    # Draw full background
+    c.setFillColor(COLOR_BG)
+    c.rect(0, 0, width_pt, height_pt, fill=1, stroke=0)
+    
+    # Subtle Watermark Pattern (Abstract Curves)
+    c.saveState()
+    c.setStrokeColor(colors.HexColor("#e2e8f0"))
+    c.setLineWidth(0.5)
+    c.setDash(1, 2)
+    for i in range(0, int(height_pt), 15):
+        p = c.beginPath()
+        p.moveTo(0, i)
+        p.curveTo(width_pt/3, i+20, 2*width_pt/3, i-20, width_pt, i)
+        c.drawPath(p, stroke=1, fill=0)
+    c.restoreState()
+    
+    # --- Header Section (Curved Geometric Design) ---
+    c.saveState()
+    # Deep Blue Header Background
+    p = c.beginPath()
+    p.moveTo(0, height_pt)
+    p.lineTo(width_pt, height_pt)
+    p.lineTo(width_pt, height_pt - 60)
+    # Beziers for a wave effect
+    p.curveTo(width_pt*0.75, height_pt - 80, width_pt*0.25, height_pt - 50, 0, height_pt - 70)
+    p.close()
+    c.setFillColor(COLOR_PRIMARY)
+    c.drawPath(p, fill=1, stroke=0)
+    
+    # Gold Accent Stripe
+    c.setStrokeColor(COLOR_ACCENT)
+    c.setLineWidth(3)
+    p2 = c.beginPath()
+    p2.moveTo(0, height_pt - 72)
+    p2.curveTo(width_pt*0.25, height_pt - 52, width_pt*0.75, height_pt - 82, width_pt, height_pt - 62)
+    c.drawPath(p2, stroke=1, fill=0)
+    
+    # Institution Name & Logo
     inst_name = "Y.S.M ADVANCE"
     inst_sub = "EDUCATION SYSTEM"
-    
-    if hasattr(owner, 'profile') and owner.profile.institution_name:
-        full_name = owner.profile.institution_name.upper()
-        # Split name for layout if needed
-        inst_name = full_name
-        inst_sub = owner.profile.get_institution_type_display().upper() if hasattr(owner.profile, 'get_institution_type_display') else "EDUCATION"
-    # Standard CR80 Size (Vertical)
-    width, height = 53.98 * 2.83465, 85.60 * 2.83465 
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=(width, height))
-    
-    # --- COLORS (Premium Palette) ---
-    NAVY_BLUE = colors.HexColor("#002855")
-    GOLD_ACCENT = colors.HexColor("#D4AF37")
-    WHITE_BG = colors.HexColor("#F8FAFC")
-    TEXT_DARK = colors.HexColor("#1e293b")
-    
-    # 1. Background
-    c.setFillColor(WHITE_BG)
-    c.rect(0, 0, width, height, fill=1, stroke=0)
-    
-    # 2. Header (Curved/Slant Design)
-    path = c.beginPath()
-    path.moveTo(0, height)
-    path.lineTo(width, height)
-    path.lineTo(width, height - 90)
-    path.curveTo(width/2, height - 110, width/2, height - 70, 0, height - 90)
-    path.close()
-    c.setFillColor(NAVY_BLUE)
-    c.drawPath(path, fill=1, stroke=0)
-    
-    # Accent Line
-    c.setStrokeColor(GOLD_ACCENT)
-    c.setLineWidth(2)
-    path2 = c.beginPath()
-    path2.moveTo(0, height - 92)
-    path2.curveTo(width/2, height - 112, width/2, height - 72, width, height - 92)
-    c.drawPath(path2, stroke=1, fill=0)
+    owner = student.created_by
+    logo_path = None
+    sig_path = None
 
-    # 3. Institution Logo & Name
-    # Placeholder for Logo (White Circle)
-    c.setFillColor(colors.white)
-    c.circle(width/2, height - 40, 22, fill=1, stroke=0)
-    
-    # Draw Logo Image if exists (fallback to text)
-    c.setFillColor(NAVY_BLUE)
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(width/2, height - 45, inst_name[:3])
-
-    # School Name
+    if hasattr(owner, 'profile'):
+        if owner.profile.institution_name:
+            inst_name = owner.profile.institution_name.upper()
+        if hasattr(owner.profile, 'institution_type'):
+            # Try to get display name, fall back to raw value
+            if hasattr(owner.profile, 'get_institution_type_display'):
+                 inst_sub = f"{owner.profile.get_institution_type_display()} SYSTEM".upper()
+            else:
+                 inst_sub = f"{owner.profile.institution_type} SYSTEM".upper()
+        
+        # Check for Logo
+        if owner.profile.institution_logo and hasattr(owner.profile.institution_logo, 'path'):
+            if os.path.exists(owner.profile.institution_logo.path):
+                logo_path = owner.profile.institution_logo.path
+        
+        # Check for Signature
+        if owner.profile.digital_signature and hasattr(owner.profile.digital_signature, 'path'):
+             if os.path.exists(owner.profile.digital_signature.path):
+                sig_path = owner.profile.digital_signature.path
+            
     c.setFillColor(colors.white)
     
-    # Dynamic Font Sizing for Long Names
-    name_len = len(inst_name)
-    font_size = 12
-    if name_len > 20: font_size = 10
-    if name_len > 30: font_size = 8
-    
-    c.setFont("Helvetica-Bold", font_size)
-    c.drawCentredString(width/2, height - 75, inst_name)
-    
-    c.setFont("Helvetica", 6)
-    c.drawCentredString(width/2, height - 85, inst_sub)
+    # Header Layout with Logo
+    if logo_path:
+        try:
+            logo = ImageReader(logo_path)
+            # Draw Logo (Left of center or above title)
+            # Let's put it top-center, smaller
+            c.drawImage(logo, width_pt/2 - 12, height_pt - 32, width=24, height=24, mask='auto', preserveAspectRatio=True)
+            
+            c.setFont("Helvetica-Bold", 10)
+            c.drawCentredString(width_pt/2, height_pt - 42, inst_name)
+            
+            c.setFont("Helvetica-Bold", 5)
+            c.drawCentredString(width_pt/2, height_pt - 48, inst_sub)
+        except Exception:
+             # Fallback
+             c.setFont("Helvetica-Bold", 11)
+             c.drawCentredString(width_pt/2, height_pt - 25, inst_name)
+             c.setFont("Helvetica-Bold", 6)
+             c.drawCentredString(width_pt/2, height_pt - 35, inst_sub)
+    else:
+        c.setFont("Helvetica-Bold", 11)
+        c.drawCentredString(width_pt/2, height_pt - 25, inst_name)
+        c.setFont("Helvetica-Bold", 6)
+        c.drawCentredString(width_pt/2, height_pt - 35, inst_sub)
 
-    # 4. Student Photo (Large & Centered with Border)
-    photo_y = height - 190
-    photo_size = 75
-    photo_x = (width - photo_size) / 2
+    c.restoreState()
     
-    # Shadow/Border
-    c.setFillColor(colors.HexColor("#e2e8f0"))
-    c.roundRect(photo_x - 2, photo_y - 2, photo_size + 4, photo_size + 4, 4, fill=1, stroke=0)
+    # --- Photo Section ---
+    photo_w, photo_h = 75, 75
+    photo_x = (width_pt - photo_w) / 2
+    photo_y = height_pt - 155
     
-    c.setFillColor(colors.white) # Photo placeholder background
-    c.rect(photo_x, photo_y, photo_size, photo_size, fill=1, stroke=0)
-
+    # Shadow for depth
+    c.setFillColor(colors.HexColor("#cbd5e1"))
+    c.roundRect(photo_x + 3, photo_y - 3, photo_w, photo_h, 8, fill=1, stroke=0)
+    
+    # White Border
+    c.setFillColor(colors.white)
+    c.roundRect(photo_x, photo_y, photo_w, photo_h, 8, fill=1, stroke=0)
+    
+    # Photo Placeholder or Image
     if student.photo and os.path.exists(student.photo.path):
         try:
             img = ImageReader(student.photo.path)
-            c.drawImage(img, photo_x, photo_y, width=photo_size, height=photo_size, mask='auto', preserveAspectRatio=True)
-        except:
-             c.setFont("Helvetica", 8)
+            # Clip path to rounded rect
+            c.saveState()
+            p_mask = c.beginPath()
+            p_mask.roundRect(photo_x+2, photo_y+2, photo_w-4, photo_h-4, 6)
+            c.clipPath(p_mask, stroke=0, fill=0)
+            c.drawImage(img, photo_x, photo_y, width=photo_w, height=photo_h, preserveAspectRatio=True, anchor='c')
+            c.restoreState()
+        except Exception:
+             c.setFillColor(colors.HexColor("#f1f5f9"))
+             c.roundRect(photo_x+2, photo_y+2, photo_w-4, photo_h-4, 6, fill=1, stroke=0)
              c.setFillColor(colors.gray)
-             c.drawCentredString(width/2, photo_y + photo_size/2, "No Photo")
+             c.setFont("Helvetica", 8)
+             c.drawCentredString(width_pt/2, photo_y + photo_h/2, "No Photo")
     else:
-         c.setFont("Helvetica", 8)
+         c.setFillColor(colors.HexColor("#f1f5f9"))
+         c.roundRect(photo_x+2, photo_y+2, photo_w-4, photo_h-4, 6, fill=1, stroke=0)
          c.setFillColor(colors.gray)
-         c.drawCentredString(width/2, photo_y + photo_size/2, "No Photo")
+         c.setFont("Helvetica", 8)
+         c.drawCentredString(width_pt/2, photo_y + photo_h/2, "No Photo")
 
-    # 5. Student Name & Role
-    c.setFillColor(NAVY_BLUE)
+    # --- Student Details ---
+    # Name
+    c.setFillColor(COLOR_PRIMARY)
     c.setFont("Helvetica-Bold", 14)
-    # Split name if too long
     name = student.name.upper()
-    if len(name) > 18:
-        name_parts = name.split(' ')
-        c.drawCentredString(width/2, photo_y - 20, " ".join(name_parts[:2]))
-        c.drawCentredString(width/2, photo_y - 35, " ".join(name_parts[2:]))
-        text_y = photo_y - 50
-    else:
-        c.drawCentredString(width/2, photo_y - 20, name)
-        text_y = photo_y - 35
+    c.drawCentredString(width_pt/2, photo_y - 20, name)
+    
+    # Role Badge
+    c.setFillColor(COLOR_ACCENT)
+    c.roundRect(width_pt/2 - 30, photo_y - 35, 60, 10, 5, fill=1, stroke=0)
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 7)
+    c.drawCentredString(width_pt/2, photo_y - 32, "STUDENT CARD")
+    
+    # Data Grid
+    cursor_y = photo_y - 55
+    spacing = 11
+    left_x = 20
+    right_x = width_pt - 20
+    
+    def draw_row(label, value):
+        nonlocal cursor_y
+        c.setFillColor(COLOR_TEXT_MUTED)
+        c.setFont("Helvetica-Bold", 7)
+        c.drawString(left_x, cursor_y, label)
         
-    c.setFillColor(GOLD_ACCENT)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(width/2, text_y, "STUDENT")
-
-    # 6. Details Section (Clean Grid)
-    start_y = text_y - 15  # Moved up slightly
-    line_h = 13            # Tighter spacing
-    left_margin = 25
-    
-    c.setFillColor(TEXT_DARK)
-    
-    def draw_detail_row(label, value, y):
+        c.setFillColor(COLOR_TEXT_MAIN)
         c.setFont("Helvetica-Bold", 8)
-        c.setFillColor(colors.HexColor("#64748b"))
-        c.drawString(left_margin, y, label)
-        c.setFont("Helvetica-Bold", 9)
-        c.setFillColor(NAVY_BLUE)
-        c.drawRightString(width - left_margin, y, str(value))
+        c.drawRightString(right_x, cursor_y, str(value))
         
-    draw_detail_row("ID NO", student.id, start_y)
-    draw_detail_row("GRADE", student.grade, start_y - line_h)
-    draw_detail_row("DOB", student.dob, start_y - line_h*2)
-    draw_detail_row("BLOOD GRP", student.blood_group or "N/A", start_y - line_h*3)
-    draw_detail_row("PARENT", student.parent.username if student.parent else "N/A", start_y - line_h*4)
+        # Dotted line
+        c.setStrokeColor(colors.HexColor("#e2e8f0"))
+        c.setLineWidth(0.5)
+        c.setDash(1, 2)
+        c.line(left_x + 35, cursor_y + 2, right_x - 5, cursor_y + 2)
+        
+        cursor_y -= spacing
+
+    draw_row("ID NO", f"{student.id:06d}")
+    draw_row("GRADE", student.grade)
+    draw_row("DOB", student.dob)
+    draw_row("PARENT", student.parent.get_full_name() if student.parent and hasattr(student.parent, 'get_full_name') and student.parent.get_full_name() else (student.parent.username if student.parent else "N/A"))
+    draw_row("VALID", f"2025-2026") # Static Academic Year for Premium Feel
     
-    # 7. QR Code (Footer) - Moved Down
-    qr_size = 40
-    qr_y = 20  # Lowered position to avoid overlap
-    qr = qrcode.QRCode(box_size=2, border=0)
-    qr_data = f"YSM|ID:{student.id}|{student.roll_number}"
-    qr.add_data(qr_data)
+    # --- Footer / QR Code ---
+    
+    # Digital Signature display
+    if sig_path:
+        try:
+            sig = ImageReader(sig_path)
+            # Position: Bottom Right, above QR area approximately
+            c.drawImage(sig, width_pt - 50, 15, width=40, height=25, mask='auto', preserveAspectRatio=True)
+            c.setFillColor(colors.black)
+            c.setFont("Helvetica", 5)
+            c.drawRightString(width_pt - 10, 10, "Principal/Auth Sign")
+        except Exception:
+            pass
+
+    # QR Code background container
+    footer_h = 50
+    c.setFillColor(colors.white)
+    
+    # Generate QR
+    qr = qrcode.QRCode(box_size=2, border=1)
+    qr.add_data(f"YSM|{student.id}|{student.name}|{student.grade}")
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white")
     
-    c.drawInlineImage(qr_img, (width - qr_size)/2, qr_y, width=qr_size, height=qr_size)
-
-    # 8. Footer Bar
-    c.setFillColor(NAVY_BLUE)
-    c.rect(0, 0, width, 25, fill=1, stroke=0)
+    c.drawInlineImage(qr_img, width_pt/2 - 20, 25, width=40, height=40)
     
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica", 7)
-    c.drawCentredString(width/2, 14, "If found, please return to office.")
-    c.setFont("Helvetica-Bold", 7)
-    c.drawCentredString(width/2, 6, inst_name)
+    # Fake Chip (Simulated) for high-tech look
+    chip_w, chip_h = 22, 16
+    chip_x = 25
+    chip_y = cursor_y - 20
+    
+    # Only draw chip if space permits above QR? No, maybe below photo
+    # Let's put chip on top left of photo
+    # Actually, chip looks good on left side under details if space exists.
+    # Let's skip chip to avoid clutter, focus on clean typography.
+    
+    # Footer Text
+    c.setFillColor(COLOR_PRIMARY)
+    c.setFont("Helvetica-Bold", 6)
+    c.drawCentredString(width_pt/2, 12, "AUTHORIZED CAMPUS IDENTIFICATION")
+    c.setFillColor(COLOR_ACCENT)
+    c.rect(0, 0, width_pt, 5, fill=1, stroke=0)
 
     c.showPage()
     c.save()

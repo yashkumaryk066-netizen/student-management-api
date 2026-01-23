@@ -705,6 +705,13 @@ class ProfileView(APIView):
                 profile.institution_name = data['institution_name']
             if 'address' in data:
                 profile.address = data['address']
+            
+            # File Uploads (Branding)
+            if 'institution_logo' in data:
+                profile.institution_logo = data['institution_logo']
+            if 'digital_signature' in data:
+                profile.digital_signature = data['digital_signature']
+
             profile.save()
         
         return Response({

@@ -36,6 +36,15 @@ class IsParent(permissions.BasePermission):
             request.user.profile.role == 'PARENT'
         )
 
+class IsHR(permissions.BasePermission):
+    """Allow only users with HR role"""
+    def has_permission(self, request, view):
+        return bool(
+            request.user and request.user.is_authenticated and
+            hasattr(request.user, 'profile') and
+            request.user.profile.role == 'HR'
+        )
+
 
 class IsAdminRole(permissions.BasePermission):
     """

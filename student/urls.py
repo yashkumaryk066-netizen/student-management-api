@@ -33,9 +33,16 @@ from .views import (
     ExamListCreateView, EventListCreateView,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
     LiveClassListCreateView, DepartmentListCreateView,
-    TeamManagementView, ClientAuditLogListView, DashboardStatsView,
+    ClientAuditLogListView, DashboardStatsView,
     GenerateIDCardView, GenerateAdmitCardView, GenerateReportCardView
 )
+from .student_portal_views import (
+    StudentMyResultView, 
+    StudentDownloadReportCardView, 
+    StudentDownloadAdmitCardView
+)
+from .attendance_geo_views import GeoFencedAttendanceView
+from .team_views import TeamManagementView
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
 
@@ -90,6 +97,14 @@ urlpatterns = [
     path("students/", StudentListCreateView.as_view(), name="student-create-list"),
     path("students/<int:id>/", StudentDetailsView.as_view(), name="student-details"),
     path("students/today/", StudentTodayView.as_view(), name="student-today"),
+    
+    # STUDENT PORTAL (SELF SERVICE)
+    path("my-results/", StudentMyResultView.as_view(), name="my-results"),
+    path("my-report-card/", StudentDownloadReportCardView.as_view(), name="my-report-card"),
+    path("my-admit-card/", StudentDownloadAdmitCardView.as_view(), name="my-admit-card"),
+    
+    path("attendence/mark-geo/", GeoFencedAttendanceView.as_view(), name="mark-geo-attendance"),
+
     #ATTENDENCE 
     path("attendence/", AttendenceCreateView.as_view(), name="attendance-create-list"),
     path("attendence/<int:id>/", AttendenceDetailsView.as_view(), name="attendence-details"),

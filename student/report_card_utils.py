@@ -9,6 +9,12 @@ from django.utils import timezone
 from django.db.models import Sum
 from .models import Grade, Exam
 
+try:
+    from reportlab.lib.utils import ImageReader
+except ImportError:
+    ImageReader = None
+import os
+
 def generate_progress_report_pdf(student):
     """
     Generate Comprehensive Progress Report Card
@@ -49,15 +55,53 @@ def generate_progress_report_pdf(student):
         fontName='Helvetica-Bold'
     )
     
-    # Header with decorative box
-    header_content = [
-        [Paragraph("Y.S.M ADVANCE EDUCATION SYSTEM", title_style)],
-        [Paragraph("STUDENT PROGRESS REPORT", subtitle_style)],
-        [Paragraph(f"Academic Session: {timezone.now().year}-{timezone.now().year+1}", 
+    # Fetch Branding
+    owner = student.created_by
+    inst_name = "Y.S.M ADVANCE EDUCATION SYSTEM"
+    logo_img = None
+    sig_img = None
+    
+    if hasattr(owner, 'profile'):
+        if owner.profile.institution_name:
+            inst_name = owner.profile.institution_name.upper()
+        
+        # Logo
+        if owner.profile.institution_logo and hasattr(owner.profile.institution_logo, 'path'):
+             if os.path.exists(owner.profile.institution_logo.path):
+                logo_img = PlatypusImage(owner.profile.institution_logo.path, width=0.8*inch, height=0.8*inch)
+                
+        # Signature
+        if owner.profile.digital_signature and hasattr(owner.profile.digital_signature, 'path'):
+             if os.path.exists(owner.profile.digital_signature.path):
+                sig_img = PlatypusImage(owner.profile.digital_signature.path, width=1.0*inch, height=0.5*inch)
+
+    # Header with decorative box logic
+    header_content = []
+    
+    # Title Block
+    title_block = [
+        Paragraph(inst_name, title_style),
+        Paragraph("STUDENT PROGRESS REPORT", subtitle_style),
+        Paragraph(f"Academic Session: {timezone.now().year}-{timezone.now().year+1}", 
                   ParagraphStyle('SessionStyle', parent=styles['Normal'], 
                                 alignment=TA_CENTER, fontSize=10, 
-                                textColor=colors.HexColor("#666666")))]
+                                textColor=colors.HexColor("#666666")))
     ]
+    
+    if logo_img:
+        # Create a nested table for Logo + Text
+        # Logo Left (or Center Top?). Let's do a 2-col nested table [Logo, TextStack]
+        # But title_style is centered. 
+        # Simplest: Add logo as first row item, centered
+        # header_content.append([logo_img]) # This might align left if col is wide.
+        # Let's use a Table for the first row of outer table
+        sub_t = Table([[logo_img]], colWidths=[6.4*inch])
+        sub_t.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER')]))
+        header_content.append([sub_t])
+    
+    # Add text rows
+    for p in title_block:
+        header_content.append([p])
     
     header_table = Table(header_content, colWidths=[6.8*inch])
     header_table.setStyle(TableStyle([
@@ -85,7 +129,7 @@ def generate_progress_report_pdf(student):
          Paragraph(f"<b>Roll Number:</b> {student.roll_number or 'N/A'}", info_style)],
         [Paragraph(f"<b>Class/Grade:</b> {student.grade}", info_style), 
          Paragraph(f"<b>Report Date:</b> {timezone.now().strftime('%d %B %Y')}", info_style)],
-        [Paragraph(f"<b>Parent/Guardian:</b> {student.parent.username if student.parent else 'N/A'}", info_style), 
+        [Paragraph(f"<b>Parent/Guardian:</b> {student.parent.get_full_name() if student.parent and hasattr(student.parent, 'get_full_name') and student.parent.get_full_name() else (student.parent.username if student.parent else 'N/A')}", info_style), 
          Paragraph(f"<b>Academic Year:</b> {timezone.now().year}-{timezone.now().year+1}", info_style)]
     ]
     
@@ -308,8 +352,9 @@ def generate_progress_report_pdf(student):
         [Paragraph("Class Teacher", sig_style), 
          Paragraph("Principal", sig_style), 
          Paragraph("Parent/Guardian", sig_style)],
+         
         [Paragraph("_________________", sig_style), 
-         Paragraph("_________________", sig_style), 
+         sig_img if sig_img else Paragraph("_________________", sig_style), 
          Paragraph("_________________", sig_style)]
     ]
     

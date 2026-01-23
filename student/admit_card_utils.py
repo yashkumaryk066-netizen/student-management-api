@@ -11,6 +11,7 @@ try:
     from reportlab.lib.utils import ImageReader
 except ImportError:
     ImageReader = None
+import os
 
 def generate_admit_card_pdf(student):
     """
@@ -24,10 +25,49 @@ def generate_admit_card_pdf(student):
     elements = []
     
     # --- HEADER ---
-    # Institute Name
-    header_style = ParagraphStyle('Header', parent=styles['Heading1'], fontSize=20, alignment=TA_CENTER, textColor=colors.HexColor("#002366"))
-    elements.append(Paragraph("Y.S.M ADVANCE EDUCATION SYSTEM", header_style))
-    elements.append(Paragraph("EXAMINATION HALL TICKET", ParagraphStyle('SubHeader', parent=styles['Heading2'], alignment=TA_CENTER, fontSize=14)))
+    # Fetch Branding
+    owner = student.created_by
+    inst_name = "Y.S.M ADVANCE EDUCATION SYSTEM"
+    logo_img = None
+    sig_img = None
+    
+    if hasattr(owner, 'profile'):
+        if owner.profile.institution_name:
+            inst_name = owner.profile.institution_name.upper()
+        
+        # Logo
+        if owner.profile.institution_logo and hasattr(owner.profile.institution_logo, 'path'):
+             if os.path.exists(owner.profile.institution_logo.path):
+                logo_img = PlatypusImage(owner.profile.institution_logo.path, width=0.8*inch, height=0.8*inch)
+                
+        # Signature
+        if owner.profile.digital_signature and hasattr(owner.profile.digital_signature, 'path'):
+             if os.path.exists(owner.profile.digital_signature.path):
+                sig_img = PlatypusImage(owner.profile.digital_signature.path, width=1.0*inch, height=0.5*inch)
+
+    # Header Layout
+    header_style = ParagraphStyle('Header', parent=styles['Heading1'], fontSize=18, alignment=TA_CENTER, textColor=colors.HexColor("#002366"))
+    sub_header_style = ParagraphStyle('SubHeader', parent=styles['Heading2'], alignment=TA_CENTER, fontSize=14)
+    
+    title_text = [
+        Paragraph(inst_name, header_style),
+        Paragraph("EXAMINATION HALL TICKET", sub_header_style)
+    ]
+    
+    if logo_img:
+        # Table: [Logo, TitleStack]
+        # We want logo centered if possible, or left. Let's do: [Logo, Titles]
+        header_data = [[logo_img, title_text]]
+        t_header = Table(header_data, colWidths=[1*inch, 6*inch])
+        t_header.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('ALIGN', (0,0), (0,0), 'CENTER'),
+        ]))
+        elements.append(t_header)
+    else:
+        elements.append(Paragraph(inst_name, header_style))
+        elements.append(Paragraph("EXAMINATION HALL TICKET", sub_header_style))
+
     elements.append(Spacer(1, 0.3*inch))
     
     # --- STUDENT & PHOTO SECTION ---
@@ -39,7 +79,7 @@ def generate_admit_card_pdf(student):
     <b>Name:</b> {student.name}<br/>
     <b>Roll Number:</b> {student.roll_number or 'N/A'}<br/>
     <b>Class/Grade:</b> {student.grade}<br/>
-    <b>Parent:</b> {student.parent.username if student.parent else 'N/A'}
+    <b>Parent:</b> {student.parent.get_full_name() if student.parent and hasattr(student.parent, 'get_full_name') and student.parent.get_full_name() else (student.parent.username if student.parent else 'N/A')}
     """
     
     # Photo Handling
@@ -118,14 +158,20 @@ def generate_admit_card_pdf(student):
     elements.append(Spacer(1, 0.6*inch))
     
     # --- SIGNATURES ---
+    # Prepare signature content
+    student_sig = "_______________________" 
+    
+    auth_sig = sig_img if sig_img else "_______________________"
+    
     sig_data = [
-        ["_______________________", "_______________________"],
+        [student_sig, auth_sig],
         ["Student Signature", "Controller of Examinations"]
     ]
     t_sig = Table(sig_data, colWidths=[3.5*inch, 3.5*inch])
     t_sig.setStyle(TableStyle([
-        ('ALIGN', (1,0), (1,-1), 'RIGHT'),
+        ('ALIGN', (1,0), (1,-1), 'CENTER'), # Center the image/line in its cell
         ('ALIGN', (0,0), (0,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'BOTTOM'), # Align bottom to keep text aligned
         ('FONTNAME', (0,1), (-1,-1), 'Helvetica-Bold'),
     ]))
     elements.append(t_sig)

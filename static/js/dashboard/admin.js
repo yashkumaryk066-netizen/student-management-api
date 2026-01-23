@@ -162,6 +162,93 @@ const DashboardApp = {
         };
     },
 
+    getCurrentLocationForSetup() {
+        const status = document.getElementById('geoStatus');
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser');
+            return;
+        }
+
+        if (status) status.style.display = 'block';
+
+        navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+
+            document.getElementById('locLat').value = lat;
+            document.getElementById('locLong').value = long;
+
+            if (status) {
+                status.style.display = 'none';
+                status.innerText = 'Detecting...';
+            }
+            alert(`✅ Location Captured!\nLat: ${lat}\nLong: ${long}\n\nDon't forget to SAVE changes.`);
+        }, (error) => {
+            if (status) status.style.display = 'none';
+            alert('❌ Error getting location: ' + error.message);
+        });
+    },
+
+    async markGeoAttendance() {
+        if (!navigator.geolocation) {
+            this.showAlert("Error", "Geolocation is not supported by your browser.", "error");
+            return;
+        }
+
+        const btn = document.getElementById('markAttBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⌛ Locating...';
+        }
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+
+            try {
+                const response = await fetch(`${this.apiBaseUrl}/attendence/mark-geo/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify({ lat, long })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.showAlert("Success", data.message || "Attendance Marked!", "success");
+                } else {
+                    this.showAlert("Failed", data.error || "Could not mark attendance.", "error");
+                }
+            } catch (e) {
+                this.showAlert("Error", "Network or Server Error", "error");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '📍 Mark My Attendance';
+                }
+            }
+
+        }, (error) => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '📍 Mark My Attendance';
+            }
+            let msg = "Location Access Denied.";
+            if (error.code === 1) msg = "Please allow location access.";
+            if (error.code === 2) msg = "Position unavailable.";
+            if (error.code === 3) msg = "Location timeout.";
+
+            this.showAlert("Location Error", msg, "error");
+        }, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        });
+    },
+
     closeAlert() {
         const overlay = document.getElementById('alertOverlay');
         if (overlay) {
@@ -823,6 +910,12 @@ const DashboardApp = {
                 <button class="filter-tab active" onclick="DashboardApp.loadAttendanceView('SCHOOL', this)">School (Classes)</button>
                 <button class="filter-tab" onclick="DashboardApp.loadAttendanceView('COACHING', this)">Coaching (Batches)</button>
                 <button class="filter-tab" onclick="DashboardApp.loadAttendanceView('INSTITUTE', this)">Institute (Dept)</button>
+            </div>
+            
+            <div style="margin-left:auto;">
+                <button id="markAttBtn" class="btn-primary" onclick="DashboardApp.markGeoAttendance()" style="background:#059669; border:1px solid #10b981; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
+                    📍 Mark My Attendance (Geo)
+                </button>
             </div>
         </div>
 
@@ -1573,65 +1666,192 @@ const DashboardApp = {
         } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5">Error loading transport data</td></tr>'; }
     },
 
-    loadHRManagement() {
+    async loadLibraryManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-    <div class="module-header">
-                 <div>
-                    <h1 class="page-title">👔 HR & Payroll</h1>
-                    <p class="page-subtitle">Manage staff, attendance, and payroll processing.</p>
-                </div>
-                <button class="btn-action" onclick="DashboardApp.addStaff()">+ Add Staff Member</button>
+        <div class="module-header">
+            <div>
+                 <h1 class="page-title">📚 Digital Library</h1>
+                 <p class="page-subtitle">Manage books, issues, and digital assets.</p>
             </div>
-            
-            <div class="stats-mini-grid">
-                <div class="stat-card">
-                    <div class="card-value">87</div>
-                    <div class="card-title">Total Staff</div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" onclick="DashboardApp.scanIsbn()">📷 Scan ISBN</button>
+                <button class="btn-action" onclick="DashboardApp.addBook()">+ Add Book</button>
+            </div>
+        </div>
+        
+        <div class="data-table-container">
+             <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                 <h3 style="color: white; margin-bottom: 5px;">Library Catalog</h3>
+            </div>
+             
+             <!-- GRID VIEW FOR BOOKS -->
+             <div id="libraryBooksGrid" class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); padding: 20px;">
+                 <div class="text-center" style="grid-column: 1/-1;">Loading library catalog...</div>
+             </div>
+        </div>
+        `;
+        this.fetchLibraryBooks();
+    },
+
+    async fetchLibraryBooks() {
+        const grid = document.getElementById('libraryBooksGrid');
+        try {
+            const books = await LibraryAPI.getBooks();
+
+            if (books.length === 0) {
+                grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; color: var(--text-muted);">No books in library.</div>';
+                return;
+            }
+
+            grid.innerHTML = books.map(b => `
+                <div class="module-card" style="padding: 15px; display: flex; flex-direction: column;">
+                    <div style="height: 240px; background: #0f172a; border-radius: 8px; margin-bottom: 15px; overflow: hidden; position: relative;">
+                        ${b.cover_image ?
+                    `<img src="${b.cover_image}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                    `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 3rem;">📖</div>`
+                }
+                        <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                            ${b.available_copies}/${b.total_copies}
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: white; font-size: 1.1rem; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${b.title}">${b.title}</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">${b.author}</p>
+                    
+                    <div style="margin-top: auto;">
+                        <span class="badge" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; font-size: 0.75rem;">${b.category}</span>
+                        ${b.description ? `<p style="font-size:0.8rem; color:#64748b; margin-top:10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${b.description}</p>` : ''}
+                        
+                        <div style="display: flex; gap: 5px; margin-top: 15px;">
+                            <button class="btn-primary" style="flex: 1; font-size: 0.9rem; padding: 8px;" onclick="DashboardApp.issueBook(${b.id}, '${b.title.replace(/'/g, "\\'")}')">Issue</button>
+                            <button class="btn-secondary" style="padding: 8px;" onclick="DashboardApp.editBook(${b.id})">✏️</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="card-value" style="color: #fbbf24;">₹2.1L</div>
-                    <div class="card-title">Payroll This Month</div>
-                </div>
-                <div class="stat-card">
-                    <div class="card-value" style="color: #f87171;">12</div>
-                    <div class="card-title">On Leave</div>
-                </div>
-                <div class="stat-card">
-                    <div class="card-value">5</div>
-                    <div class="card-title">Pending Approval</div>
+            `).join('');
+
+        } catch (e) {
+            console.error(e);
+            grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; color: red;">Error loading books.</div>';
+        }
+    },
+
+    addBook() {
+        // ... modal setup ...
+        const modal = `
+            <div class="modal-overlay" id="addBookModal">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h2>+ Add New Book</h2>
+                        <button class="close-btn" onclick="document.getElementById('addBookModal').remove()">×</button>
+                    </div>
+                    <form id="addBookForm" onsubmit="event.preventDefault(); DashboardApp.submitAddBook();">
+                        <div class="form-group">
+                            <label>Book Title</label>
+                            <input type="text" name="title" class="form-input" required>
+                        </div>
+                        
+                        <div class="row" style="display:flex; gap:15px;">
+                            <div class="form-group" style="flex:1;">
+                                <label>Author</label>
+                                <input type="text" name="author" class="form-input" required>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>ISBN</label>
+                                <input type="text" name="isbn" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div class="row" style="display:flex; gap:15px;">
+                             <div class="form-group" style="flex:1;">
+                                <label>Publisher</label>
+                                <input type="text" name="publisher" class="form-input">
+                            </div>
+                             <div class="form-group" style="flex:1;">
+                                <label>Category</label>
+                                <select name="category" class="form-input">
+                                    <option value="FICTION">Fiction</option>
+                                    <option value="NON_FICTION">Non-Fiction</option>
+                                    <option value="TEXTBOOK">Textbook</option>
+                                    <option value="REFERENCE">Reference</option>
+                                </select>
+                            </div>
+                        </div>
+
+                         <div class="row" style="display:flex; gap:15px;">
+                            <div class="form-group" style="flex:1;">
+                                <label>Total Copies</label>
+                                <input type="number" name="total_copies" class="form-input" value="1" min="1">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Price (₹)</label>
+                                <input type="number" name="price" class="form-input">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                             <label>Cover Image</label>
+                             <div class="file-upload-wrapper" style="border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px;">
+                                <input type="file" name="cover_image" accept="image/*" class="form-input" style="padding:5px;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" class="form-input" rows="3"></textarea>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addBookModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Book</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            
-             <div class="data-table-container">
-                 <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
-                     <h3 style="color: white; margin-bottom: 5px;">Staff Directory</h3>
-                </div>
-                 <table class="data-table">
-                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Department</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                         <!-- Dummy Data -->
-                         <tr>
-                            <td>EMP-001</td>
-                            <td>Dr. A. Verma</td>
-                            <td>Science</td>
-                            <td>HOD</td>
-                            <td><span class="status-badge status-active">Active</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            </div>
-`;
-        this.fetchEmployees();
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    async submitAddBook() {
+        const form = document.getElementById('addBookForm');
+        const formData = new FormData(form);
+
+        // Add defaults if missing
+        if (!formData.get('published_year')) formData.append('published_year', new Date().getFullYear());
+        if (!formData.get('edition')) formData.append('edition', '1st');
+
+        // Show loading state
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = 'Uploading...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/library/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                this.showAlert("Success", "Book added successfully!", "success");
+                document.getElementById('addBookModal').remove();
+                this.fetchLibraryBooks();
+            } else {
+                const err = await response.json();
+                this.showAlert("Error", err.error || "Failed to add book", "error");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (e) {
+            console.error(e);
+            this.showAlert("Error", "Network error", "error");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     },
 
     async fetchEmployees() {
@@ -2872,30 +3092,85 @@ const DashboardApp = {
     <div class="settings-grid">
         <!-- Profile Section -->
         <div class="settings-card">
-            <h3>👤 Profile Information</h3>
+            <h3>👤 Profile & Branding</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Customize your institution's digital identity.</p>
             <form onsubmit="event.preventDefault(); DashboardApp.handleProfileUpdate(event);" class="settings-form">
                 <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" name="first_name" id="profileName" class="form-input" placeholder="First Name">
-                        <input type="text" name="last_name" id="profileLastName" class="form-input" placeholder="Last Name" style="margin-top:10px;">
-                        </div>
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="email" name="email" id="profileEmail" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="tel" name="phone" id="profilePhone" class="form-input" placeholder="+91">
-                        </div>
-                        <div class="form-group">
-                            <label>Role</label>
-                            <input type="text" id="profileRole" class="form-input" disabled value="ADMIN">
-                        </div>
-                        <div style="text-align: right;">
-                            <button type="submit" class="btn-primary">Save Changes</button>
-                        </div>
-                    </form>
+                    <label>Institution Name (appears on documents)</label>
+                    <input type="text" name="institution_name" id="institutionName" class="form-input" placeholder="e.g. Springfield High School" required>
                 </div>
+
+                <div class="row" style="display:flex; gap:15px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>School/Institute Logo</label>
+                        <div class="file-upload-wrapper" style="border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px;">
+                            <input type="file" name="institution_logo" id="instLogo" accept="image/*" class="form-input" style="padding:5px;">
+                            <div id="currentLogo" style="font-size:0.8rem; color:#10b981; margin-top:5px; display:none;">✅ Logo Uploaded</div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Digital Signature (for Admit/Report Cards)</label>
+                        <div class="file-upload-wrapper" style="border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px;">
+                            <input type="file" name="digital_signature" id="instSig" accept="image/*" class="form-input" style="padding:5px;">
+                            <div id="currentSig" style="font-size:0.8rem; color:#10b981; margin-top:5px; display:none;">✅ Signature Uploaded</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:20px 0;">
+
+                <!-- GeoFencing for Attendance -->
+                <h4 style="color:var(--primary-color);">📍 Attendance Geofencing</h4>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Restrict students/staff to mark attendance only when they are within campus range.</p>
+                <div class="row" style="display:flex; gap:15px;">
+                     <div class="form-group" style="flex:1;">
+                        <label>Campus Latitude</label>
+                        <input type="number" step="any" name="location_lat" id="locLat" class="form-input" placeholder="0.000000">
+                    </div>
+                     <div class="form-group" style="flex:1;">
+                        <label>Campus Longitude</label>
+                         <input type="number" step="any" name="location_long" id="locLong" class="form-input" placeholder="0.000000">
+                    </div>
+                </div>
+                 <div class="form-group">
+                        <label>Allowed Radius (in meters)</label>
+                        <input type="number" name="attendance_radius" id="locRadius" class="form-input" placeholder="e.g. 200" value="200">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <button type="button" class="btn-secondary" onclick="DashboardApp.getCurrentLocationForSetup()" style="width:100%;">
+                        📍 Get Current Location & Set as Campus
+                    </button>
+                    <p id="geoStatus" style="font-size:0.8rem; margin-top:5px; color:#f59e0b; display:none;">Detecting...</p>
+                </div>
+                
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:20px 0;">
+
+                <div class="row" style="display:flex; gap:15px;">
+                    <div class="form-group" style="flex:1;">
+                         <label>First Name</label>
+                         <input type="text" name="first_name" id="profileName" class="form-input">
+                    </div>
+                     <div class="form-group" style="flex:1;">
+                         <label>Last Name</label>
+                         <input type="text" name="last_name" id="profileLastName" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" id="profileEmail" class="form-input" readonly style="opacity:0.7; cursor:not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone" id="profilePhone" class="form-input" placeholder="+91">
+                </div>
+                
+                <div style="text-align: right;">
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Changes reflect on documents immediately.</p>
+                </div>
+            </form>
+        </div>
 
                 <!-- Security Section -->
                 <div class="settings-card">
@@ -2945,11 +3220,27 @@ const DashboardApp = {
 
             if (response.ok) {
                 const data = await response.json();
-                document.getElementById('profileName').value = data.first_name || '';
+                document.getElementById('profileName').value = data.first_name || data.full_name || '';
                 document.getElementById('profileLastName').value = data.last_name || '';
                 document.getElementById('profileEmail').value = data.email || '';
                 document.getElementById('profilePhone').value = data.phone || '';
-                document.getElementById('profileRole').value = (data.role || 'USER').toUpperCase();
+
+                // Branding
+                document.getElementById('institutionName').value = data.institution_name || '';
+
+                if (data.institution_logo) {
+                    document.getElementById('currentLogo').style.display = 'block';
+                    document.getElementById('currentLogo').innerHTML = `✅ <a href="${data.institution_logo}" target="_blank" style="color:inherit;">Logo Uploaded</a>`;
+                }
+                if (data.digital_signature) {
+                    document.getElementById('currentSig').style.display = 'block';
+                    document.getElementById('currentSig').innerHTML = `✅ <a href="${data.digital_signature}" target="_blank" style="color:inherit;">Signature Uploaded</a>`;
+                }
+
+                // Geolocation
+                if (document.getElementById('locLat')) document.getElementById('locLat').value = data.location_lat || '';
+                if (document.getElementById('locLong')) document.getElementById('locLong').value = data.location_long || '';
+                if (document.getElementById('locRadius')) document.getElementById('locRadius').value = data.attendance_radius || 200;
             }
         } catch (error) {
             console.error('Failed to load profile settings', error);
@@ -2964,20 +3255,32 @@ const DashboardApp = {
         btn.disabled = true;
 
         const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+
+        // Remove empty file inputs to avoid overwriting existing files with empty data
+        const logoInput = form.querySelector('#instLogo');
+        const sigInput = form.querySelector('#instSig');
+
+        if (logoInput && logoInput.files.length === 0) {
+            formData.delete('institution_logo');
+        }
+        if (sigInput && sigInput.files.length === 0) {
+            formData.delete('digital_signature');
+        }
 
         try {
             const response = await fetch(`${this.apiBaseUrl}/profile/`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    // Content-Type must NOT be set when sending FormData
                 },
-                body: JSON.stringify(data)
+                body: formData
             });
 
             if (response.ok) {
-                alert('Profile updated successfully!');
+                alert('Profile, Branding & Settings updated successfully!');
+                // Reload settings to show new images
+                this.fetchProfileSettings();
             } else {
                 throw new Error('Failed to update profile');
             }
@@ -3114,11 +3417,144 @@ const DashboardApp = {
         }
     },
 
-    editStudent(id) {
-        showToast('Redirecting to Secure Editor...', 'info');
-        setTimeout(() => {
-            window.open(`/admin/student/student/${id}/change/`, '_blank');
-        }, 500);
+    async editStudent(id) {
+        try {
+            DashboardApp.showAlert('Loading...', 'Fetching student details...', 'info');
+            const res = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('authToken') }
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch student details");
+
+            const student = await res.json();
+            DashboardApp.closeAlert(); // Close loading alert
+            this.showEditStudentModal(student);
+
+        } catch (e) {
+            console.error(e);
+            DashboardApp.showAlert('Error', 'Could not load student details.', 'error');
+        }
+    },
+
+    showEditStudentModal(student) {
+        // Pre-select logic
+        const genderOptions = `
+            <option value="Male" ${student.gender === 'Male' ? 'selected' : ''}>Male</option>
+            <option value="Female" ${student.gender === 'Female' ? 'selected' : ''}>Female</option>
+        `;
+
+        const typeOptions = `
+            <option value="SCHOOL" ${student.institution_type === 'SCHOOL' ? 'selected' : ''}>School Student</option>
+            <option value="COACHING" ${student.institution_type === 'COACHING' ? 'selected' : ''}>Coaching Student</option>
+            <option value="INSTITUTE" ${student.institution_type === 'INSTITUTE' ? 'selected' : ''}>Institute/College Student</option>
+        `;
+
+        const modalHtml = `
+    <div class="modal-overlay" id="editStudentModal">
+        <div class="modal-card">
+            <h2>✏️ Edit Student Details</h2>
+            <form id="editStudentForm" onsubmit="event.preventDefault(); DashboardApp.handleEditStudentSubmit(event, ${student.id});">
+                <div class="form-group">
+                    <label>Institution Type</label>
+                    <select name="institution_type" class="form-input" required>
+                        ${typeOptions}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" class="form-input" required value="${student.name || ''}">
+                </div>
+                
+                <div class="row" style="display:flex; gap:15px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Age</label>
+                        <input type="number" name="age" class="form-input" required value="${student.age || ''}">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Date of Birth</label>
+                        <input type="date" name="dob" class="form-input" required value="${student.dob || ''}">
+                    </div>
+                </div>
+                
+                <div class="row" style="display:flex; gap:15px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Class/Grade</label>
+                        <input type="number" name="grade" class="form-input" required value="${student.grade || 0}">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Gender</label>
+                        <select name="gender" class="form-input" required>
+                            ${genderOptions}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Parent/Guardian Relation</label>
+                    <input type="text" name="relation" class="form-input" required value="${student.relation || ''}" placeholder="e.g. Father">
+                </div>
+                
+                <div class="form-group">
+                    <label>Update Photo (Optional)</label>
+                    <div class="file-upload-wrapper" style="border: 2px dashed #4b5563; padding: 10px; text-align: center; border-radius: 8px; position: relative;">
+                        <input type="file" name="photo" class="form-input" accept="image/*" style="opacity: 0; position: absolute; top:0; left:0; width:100%; height:100%; cursor: pointer;">
+                        <span style="color: #9ca3af; font-size:0.9rem;">📸 Click to Change Photo</span>
+                    </div>
+                    ${student.photo ? `<div style="font-size:0.8rem; color:#10b981; margin-top:5px;">Current photo exists</div>` : ''}
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('editStudentModal').remove()">Cancel</button>
+                    <button type="submit" class="btn-primary">Update Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleEditStudentSubmit(event, id) {
+        const form = event.target;
+        const formData = new FormData(form);
+
+        // Remove empty photo to prevent overwriting with null/empty if handled by backend
+        const photoFile = formData.get('photo');
+        if (!photoFile || photoFile.size === 0) {
+            formData.delete('photo');
+        }
+
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = 'Updating...';
+        btn.disabled = true;
+
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
+                method: 'PUT', // or PATCH
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(Object.values(errorData).flat().join(', ') || 'Update failed');
+            }
+
+            // Success
+            document.getElementById('editStudentModal').remove();
+            this.fetchStudents(); // Refresh list
+            DashboardApp.showAlert('Success', 'Student details updated successfully!', 'success');
+
+        } catch (error) {
+            DashboardApp.showAlert('Error', error.message, 'error');
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     },
 
 
@@ -3280,63 +3716,7 @@ const DashboardApp = {
         this.submitForm(event, '/events/', 'eventModal', 'Event created successfully!');
     },
 
-    // --- LIBRARY ---
-    addBook() {
-        const modalHtml = `
-        <div class="modal-overlay" id="addBookModal">
-            <div class="modal-card">
-                <h2>Add New Book</h2>
-                <form onsubmit="event.preventDefault(); DashboardApp.handleBookSubmit(event);">
-                    <div class="form-group">
-                        <label>ISBN</label>
-                        <input type="text" name="isbn" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Title</label>
-                        <input type="text" name="title" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Author</label>
-                        <input type="text" name="author" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Publisher</label>
-                        <input type="text" name="publisher" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select name="category" class="form-input" required>
-                            <option value="TEXTBOOK">Textbook</option>
-                            <option value="FICTION">Fiction</option>
-                            <option value="REFERENCE">Reference</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Price (₹)</label>
-                        <input type="number" name="price" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Total Copies</label>
-                        <input type="number" name="total_copies" class="form-input" required value="1">
-                    </div>
-                    <div class="form-group">
-                        <label>Year</label>
-                        <input type="number" name="published_year" class="form-input" required value="2024">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn-secondary" onclick="document.getElementById('addBookModal').remove()">Cancel</button>
-                        <button type="submit" class="btn-primary">Save Book</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
 
-    async handleBookSubmit(event) {
-        this.submitForm(event, '/library/books/', 'addBookModal', 'Book added successfully!');
-    },
 
     // --- TRANSPORT ---
     addVehicle() {
@@ -3383,47 +3763,7 @@ const DashboardApp = {
         this.submitForm(event, '/transport/vehicles/', 'addVehicleModal', 'Vehicle added successfully!');
     },
 
-    // --- HR ---
-    addStaff() {
-        const modalHtml = `
-        <div class="modal-overlay" id="addStaffModal">
-            <div class="modal-card">
-                <h2>Add New Staff/Employee</h2>
-                <p style="font-size:0.8rem; color:var(--warning); margin-bottom:10px;">Note: User account must exist first.</p>
-                <form onsubmit="event.preventDefault(); DashboardApp.handleStaffSubmit(event);">
-                    <div class="form-group">
-                        <label>User ID (System ID)</label>
-                        <input type="number" name="user" class="form-input" required placeholder="Enter User ID">
-                    </div>
-                    <div class="form-group">
-                        <label>Joining Date</label>
-                        <input type="date" name="joining_date" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Basic Salary (₹)</label>
-                        <input type="number" name="basic_salary" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Contract Type</label>
-                        <select name="contract_type" class="form-input" required>
-                            <option value="PERMANENT">Permanent</option>
-                            <option value="CONTRACT">Contract</option>
-                        </select>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn-secondary" onclick="document.getElementById('addStaffModal').remove()">Cancel</button>
-                        <button type="submit" class="btn-primary">Save Staff</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    },
 
-    async handleStaffSubmit(event) {
-        this.submitForm(event, '/hr/employees/', 'addStaffModal', 'Staff member added successfully!');
-    },
 
     // --- COURSES & BATCHES ---
     loadCourseManagement() {
@@ -4244,7 +4584,7 @@ const DashboardApp = {
         }
     },
 
-    showAddStaffModal() {
+    addStaff() {
         // Modal for adding staff with permissions
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -4418,11 +4758,10 @@ const DashboardApp = {
             console.error('Failed to load logs:', e);
             document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to connect to Security Service.</td></tr>`;
         }
-        document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to connect to Security Service.</td></tr>`;
-    }
-},
+    },
 
     // --- APPROVALS MODULE (CLIENT ADMIN) ---
+
     async loadApprovalsModule() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
@@ -4502,31 +4841,32 @@ const DashboardApp = {
         }
     },
 
-        async processStudentApproval(id, isApproved) {
-    if (!confirm(isApproved ? "Approve this student?" : "Reject and delete this request?")) return;
+    async processStudentApproval(id, isApproved) {
+        if (!confirm(isApproved ? "Approve this student?" : "Reject and delete this request?")) return;
 
-    try {
-        const endpoint = isApproved
-            ? `${this.apiBaseUrl}/students/${id}/approve/`
-            : `${this.apiBaseUrl}/students/${id}/`; // Delete if rejected (for now)
+        try {
+            const endpoint = isApproved
+                ? `${this.apiBaseUrl}/students/${id}/approve/`
+                : `${this.apiBaseUrl}/students/${id}/`; // Delete if rejected (for now)
 
-        const method = isApproved ? 'POST' : 'DELETE';
+            const method = isApproved ? 'POST' : 'DELETE';
 
-        const res = await fetch(endpoint, {
-            method: method,
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-        });
+            const res = await fetch(endpoint, {
+                method: method,
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
 
-        if (res.ok) {
-            this.showAlert('Success', isApproved ? 'Student Approved & Activated' : 'Request Rejected', 'success');
-            this.loadApprovalsModule(); // Refresh list
-        } else {
-            this.showAlert('Error', 'Action failed', 'error');
+            if (res.ok) {
+                this.showAlert('Success', isApproved ? 'Student Approved & Activated' : 'Request Rejected', 'success');
+                this.loadApprovalsModule(); // Refresh list
+            } else {
+                this.showAlert('Error', 'Action failed', 'error');
+            }
+        } catch (e) {
+            this.showAlert('Error', 'Network error', 'error');
         }
-    } catch (e) {
-        this.showAlert('Error', 'Network error', 'error');
-    }
-},
+    },
+};
 
 // Universal Menu Toggle (Premium UX - Auto-Close on Click)
 document.addEventListener('DOMContentLoaded', function () {

@@ -131,6 +131,7 @@ class UserProfile(models.Model):
         ('PARENT', 'Parent'),
         ('ADMIN', 'Admin'),   # System Admin (Superuser)
         ('CLIENT', 'Client'), # Subscription Owner (School/Coaching Owner)
+        ('HR', 'HR/Manager'), # Staff with managed permissions
         ('AI_USER', 'AI User'), # Independent AI Platform User
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -143,9 +144,16 @@ class UserProfile(models.Model):
     ]
     institution_type = models.CharField(max_length=20, choices=INSTITUTION_TYPES, default='SCHOOL', db_index=True)
     institution_name = models.CharField(max_length=200, blank=True, null=True)
+    institution_logo = models.ImageField(upload_to='institution_logos/', blank=True, null=True, help_text="Upload your School/Institute Logo")
+    digital_signature = models.ImageField(upload_to='signatures/', blank=True, null=True, help_text="Upload Administrator Digital Signature")
     address = models.TextField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True)
     telegram_chat_id = models.CharField(max_length=50, blank=True, null=True, help_text="Linked Telegram Chat ID")
+    
+    # Geolocation for Attendance
+    location_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, help_text="Institution Latitude")
+    location_long = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, help_text="Institution Longitude")
+    attendance_radius = models.PositiveIntegerField(default=200, help_text="Allowed radius in meters for attendance")
     
     # Plan Management
     subscription_expiry = models.DateField(null=True, blank=True)
@@ -153,6 +161,8 @@ class UserProfile(models.Model):
     is_active = models.BooleanField(default=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    force_password_change = models.BooleanField(default=False, help_text="Force user to change password on next login")
     
     # Granular Permissions for Team Members
     # Structure: {'students': {'view': True, 'edit': False}, 'fees': {...}}
@@ -628,6 +638,10 @@ class LibraryBook(models.Model):
     available_copies = models.IntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     shelf_location = models.CharField(max_length=50, blank=True)
+    
+    # Premium Fields
+    cover_image = models.ImageField(upload_to='library_covers/', blank=True, null=True, help_text="Book Cover Scan")
+    description = models.TextField(blank=True, help_text="Synopsis or details")
     added_date = models.DateField(auto_now_add=True)
     
     class Meta:
