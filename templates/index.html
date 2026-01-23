@@ -1784,66 +1784,121 @@
                     const manualOrderId = 'MAN-' + Math.random().toString(36).substr(2, 6).toUpperCase();
 
                     step2.innerHTML = `
-                        <div style="text-align:center; padding: 10px;">
-                            <div class="badge" style="margin: 0 auto 15px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
-                                <span class="pulse-dot" style="background: #34d399;"></span> SECURE GATEWAY
+                        <div style="text-align:center; padding: 10px; animation: slideInUp 0.4s ease-out;">
+                            
+                            <!-- Header -->
+                            <div class="badge" style="margin: 0 auto 15px; background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); backdrop-filter: blur(4px);">
+                                <span class="pulse-dot" style="background: #34d399; box-shadow: 0 0 10px #34d399;"></span> SECURE GATEWAY
                             </div>
                             <h3 style="margin-bottom:5px; font-family:'Space Grotesk'; font-size: 1.8rem; color: white;">Scan & Pay</h3>
                             <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:25px;">Supported: GPay, PhonePe, Paytm, UPI</p>
                             
-                            <div style="position:relative; display:inline-block; margin-bottom:25px;">
-                                <div style="position:absolute; inset:-5px; background:linear-gradient(45deg, #3b82f6, #8b5cf6); border-radius:20px; filter:blur(15px); opacity:0.5;"></div>
-                                <div style="background:white; padding:15px; border-radius:15px; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                                    <img src="/static/images/payment_qr.jpg" alt="Payment QR"
-                                        style="width:200px; height:200px; object-fit:contain; display:block;">
+                            <!-- QR Card -->
+                            <div style="position:relative; display:inline-block; margin-bottom:30px;">
+                                <div style="position:absolute; inset:-10px; background:linear-gradient(45deg, #6366f1, #ec4899); border-radius:24px; filter:blur(20px); opacity:0.4; animation: pulseGlow 3s infinite;"></div>
+                                <div style="background: white; padding: 15px; border-radius: 16px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                                    <div style="position: relative;">
+                                        <img src="/static/images/payment_qr.jpg" alt="Payment QR"
+                                            style="width: 220px; height: 220px; object-fit: contain; display: block; filter: contrast(1.1);">
+                                        
+                                        <!-- Central Logo Overlay (Optional) -->
+                                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:40px; height:40px; background:white; border-radius:50%; padding:2px; display:flex; align-items:center; justify-content:center; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
+                                            <i class="fas fa-bolt" style="color: #6366f1; font-size: 20px;"></i>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div style="margin-bottom:30px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+                            <!-- Amount & Ref -->
+                            <div style="margin-bottom:30px; background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
                                 <div style="text-align:left;">
-                                    <div style="font-size:0.8rem; color:var(--text-muted);">Total Amount</div>
-                                    <div style="font-size:1.5rem; font-weight:700; color:white;">₹${selectedAmount.toLocaleString('en-IN')}</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 4px;">Total Payable</div>
+                                    <div style="font-size:1.8rem; font-weight:800; color:white; letter-spacing: -1px;">₹${selectedAmount.toLocaleString('en-IN')}</div>
                                 </div>
                                 <div style="text-align:right;">
-                                    <div style="font-size:0.8rem; color:var(--text-muted);">Ref ID</div>
-                                    <div style="font-family:monospace; color:var(--accent);">${manualOrderId}</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 4px;">Ref ID</div>
+                                    <div style="font-family:'Courier New', monospace; color:var(--accent); font-weight:700; background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px;">${manualOrderId}</div>
                                 </div>
                             </div>
                             
-                            <div style="margin-bottom:25px; text-align:left;">
-                                <label style="display:block; margin-bottom:8px; color:var(--text-muted); font-size:0.9rem; margin-left:5px;">Transaction Details</label>
-                                <input type="text" id="txnUtrInput" placeholder="Enter 12-digit UTR / Ref No." maxlength="12"
-                                    onkeyup="this.value = this.value.toUpperCase();"
-                                    style="width:100%; padding:14px; background:rgba(15, 23, 42, 0.8); border:1px solid rgba(59, 130, 246, 0.5); color:white; border-radius:10px; font-family:monospace; letter-spacing:2px; font-size:1.1rem; outline:none; transition:all 0.3s; text-align:center;">
-                                <div id="utrError" style="color:#ef4444; font-size:0.85rem; margin-top:10px; display:none; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);"></div>
+                            <!-- UTR Input -->
+                            <div style="margin-bottom:30px; text-align:left;">
+                                <label style="display:block; margin-bottom:10px; color:#e2e8f0; font-size:0.95rem; font-weight: 500;">
+                                    Transaction UTR / Ref No.
+                                </label>
+                                <div style="position: relative;">
+                                    <input type="text" id="txnUtrInput" placeholder="Enter 12-digit number" maxlength="12"
+                                        onkeyup="this.value = this.value.toUpperCase();"
+                                        style="width:100%; padding:16px 20px; padding-right: 50px; background: rgba(15, 23, 42, 0.6); border: 2px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; font-family: monospace; letter-spacing: 2px; font-size: 1.2rem; outline: none; transition: all 0.3s;">
+                                    <i class="fas fa-receipt" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3);"></i>
+                                </div>
+                                <div class="field-helper" style="color: rgba(255,255,255,0.3); font-size: 0.8rem; margin-top: 8px;">
+                                    Usually found in payment details as "UPI Ref ID" or "UTR"
+                                </div>
+                                <div id="utrError" style="color:#ef4444; font-size:0.9rem; margin-top:10px; display:none; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); animation: shake 0.4s;"></div>
                             </div>
                             
-                            <!-- BRANDING SECTION (NEW) -->
-                            <div style="margin-bottom:25px; text-align:left; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                                <h4 style="color:white; margin-bottom:15px; font-size:1rem;">Institute Branding (Optional)</h4>
+                            <!-- BRANDING SECTION -->
+                            <div class="branding-section" style="margin-bottom:30px; text-align:left; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 25px;">
+                                <h4 style="color:white; margin-bottom:20px; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <span>Institute Branding</span>
+                                    <span style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; font-weight: 400; color: rgba(255,255,255,0.6);">Optional</span>
+                                </h4>
                                 
-                                <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.85rem;">Institute Name</label>
-                                <input type="text" id="instNameInput" placeholder="E.g. Delhi Public School"
-                                    style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; margin-bottom:15px;">
+                                <div style="margin-bottom: 20px;">
+                                    <label style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; display: block;">Institution Name</label>
+                                    <input type="text" id="instNameInput" placeholder="E.g. Delhi Public School"
+                                        style="width:100%; padding:14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:10px; transition: 0.3s;">
+                                </div>
+                                
+                                <style>
+                                    .file-upload-box {
+                                        background: rgba(255,255,255,0.03);
+                                        border: 1px dashed rgba(255,255,255,0.2);
+                                        border-radius: 12px;
+                                        padding: 15px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: 0.3s;
+                                        position: relative;
+                                    }
+                                    .file-upload-box:hover {
+                                        background: rgba(255,255,255,0.06);
+                                        border-color: rgba(99, 102, 241, 0.5);
+                                    }
+                                    .file-upload-box input {
+                                        position: absolute;
+                                        width: 100%;
+                                        height: 100%;
+                                        top: 0;
+                                        left: 0;
+                                        opacity: 0;
+                                        cursor: pointer;
+                                    }
+                                    .upload-icon { font-size: 1.5rem; color: #6366f1; margin-bottom: 8px; }
+                                    .upload-text { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+                                </style>
                                 
                                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.85rem;">Logo (PNG/JPG)</label>
-                                        <input type="file" id="instLogoInput" accept="image/*"
-                                            style="width:100%; font-size:0.8rem; color:var(--text-muted);">
+                                    <div class="file-upload-box">
+                                        <input type="file" id="instLogoInput" accept="image/*" onchange="window.updateFileName(this, 'logo-text')">
+                                        <div class="upload-icon">🏫</div>
+                                        <div class="upload-text" id="logo-text">Upload Logo</div>
                                     </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; color:var(--text-muted); font-size:0.85rem;">Signature (PNG)</label>
-                                        <input type="file" id="digSigInput" accept="image/*"
-                                            style="width:100%; font-size:0.8rem; color:var(--text-muted);">
+                                    <div class="file-upload-box">
+                                        <input type="file" id="digSigInput" accept="image/*" onchange="window.updateFileName(this, 'sig-text')">
+                                        <div class="upload-icon">✒️</div>
+                                        <div class="upload-text" id="sig-text">Upload Signature</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <button id="verifyBtn" onclick="verifyManualPayment('${manualOrderId}')" class="btn-primary" style="width:100%; padding:16px; font-size:1.1rem; margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:10px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">
-                                <i class="fas fa-shield-alt"></i> VERIFY & ACTIVATE
+                            <button id="verifyBtn" onclick="verifyManualPayment('${manualOrderId}')" class="btn-primary" 
+                                style="width:100%; padding:18px; font-size:1.1rem; border-radius: 14px; margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:12px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s;">
+                                <i class="fas fa-bolt"></i> VERIFY & ACTIVATE
                             </button>
-                            <button onclick="location.reload()" style="background:transparent; border:none; color:var(--text-muted); font-size:0.9rem; cursor:pointer; padding:10px;">
+                            
+                            <button onclick="location.reload()" style="background:transparent; border:none; color:var(--text-muted); font-size:0.9rem; cursor:pointer; padding:10px; transition: color 0.3s;">
                                 Cancel Transaction
                             </button>
                         </div>
