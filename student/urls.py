@@ -23,8 +23,8 @@ from .views import (
     DemoRequestView,
     DeveloperProfileView,
     ResumeView,
-    # New Views for Client Subscriptions
-    ClientSubscriptionView, SubscriptionRenewalView, RenewalSubmissionView,
+    # New Views for Client Subscriptions (Moved to subscription_views)
+    # ClientSubscriptionView, SubscriptionRenewalView, RenewalSubmissionView,
     # New Module Views
     LibraryBookListCreateView, LibraryBookDetailView, BookIssueListCreateView,
     HostelListCreateView, RoomListCreateView, HostelAllocationListCreateView,
@@ -34,11 +34,11 @@ from .views import (
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView, InvoiceDownloadView,
     LiveClassListCreateView, DepartmentListCreateView,
     ClientAuditLogListView, DashboardStatsView,
-    ClientAuditLogListView, DashboardStatsView,
     GenerateIDCardView, GenerateAdmitCardView, GenerateReportCardView,
     GlobalSearchView, HolidayListCreateView, RoutineListCreateView, BulkImportView
 )
 from .report_views import ReportListView, ReportDownloadView
+from .subscription_views import ClientSubscriptionView, SubscriptionRenewalView, RenewalSubmissionView
 from .student_portal_views import (
     StudentMyResultView, 
     StudentDownloadReportCardView, 
