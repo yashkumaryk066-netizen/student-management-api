@@ -10,7 +10,6 @@ from django.core.mail import send_mail
 
 from .models import ClientSubscription, UserProfile, Payment, Notification
 from .services.invoice_service import generate_invoice_pdf
-from .services.invoice_service import generate_invoice_pdf
 from .services.email_service import send_credentials_with_invoice
 from .services.telegram_service import send_telegram_notification
 from .plan_permissions import PLAN_FEATURES, FEATURE_META

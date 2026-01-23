@@ -69,7 +69,7 @@ class StudentListCreateView(APIView):
     required_feature = 'students'
 
     def get(self, request):
-        students = Student.objects.all()
+        students = Student.objects.select_related('parent', 'department').all()
         students = filter_by_owner(students, request.user)
 
         search = request.query_params.get("search")
@@ -93,6 +93,84 @@ class StudentListCreateView(APIView):
             )
 
         return Response(StudentSerializer(students, many=True).data)
+
+# ... [Skipping unchanged lines] ...
+
+class BookIssueListCreateView(generics.ListCreateAPIView):
+    queryset = BookIssue.objects.all()
+    serializer_class = BookIssueSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(
+            self.queryset.select_related('book', 'student'), 
+            self.request.user
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
+# ... [Skipping unchanged lines] ...
+
+class HostelAllocationListCreateView(generics.ListCreateAPIView):
+    queryset = HostelAllocation.objects.all()
+    serializer_class = HostelAllocationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(
+            self.queryset.select_related('student', 'room__hostel'),
+            self.request.user
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
+# ... [Skipping unchanged lines] ...
+
+class RouteListCreateView(generics.ListCreateAPIView):
+    queryset = Route.objects.all()
+    serializer_class = RouteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(
+            self.queryset.select_related('vehicle'), 
+            self.request.user
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
+class TransportAllocationListCreateView(generics.ListCreateAPIView):
+    queryset = TransportAllocation.objects.all()
+    serializer_class = TransportAllocationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(
+            self.queryset.select_related('student', 'route'), 
+            self.request.user
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
+# ... [Skipping unchanged lines] ...
+
+class ExamListCreateView(generics.ListCreateAPIView):
+    queryset = Exam.objects.all()
+    serializer_class = ExamSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(
+            self.queryset.select_related('subject', 'batch'), 
+            self.request.user
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
 
     def post(self, request):
         serializer = StudentSerializer(data=request.data)

@@ -46,17 +46,12 @@ from .team_views import TeamManagementView
 from .eazypay_views import InitEazypayPaymentView, EazypayCallbackView
 from .manual_payment_views import ManualPaymentSubmitView
 
-# Remove invalid imports - these are now part of views.py or no longer needed
 from .admin_dashboard_views import (
     AdminPaymentApprovalView, PendingPaymentsListView, PublicSubscriptionSubmitView,
     SuperAdminClientActionView, SuperAdminDashboardView
 )
 from .super_admin_views import SuperAdminAdvancedDashboardView, AuditLogView, AdminApprovalActionView
-from .subscription_views import (
-    SubscriptionPurchaseView, SubscriptionStatusView, SubscriptionRenewView,
-    verify_payment_api
-)
-from .plan_features_views import UserPlanFeaturesView
+# Removed unused legacy imports
 from .report_views import ReportListView, ReportDownloadView
 from .onboarding_views import OnboardingPaymentView, OnboardingBulkImportView
 from .payment_gateway_views import CreateOrderView
@@ -195,12 +190,6 @@ urlpatterns = [
     path('subscription/status/', ClientSubscriptionView.as_view(), name='subscription-status'),
     path('subscription/renew/', SubscriptionRenewalView.as_view(), name='subscription-renew'),
     path('subscription/submit/', PublicSubscriptionSubmitView.as_view(), name='subscription-submit-public'),
-    
-    # Old/Unused - Commenting out to avoid import errors
-    # path('subscription/buy/', SubscriptionPurchaseView.as_view(), name='subscription-buy'),  
-    # path('subscription/verify-payment/', verify_payment_api, name='subscription-verify-payment'),
-    # path('admin/payments/pending/', PendingPaymentsListView.as_view(), name='admin-pending-payments'),
-    # path('admin/payments/approve/', AdminPaymentApprovalView.as_view(), name='admin-approve-payment'),
     
     # ADMIN PAYMENT VERIFICATION
     path('admin/payments/pending/', PendingPaymentsListView.as_view(), name='admin-pending-payments'),
