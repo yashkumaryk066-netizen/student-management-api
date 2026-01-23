@@ -51,8 +51,11 @@ from .admin_dashboard_views import (
     SuperAdminClientActionView, SuperAdminDashboardView
 )
 from .super_admin_views import SuperAdminAdvancedDashboardView, AuditLogView, AdminApprovalActionView
+from .services.invoice_service import generate_invoice_pdf
+from .services.email_service import send_credentials_with_invoice
 # Removed unused legacy imports
 from .report_views import ReportListView, ReportDownloadView
+from .plan_features_views import UserPlanFeaturesView
 from .onboarding_views import OnboardingPaymentView, OnboardingBulkImportView
 from .payment_gateway_views import CreateOrderView
 from .password_reset_views import RequestPasswordResetView, VerifyAndResetPasswordView
