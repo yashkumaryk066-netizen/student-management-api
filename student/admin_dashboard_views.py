@@ -123,7 +123,7 @@ class PublicSubscriptionSubmitView(APIView):
 
             # Create Subscription (Inactive)
             ClientSubscription.objects.create(
-                client=user,
+                user=user,
                 plan_type=plan_type,
                 start_date=date.today(),
                 end_date=date.today(), # Expired until approved
