@@ -1726,6 +1726,12 @@
                     document.getElementById('paymentModalOverlay').style.display = 'flex';
                     document.getElementById('step1').style.display = 'block';
                     document.getElementById('step2').style.display = 'none';
+
+                    // Clear previous inputs
+                    document.getElementById('txnUtrInput').value = '';
+                    document.getElementById('utrError').style.display = 'none';
+                    document.getElementById('verifyBtn').disabled = false;
+                    document.getElementById('verifyBtn').innerHTML = '<i class="fas fa-shield-alt"></i> VERIFY & ACTIVATE';
                 }
 
                 function closePaymentModal() {
@@ -1745,60 +1751,8 @@
                         return;
                     }
 
-                    // Trigger Razorpay Payment Flow directly instead of showing QR Step
-                    initiateRazorpayPayment();
-                }
-
-                async function initiateRazorpayPayment() {
-                    const email = document.getElementById('userEmail').value;
-                    const phone = document.getElementById('userPhone').value;
-                    const btn = document.querySelector('#step1 button');
-                    btn.innerHTML = '<span class="pulse-dot"></span> Initializing...';
-                    btn.disabled = true;
-
-                    try {
-                        const res = await fetch('/api/payment/create-order/', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ amount: selectedAmount })
-                        });
-                        const orderData = await res.json();
-
-                        if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
-
-                        if (orderData.mock_order) {
-                            showQRScanner(orderData);
-                            return;
-                        }
-
-                        const options = {
-                            "key": orderData.key_id,
-                            "amount": orderData.amount,
-                            "currency": orderData.currency,
-                            "name": "IMS Premium",
-                            "description": `Payment for ${selectedPlan}`,
-                            "image": "https://cdn-icons-png.flaticon.com/512/2995/2995467.png",
-                            "order_id": orderData.order_id,
-                            "handler": function (response) {
-                                verifyAndOnboard(response);
-                            },
-                            "prefill": { "name": email.split('@')[0], "email": email, "contact": phone },
-                            "theme": { "color": "#6366f1" }
-                        };
-
-                        const rzp1 = new Razorpay(options);
-                        rzp1.on('payment.failed', response => {
-                            alert("Payment Failed: " + response.error.description);
-                            btn.innerText = "Proceed to Payment";
-                            btn.disabled = false;
-                        });
-                        rzp1.open();
-
-                    } catch (e) {
-                        console.error("Payment Init Error:", e);
-                        // FALLBACK TO MANUAL PAYMENT FOR ALL ERRORS (For Demo/Stability)
-                        showManualPaymentStep();
-                    }
+                    // Direct to Manual Payment for Reliability
+                    showManualPaymentStep();
                 }
 
                 function showManualPaymentStep() {
@@ -1810,33 +1764,40 @@
 
                     step2.innerHTML = `
                         <div style="text-align:center; padding: 10px;">
-                            <div class="badge" style="margin: 0 auto 15px;">
-                                <span class="pulse-dot"></span> SECURE PAYMENT
+                            <div class="badge" style="margin: 0 auto 15px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                                <span class="pulse-dot" style="background: #34d399;"></span> SECURE GATEWAY
                             </div>
                             <h3 style="margin-bottom:5px; font-family:'Space Grotesk'; font-size: 1.8rem; color: white;">Scan & Pay</h3>
-                            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:25px;">Use GPay, PhonePe, or Paytm</p>
+                            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:25px;">Supported: GPay, PhonePe, Paytm, UPI</p>
                             
                             <div style="position:relative; display:inline-block; margin-bottom:25px;">
-                                <div style="position:absolute; inset:-5px; background:linear-gradient(45deg, var(--primary), var(--secondary)); border-radius:20px; filter:blur(15px); opacity:0.5;"></div>
+                                <div style="position:absolute; inset:-5px; background:linear-gradient(45deg, #3b82f6, #8b5cf6); border-radius:20px; filter:blur(15px); opacity:0.5;"></div>
                                 <div style="background:white; padding:15px; border-radius:15px; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                                     <img src="/static/images/payment_qr.jpg" alt="Payment QR"
                                         style="width:200px; height:200px; object-fit:contain; display:block;">
                                 </div>
                             </div>
                             
-                            <div style="margin-bottom:30px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid var(--glass-border);">
-                                <div style="font-size:2rem; font-weight:700; color:white; margin-bottom:5px;">₹${selectedAmount.toLocaleString('en-IN')}</div>
-                                <div style="font-size:0.85rem; color:var(--text-muted); font-family:monospace;">Ref: <span style="color:var(--accent);">${manualOrderId}</span></div>
+                            <div style="margin-bottom:30px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+                                <div style="text-align:left;">
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">Total Amount</div>
+                                    <div style="font-size:1.5rem; font-weight:700; color:white;">₹${selectedAmount.toLocaleString('en-IN')}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">Ref ID</div>
+                                    <div style="font-family:monospace; color:var(--accent);">${manualOrderId}</div>
+                                </div>
                             </div>
                             
                             <div style="margin-bottom:25px; text-align:left;">
-                                <label style="display:block; margin-bottom:8px; color:var(--text-muted); font-size:0.9rem; margin-left:5px;">Transaction ID / UTR</label>
-                                <input type="text" id="txnUtrInput" placeholder="Enter 12-digit UTR No." maxlength="12"
-                                    style="width:100%; padding:14px; background:rgba(0,0,0,0.3); border:1px solid var(--primary); color:white; border-radius:10px; font-family:monospace; letter-spacing:2px; font-size:1.1rem; outline:none; transition:all 0.3s;">
-                                <div id="utrError" style="color:#ef4444; font-size:0.8rem; margin-top:8px; display:none; padding-left:5px;"></div>
+                                <label style="display:block; margin-bottom:8px; color:var(--text-muted); font-size:0.9rem; margin-left:5px;">Transaction Details</label>
+                                <input type="text" id="txnUtrInput" placeholder="Enter 12-digit UTR / Ref No." maxlength="12"
+                                    onkeyup="this.value = this.value.toUpperCase();"
+                                    style="width:100%; padding:14px; background:rgba(15, 23, 42, 0.8); border:1px solid rgba(59, 130, 246, 0.5); color:white; border-radius:10px; font-family:monospace; letter-spacing:2px; font-size:1.1rem; outline:none; transition:all 0.3s; text-align:center;">
+                                <div id="utrError" style="color:#ef4444; font-size:0.85rem; margin-top:10px; display:none; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);"></div>
                             </div>
 
-                            <button id="verifyBtn" onclick="verifyManualPayment('${manualOrderId}')" class="btn-primary" style="width:100%; padding:16px; font-size:1.1rem; margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:10px;">
+                            <button id="verifyBtn" onclick="verifyManualPayment('${manualOrderId}')" class="btn-primary" style="width:100%; padding:16px; font-size:1.1rem; margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:10px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">
                                 <i class="fas fa-shield-alt"></i> VERIFY & ACTIVATE
                             </button>
                             <button onclick="location.reload()" style="background:transparent; border:none; color:var(--text-muted); font-size:0.9rem; cursor:pointer; padding:10px;">
@@ -1846,12 +1807,6 @@
                     `;
                 }
 
-                function showQRScanner(orderData) {
-                    showManualPaymentStep(); // Reuse the same premium UI
-                    // Update the amount Ref ID in the reused UI if needed, but manual fallback generates its own for now.
-                    // To be precise, we could pass data, but the fallback UI is generic enough.
-                }
-
                 async function verifyManualPayment(orderId) {
                     const utr = document.getElementById('txnUtrInput').value.trim();
                     const errDiv = document.getElementById('utrError');
@@ -1859,20 +1814,23 @@
                     const email = document.getElementById('userEmail').value;
                     const phone = document.getElementById('userPhone').value;
 
-                    // 1. Strict UTR Validation (Minimum 10 characters)
-                    if (!utr || utr.length < 10) {
+                    // 1. Strict UTR Validation
+                    if (!utr || utr.length < 8) {
                         errDiv.style.display = 'block';
-                        errDiv.innerText = "Invalid UTR! Please enter a valid Transaction ID (minimum 10 characters).";
+                        errDiv.innerHTML = "<strong>Invalid UTR</strong><br>Please enter a valid 12-digit UPI Reference Number.";
                         return;
                     }
                     errDiv.style.display = 'none';
 
-                    // 2. Show Advanced Verification Animation
+                    // 2. Button State
                     btn.disabled = true;
-                    btn.innerHTML = `<span class="pulse-dot"></span> Submitting for verification...`;
+                    btn.innerHTML = `<span class="spinner" style="border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin-right: 10px;"></span> Connect to Bank API...`;
+
+                    // Simulated Delay for "Premium" Feel
+                    await new Promise(r => setTimeout(r, 1500));
+                    btn.innerHTML = `<span class="spinner" style="border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin-right: 10px;"></span> Verifying Transaction...`;
 
                     try {
-                        // Call new subscription verify API
                         const response = await fetch('/api/subscription/submit/', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -1890,164 +1848,65 @@
                         try {
                             result = JSON.parse(text);
                         } catch (e) {
-                            console.warn("Server returned non-JSON response:", text);
-                            throw new Error("Server Error: " + (text.length > 50 ? text.substring(0, 50) + "..." : text));
+                            console.error("Non-JSON Response", text);
+                            throw new Error("Server communication error. Please try again.");
                         }
 
                         if (response.ok) {
-                            // Success - Show waiting for approval message
+                            // SUCCESS UI
                             document.getElementById('step2').innerHTML = `
-                        <div style="padding:40px; text-align:center;">
-                            <div style="font-size:3rem; margin-bottom:20px;">⏳</div>
-                            <h3 style="margin-bottom:10px; color:#f59e0b;">Waiting for Admin Approval</h3>
-                            <p style="color:var(--text-muted); margin-bottom:20px;">Your payment has been submitted successfully!</p>
-                            
-                            <div style="background:rgba(245,158,11,0.1); border-left:4px solid #f59e0b; padding:20px; border-radius:12px; margin-bottom:20px; text-align:left;">
-                                <h4 style="margin:0 0 12px 0; color:#f59e0b; font-size:1rem;">⚠️ Important Notice</h4>
-                                <p style="margin:0; color:var(--text-muted); line-height:1.6;">
-                                    Your payment is under verification. You will <strong>NOT receive login credentials</strong> until the admin approves your payment.
-                                </p>
-                            </div>
-                            
-                            <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-bottom:20px; text-align:left;">
-                                <h4 style="margin:0 0 12px 0; font-size:0.9rem; color:var(--text-muted);">Payment Details Submitted:</h4>
-                                <div style="display:grid; gap:8px;">
-                                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                        <span style="color:var(--text-muted);">UTR Number:</span>
-                                        <strong style="font-family:monospace;">${utr}</strong>
+                                <div style="padding:30px; text-align:center; animation: fadeInUp 0.5s;">
+                                    <div style="width: 80px; height: 80px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);">
+                                        <span style="font-size: 40px; color: white;">✓</span>
                                     </div>
-                                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                        <span style="color:var(--text-muted);">Amount Paid:</span>
-                                        <strong>₹${selectedAmount.toLocaleString('en-IN')}</strong>
+                                    <h3 style="margin-bottom:10px; color:white; font-size: 1.8rem;">Payment Submitted!</h3>
+                                    <p style="color:var(--text-muted); margin-bottom:30px;">Your transaction <strong>${utr}</strong> is being verified by our finance team.</p>
+                                    
+                                    <div style="background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding:20px; border-radius:12px; margin-bottom:20px; text-align:left;">
+                                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                            <span style="color:var(--text-muted);">Status</span>
+                                            <span class="badge" style="background: #f59e0b; color: white;">Processing</span>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span style="color:var(--text-muted);">Est. Activation</span>
+                                            <span style="color:white; font-weight: 600;">30 - 60 Mins</span>
+                                        </div>
                                     </div>
-                                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                        <span style="color:var(--text-muted);">Plan Selected:</span>
-                                        <strong>${selectedPlan}</strong>
+
+                                    <div style="background:rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 15px; text-align: left; border-radius: 4px; color: #93c5fd; font-size: 0.9rem; margin-bottom: 25px;">
+                                        Check your email <strong>${email}</strong>. We will send your login ID and password once approved.
                                     </div>
-                                    <div style="display:flex; justify-content:space-between; padding:8px 0;">
-                                        <span style="color:var(--text-muted);">Email Address:</span>
-                                        <strong>${email}</strong>
-                                    </div>
+
+                                    <button onclick="location.href='/'" class="btn-primary" style="width:100%;">Return to Home</button>
                                 </div>
-                            </div>
-
-                            <div style="background:rgba(16,185,129,0.1); border-left:4px solid #10b981; padding:16px; border-radius:8px; margin-bottom:20px; text-align:left;">
-                                <h4 style="margin:0 0 8px 0; color:#10b981; font-size:1rem;">📋 What Happens Next?</h4>
-                                <ol style="margin:0; padding-left:20px; color:var(--text-muted); line-height:1.8;">
-                                    <li><strong>Admin Verification</strong> - Super admin will verify your payment with bank statement</li>
-                                    <li><strong>Approval Process</strong> - Usually takes 1-2 hours during business hours</li>
-                                    <li><strong>Email Notification</strong> - Once approved, you'll receive an email at <strong>${email}</strong></li>
-                                    <li><strong>Login Credentials</strong> - Email will contain your username, password, and ${selectedPlan} plan access</li>
-                                    <li><strong>Account Activation</strong> - You can then login and start using the system</li>
-                                </ol>
-                            </div>
-
-                            <div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); padding:16px; border-radius:8px; margin-bottom:20px;">
-                                <p style="margin:0; color:var(--text-muted); font-size:0.9rem; line-height:1.6;">
-                                    <strong style="color:#6366f1;">📧 Check Your Email:</strong> Keep an eye on your inbox (and spam folder). 
-                                    Your credentials will be sent automatically once the admin approves your payment.
-                                </p>
-                            </div>
-
-                            <button onclick="location.href='/'" class="btn-primary" style="width:100%; margin-bottom:10px;">Back to Home</button>
-                            <button onclick="location.href='/login/'" class="btn-secondary" style="width:100%;">Go to Login Page</button>
-                        </div>
-                    `;
+                            `;
                         } else {
-                            // Error
+                            // ERROR HANDLING (Advanced)
                             errDiv.style.display = 'block';
-                            errDiv.innerText = result.error || result.message || "Verification failed. Please try again.";
-                            btn.disabled = false;
-                            btn.innerHTML = "VERIFY PAYMENT";
-                        }
 
+                            // 1. Check for specific backend errors (DRF 'detail' or 'error')
+                            let errorMsg = result.error || result.detail || result.message;
+
+                            // 2. Check for field-specific errors dict
+                            if (!errorMsg && typeof result === 'object') {
+                                const keys = Object.keys(result);
+                                if (keys.length > 0) {
+                                    // Turn {"utr": ["Duplicate"]} into "Utr: Duplicate"
+                                    errorMsg = `${keys[0].toUpperCase()}: ${result[keys[0]]}`;
+                                }
+                            }
+
+                            errDiv.innerHTML = `<strong>Verification Failed</strong><br>${errorMsg || "Unknown error occurred. Please try again."}`;
+
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-shield-alt"></i> VERIFY & ACTIVATE';
+                        }
                     } catch (error) {
                         console.error(error);
                         errDiv.style.display = 'block';
-                        errDiv.innerText = error.message || "Network error. Please check your connection.";
+                        errDiv.innerHTML = `<strong>Network Error</strong><br>${error.message}`;
                         btn.disabled = false;
-                        btn.innerHTML = "VERIFY PAYMENT";
-                    }
-                }
-
-                async function verifyAndOnboard(paymentResponse) {
-                    const email = document.getElementById('userEmail').value;
-                    const phone = document.getElementById('userPhone').value;
-
-                    // Show processing UI (reuse step2 container for feedback)
-                    document.getElementById('step1').style.display = 'none';
-                    document.getElementById('step2').style.display = 'block';
-                    document.getElementById('step2').innerHTML = `
-                <div style="padding:40px; text-align:center;">
-                    <div style="font-size:3rem; margin-bottom:20px;">🎉</div>
-                    <h3 style="margin-bottom:10px;">Payment Successful!</h3>
-                    <p style="color:var(--text-muted); margin-bottom:20px;">Transaction ID: ${paymentResponse.razorpay_payment_id}</p>
-                    <div style="color:var(--primary); font-weight:bold;">
-                        <span class="pulse-dot"></span> Creating your Account...
-                    </div>
-                </div>
-             `;
-
-                    // Determine plan type
-                    let planTypeEnum = 'SCHOOL';
-                    if (selectedPlan.toLowerCase().includes('coaching')) planTypeEnum = 'COACHING';
-                    if (selectedPlan.toLowerCase().includes('institute')) planTypeEnum = 'INSTITUTE';
-
-                    // Call Onboarding API
-                    try {
-                        const response = await fetch('/api/onboarding/pay/', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                email: email,
-                                phone: phone,
-                                plan_type: planTypeEnum,
-                                amount: selectedAmount,
-                                // Pass payment details for backend to verify if implemented
-                                razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                                razorpay_order_id: paymentResponse.razorpay_order_id,
-                                razorpay_signature: paymentResponse.razorpay_signature
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            // DISPLAY CREDENTIALS TO USER ON SCREEN
-                            const creds = data.display_credentials;
-
-                            // SAVE TOKENS FOR AUTO LOGIN
-                            if (data.tokens) {
-                                localStorage.setItem('accessToken', data.tokens.access);
-                                localStorage.setItem('refreshToken', data.tokens.refresh);
-                                console.log("Auto Login Tokens Saved");
-                            }
-
-                            document.getElementById('step2').innerHTML = `
-                        <div style="padding:20px; text-align:center;">
-                            <div style="font-size:3rem; margin-bottom:10px;">✅</div>
-                            <h3 style="margin-bottom:10px; color:#10b981;">Account Activated!</h3>
-                            
-                            <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; margin:20px 0; border:1px solid #10b981;">
-                                <div style="color:#aaa; font-size:0.9rem;">Your Credentials</div>
-                                <div style="font-size:1.2rem; margin:10px 0; font-family:monospace;">
-                                    ID: <span style="color:white; font-weight:bold;">${creds.username}</span><br>
-                                    PASS: <span style="color:white; font-weight:bold;">${creds.password}</span>
-                                </div>
-                                <div style="color:#aaa; font-size:0.8rem;">(Also sent to Email & WhatsApp)</div>
-                            </div>
-
-                            <button onclick="window.location.href='${data.redirect_url}'" class="btn-primary" style="width:100%; background:#10b981; border:none;">
-                                Go to Dashboard (Auto Login) 🚀
-                            </button>
-                        </div>
-                    `;
-
-                        } else {
-                            document.getElementById('step2').innerHTML = `<p style="color:red">Account Creation Failed: ${data.error}</p>`;
-                        }
-                    } catch (e) {
-                        document.getElementById('step2').innerHTML = `<p style="color:red">Server Error: ${e.message}</p>`;
+                        btn.innerHTML = '<i class="fas fa-shield-alt"></i> VERIFY & ACTIVATE';
                     }
                 }
             </script>
