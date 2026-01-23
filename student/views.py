@@ -266,8 +266,11 @@ class TeamManagementView(APIView):
 
     def get(self, request):
         """List all staff and teachers in the institution"""
-        # Get employees
-        employees = filter_by_owner(Employee.objects.all(), request.user)
+        # Get employees with related user and department
+        employees = filter_by_owner(
+            Employee.objects.select_related('user', 'user__profile', 'department', 'designation').all(), 
+            request.user
+        )
         
         return Response({
             "employees": EmployeeSerializer(employees, many=True).data,
@@ -422,7 +425,8 @@ class PaymentListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = Payment.objects.all()
+        # Optimize with select_related to prevent N+1 queries
+        qs = Payment.objects.select_related('student', 'student__parent', 'user').all()
 
         if request.user.profile.role == 'PARENT':
             qs = qs.filter(student__parent=request.user)
@@ -631,7 +635,7 @@ class RouteListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=get_owner_user(self.request.user))
 
 class TransportAllocationListCreateView(generics.ListCreateAPIView):
-    queryset = TransportAllocation.objects.all()
+    queryset = TransportAllocation.objects.select_related('student', 'route', 'vehicle').all()
     serializer_class = TransportAllocationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -643,7 +647,7 @@ class TransportAllocationListCreateView(generics.ListCreateAPIView):
 
 # --- HR ---
 class EmployeeListCreateView(generics.ListCreateAPIView):
-    queryset = Employee.objects.all()
+    queryset = Employee.objects.select_related('user', 'user__profile', 'department', 'designation').all()
     serializer_class = EmployeeSerializer
     permission_classes = [IsAuthenticated, permissions.IsAdminUser]
 
@@ -655,7 +659,7 @@ class EmployeeListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=owner)
 
 class LeaveRequestListCreateView(generics.ListCreateAPIView):
-    queryset = LeaveRequest.objects.all()
+    queryset = LeaveRequest.objects.select_related('employee', 'employee__user', 'approved_by').all()
     serializer_class = LeaveRequestSerializer
     permission_classes = [IsAuthenticated]
 
@@ -667,7 +671,7 @@ class LeaveRequestListCreateView(generics.ListCreateAPIView):
 
 # --- ACADEMIC / EXAMS ---
 class ExamListCreateView(generics.ListCreateAPIView):
-    queryset = Exam.objects.all()
+    queryset = Exam.objects.select_related('course').prefetch_related('students').all()
     serializer_class = ExamSerializer
     permission_classes = [IsAuthenticated]
 
@@ -678,7 +682,7 @@ class ExamListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=get_owner_user(self.request.user))
 
 class EventListCreateView(generics.ListCreateAPIView):
-    queryset = Event.objects.all()
+    queryset = Event.objects.prefetch_related('participants').all()
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
 
@@ -690,7 +694,7 @@ class EventListCreateView(generics.ListCreateAPIView):
 
 # --- COACHING ---
 class CourseListCreateView(generics.ListCreateAPIView):
-    queryset = Course.objects.all()
+    queryset = Course.objects.select_related('department').prefetch_related('batches').all()
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
 
@@ -701,7 +705,7 @@ class CourseListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=get_owner_user(self.request.user))
 
 class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Course.objects.all()
+    queryset = Course.objects.select_related('department').prefetch_related('batches').all()
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
 
@@ -709,7 +713,7 @@ class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
         return filter_by_owner(self.queryset, self.request.user)
 
 class BatchListCreateView(generics.ListCreateAPIView):
-    queryset = Batch.objects.all()
+    queryset = Batch.objects.select_related('course').prefetch_related('enrollments', 'enrollments__student').all()
     serializer_class = BatchSerializer
     permission_classes = [IsAuthenticated]
 
@@ -720,7 +724,7 @@ class BatchListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=get_owner_user(self.request.user))
 
 class EnrollmentListCreateView(generics.ListCreateAPIView):
-    queryset = Enrollment.objects.all()
+    queryset = Enrollment.objects.select_related('student', 'student__user', 'batch', 'batch__course').all()
     serializer_class = EnrollmentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -731,7 +735,7 @@ class EnrollmentListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=get_owner_user(self.request.user))
 
 class LiveClassListCreateView(generics.ListCreateAPIView):
-    queryset = LiveClass.objects.all()
+    queryset = LiveClass.objects.select_related('course', 'teacher', 'teacher__user').all()
     serializer_class = LiveClassSerializer
     permission_classes = [IsAuthenticated]
 

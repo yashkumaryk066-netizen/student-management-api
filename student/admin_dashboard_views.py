@@ -184,28 +184,21 @@ class AdminPaymentApprovalView(APIView):
                     payment.save()
 
                     # Log approval details
-                    print(f"\n{'='*60}")
-                    print(f"PAYMENT APPROVED - DEBUG INFO")
-                    print(f"{'='*60}")
-                    print(f"User: {user.username} (ID: {user.id})")
-                    print(f"Email: {email}")
-                    print(f"Created: {created}")
-                    print(f"Password: {'[GENERATED]' if password else '[EXISTING - None]'}")
-                    print(f"Plan: {sub.plan_type}")
-                    print(f"{'='*60}\n")
+                    logger.info(f"Payment approved: User={user.username} (ID={user.id}), Plan={sub.plan_type}, Created={created}")
+                    logger.debug(f"Email={email}, Amount={payment.amount}, Transaction={payment.transaction_id}")
 
                     # Generate Invoice & Send Email
                     try:
                         invoice_pdf = generate_invoice_pdf(user, sub, payment)
-                        print(f"✅ Invoice PDF generated successfully")
+                        logger.debug(f"Invoice PDF generated successfully")
                         
                         # CRITICAL FIX: Always send credentials
                         email_result = send_credentials_with_invoice(user, password, sub.plan_type, invoice_pdf)
                         
                         if email_result:
-                            print(f"✅ Email sent successfully to {email}")
+                            logger.info(f"Email sent successfully to {email}")
                         else:
-                            print(f"❌ Email sending failed to {email}")
+                            logger.warning(f"Email sending failed to {email}")
                             # Log but don't fail the approval
                             logger.error(f"Email send failed for {email}")
                         
@@ -245,13 +238,10 @@ class AdminPaymentApprovalView(APIView):
                         )
                         
                         send_telegram_notification(tg_chat_id, tg_message, invoice_pdf, invoice_filename=f"Invoice_{user.username}.pdf")
-                        print(f"✅ Telegram notification sent")
+                        logger.info(f"Telegram notification sent for {user.username}")
 
                     except Exception as e:
-                        logger.error(f"Error sending notifications: {e}")
-                        print(f"❌ Notification Error: {str(e)}")
-                        import traceback
-                        traceback.print_exc()
+                        logger.error(f"Notification error for {email}: {str(e)}")
 
                     return Response({'message': 'Payment approved'}, status=200)
 
@@ -268,8 +258,8 @@ class AdminPaymentApprovalView(APIView):
                             [email],
                             fail_silently=True
                         )
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.error(f"Rejection email failed for {email}: {str(e)}")
 
                 return Response({'message': 'Payment rejected'}, status=200)
 
