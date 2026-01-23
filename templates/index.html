@@ -2024,6 +2024,17 @@
                 }
             </script>
 
+            <script>
+                // Helper for Premium File Inputs
+                window.updateFileName = function (input, id) {
+                    if (input.files && input.files[0]) {
+                        document.getElementById(id).innerText = input.files[0].name.substring(0, 15) + (input.files[0].name.length > 15 ? '...' : '');
+                        document.getElementById(id).style.color = '#34d399';
+                        document.getElementById(id).style.fontWeight = 'bold';
+                    }
+                };
+            </script>
+
             <!-- Three.js Particle System -->
             <script>
                 const canvas = document.getElementById('bg-canvas');
