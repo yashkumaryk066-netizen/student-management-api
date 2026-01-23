@@ -272,6 +272,8 @@
                     </a></li>
                 <li class="nav-item"><a href="#institutes" class="nav-link" onclick="switchTab('institutes')"><span
                             class="nav-icon">🏛️</span> Institutes</a></li>
+                <li class="nav-item"><a href="#students" class="nav-link" onclick="switchTab('students')"><span
+                            class="nav-icon">👥</span> Students (Advanced)</a></li>
 
                 <li class="nav-category">Management</li>
                 <li class="nav-item"><a href="#billing" class="nav-link" onclick="switchTab('billing')"><span
@@ -303,7 +305,7 @@
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <!-- PREMIUM BACK BUTTON -->
-                <button onclick="window.location.href='/dashboard/'"
+                <button onclick="window.location.href='/dashboard/admin/?allow_admin=true'"
                     style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #3b82f6; padding: 10px 16px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.3s;"
                     onmouseover="this.style.background='rgba(59, 130, 246, 0.2)'; this.style.borderColor='rgba(59, 130, 246, 0.5)';"
                     onmouseout="this.style.background='rgba(59, 130, 246, 0.1)'; this.style.borderColor='rgba(59, 130, 246, 0.3)';">
@@ -443,7 +445,107 @@
             <p style="color:#94a3b8">Details coming soon...</p>
         </div>
 
+        <!-- 4. STUDENTS (NEW PREMIUM MODULE) -->
+        <div id="tab-students" class="dashboard-tab" style="display: none;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="color: white; font-size: 20px;">Student Management (Advanced)</h2>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="saStudentSearch" onkeyup="fetchSaStudents()"
+                        placeholder="Search by name, email..."
+                        style="padding: 10px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6); color: white; width: 250px;">
+                    <button onclick="fetchSaStudents()" class="btn-view">Refresh</button>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="padding: 0; overflow: hidden;">
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Grade/Class</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="saStudentTable">
+                            <!-- Populated by JS -->
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                    Loading student data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </main>
+
+    <!-- Super Admin Edit Student Modal -->
+    <div class="modal-overlay" id="saEditStudentModal" style="z-index: 2000;">
+        <div class="modal-content" style="max-width: 600px; background: #0f172a; border: 1px solid #3b82f6;">
+            <button class="close-modal" onclick="closeSaEditModal()">×</button>
+            <h2 style="color: white; margin-bottom: 5px; font-size: 20px;">✏️ Edit Student Profile</h2>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 25px;">Advanced Modification Mode</p>
+
+            <form id="saEditForm" onsubmit="event.preventDefault(); submitSaEditStudent();">
+                <input type="hidden" id="saEditId">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Full
+                            Name</label>
+                        <input type="text" id="saEditName" required
+                            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                    </div>
+                    <div>
+                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Institution
+                            Type</label>
+                        <select id="saEditType" required
+                            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                            <option value="SCHOOL">School</option>
+                            <option value="COACHING">Coaching</option>
+                            <option value="INSTITUTE">Institute</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label
+                            style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Grade</label>
+                        <input type="text" id="saEditGrade"
+                            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                    </div>
+                    <div>
+                        <label
+                            style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Gender</label>
+                        <select id="saEditGender"
+                            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Age</label>
+                        <input type="number" id="saEditAge"
+                            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                    </div>
+                </div>
+
+                <button type="submit"
+                    style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+                    💾 Save Changes (Live)
+                </button>
+            </form>
+        </div>
+    </div>
 
     <script>
         // --- AUTH & API HELPERS ---
@@ -630,6 +732,105 @@
             `).join('');
         }
 
+        // --- STUDENTS MODULE ---
+        async function fetchSaStudents() {
+            console.log("Fetching Students for SuperAdmin...");
+            try {
+                const search = document.getElementById('saStudentSearch')?.value || '';
+                const response = await fetch(`/api/students/?search=${encodeURIComponent(search)}`, {
+                    headers: { 'Authorization': 'Bearer ' + getAccessToken() }
+                });
+
+                if (!response.ok) throw new Error("Failed");
+
+                const data = await response.json();
+                const students = data.results || data; // Handle pagination
+
+                const tbody = document.getElementById('saStudentTable');
+                if (!tbody) return;
+
+                if (students.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">No students found.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = students.map(s => `
+                    <tr>
+                        <td style="color: #64748b; font-family: monospace;">#${s.id}</td>
+                        <td>
+                            <div style="font-weight: 600; color: white;">${s.name}</div>
+                            <div style="font-size: 11px; color: #64748b;">${s.email || 'No Email'}</div>
+                        </td>
+                        <td><span class="status-tag" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">${s.institution_type || 'N/A'}</span></td>
+                        <td>${s.grade || '-'}</td>
+                        <td><span style="color: #10b981;">● Active</span></td>
+                        <td style="text-align: right;">
+                            <button onclick='openSaEditModal(${JSON.stringify(s).replace(/'/g, "&apos;")})' 
+                                style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                                ✏️ Edit
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // --- EDIT MODAL LOGIC ---
+        function openSaEditModal(student) {
+            document.getElementById('saEditId').value = student.id;
+            document.getElementById('saEditName').value = student.name;
+            document.getElementById('saEditType').value = student.institution_type;
+            document.getElementById('saEditGrade').value = student.grade;
+            document.getElementById('saEditGender').value = student.gender;
+            document.getElementById('saEditAge').value = student.age;
+
+            document.getElementById('saEditStudentModal').style.display = 'flex';
+        }
+
+        function closeSaEditModal() {
+            document.getElementById('saEditStudentModal').style.display = 'none';
+        }
+
+        async function submitSaEditStudent() {
+            const id = document.getElementById('saEditId').value;
+            const data = {
+                name: document.getElementById('saEditName').value,
+                institution_type: document.getElementById('saEditType').value,
+                grade: document.getElementById('saEditGrade').value,
+                gender: document.getElementById('saEditGender').value,
+                age: document.getElementById('saEditAge').value,
+            };
+
+            const csrfMatch = document.cookie.match(/csrftoken=([\w-]+)/);
+            const csrfToken = csrfMatch ? csrfMatch[1] : '';
+
+            try {
+                const res = await fetch(`/api/students/${id}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': 'Bearer ' + getAccessToken(),
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    closeSaEditModal();
+                    fetchSaStudents(); // Refresh
+                    showPremiumAlert('Student Updated Successfully! ✅', 'success');
+                } else {
+                    showPremiumAlert('Update Failed ❌', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showPremiumAlert('Network Error ⚠️', 'error');
+            }
+        }
+
         function renderInstitutes(list) {
             const tbody = document.getElementById('instituteListTable');
             if (list && list.length > 0) {
@@ -737,7 +938,20 @@
         }
 
         // Initial Load
-        document.addEventListener('DOMContentLoaded', fetchDashboardData);
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDashboardData();
+            // Also fetch students if starting on students tab (though default is overview)
+        });
+
+        // Hook into switchTab to load students when tab is clicked
+        const originalSwitchTab = switchTab;
+        switchTab = function (tabId) {
+            originalSwitchTab(tabId);
+            if (tabId === 'students') {
+                fetchSaStudents();
+            }
+        };
     </script>
 </body>
 
