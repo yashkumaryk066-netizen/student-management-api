@@ -33,7 +33,21 @@ async function apiCall(endpoint, options = {}) {
     };
 
     try {
-        const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        // --- RETRY LOGIC WRAPPER ---
+        const fetchWithRetry = async (url, opts, retries = 2, delay = 1000) => {
+            try {
+                return await fetch(url, opts);
+            } catch (err) {
+                if (retries > 0 && err.name !== 'AbortError') {
+                    console.log(`📡 Connection unstable. Retrying... (${retries} left)`);
+                    await new Promise(res => setTimeout(res, delay));
+                    return fetchWithRetry(url, opts, retries - 1, delay * 1.5); // Exponential backoff
+                }
+                throw err;
+            }
+        };
+
+        const res = await fetchWithRetry(`${API_BASE_URL}${endpoint}`, {
             ...options,
             headers,
             signal: options.signal
@@ -72,6 +86,12 @@ async function apiCall(endpoint, options = {}) {
         if (err.name !== 'AbortError') {
             console.error('API Error:', err);
         }
+
+        // Enhance Network Error for User
+        if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+            throw new Error('Connection lost. Please check your internet.');
+        }
+
         throw err;
     }
 }
