@@ -39,8 +39,9 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Firefox Support for Premium Look */
     scrollbar-width: thin;
-    scrollbar-color: var(--primary) var(--bg-dark);
+    scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
 }
 
 body {
@@ -117,6 +118,8 @@ body {
     border-right: 2px solid rgba(59, 130, 246, 0.3);
     padding: 24px;
     padding-bottom: 80px;
+    padding-right: 12px;
+    /* Increased right padding to prevent scrollbar overlap */
     /* Extra space for scroll comfort */
     z-index: 10000;
     display: flex;
@@ -133,35 +136,49 @@ body {
     /* iOS smooth scrolling */
 }
 
-/* Premium Custom Scrollbar for Sidebar */
-/* Premium Ultra-Smooth Scrollbar */
+/* ============================================
+   PREMIUM GLASS SCROLLBAR (GLOBAL & SIDEBAR)
+   ============================================ */
+/* Global Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6);
+    /* Neon Blue */
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+/* Sidebar Specific - Inherits global but ensures transparency */
 .sidebar::-webkit-scrollbar,
 .dash-sidebar::-webkit-scrollbar,
 .nav-menu::-webkit-scrollbar {
-    width: 5px;
-}
-
-.sidebar::-webkit-scrollbar-track,
-.dash-sidebar::-webkit-scrollbar-track,
-.nav-menu::-webkit-scrollbar-track {
-    background: transparent;
-    /* Invisible track for cleaner look */
-    margin: 4px;
+    width: 6px;
 }
 
 .sidebar::-webkit-scrollbar-thumb,
 .dash-sidebar::-webkit-scrollbar-thumb,
 .nav-menu::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.3);
-    border-radius: 20px;
-    transition: background 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover,
 .dash-sidebar::-webkit-scrollbar-thumb:hover,
 .nav-menu::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.8);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    background: rgba(99, 102, 241, 0.7);
 }
 
 /* Enhanced Glow When Active */
@@ -211,8 +228,10 @@ body {
     position: relative;
     overflow: visible;
     /* Changed from hidden to visible */
-    min-height: 80px;
-    /* Ensure height accommodates wrapped text */
+    min-height: auto;
+    /* Allow natural height */
+    padding-right: 12px;
+    /* Ensure space from scrollbar */
 }
 
 .sidebar-header::before,
@@ -258,6 +277,14 @@ body {
     }
 }
 
+/* Brand Text Wrapper */
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
 .sidebar-title,
 .dash-brand {
     font-size: 1.25rem;
@@ -274,6 +301,19 @@ body {
     word-break: break-word;
     /* Prevent overflow */
     line-height: 1.2;
+}
+
+.sidebar-subtitle {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: block;
+    margin-top: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
 }
 
 @keyframes textGlow {
@@ -293,41 +333,25 @@ body {
 .dash-nav {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
+    /* Increased gap */
     list-style: none;
     flex: 1;
     overflow-y: auto;
-    padding-right: 4px;
-    /* Reduced for better width */
-    padding-left: 4px;
-    /* Reduced for better width */
+    overflow-x: visible;
+    /* Allow hover effects to bleed out safely */
+    padding-right: 8px;
+    /* More space for scrollbar */
+    padding-left: 8px;
+    margin-right: -4px;
+    /* Compensate for padding to align visuals */
 }
 
-/* Premium Scrollbar for Nav Menu */
-.nav-menu::-webkit-scrollbar,
-.dash-nav::-webkit-scrollbar {
-    width: 6px;
-}
-
-.nav-menu::-webkit-scrollbar-track,
-.dash-nav::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 10px;
-    margin: 8px 0;
-}
-
-.nav-menu::-webkit-scrollbar-thumb,
-.dash-nav::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
-    border-radius: 10px;
-    border: 1px solid rgba(15, 23, 42, 0.3);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
-}
-
-.nav-menu::-webkit-scrollbar-thumb:hover,
-.dash-nav::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #60a5fa, #a78bfa);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 1);
+/* Nav Menu Scrollbar - Uses Global Styles (Simplified) */
+.nav-menu,
+.dash-nav {
+    scrollbar-gutter: stable;
+    /* Prevents layout shift */
 }
 
 /* Category Headers - Futuristic Style */
@@ -367,13 +391,11 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 14px;
-    /* Adjusted padding */
+    padding: 12px 16px;
     width: 100%;
-    /* Ensure full width */
     box-sizing: border-box;
-    /* Include padding in width */
-    border-radius: 10px;
+    border-radius: 12px;
+    /* Smoother radius */
     color: #94a3b8;
     text-decoration: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -384,6 +406,9 @@ body {
     background: rgba(15, 23, 42, 0.3);
     cursor: pointer;
     overflow: visible;
+    /* CRITICAL: Allows badges to pop out */
+    margin-bottom: 4px;
+    /* Ensure vertical separation */
 }
 
 /* Icon Styling - Vibrant Colors */
@@ -433,7 +458,8 @@ body {
     border-left: 4px solid #3b82f6;
     border-color: rgba(59, 130, 246, 0.3);
     color: #ffffff;
-    padding-left: 12px;
+    padding-left: 16px;
+    /* Slightly more push */
     box-shadow:
         0 0 20px rgba(59, 130, 246, 0.2),
         inset 4px 0 0 #3b82f6;
@@ -3306,13 +3332,14 @@ screen and (min-resolution: 192dpi) {
 .top-header {
     z-index: 9999 !important;
 }
+
 /* ============================
    PREMIUM DROPDOWNS & LOADER
    Fixes based on User Feedback
    ============================ */
 
 /* Fix 1: Premium Select/Dropdowns */
-select.form-input, 
+select.form-input,
 select.premium-input,
 .form-group select {
     appearance: none;
@@ -3351,7 +3378,8 @@ select option {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #020617; /* Deep Space */
+    background: #020617;
+    /* Deep Space */
     z-index: 99999;
     display: flex;
     justify-content: center;
@@ -3383,7 +3411,8 @@ select option {
     height: 60px;
 }
 
-.loader-spinner:before, .loader-spinner:after {
+.loader-spinner:before,
+.loader-spinner:after {
     content: "";
     position: absolute;
     border-radius: 50%;
@@ -3391,24 +3420,43 @@ select option {
 }
 
 .loader-spinner:before {
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     border-top-color: #3b82f6;
     animation: spin 1.5s linear infinite;
 }
 
 .loader-spinner:after {
-    top: 5px; left: 5px; right: 5px; bottom: 5px;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
     border-top-color: #8b5cf6;
     animation: spin 3s linear infinite reverse;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes pulseGlow {
-    0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 5px rgba(99,102,241,0.5)); }
-    50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(99,102,241,0.8)); }
-}
 
+    0%,
+    100% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.5));
+    }
+
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.8));
+    }
+}
