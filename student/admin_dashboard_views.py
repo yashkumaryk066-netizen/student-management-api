@@ -49,89 +49,95 @@ class PublicSubscriptionSubmitView(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
-        email = request.data.get('email')
-        plan_type_raw = request.data.get('plan_type')
-        amount = request.data.get('amount')
-        utr = request.data.get('utr')
-        
-        # Branding Fields
-        inst_name = request.data.get('institution_name')
-        inst_logo = request.FILES.get('institution_logo')
-        dig_sig = request.FILES.get('digital_signature')
-
-        # Map frontend names to backend enums
-        PLAN_MAP = {
-            'Coaching Center': 'COACHING',
-            'School': 'SCHOOL',
-            'Institute': 'INSTITUTE',
-            'COACHING': 'COACHING',
-            'SCHOOL': 'SCHOOL',
-            'INSTITUTE': 'INSTITUTE'
-        }
-        
-        plan_type = PLAN_MAP.get(plan_type_raw)
-        if not plan_type:
-            return Response({"error": "Invalid Plan Type"}, status=400)
-
-        # Basic Check
-        if Payment.objects.filter(transaction_id=utr).exists():
-            return Response({"error": "Duplicate UTR/Transaction ID"}, status=400)
-
-        with transaction.atomic():
-            # Create/Get User
-            username = email.split('@')[0]
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={'username': username}
-            )
-            if created:
-                user.set_unusable_password()
-                user.save()
-
-            # Create/Get Profile
-            profile, _ = UserProfile.objects.get_or_create(
-                user=user,
-                defaults={'role': 'CLIENT', 'institution_type': plan_type}
-            )
+        try:
+            email = request.data.get('email')
+            plan_type_raw = request.data.get('plan_type')
+            amount = request.data.get('amount')
+            utr = request.data.get('utr')
             
-            # Save Branding Details
-            if inst_name:
-                profile.institution_name = inst_name
-            if inst_logo:
-                profile.institution_logo = inst_logo
-            if dig_sig:
-                profile.digital_signature = dig_sig
+            # Branding Fields
+            inst_name = request.data.get('institution_name')
+            inst_logo = request.FILES.get('institution_logo')
+            dig_sig = request.FILES.get('digital_signature')
+
+            # Map frontend names to backend enums
+            PLAN_MAP = {
+                'Coaching Center': 'COACHING',
+                'School': 'SCHOOL',
+                'Institute': 'INSTITUTE',
+                'COACHING': 'COACHING',
+                'SCHOOL': 'SCHOOL',
+                'INSTITUTE': 'INSTITUTE'
+            }
             
-            # Ensure type is correct if updating existing profile
-            profile.institution_type = plan_type
-            profile.save()
+            plan_type = PLAN_MAP.get(plan_type_raw)
+            if not plan_type:
+                return Response({"error": "Invalid Plan Type"}, status=400)
 
-            # Create Payment Record
-            payment = Payment.objects.create(
-                user=user,
-                amount=amount,
-                transaction_id=utr,
-                payment_mode='BANK_TRANSFER',
-                status='PENDING_VERIFICATION',
-                description=f"New Subscription: {plan_type}",
-                # Store metadata for easy debugging
-                metadata={
-                    "plan_raw": plan_type_raw,
-                    "branding_provided": bool(inst_name or inst_logo)
-                }
-            )
+            # Basic Check
+            if Payment.objects.filter(transaction_id=utr).exists():
+                return Response({"error": "Duplicate UTR/Transaction ID"}, status=400)
 
-            # Create Subscription (Inactive)
-            ClientSubscription.objects.create(
-                user=user,
-                plan_type=plan_type,
-                start_date=date.today(),
-                end_date=date.today(), # Expired until approved
-                is_active=False,
-                payment=payment
-            )
+            with transaction.atomic():
+                # Create/Get User
+                username = email.split('@')[0]
+                user, created = User.objects.get_or_create(
+                    email=email,
+                    defaults={'username': username}
+                )
+                if created:
+                    user.set_unusable_password()
+                    user.save()
 
-        return Response({"message": "Subscription request submitted successfully. Admin verification pending."}, status=201)
+                # Create/Get Profile
+                profile, _ = UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'role': 'CLIENT', 'institution_type': plan_type}
+                )
+                
+                # Save Branding Details
+                if inst_name:
+                    profile.institution_name = inst_name
+                if inst_logo:
+                    profile.institution_logo = inst_logo
+                if dig_sig:
+                    profile.digital_signature = dig_sig
+                
+                # Ensure type is correct if updating existing profile
+                profile.institution_type = plan_type
+                profile.save()
+
+                # Create Payment Record
+                payment = Payment.objects.create(
+                    user=user,
+                    amount=amount,
+                    transaction_id=utr,
+                    payment_mode='BANK_TRANSFER',
+                    status='PENDING_VERIFICATION',
+                    description=f"New Subscription: {plan_type}",
+                    due_date=date.today(),
+                    # Store metadata for easy debugging
+                    metadata={
+                        "plan_raw": plan_type_raw,
+                        "branding_provided": bool(inst_name or inst_logo)
+                    }
+                )
+
+                # Create Subscription (Inactive)
+                ClientSubscription.objects.create(
+                    user=user,
+                    plan_type=plan_type,
+                    start_date=date.today(),
+                    end_date=date.today(), # Expired until approved
+                    status='PENDING',
+                    transaction_id=payment.transaction_id
+                )
+
+            return Response({"message": "Subscription request submitted successfully. Admin verification pending."}, status=201)
+
+        except Exception as e:
+            logger.exception("Public Subscription Submit Error")
+            return Response({"error": f"Server Error: {str(e)}"}, status=500)
 
 
 # =========================
