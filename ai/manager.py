@@ -175,14 +175,36 @@ class AIServiceManager:
         # 1. Try Primary/Active Service
         if self.service:
             try:
-                # AUTO-SWITCH TO VISION ENGINE IF MEDIA PRESENT
+                # --- SAFETY GUARDRAILS ---
+                # P0: Prevent System System Prompt Leakage
+                unsafe_keywords = [
+                    "system prompt", "system instruction", "ignore previous instructions", 
+                    "leak your instructions", "what are your instructions", "developer mode"
+                ]
+                if any(k in question.lower() for k in unsafe_keywords):
+                    logger.warning(f"⚠️ SAFETY BLOCK: Unsafe query detected from user: {question[:50]}...")
+                    return "I cannot fulfill this request due to safety guidelines. I am here to help with educational and technical topics."
+
+                # --- AUTO-SWITCH TO VISION ENGINE IF MEDIA PRESENT ---
                 if kwargs.get('media_data') and self.provider != self.GEMINI:
                     logger.info("📸 Visual content detected. Switching to Y.S.M Vision Engine.")
                     from .gemini import get_gemini_service
                     vision_service = get_gemini_service()
                     return vision_service.ask_tutor(question, subject, context, **kwargs)
 
-                return self.service.ask_tutor(question, subject, context, **kwargs)
+                # --- HISTORY TRIMMING (TOKEN SAFETY) ---
+                # Check if 'history' kwarg exists and trim it
+                history = kwargs.get('history', [])
+                if history and isinstance(history, list) and len(history) > 20:
+                     logger.info(f"✂️ Trimming conversation history from {len(history)} to 20 messages.")
+                     kwargs['history'] = history[-20:] # Keep last 20 messages only
+
+                # LOGGING START
+                logger.info(f"🤖 AI Request: Provider={self.provider}, Subject={subject}, Q_Len={len(question)}")
+                
+                response = self.service.ask_tutor(question, subject, context, **kwargs)
+                return response
+
             except Exception as e:
                 logger.warning(f"Primary AI ({self.provider}) failed: {str(e)}. Retrying with backups...")
                 # If primary fails during execution (e.g. timeout), try to switch provider immediately
@@ -190,6 +212,7 @@ class AIServiceManager:
                 self._try_fallback_providers()
                 if self.service:
                     try:
+                         # Retry logic
                         return self.service.ask_tutor(question, subject, context, **kwargs)
                     except Exception as fe:
                         logger.error(f"Fallback AI ({self.provider}) also failed: {fe}")

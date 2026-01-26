@@ -30,7 +30,7 @@ class ChatGPTService:
         self.client = OpenAI(api_key=self.api_key)
         
         # Default model configuration
-        self.default_model = config('OPENAI_MODEL', default='gpt-4-turbo-preview')
+        self.default_model = config('OPENAI_MODEL', default='gpt-4o')
         self.temperature = float(config('OPENAI_TEMPERATURE', default='0.7'))
         self.max_tokens = int(config('OPENAI_MAX_TOKENS', default='2000'))
     
@@ -47,7 +47,7 @@ class ChatGPTService:
         
         Args:
             messages: List of message objects with 'role' and 'content'
-            model: Model to use (default: gpt-4-turbo-preview)
+            model: Model to use (default: gpt-4o)
             temperature: Creativity level (0-1)
             max_tokens: Maximum response length
             stream: Whether to stream the response
@@ -56,8 +56,11 @@ class ChatGPTService:
             Generated text or full response object
         """
         try:
+            # Ensure safe usage of model
+            selected_model = model or self.default_model
+            
             response = self.client.chat.completions.create(
-                model=model or self.default_model,
+                model=selected_model,
                 messages=messages,
                 temperature=temperature if temperature is not None else self.temperature,
                 max_tokens=max_tokens or self.max_tokens,
@@ -78,6 +81,9 @@ class ChatGPTService:
                 raise Exception("AI service authentication failed. Please check API credentials.")
             elif "rate_limit" in error_msg.lower() or "quota" in error_msg.lower():
                 raise Exception("AI service rate limit exceeded. Please try again later.")
+            elif "invalid_request_error" in error_msg.lower() or "context_length_exceeded" in error_msg.lower():
+                 # Handle context length issues specifically
+                 raise Exception("Request too long for AI model context window.")
             elif "invalid" in error_msg.lower():
                 raise Exception(f"Invalid AI request: {error_msg}")
             else:
