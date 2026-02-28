@@ -1,47 +1,76 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.conf import settings
+from django.db import transaction
 from .models import UserProfile
+from student.services.email_service import send_approval_email
+import logging
+
+logger = logging.getLogger(__name__)
 
 @receiver(pre_save, sender=User)
 def check_activation(sender, instance, **kwargs):
     """
     Check if user is being activated.
-    Note: We need the 'old' instance to compare, but pre_save gives us the new one.
-    To get old, we need to query DB.
+    Uses transaction.on_commit to ensure email is sent only after successful commit.
     """
     if instance.pk:
         try:
             old_instance = User.objects.get(pk=instance.pk)
             # Check if toggling from Inactive -> Active
             if not old_instance.is_active and instance.is_active:
-                # Check if it is an AI USER
-                if hasattr(instance, 'profile') and instance.profile.role == 'AI_USER':
-                    send_approval_email(instance)
+                # Check if it is an AI USER or other role requiring notification
+                if hasattr(instance, 'profile'):
+                    # Use Premium Email Service with Robust Error Handling
+                    def send_activation_email():
+                        try:
+                            # Re-fetch minimal required data to avoid stale objects
+                            user_refresh = User.objects.get(pk=instance.pk)
+                            if hasattr(user_refresh, 'profile'):
+                                send_approval_email(
+                                    email=user_refresh.email,
+                                    username=user_refresh.username,
+                                    password=None, # Indicates existing credentials
+                                    plan_type=user_refresh.profile.role, 
+                                    institution_type=user_refresh.profile.institution_type
+                                )
+                        except Exception as e:
+                            logger.error(f"Failed to send activation email for {instance.username}: {e}")
+
+                    # Execute only after transaction commits successfully
+                    transaction.on_commit(send_activation_email)
+
         except User.DoesNotExist:
             pass
 
-def send_approval_email(user):
-    """Send approval notification"""
-    try:
-        subject = 'Y.S.M AI Access Approved'
-        message = f"""
-        Greetings {user.username},
-        
-        Your access request for Y.S.M Architect Intelligence has been APPROVED by the Super Admin.
-        
-        You can now login securely using your registered credentials.
-        
-        Access Portal: {settings.SITE_URL}/api/ai/auth/
-        
-        Regards,
-        System Admin
-        """
-        email_from = settings.DEFAULT_FROM_EMAIL
-        recipient_list = [user.email]
-        
-        send_mail(subject, message, email_from, recipient_list, fail_silently=True)
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        # Default for Superusers - Premium Setup
+        if instance.is_superuser:
+            UserProfile.objects.get_or_create(
+                user=instance,
+                defaults={
+                    'role': 'ADMIN',
+                    'institution_type': 'SCHOOL',
+                    'subscription_plan': 'ENTERPRISE',
+                    'institution_name': 'Y.S.M CENTRAL COMMAND'
+                }
+            )
+        else:
+            # Ensure profile exists for all users to prevent crashes in views
+            UserProfile.objects.get_or_create(
+                user=instance, 
+                defaults={
+                    'role': 'STUDENT', # Default safe role
+                    'institution_type': 'SCHOOL'
+                }
+            )
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        try:
+            instance.profile.save()
+        except Exception as e:
+            logger.error(f"Error saving profile for user {instance.username}: {e}")

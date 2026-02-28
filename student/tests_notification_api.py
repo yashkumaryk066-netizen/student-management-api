@@ -15,21 +15,39 @@ class NotificationAPITestCase(APITestCase):
             is_staff=True,
             is_superuser=True
         )
-        UserProfile.objects.create(user=self.admin_user, role='ADMIN')
+        admin_profile, _ = UserProfile.objects.get_or_create(
+            user=self.admin_user,
+            defaults={'role': 'ADMIN'}
+        )
+        admin_profile.role = 'ADMIN'
+        admin_profile.save()
+        self.admin_user.refresh_from_db()
 
         # ===== Teacher =====
         self.teacher_user = User.objects.create_user(
             username='teacher_notif',
             password='password123'
         )
-        UserProfile.objects.create(user=self.teacher_user, role='TEACHER')
+        teacher_profile, _ = UserProfile.objects.get_or_create(
+            user=self.teacher_user,
+            defaults={'role': 'TEACHER'}
+        )
+        teacher_profile.role = 'TEACHER'
+        teacher_profile.save()
+        self.teacher_user.refresh_from_db()
 
         # ===== Student =====
         self.student_user = User.objects.create_user(
             username='student_notif',
             password='password123'
         )
-        UserProfile.objects.create(user=self.student_user, role='STUDENT')
+        student_profile, _ = UserProfile.objects.get_or_create(
+            user=self.student_user,
+            defaults={'role': 'STUDENT'}
+        )
+        student_profile.role = 'STUDENT'
+        student_profile.save()
+        self.student_user.refresh_from_db()
 
         # ===== Notifications =====
         self.notif_student = Notification.objects.create(

@@ -1,0 +1,160 @@
+/* ======================================================================
+   PREMIUM DATEPICKER THEME (Flatpickr Override)
+   Style: Glassmorphism Dark Slate
+   ====================================================================== */
+
+/* Main Container - The "Card" */
+.flatpickr-calendar {
+    background: rgba(30, 41, 59, 0.95) !important;
+    /* Dark Slate with Opacity */
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    /* Subtle Blue Border */
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7) !important;
+    border-radius: 16px !important;
+    font-family: 'Inter', sans-serif !important;
+    width: 320px !important;
+    padding: 10px !important;
+}
+
+/* Arrow (Triangle on top) */
+.flatpickr-calendar::before,
+.flatpickr-calendar::after {
+    border-bottom-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Header (Month/Year) */
+.flatpickr-calendar .flatpickr-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.flatpickr-current-month {
+    color: #f8fafc !important;
+    /* White text */
+    font-weight: 700 !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: #0f172a !important;
+    /* Darker bg for dropdown */
+    color: #f8fafc !important;
+    border-radius: 8px !important;
+    padding: 2px 8px !important;
+}
+
+.flatpickr-current-month input.cur-year {
+    color: #94a3b8 !important;
+    /* Muted text for year */
+    font-weight: 600 !important;
+}
+
+/* Weekdays */
+.flatpickr-weekdays {
+    background: transparent !important;
+}
+
+span.flatpickr-weekday {
+    color: #64748b !important;
+    /* Muted slate */
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+}
+
+/* Days Grid */
+.flatpickr-day {
+    color: #cbd5e1 !important;
+    /* Light Grey text */
+    border-radius: 8px !important;
+    /* Rounded squares */
+    border: 1px solid transparent !important;
+    transition: all 0.2s ease !important;
+    font-weight: 500 !important;
+}
+
+/* Hover State */
+.flatpickr-day:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    transform: scale(1.1) !important;
+}
+
+/* Selected State */
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.today.selected,
+.flatpickr-day.today.inRange,
+.flatpickr-day.prevMonthDay.selected,
+.flatpickr-day.nextMonthDay.selected,
+.flatpickr-day.prevMonthDay.inRange,
+.flatpickr-day.nextMonthDay.inRange {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    /* Premium Blue Gradient */
+    border-color: transparent !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+    animation: pulseSelect 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Today Indicator */
+.flatpickr-day.today {
+    border-color: #f59e0b !important;
+    /* Amber border for today */
+    color: #f59e0b !important;
+}
+
+.flatpickr-day.today:hover {
+    background: #f59e0b !important;
+    color: black !important;
+}
+
+/* Input Field Styling (When Flatpickr attaches) */
+.premium-date-input {
+    background: rgba(30, 41, 59, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    padding: 10px 15px !important;
+    border-radius: 10px !important;
+    font-family: 'Inter', sans-serif !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.premium-date-input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+@keyframes pulseSelect {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Navigation Arrows */
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    fill: #94a3b8 !important;
+}
+
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+    fill: #fff !important;
+}

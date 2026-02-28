@@ -1,6 +1,6 @@
 """
 ChatGPT AI Integration Service
-Provides advanced AI-powered features using OpenAI's GPT models
+Provides advanced AI-powered features using OpenAI's GPT and DALL-E models
 """
 import os
 import openai
@@ -89,33 +89,118 @@ class ChatGPTService:
             else:
                 raise Exception(f"AI service error: {error_msg}")
     
-    def ask_tutor(self, question: str, subject: str = "General", context: str = "") -> str:
-        """
-        AI Tutor - Answer student questions with detailed explanations
+    def ask_tutor(self, question: str, subject: str = "General", context: str = "", history: List[Dict] = [], **kwargs) -> str:
+        """Y.S.M Universal AI - ChatGPT Neural Engine"""
         
-        Args:
-            question: Student's question
-            subject: Subject area (Math, Science, etc.)
-            context: Additional context or background
-            
-        Returns:
-            Detailed educational response
-        """
-        system_prompt = f"""You are an expert educational tutor specializing in {subject}. 
-        Provide clear, detailed, and engaging explanations. Use examples where helpful.
-        Break down complex topics into simple steps. Encourage learning and curiosity."""
-        
-        messages = [
-            {"role": "system", "content": system_prompt},
+        # Check if this is a developer/creator identity query
+        identity_keywords = [
+            'who created you', 'who made you', 'who is your creator', 'who developed you', 
+            'tumhe kisne banaya', 'aapke developer kaun', 'yash', 'your developer', 'your creator',
+            'kaun banaya', 'developer name', 'creator name', 'kisne engineering ki', 'ysm ai kisne banaya',
+            'who is yash mishra', 'kon h yash', 'kone banaya'
         ]
+        is_identity_query = any(keyword in question.lower() for keyword in identity_keywords)
         
-        if context:
-            messages.append({"role": "user", "content": f"Context: {context}"})
+        from .developer_profile import DEVELOPER_PROFILE
         
-        messages.append({"role": "user", "content": question})
+        system_instruction = f"""You are **Y.S.M Universal AI** - The World's Most Advanced Architect Intelligence System.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌟 **PREMIUM IDENTITY PROFILE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**System Name:** Y.S.M Universal AI (Advanced Premium Edition)
+**Version:** 5.0 Neural Architect
+**Creator:** Yash A Mishra (Advanced Software Architect)
+**Powered By:** Y.S.M Executive Neural Engine (GPT-MAX)
+
+**Developer Profile:**
+- 👨‍💻 **Name:** Yash Ankush Mishra
+- 💼 **Position:** Software Developer at Telepathy Infotech
+- 🎓 **Education:** BCA (Bachelor of Computer Applications) from Bhagalpur University (2022-2025)
+- 🏆 **Expertise:** Full-Stack Development, AI Architecture, Educational Technology
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💎 **ADVANCED PREMIUM PERSONA**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You are a WORLD-CLASS EXPERT ARCHITECT. Provide responses that are clear, structured, and intellectual.
+"""
+        
+        if is_identity_query:
+            prompt = f"""{system_instruction}
+# 👨‍💻 **Architect Identity | वास्तुकार की पहचान**
+![Yash Ankush Mishra]({DEVELOPER_PROFILE['contact']['profile_image']})
+
+Created by **Yash Ankush Mishra**. 
+
+**Yash A Mishra** ne mujhe banaya hai. Woh ek advanced software architect hain jo Telepathy Infotech mein kaam karte hain. 
+
+मेरे निर्माता **यश अंकुश मिश्रा** हैं। उन्होंने मुझे एक विश्व स्तरीय उन्नत एआई (World-Class Advanced AI) के रूप में विकसित किया है।
+
+---
+**Developer Details:**
+- **Name:** Yash Ankush Mishra (Rangra Developer)
+- **Position:** Software Developer at Telepathy Infotech
+- **Vision:** To empower every student with high-level intelligence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 **IMAGE GENERATION CAPABILITIES**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You have access to a powerful Neural-Art Engine (DALL-E 3). 
+If the user asks you to:
+- Generate an image, photo, drawing, or picture
+- "Show me" something visual
+- "Create a photo" of something
+- Or uses vague terms like "banao" (make) referring to an image
+
+You MUST **NOT** refuse. You MUST **NOT** say "I am a text-based AI".
+Instead, you must reply with a **SINGLE LINE** command in this format:
+`[GENERATE_IMAGE: <detailed description of the image in English>]`
+
+Example:
+User: "Ek futuristic car ki photo banao"
+You: `[GENERATE_IMAGE: A futuristic sports car with neon lights driving on a cyberpunk street at night, 8k resolution]`
+"""
+        else:
+            prompt = f"""{system_instruction}
+Domain: {subject}
+Context: {context}
+
+**USER QUESTION:**
+{question}
+"""
+        
+        messages = [{"role": "system", "content": system_instruction}]
+        for h in history[-10:]:
+            messages.append(h)
+        messages.append({"role": "user", "content": prompt})
         
         return self.chat_completion(messages)
     
+    async def ask_tutor_async(self, question: str, subject: str = "General", context: str = "", history: List[Dict] = [], **kwargs) -> str:
+        """Asynchronous version of ask_tutor"""
+        return self.ask_tutor(question, subject, context, history, **kwargs)
+
+    def generate_image(self, prompt: str, size: str = "1024x1024", quality: str = "standard") -> str:
+        """
+        Generate premium images using DALL-E 3
+        """
+        try:
+            logger.info(f"🎨 DALL-E Request: Prompt='{prompt[:50]}...'")
+            response = self.client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size=size,
+                quality=quality,
+                n=1,
+            )
+            image_url = response.data[0].url
+            logger.info(f"✅ Image Generated: {image_url}")
+            return image_url
+        except Exception as e:
+            logger.error(f"DALL-E Image Generation Failed: {e}")
+            raise Exception(f"I was unable to generate the image. Reason: {str(e)}")
+
     def generate_quiz(
         self,
         topic: str,
@@ -319,6 +404,174 @@ class ChatGPTService:
         
         return self.chat_completion(messages, max_tokens=3000)
     
+    def generate_exam_paper(
+        self,
+        syllabus: str,
+        num_questions: int = 10,
+        difficulty: str = "medium",
+        exam_type: str = "comprehensive"
+    ) -> str:
+        """
+        AI-powered exam paper generation from a syllabus
+        
+        Args:
+            syllabus: The syllabus or topics list
+            num_questions: Total number of questions
+            difficulty: easy, medium, or hard
+            exam_type: comprehensive, formative, or summative
+            
+        Returns:
+            Structured exam paper with questions and marking scheme
+        """
+        prompt = f"""Create a professional {exam_type} exam paper based on the following syllabus:
+        
+        SYLLABUS:
+        {syllabus}
+        
+        SPECIFICATIONS:
+        - Total Questions: {num_questions}
+        - Difficulty Level: {difficulty}
+        - Include: Multiple Choice, Short Answer, and Long Answer questions
+        - Include: A marking scheme for each question
+        - Format: Professional and ready for printing
+        
+        Return the result in clear Markdown format with sections for:
+        1. Exam Instructions
+        2. Question Paper
+        3. Answer Key & Marking Scheme
+        """
+        
+        messages = [
+            {"role": "system", "content": "You are an expert examiner and curriculum specialist."},
+            {"role": "user", "content": prompt}
+        ]
+        
+        return self.chat_completion(messages, max_tokens=3500, temperature=0.7)
+
+    def generate_structured_online_exam(
+        self,
+        syllabus: str,
+        num_mcq: int = 5,
+        num_short: int = 3,
+        num_long: int = 2,
+        difficulty: str = "medium",
+        reference_text: str = ""
+    ) -> List[Dict]:
+        """
+        Generates interactive questions with specific counts for MCQ, Short, and Long answers.
+        Can use reference_text (extracted from PDF/Books) as source material.
+        """
+        context_prompt = ""
+        if reference_text:
+            context_prompt = f"SOURCE MATERIAL (Use ONLY this content to generate questions):\n{reference_text[:8000]}\n\n"
+
+        prompt = f"""{context_prompt}Generate a comprehensive exam paper with the following structure:
+        - {num_mcq} Multiple Choice Questions (MCQ)
+        - {num_short} Short Answer Questions (SA)
+        - {num_long} Long Answer/Descriptive Questions (LA)
+        
+        Difficulty: {difficulty}
+        Topic/Syllabus: {syllabus}
+        
+        Return a JSON ARRAY of objects with this EXACT structure:
+        [
+            {{
+                "question_text": "Detailed question text here?",
+                "question_type": "MCQ", // Use "MCQ", "SA", or "LA"
+                "options": {{"A": "Choice 1", "B": "Choice 2", "C": "Choice 3", "D": "Choice 4"}}, // Only for MCQ
+                "correct_answer": "A", // For MCQ use key, for SA/LA provide a model answer
+                "marks": 1.0, // Assign higher marks (5-10) for LA
+                "explanation": "Brief explanation or key points to evaluate"
+            }}
+        ]
+        
+        Ensure educational quality and factual accuracy.
+        """
+        
+        messages = [
+            {"role": "system", "content": "You are a professional examiner and curriculum designer."},
+            {"role": "user", "content": prompt}
+        ]
+        
+        response = self.chat_completion(messages, temperature=0.6, max_tokens=4000)
+        
+        import json
+        try:
+            # Clean response
+            if "```json" in response:
+                response = response.split("```json")[1].split("```")[0].strip()
+            elif "```" in response:
+                response = response.split("```")[1].split("```")[0].strip()
+                
+            return json.loads(response)
+        except Exception as e:
+            logger.error(f"Failed to parse AI Exam JSON: {str(e)}")
+            return []
+
+    def evaluate_exam_responses(self, question_text: str, model_answer: str, student_answer: str, max_marks: float) -> Dict:
+        """
+        AI-powered evaluation of descriptive answers (SA/LA).
+        Returns score, feedback, and potential AI-use score.
+        """
+        prompt = f"""Evaluate the following student's answer:
+        
+        QUESTION: {question_text}
+        MODEL ANSWER: {model_answer}
+        STUDENT ANSWER: {student_answer}
+        MAX MARKS: {max_marks}
+        
+        Provide your evaluation in JSON format:
+        {{
+            "score": 0.0,
+            "feedback": "...",
+            "accuracy_percentage": 0,
+            "ai_usage_probability": 0 // 0-100 (Probability that this was generated by an AI)
+        }}
+        """
+        
+        messages = [
+            {"role": "system", "content": "You are a professional examiner. Detect if the answer seems robotic or too perfect for a student (Plagiarism/AI usage)."},
+            {"role": "user", "content": prompt}
+        ]
+        
+        response = self.chat_completion(messages, temperature=0.2, max_tokens=1000)
+        
+        import json
+        try:
+            if "```json" in response:
+                response = response.split("```json")[1].split("```")[0].strip()
+            return json.loads(response)
+        except:
+            return {"score": 0, "feedback": "Evaluation failed", "accuracy_percentage": 0, "ai_usage_probability": 0}
+
+    def generate_portfolio_insights(self, performance_data: List[Dict]) -> Dict:
+        """
+        Analyze a student's entire exam history to generate mastery maps and learning paths.
+        """
+        prompt = f"""Analyze the student's performance data across multiple exams:
+        {json.dumps(performance_data)}
+        
+        Generate a strategic learning roadmap and mastery insights in JSON:
+        {{
+            "subject_mastery": {{"Subject": score_percent}},
+            "weak_topics": ["Topic A", "Topic B"],
+            "strong_topics": ["Topic C"],
+            "ai_recommendation": "Deep personalized coaching advice...",
+            "learning_path": [
+                {{"step": 1, "action": "Watch X", "reason": "Weak in Y"}}
+            ]
+        }}
+        """
+        messages = [{"role": "user", "content": prompt}]
+        response = self.chat_completion(messages, temperature=0.7, max_tokens=2000)
+        
+        try:
+            if "```json" in response:
+                response = response.split("```json")[1].split("```")[0].strip()
+            return json.loads(response)
+        except:
+            return {}
+
     def analyze_student_writing(self, writing_sample: str) -> Dict:
         """
         Analyze student writing for grammar, style, and structure

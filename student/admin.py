@@ -1,4 +1,9 @@
 from django.contrib import admin
+from django.utils.html import format_html
+from student.conf import CURRENCY_SYMBOL
+import logging
+
+logger = logging.getLogger(__name__)
 from .models import (
     Student, Attendence, UserProfile, Payment, Notification,
     Subject, Classroom, ClassSchedule,
@@ -289,7 +294,7 @@ class PaymentAdmin(admin.ModelAdmin):
                     pdf_content = pdf_buffer.getvalue()
                     pdf_name = f"Invoice_INV-{payment.id:06d}.pdf"
                 except Exception as e:
-                    print(f"PDF Gen Error: {e}")
+                    logger.error(f"PDF Gen Error: {e}")
                     pdf_content = None
 
                 # Email Notification
@@ -308,7 +313,7 @@ We are thrilled to inform you that your **{plan_name} Subscription** has been su
 🔹 Plan Extended By: 30 Days
 🔹 New Expiry Date: {user.profile.subscription_expiry}
 🔹 Transaction ID: {payment.transaction_id or 'Manual'}
-🔹 Amount Paid: ₹{payment.amount}
+🔹 Amount Paid: {CURRENCY_SYMBOL}{payment.amount}
 --------------------------------------------------
 
 We have attached your **official Tax Invoice** to this email.
@@ -577,7 +582,7 @@ _Thank you for choosing NextGen ERP!_
                     fail_silently=True
                 )
             except Exception as e:
-                print(f"Email failed: {e}")
+                logger.error(f"Email failed: {e}")
             
             # Update Status
             demo_req.status = 'CONVERTED'
@@ -746,7 +751,7 @@ class PayrollAdmin(admin.ModelAdmin):
     ordering = ['-year', '-month']
 
 # ==================== AI CHAT MANAGEMENT ====================
-from .chat_models import ChatConversation, ChatMessage
+from .models import ChatConversation, ChatMessage
 
 class ChatMessageInline(admin.TabularInline):
     model = ChatMessage

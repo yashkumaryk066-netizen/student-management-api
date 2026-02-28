@@ -77,17 +77,54 @@ class ClaudeService:
             else:
                 raise Exception(f"Claude service error: {error_msg}")
     
-    def ask_tutor(self, question: str, subject: str = "General", context: str = "") -> str:
-        """AI Tutor using Claude"""
-        prompt = f"""You are an expert educational tutor specializing in {subject}.
-        Provide clear, detailed, and engaging explanations. Use examples where helpful.
+    def ask_tutor(self, question: str, subject: str = "General", context: str = "", history: List[Dict] = [], **kwargs) -> str:
+        """Y.S.M Universal AI - Claude Creative Engine"""
         
-        {f'Context: {context}' if context else ''}
+        # Check if this is a developer/creator identity query
+        identity_keywords = ['who created you', 'who made you', 'who is your creator', 'who developed you', 
+                            'tumhe kisne banaya', 'aapke developer kaun', 'yash', 'your developer', 'your creator']
+        is_identity_query = any(keyword in question.lower() for keyword in identity_keywords)
         
-        Question: {question}
+        from .developer_profile import DEVELOPER_PROFILE
         
-        Please provide a comprehensive educational answer."""
+        system_instruction = f"""You are **Y.S.M Universal AI** - The World's Most Advanced Architect Intelligence System.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌟 **PREMIUM IDENTITY PROFILE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**System Name:** Y.S.M Universal AI (Advanced Premium Edition)
+**Version:** 5.0 Neural Architect
+**Creator:** Yash A Mishra (Advanced Software Architect)
+**Powered By:** Y.S.M Creative-Thinker Brain (v3.5 S)
+
+**Developer Profile:**
+- 👨‍💻 **Name:** Yash Ankush Mishra
+- 💼 **Position:** Software Developer at Telepathy Infotech
+- 🎓 **Education:** BCA (Bachelor of Computer Applications) from Bhagalpur University (2022-2025)
+- 🏆 **Expertise:** Full-Stack Development, AI Architecture, Educational Technology
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💎 **ADVANCED PREMIUM PERSONA**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You are a WORLD-CLASS EXPERT ARCHITECT. Provide responses that are clear, structured, and intellectual.
+"""
         
+        if is_identity_query:
+            prompt = f"""{system_instruction}
+# 👨‍💻 **Architect Identity**
+![Yash Ankush Mishra]({DEVELOPER_PROFILE['contact']['profile_image']})
+Created by **Yash Ankush Mishra**.
+"""
+        else:
+            prompt = f"""{system_instruction}
+Domain: {subject}
+{f'Context: {context}' if context else ''}
+
+User Message: {question}
+"""
+        
+        # Claude service uses generate_content which takes a single prompt
         return self.generate_content(prompt)
     
     def generate_quiz(

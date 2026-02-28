@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear SuperAdmin Cache</title>
+</head>
+<body style="background: #0f172a; color: white; font-family: monospace; padding: 50px; text-align: center;">
+    <h1>🔧 Clearing SuperAdmin Cache...</h1>
+    <p id="status">Processing...</p>
+    
+    <script>
+        // Clear old superadmin redirect flag
+        localStorage.removeItem('isSuperuser');
+        
+        document.getElementById('status').innerHTML = `
+            ✅ Cache Cleared!<br><br>
+            <a href="/dashboard/admin/" style="color: #3b82f6; font-size: 1.2rem;">
+                → Go to Unified Dashboard
+            </a>
+        `;
+        
+        console.log("✅ isSuperuser flag removed from localStorage");
+    </script>
+</body>
+</html>

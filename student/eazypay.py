@@ -1,6 +1,10 @@
 from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 import base64
+import logging
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 class EazypayClient:
     def __init__(self):
@@ -42,7 +46,7 @@ class EazypayClient:
             encrypted_b64 = base64.b64encode(encrypted_bytes).decode('utf-8')
             return encrypted_b64
         except Exception as e:
-            print(f"Encryption error: {e}")
+            logger.error(f"Encryption error: {e}")
             return None
 
     def decrypt(self, encrypted_text):
@@ -53,7 +57,7 @@ class EazypayClient:
             decrypted_padded = cipher.decrypt(encrypted_bytes).decode('utf-8')
             return self.unpad(decrypted_padded)
         except Exception as e:
-            print(f"Decryption error: {e}")
+            logger.error(f"Decryption error: {e}")
             return None
 
     def get_payment_url(self, transaction_id, amount, optional_fields=None):

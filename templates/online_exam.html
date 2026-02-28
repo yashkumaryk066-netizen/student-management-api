@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE EXAM HUB | Y.S.M ERP</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;
+            --accent-neon: #00f2ff;
+            --accent-danger: #ff0055;
+            --accent-gold: #fbbf24;
+            --glass-bg: rgba(20, 20, 25, 0.9);
+            --text-primary: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: none;
+            /* Focus Cursor */
+        }
+
+        /* Focus Magic Cursor */
+        .magic-cursor {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-neon);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: screen;
+            transition: transform 0.1s ease;
+            box-shadow: 0 0 10px var(--accent-neon);
+        }
+
+        .magic-cursor-follower {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .data-stream {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.1;
+            background: linear-gradient(0deg, transparent, rgba(0, 242, 255, 0.05) 50%, transparent);
+            background-size: 100% 400%;
+            animation: dataStream 10s linear infinite;
+        }
+
+        @keyframes dataStream {
+            0% {
+                background-position: 0% 100%;
+            }
+
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, var(--accent-neon), #fff, var(--accent-neon));
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmerEffect 3s linear infinite;
+        }
+
+        @keyframes shimmerEffect {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .exam-area {
+            position: relative;
+            z-index: 5;
+        }
+
+        .q-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0, 242, 255, 0.05), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .q-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid var(--accent-neon);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .system-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: var(--accent-neon);
+            text-transform: uppercase;
+        }
+
+        .dashboard-container {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: none;
+            background: linear-gradient(135deg, #0a0a0c 0%, #1a1a2e 100%);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .premium-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .performance-insight {
+            background: linear-gradient(45deg, rgba(0, 242, 255, 0.05), rgba(251, 191, 36, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: 0.3s;
+            border-left: 4px solid #333;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-published {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+        }
+
+        .btn-neon {
+            background: var(--accent-neon);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent-neon);
+        }
+
+        .btn-gold {
+            background: linear-gradient(45deg, #fbbf24, #d97706);
+            color: #000;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #444;
+        }
+
+        .mastery-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid var(--accent-neon);
+            border-radius: 6px;
+            margin: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Terminal Styles */
+        #terminal-view {
+            height: 100vh;
+            flex-direction: column;
+            display: none;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        #questions-sidebar {
+            width: 250px;
+            background: var(--glass-bg);
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            padding: 1rem;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        .exam-area {
+            flex: 1;
+            background: var(--glass-bg);
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            border-radius: 8px;
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .question-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .palette-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background: #1a1a1f;
+            border: 1px solid #333;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .palette-btn.current {
+            border-color: var(--accent-neon);
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        .palette-btn.answered {
+            background: var(--accent-neon);
+            color: #000;
+        }
+
+        .q-card {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .q-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .options-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .option-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-item.selected {
+            background: rgba(0, 242, 255, 0.2);
+            border-color: var(--accent-neon);
+        }
+
+        .text-answer-area {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            color: #fff;
+            font-size: 1rem;
+            min-height: 250px;
+            outline: none;
+        }
+
+        #lockdown-start {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .violation-warning {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--accent-danger);
+            color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            z-index: 2000;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="magic-cursor" id="magicCursor"></div>
+    <div class="magic-cursor-follower" id="magicFollower"></div>
+    <div class="data-stream"></div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="dashboard-container">
+        <header style="background: transparent; border: none; padding: 0; margin-bottom: 2rem;">
+            <div class="system-title"><i class="fas fa-user-shield"></i> SECURE EXAM HUB</div>
+            <button class="btn btn-ghost" onclick="window.location.href='/dashboard/student/'">Exit to Portal</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="premium-card">
+                <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-history"></i> Exam History & Active Tests</h2>
+                <div id="exam-history-list">
+                    <p style="color: #666;">Loading your academic records...</p>
+                </div>
+                <button class="btn btn-ghost" onclick="fetchDashboardData()" style="margin-top: 1rem;"><i
+                        class="fas fa-sync"></i> Refresh Records</button>
+            </div>
+
+            <div class="premium-card performance-insight">
+                <h2 style="margin-bottom: 1.5rem; color: var(--accent-gold);"><i class="fas fa-brain"></i> AI
+                    Performance Insights</h2>
+                <div id="ai-portfolio-content">
+                    <p style="color: #888;">Complete exams to unlock deep AI analysis of your subject mastery.</p>
+                </div>
+                <div id="learning-path-content" style="margin-top: 2rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="result-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; padding: 3rem; overflow-y: auto;">
+        <div class="premium-card" style="max-width: 900px; margin: 0 auto; background: #111;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem;">
+                <h2 id="modal-exam-title">Detailed Performance Analysis</h2>
+                <button class="btn btn-ghost"
+                    onclick="document.getElementById('result-modal').style.display='none'">CLOSE</button>
+            </div>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- TERMINAL VIEW -->
+    <div id="terminal-view">
+        <div id="lockdown-start">
+            <h1 style="color: var(--accent-neon); font-family: 'Orbitron'; margin-bottom: 1rem;">SECURE TERMINAL</h1>
+            <p style="color: #888; margin-bottom: 2rem; max-width: 500px; text-align: center;">You are about to enter a
+                proctored environment. Exiting fullscreen or switching tabs will be flagged as a violation.</p>
+
+            <div
+                style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; margin-bottom: 2rem;">
+                <div style="text-align: left;">
+                    <label style="color: #aaa; font-size: 0.8rem; text-transform: uppercase;">Roll Number</label>
+                    <input type="text" id="verify-roll-no"
+                        style="width: 100%; background: #1a1a1f; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 6px; outline: none;">
+                </div>
+                <div style="text-align: left;">
+                    <label style="color: #aaa; font-size: 0.8rem; text-transform: uppercase;">Roll Code (From Admit
+                        Card)</label>
+                    <input type="text" id="verify-roll-code"
+                        style="width: 100%; background: #1a1a1f; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 6px; outline: none;">
+                </div>
+            </div>
+
+            <button class="btn btn-neon" onclick="startExam()">Launch Exam & Lockdown</button>
+        </div>
+
+        <header>
+            <div class="system-title"><i class="fas fa-microchip"></i> <span id="exam-title-text">...</span></div>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="color: var(--accent-danger); font-weight: bold; font-size: 0.9rem;">VIOLATIONS: <span
+                        id="violation-count">0</span>/3</div>
+                <div id="timer-display"
+                    style="font-family: 'Orbitron'; font-size: 1.5rem; text-shadow: 0 0 10px var(--accent-neon);">00:00
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <div id="questions-sidebar">
+                <div class="question-palette" id="palette-container"></div>
+            </div>
+            <div class="exam-area" id="questions-container"></div>
+        </div>
+
+        <footer
+            style="padding: 1rem 2rem; background: #000; display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn btn-ghost" onclick="changeQuestion(-1)" id="prev-btn">Previous</button>
+            <span id="progress-text">1 / 1</span>
+            <button class="btn btn-neon" onclick="changeQuestion(1)" id="next-btn">Next</button>
+            <button class="btn btn-danger" onclick="confirmSubmit()" id="final-submit-btn"
+                style="display: none; background: var(--accent-danger); box-shadow: 0 0 15px var(--accent-danger);">Final
+                Submit</button>
+        </footer>
+    </div>
+
+    <div class="violation-warning" id="warning">
+        <h2>SECURITY ALERT</h2>
+        <p id="warning-msg">ILLEGAL TAB SWITCH DETECTED</p>
+        <button class="btn btn-ghost" onclick="closeWarning()"
+            style="margin-top: 1rem; border-color: #fff; color: #fff;">RESUME EXAM</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const examId = new URLSearchParams(window.location.search).get('id');
+        let examData = null, currentIdx = 0, studentAnswers = {}, timeLeft = 0, timerObj, violations = 0;
+
+        async function init() {
+            if (examId) {
+                document.getElementById('terminal-view').style.display = 'flex';
+                fetchExamData();
+            } else {
+                document.getElementById('dashboard-view').style.display = 'block';
+                fetchDashboardData();
+            }
+        }
+
+        async function fetchDashboardData() {
+            try {
+                const [exams, info] = await Promise.all([
+                    fetch('/api/online-exams/').then(r => r.json()),
+                    fetch('/api/ai/student-insights/').then(r => r.json())
+                ]);
+
+                const historyList = document.getElementById('exam-history-list');
+                historyList.innerHTML = exams.map(ex => `
+                    <div class="result-item" style="border-left-color: ${ex.results_published ? '#10b981' : '#fbbf24'}">
+                        <div>
+                            <h4 style="color: #fff;">${ex.title}</h4>
+                            <small style="color: #888;">${ex.subject_name} • ${ex.duration_minutes}m</small>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="status-badge ${ex.results_published ? 'status-published' : 'status-pending'}">
+                                ${ex.results_published ? 'Published' : 'Awaiting Release'}
+                            </span>
+                            ${ex.results_published ?
+                        `<button class="btn btn-ghost" onclick="viewResult(${ex.id})" style="font-size: 0.7rem;">Analytics</button>
+                                 <button class="btn btn-ghost" onclick="viewMeritList(${ex.id})" style="font-size: 0.7rem; border-color: var(--accent-gold); color: var(--accent-gold); margin-left: 5px;"><i class="fas fa-trophy"></i> Merit List</button>
+                                 <button class="btn btn-gold" onclick="downloadCert(${ex.id})"><i class="fas fa-award"></i> Certificate</button>` :
+                        `<button class="btn btn-neon" onclick="window.location.search='?id=${ex.id}'">Enter Terminal</button>`
+                    }
+                        </div>
+                    </div>
+                `).join('');
+
+                if (info.subject_mastery) renderInsights(info);
+            } catch (e) { console.error(e); }
+        }
+
+        async function downloadCert(id) {
+            const attempts = await fetch('/api/online-exams/my_attempts/').then(r => r.json());
+            const attempt = attempts.find(a => a.exam == id && a.is_submitted);
+            if (attempt) window.open(`/api/online-exam-certificate/${attempt.id}/`, '_blank');
+            else Swal.fire('Error', 'Completed attempt record not found.', 'error');
+        }
+
+        async function viewResult(id) {
+            const attempts = await fetch('/api/online-exams/my_attempts/').then(r => r.json());
+            const attempt = attempts.find(a => a.exam == id && a.is_submitted);
+            if (!attempt) return;
+
+            // Fetch detailed result with responses
+            const resp = await fetch(`/api/online-exam-result/${attempt.id}/`);
+            const data = await resp.json();
+
+            document.getElementById('modal-exam-title').innerText = data.exam_title;
+            const content = document.getElementById('modal-content');
+
+            let html = `
+                <div style="display: flex; justify-content: space-around; margin-bottom: 2rem; background: rgba(251, 191, 36, 0.1); padding: 1rem; border-radius: 8px;">
+                    <div style="text-align: center;"><strong>SCORE</strong><br><span style="font-size: 1.5rem; color: var(--accent-gold);">${data.score_obtained}</span></div>
+                    <div style="text-align: center;"><strong>PLAGIARISM RISK</strong><br><span style="font-size: 1.5rem; color: #ff0055;">${data.plagiarism_score}%</span></div>
+                    <div style="text-align: center;"><strong>AI ACCURACY</strong><br><span style="font-size: 1.5rem; color: #10b981;">HIGH</span></div>
+                </div>
+                <h3>Question-wise AI Feedback</h3>
+            `;
+
+            data.responses.forEach((r, i) => {
+                html += `
+                    <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid ${r.is_correct ? '#10b981' : '#ff0055'}">
+                        <strong>Q${i + 1}: ${r.question_text || 'Descriptive Question'}</strong><br>
+                        <p style="color: #aaa; margin: 5px 0;">Your Answer: ${r.marked_answer}</p>
+                        ${r.ai_feedback ? `<div style="background: rgba(0,242,255,0.05); padding: 8px; border-radius: 4px; margin-top: 5px;"><small style="color: var(--accent-neon);">AI FEEDBACK:</small> ${r.ai_feedback}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            content.innerHTML = html;
+        }
+
+        async function viewMeritList(id) {
+            const resp = await fetch(`/api/online-exams/${id}/merit_list/`);
+            const data = await resp.json();
+
+            document.getElementById('modal-exam-title').innerHTML = `<i class="fas fa-trophy" style="color:var(--accent-gold)"></i> HALL OF FAME: ${data.exam_title}`;
+            const content = document.getElementById('modal-content');
+
+            let html = `
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                    <button class="btn btn-gold" onclick="window.open('/api/online-exams/${id}/merit_list/?format=pdf', '_blank')"><i class="fas fa-file-pdf"></i> Download Official Merit List</button>
+                </div>
+                <div style="background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: rgba(255,255,255,0.05); color: var(--accent-neon);">
+                            <tr>
+                                <th style="padding: 15px;">RANK</th>
+                                <th style="padding: 15px;">STUDENT NAME</th>
+                                <th style="padding: 15px;">SCORE</th>
+                                <th style="padding: 15px;">BADGE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.full_list.forEach(att => {
+                let badgeHtml = '';
+                if (att.badge === 'GOLD') badgeHtml = '<span style="color:#fbbf24"><i class="fas fa-medal"></i> GOLD</span>';
+                else if (att.badge === 'SILVER') badgeHtml = '<span style="color:#94a3b8"><i class="fas fa-medal"></i> SILVER</span>';
+                else if (att.badge === 'BRONZE') badgeHtml = '<span style="color:#b45309"><i class="fas fa-medal"></i> BRONZE</span>';
+
+                html += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 15px; font-weight: bold; color: ${att.rank <= 3 ? 'var(--accent-gold)' : '#fff'}">#${att.rank}</td>
+                        <td style="padding: 15px;">${att.student_name}</td>
+                        <td style="padding: 15px;">${att.score}</td>
+                        <td style="padding: 15px;">${badgeHtml}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table></div>`;
+            content.innerHTML = html;
+            document.getElementById('result-modal').style.display = 'block';
+        }
+
+        function renderInsights(data) {
+            const portfolio = document.getElementById('ai-portfolio-content');
+            let html = '<h4>Academic Mastery</h4><div style="margin: 10px 0;">';
+            for (let [s, v] of Object.entries(data.subject_mastery)) html += `<span class="mastery-tag">${s}: ${v}%</span>`;
+            html += '</div>';
+            html += `<p style="margin-top: 15px; background: rgba(0,242,255,0.05); padding: 10px; border-radius: 8px;"><strong>AI Says:</strong> ${data.ai_recommendation}</p>`;
+            portfolio.innerHTML = html;
+
+            if (data.learning_path) {
+                document.getElementById('learning-path-content').innerHTML = `
+                    <h4 style="color: var(--accent-neon); margin-bottom: 10px;">Tailored Learning Path</h4>
+                    ${data.learning_path.map(step => `
+                        <div style="background: rgba(255,255,255,0.03); padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 2px solid var(--accent-gold);">
+                            <small style="color: var(--accent-gold);">STEP ${step.step}</small><br>${step.action}
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        async function fetchExamData() {
+            const resp = await fetch(`/api/online-exam-session/${examId}/`);
+            examData = await resp.json();
+            if (examData.error) return Swal.fire('Denied', examData.error, 'error');
+
+            document.getElementById('exam-title-text').innerText = examData.exam.title;
+            timeLeft = examData.exam.duration_minutes * 60;
+            renderExamContent();
+        }
+
+        function renderExamContent() {
+            const container = document.getElementById('questions-container');
+            const palette = document.getElementById('palette-container');
+
+            examData.questions.forEach((q, i) => {
+                // Card
+                const card = document.createElement('div');
+                card.className = `q-card ${i === 0 ? 'active' : ''}`;
+                card.id = `q-card-${i}`;
+
+                let optHtml = '';
+                if (q.question_type === 'MCQ') {
+                    Object.entries(q.options).forEach(([k, v]) => {
+                        optHtml += `<div class="option-item" onclick="pickOption(${q.id}, '${k}', ${i})"><div style="border:1px solid #555; width:25px; height:25px; border-radius:50%; text-align:center;">${k}</div> ${v}</div>`;
+                    });
+                } else if (q.question_type === 'TF') {
+                    ['True', 'False'].forEach(v => {
+                        optHtml += `<div class="option-item" onclick="pickOption(${q.id}, '${v}', ${i})">${v}</div>`;
+                    });
+                } else {
+                    optHtml = `<textarea class="text-answer-area" oninput="textAns(${q.id}, this.value, ${i})" placeholder="Enter your detailed response..."></textarea>`;
+                }
+
+                card.innerHTML = `<h3 style="color: var(--accent-neon);">Q${i + 1}.</h3><h2 style="margin: 10px 0 20px 0;">${q.question_text}</h2><div class="options-list">${optHtml}</div>`;
+                container.appendChild(card);
+
+                // Palette
+                const pBtn = document.createElement('div');
+                pBtn.className = `palette-btn ${i === 0 ? 'current' : ''}`;
+                pBtn.id = `p-btn-${i}`;
+                pBtn.innerText = i + 1;
+                pBtn.onclick = () => jump(i);
+                palette.appendChild(pBtn);
+            });
+            updateStatus();
+        }
+
+        function pickOption(qid, val, idx) {
+            studentAnswers[qid] = val;
+            const items = document.querySelectorAll(`#q-card-${idx} .option-item`);
+            items.forEach(it => it.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            document.getElementById(`p-btn-${idx}`).classList.add('answered');
+        }
+
+        function textAns(qid, val, idx) {
+            studentAnswers[qid] = val;
+            if (val.trim()) document.getElementById(`p-btn-${idx}`).classList.add('answered');
+            else document.getElementById(`p-btn-${idx}`).classList.remove('answered');
+        }
+
+        function jump(idx) {
+            document.querySelector('.q-card.active').classList.remove('active');
+            document.querySelector('.palette-btn.current').classList.remove('current');
+            document.getElementById(`q-card-${idx}`).classList.add('active');
+            document.getElementById(`p-btn-${idx}`).classList.add('current');
+            currentIdx = idx;
+            updateStatus();
+        }
+
+        function changeQuestion(dir) {
+            const next = currentIdx + dir;
+            if (next >= 0 && next < examData.questions.length) jump(next);
+        }
+
+        function updateStatus() {
+            document.getElementById('progress-text').innerText = `${currentIdx + 1} / ${examData.questions.length}`;
+            document.getElementById('prev-btn').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+            if (currentIdx === examData.questions.length - 1) {
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('final-submit-btn').style.display = 'block';
+            } else {
+                document.getElementById('next-btn').style.display = 'block';
+                document.getElementById('final-submit-btn').style.display = 'none';
+            }
+        }
+
+        async function startExam() {
+            const roll_number = document.getElementById('verify-roll-no').value;
+            const roll_code = document.getElementById('verify-roll-code').value;
+
+            if (!roll_number || !roll_code) {
+                return Swal.fire('Missing Data', 'Please enter both Roll Number and Roll Code from your Admit Card.', 'warning');
+            }
+
+            let lat = null, lng = null;
+            if (examData.exam.require_geofencing) {
+                try {
+                    const pos = await new Promise((r, j) => navigator.geolocation.getCurrentPosition(r, j));
+                    lat = pos.coords.latitude; lng = pos.coords.longitude;
+                } catch (e) { return Swal.fire('GPS Fault', 'Location permit required for this exam.', 'error'); }
+            }
+            try { document.documentElement.requestFullscreen(); } catch (e) { }
+
+            const startResp = await fetch(`/api/online-exam-session/${examId}/start/`, {
+                method: 'POST',
+                body: JSON.stringify({ lat, lng, roll_number, roll_code }),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(r => r.json());
+
+            if (startResp.error) return Swal.fire('Verification Failed', startResp.error, 'error');
+
+            /* LOCKDOWN ACTIVATION */
+            document.body.classList.add('exam-mode');
+            // Hide navigation elements if they exist
+            document.querySelectorAll('.btn-ghost').forEach(btn => {
+                if (btn.innerText.includes('Exit')) btn.style.display = 'none';
+            });
+
+            document.getElementById('lockdown-start').style.display = 'none';
+            startTimer();
+            setupProctoring();
+        }
+
+        function startTimer() {
+            timerObj = setInterval(() => {
+                timeLeft--;
+                const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+                document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) { clearInterval(timerObj); finish("Time Elapsed"); }
+            }, 1000);
+        }
+
+        function setupProctoring() {
+            document.addEventListener('visibilitychange', () => { if (document.hidden) detectViolation("Tab Switch"); });
+            window.addEventListener('blur', () => detectViolation("Window Loss"));
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'F12' || (e.ctrlKey && ['c', 'v', 'u', 's'].includes(e.key))) {
+                    e.preventDefault(); detectViolation("Keys Blocked");
+                }
+            });
+        }
+
+        async function detectViolation(type) {
+            violations++;
+            document.getElementById('violation-count').innerText = violations;
+            document.getElementById('warning-msg').innerText = `SECURITY THREAT: ${type.toUpperCase()}`;
+            document.getElementById('warning').style.display = 'block';
+
+            const r = await fetch(`/api/online-exam-session/${examId}/violation/`, { method: 'POST' }).then(r => r.json());
+            if (r.terminated) finish("System Lockout (Violations)");
+        }
+
+        function closeWarning() {
+            document.getElementById('warning').style.display = 'none';
+            window.focus();
+        }
+
+        async function confirmSubmit() {
+            const res = await Swal.fire({ title: 'Submit Exam?', text: 'Ensure all questions are reviewed.', icon: 'question', showCancelButton: true });
+            if (res.isConfirmed) finish("Submitted Successfully");
+        }
+
+        async function finish(reason) {
+            clearInterval(timerObj);
+            const r = await fetch(`/api/online-exam-session/${examId}/submit/`, {
+                method: 'POST', body: JSON.stringify({ answers: studentAnswers }), headers: { 'Content-Type': 'application/json' }
+            }).then(r => r.json());
+
+            Swal.fire({ title: 'EXAM ENDED', text: `Reason: ${reason}. Result will be available in 5 hours.`, icon: 'info' })
+                .then(() => window.location.search = "");
+        }
+
+        // Focus Motion Engine
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('magicCursor');
+            const follower = document.getElementById('magicFollower');
+
+            if (cursor && follower) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                follower.style.left = e.clientX + 'px';
+                follower.style.top = e.clientY + 'px';
+            }
+
+            document.querySelectorAll('.exam-area, .premium-card').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            });
+        });
+
+        document.querySelectorAll('button, .option-item, input').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const mc = document.getElementById('magicCursor');
+                if (mc) {
+                    mc.style.transform = 'scale(3)';
+                    mc.style.background = 'white';
+                }
+            });
+            el.addEventListener('mouseleave', () => {
+                const mc = document.getElementById('magicCursor');
+                if (mc) {
+                    mc.style.transform = 'scale(1)';
+                    mc.style.background = 'var(--accent-neon)';
+                }
+            });
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

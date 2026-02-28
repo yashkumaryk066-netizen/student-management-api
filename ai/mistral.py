@@ -115,12 +115,15 @@ class MistralService:
             raise Exception("Mistral AI unavailable. Please configure MISTRAL_API_KEY or HUGGINGFACE_API_KEY")
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", **kwargs) -> str:
-        """AI Tutor using Mistral"""
-        system_context = f"""You are Y.S.M AI - an expert tutor in {subject}.
-Provide clear, detailed explanations with examples.
-Break down complex topics into simple steps."""
+        """Y.S.M Universal AI - Europa Engine"""
+        system_instruction = f"""You are **Y.S.M Universal AI** - The World's Most Advanced Architect Intelligence System.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**System Name:** Y.S.M Universal AI (Europa Edition)
+**Creator:** Yash A Mishra
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You are an expert tutor in {subject}. Provide clear, detailed explanations with examples."""
         
-        full_prompt = f"""{system_context}
+        full_prompt = f"""{system_instruction}
 
 Context: {context}
 

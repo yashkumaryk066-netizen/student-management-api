@@ -144,6 +144,147 @@ html.lenis {
     }
 }
 
+/* ================= MAGIC CURSOR ================= */
+.magic-cursor {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    mix-blend-mode: difference;
+    transition: transform 0.1s ease;
+}
+
+.magic-cursor-follower {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ================= NEON PULSE ================= */
+.neon-pulse {
+    position: relative;
+    overflow: hidden;
+}
+
+.neon-pulse::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 50%);
+    animation: neonRotate 6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes neonRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ================= FLOATING SHAPES ================= */
+.float-shape {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    filter: blur(40px);
+}
+
+.shape-1 {
+    width: 300px;
+    height: 300px;
+    background: var(--primary);
+    top: 10%;
+    left: 5%;
+    animation: float 20s infinite alternate linear;
+}
+
+.shape-2 {
+    width: 400px;
+    height: 400px;
+    background: var(--secondary);
+    bottom: 20%;
+    right: 5%;
+    animation: float 25s infinite alternate-reverse linear;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(100px, 50px) rotate(90deg);
+    }
+}
+
+/* ================= TEXT SHIMMER ================= */
+.text-shimmer {
+    background: linear-gradient(90deg, #fff 0%, #6366f1 50%, #fff 100%);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+    to {
+        background-position: 200% center;
+    }
+}
+
+/* ================= MAGICAL CARDS ================= */
+.magical-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.magical-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.06), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.magical-card:hover::after {
+    opacity: 1;
+}
+
+.magical-card:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-10px);
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5) !important;
+}
+
+.parallax-3d {
+    transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+    transform-style: preserve-3d;
+}
+
 /* ================= CINEMATIC DEPTH HELPERS ================= */
 .depth-soft {
     transform: translateZ(0);

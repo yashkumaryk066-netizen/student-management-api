@@ -27,7 +27,7 @@ const TokenStore = {
 /* ---------- CORE API CALL ---------- */
 async function apiCall(endpoint, options = {}) {
     const headers = {
-        'Content-Type': 'application/json',
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...(TokenStore.access && { Authorization: `Bearer ${TokenStore.access}` }),
         ...options.headers
     };
@@ -210,6 +210,15 @@ window.TransportAPI = TransportAPI;
 window.HRAPI = HRAPI;
 window.ExamAPI = ExamAPI;
 
+const DashboardAPI = {
+    getStats: () => apiCall('/dashboard/stats/'),
+    getStudentDashboard: () => apiCall('/dashboard/student/'),
+    getTeacherDashboard: () => apiCall('/dashboard/teacher/'),
+    getParentDashboard: () => apiCall('/dashboard/parent/'),
+    getGlobalSearch: (q) => apiCall(`/search/global/?q=${q}`),
+    getROI: () => apiCall('/analytics/roi/')
+};
+
 const SubscriptionAPI = {
     getStatus: () => apiCall('/subscription/status/'),
     renew: (plan, amt, txn) =>
@@ -273,12 +282,13 @@ window.PaymentAPI = PaymentAPI;
 window.NotificationAPI = NotificationAPI;
 window.LibraryAPI = LibraryAPI;
 window.SubscriptionAPI = SubscriptionAPI;
+window.DashboardAPI = DashboardAPI;
 
 const BulkAPI = {
     importStudents: (file) => {
         const formData = new FormData();
         formData.append('file', file);
-        return apiCall('/auth/bulk-import/', { // Re-using auth endpoint or check views.py
+        return apiCall('/bulk-import/', {
             headers: {}, // Let browser set content-type for FormData
             method: 'POST',
             body: formData

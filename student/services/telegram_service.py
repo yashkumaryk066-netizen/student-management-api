@@ -10,7 +10,7 @@ def send_telegram_notification(chat_id, message, invoice_pdf=None, invoice_filen
     Sends a text message and optionally a PDF file to a Telegram user.
     Uses requests directly to avoid dependency issues with python-telegram-bot in some environments.
     """
-    token = os.environ.get('TELEGRAM_BOT_TOKEN', '8384943128:AAH6r2ovKp20XUMSi64asxo4J0lc_lvZvxc')
+    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', os.environ.get('TELEGRAM_BOT_TOKEN'))
     
     if not token or not chat_id:
         logger.error("Telegram Token or Chat ID missing.")

@@ -1,0 +1,378 @@
+/* --- PROFILE DROPDOWN --- */
+.profile-dropdown {
+    display: block !important;
+    /* Always display for transitions, control via opacity/visibility */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.profile-dropdown.active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+:root {
+    --deep-space: #030511;
+    --neon-cyan: #00f3ff;
+    --neon-magenta: #bc13fe;
+    --neon-gold: #ffd700;
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    background-color: var(--deep-space);
+    background-image:
+        radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.05), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.05), transparent 25%);
+    font-family: 'Space Grotesk', sans-serif;
+    /* Tech feel */
+    overflow-x: hidden;
+}
+
+/* --- PARTICLE BACKGROUND --- */
+#particles-js {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* --- 3D TILT CARDS --- */
+.cyber-card {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.cyber-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: skewX(-25deg);
+    transition: 0.5s;
+    pointer-events: none;
+}
+
+.cyber-card:hover::before {
+    left: 150%;
+    transition: 0.8s;
+}
+
+.cyber-card:hover {
+    box-shadow:
+        0 0 20px rgba(0, 243, 255, 0.2),
+        inset 0 0 20px rgba(0, 243, 255, 0.05);
+    border-color: rgba(0, 243, 255, 0.3);
+}
+
+.card-glitch-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    opacity: 0;
+    background: repeating-linear-gradient(transparent 0%,
+            rgba(0, 243, 255, 0.05) 0.5%,
+            transparent 1%);
+    transition: opacity 0.3s;
+}
+
+.cyber-card:hover .card-glitch-effect {
+    opacity: 1;
+}
+
+/* --- NEON TYPOGRAPHY --- */
+.neon-text-cyan {
+    color: #fff;
+    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+}
+
+.neon-text-magenta {
+    color: #fff;
+    text-shadow: 0 0 5px var(--neon-magenta), 0 0 10px var(--neon-magenta);
+}
+
+.hud-title {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: var(--neon-cyan);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hud-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--neon-cyan), transparent);
+}
+
+/* --- STATS DISPLAY --- */
+.big-stat {
+    font-size: 3.5rem;
+    font-weight: 700;
+    font-family: 'Orbitron', monospace;
+    background: linear-gradient(to bottom, #fff, #a5b4fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 5px 0;
+}
+
+/* --- GRID LAYOUT --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto auto;
+    /* 2 rows explicitly */
+    gap: 24px;
+    padding: 24px;
+}
+
+.col-span-3 {
+    grid-column: span 3;
+}
+
+.col-span-4 {
+    grid-column: span 4;
+}
+
+.col-span-6 {
+    grid-column: span 6;
+}
+
+.col-span-8 {
+    grid-column: span 8;
+}
+
+.col-span-12 {
+    grid-column: span 12;
+}
+
+@media (max-width: 1024px) {
+
+    .col-span-3,
+    .col-span-4,
+    .col-span-6,
+    .col-span-8 {
+        grid-column: span 12;
+    }
+}
+
+/* --- ADVANCED BUTTONS --- */
+.cyber-btn {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 10px 24px;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.cyber-btn:hover {
+    background: var(--neon-cyan);
+    color: #000;
+    box-shadow: 0 0 20px var(--neon-cyan);
+}
+
+.cyber-btn-grad {
+    background: linear-gradient(45deg, var(--neon-magenta), #7c3aed);
+    border: none;
+    color: white;
+}
+
+/* --- SIDEBAR UPGRADE --- */
+.sidebar {
+    background: rgba(3, 5, 17, 0.95) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.nav-link.active {
+    background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), transparent) !important;
+    border-left: 3px solid var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+}
+
+.nav-link:hover {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* --- SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #02040a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+}
+
+/* --- ACTIONS DROPDOWN PREMIUM --- */
+.actions-dropdown {
+    background: rgba(11, 15, 25, 0.98) !important;
+    backdrop-filter: blur(25px) !important;
+    border: 1px solid rgba(0, 243, 255, 0.25) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 243, 255, 0.1) !important;
+    border-radius: 16px !important;
+    padding: 12px !important;
+    z-index: 1000 !important;
+    animation: dropdownSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.actions-dropdown.modalized {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 16px !important;
+    overflow: auto !important;
+    z-index: 10050 !important;
+    background: rgba(8, 12, 24, 0.98) !important;
+}
+
+.actions-dropdown.modalized .actions-sheet {
+    max-width: 420px;
+    width: min(92vw, 420px);
+    margin: 70px auto 40px;
+}
+
+.actions-dropdown.modalized .actions-close {
+    max-width: 420px;
+    width: min(92vw, 420px);
+    margin: 10px auto 10px;
+}
+
+.actions-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.6);
+    backdrop-filter: blur(6px);
+    z-index: 10040;
+}
+
+@media (max-width: 768px) {
+    .actions-dropdown {
+        width: min(90vw, 320px) !important;
+        left: auto !important;
+        right: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .actions-dropdown {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 16px !important;
+        overflow: auto !important;
+        background: rgba(8, 12, 24, 0.98) !important;
+    }
+}
+
+.actions-dropdown.fullscreen .actions-close {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.actions-dropdown.fullscreen .actions-close button {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dropdown-item {
+    padding: 12px 18px !important;
+    color: #e2e8f0 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    border-radius: 10px !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    font-weight: 500 !important;
+    margin-bottom: 2px !important;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 243, 255, 0.12) !important;
+    color: var(--neon-cyan) !important;
+    transform: translateX(8px) !important;
+    box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.05) !important;
+}
+
+.dropdown-divider {
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent) !important;
+    margin: 10px 0 !important;
+}
+
+.dropdown-item span:first-child {
+    font-size: 1.2rem !important;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)) !important;
+}

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Command Center - Y.S.M ADVANCE</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .command-header { text-align: center; margin-bottom: 50px; }
+        .command-header h2 { font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-bottom: 50px; }
+        .metric-card { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .metric-card:hover { transform: translateY(-5px); border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2); }
+        .metric-value { font-size: 2.2rem; font-weight: 700; color: white; margin-bottom: 8px; }
+        .metric-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .section { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 30px; margin-bottom: 30px; }
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .data-table thead th { background: rgba(59, 130, 246, 0.05); color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 16px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .data-table tbody tr { border-bottom: 1px solid rgba(255, 255, 255, 0.03); transition: all 0.2s; }
+        .data-table tbody tr:hover { background: rgba(59, 130, 246, 0.05); }
+        .data-table tbody td { padding: 18px 16px; color: #e2e8f0; font-size: 0.9rem; }
+        .action-btn { padding: 6px 12px; border-radius: 6px; border: none; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-right: 6px; }
+        .btn-approve { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .btn-approve:hover { background: rgba(16, 185, 129, 0.2); }
+        .btn-reject { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-reject:hover { background: rgba(239, 68, 68, 0.2); }
+        .btn-credentials { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .btn-credentials:hover { background: rgba(245, 158, 11, 0.2); }
+        .btn-block { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-block:hover { background: rgba(239, 68, 68, 0.2); }
+        .btn-icon { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px; cursor: pointer; transition: all 0.2s; border-radius: 6px; color: #94a3b8; }
+        .btn-icon:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        .plan-badge { background: rgba(59, 130, 246, 0.1); color: #3b82f6; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .status-badge-table { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .days-remaining { color: #f59e0b; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="command-header">
+            <h2>COMMAND CENTER</h2>
+            <p style="color: #64748b; font-size: 0.95rem;">Global Subscription Management System</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Revenue</div>
+                <div class="metric-value" style="color: #3b82f6" id="totalRevenue">₹0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Active Subscriptions</div>
+                <div class="metric-value" style="color: #10b981" id="activeSubscriptions">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Clients</div>
+                <div class="metric-value" style="color: #f59e0b" id="totalClients">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Pending Approvals</div>
+                <div class="metric-value" style="color: #8b5cf6" id="pendingApprovals">0</div>
+            </div>
+        </div>
+
+        <div class="section" id="pendingSection" style="display: none;">
+            <h3 style="color: white; margin-bottom: 20px;">⚡ Pending Approval Requests</h3>
+            <table class="data-table">
+                <thead>
+                    <tr><th>USERNAME</th><th>EMAIL</th><th>PLAN</th><th>AMOUNT</th><th>DATE</th><th>ACTIONS</th></tr>
+                </thead>
+                <tbody id="pendingTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3 style="color: white; margin-bottom: 20px;">🏛️ CLIENT REGISTRY</h3>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>USERNAME</th><th>EMAIL</th><th>PLAN</th><th>STATUS</th><th>START DATE</th><th>EXPIRY DATE</th><th>ACCESS DAYS</th><th>TOTAL PAID</th><th>MANAGEMENT</th></tr>
+                    </thead>
+                    <tbody id="clientTableBody">
+                        <tr><td colspan="9" style="text-align:center; padding:60px;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let v = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const c = cookies[i].trim();
+                    if (c.substring(0, name.length + 1) === (name + '=')) {
+                        v = decodeURIComponent(c.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return v;
+        }
+
+        async function approveRequest(userId, username) {
+            const days = prompt(`Approve ${username}? Enter days (default 30):`, '30');
+            if (!days) return;
+            try {
+                const res = await fetch('/api/subscription/approve/', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ user_id: userId, days: parseInt(days) })
+                });
+                const result = await res.json();
+                alert(result.message || 'Approved!');
+                loadAllData();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function rejectRequest(userId, username) {
+            if (!confirm(`Reject ${username}?`)) return;
+            try {
+                const res = await fetch('/api/subscription/reject/', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const result = await res.json();
+                alert(result.message || 'Rejected!');
+                loadAllData();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function showCredentials(userId) {
+            try {
+                const res = await fetch(`/api/client/${userId}/credentials/`, {
+                    credentials: 'same-origin',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const cred = await res.json();
+                alert(`CREDENTIALS\n\nUsername: ${cred.username}\nEmail: ${cred.email}\nPlan: ${cred.plan_type || 'N/A'}\nStatus: ${cred.status || 'N/A'}\nDays Remaining: ${cred.days_remaining || 0}\nTotal Paid: ₹${cred.amount_paid || 0}`);
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function blockClient(userId, username) {
+            if (!confirm(`Block ${username}?`)) return;
+            try {
+                const res = await fetch('/api/client/block/', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const result = await res.json();
+                alert(result.message || 'Blocked!');
+                loadAllData();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function deleteClient(userId, username) {
+            if (!confirm(`DELETE ${username}? Type 'DELETE' to confirm`)) return;
+            const conf = prompt(`Type 'DELETE' to confirm:`);
+            if (conf !== 'DELETE') { alert('Cancelled'); return; }
+            try {
+                const res = await fetch(`/api/client/${userId}/delete/`, {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const result = await res.json();
+                alert(result.message || 'Deleted!');
+                loadAllData();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function loadAllData() {
+            try {
+                const res = await fetch('/api/super-admin/clients/', {
+                    credentials: 'same-origin',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const clients = await res.json();
+                const pending = clients.filter(c => c.subscription_status === 'PENDING');
+                const active = clients.filter(c => c.subscription_status !== 'PENDING');
+                
+                if (pending.length > 0) {
+                    document.getElementById('pendingSection').style.display = 'block';
+                    document.getElementById('pendingTableBody').innerHTML = pending.map(r => `
+                        <tr>
+                            <td style="font-weight:600;">${r.username}</td>
+                            <td>${r.email}</td>
+                            <td><span class="plan-badge">${r.plan || 'SCHOOL'}</span></td>
+                            <td>₹${r.total_paid || '2000'}</td>
+                            <td>${r.date_joined ? new Date(r.date_joined).toLocaleDateString() : 'Today'}</td>
+                            <td>
+                                <button class="action-btn btn-approve" onclick="approveRequest(${r.user_id}, '${r.username}')">✓ Approve</button>
+                                <button class="action-btn btn-reject" onclick="rejectRequest(${r.user_id}, '${r.username}')">✗ Reject</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    document.getElementById('pendingSection').style.display = 'none';
+                }
+                
+                if (active.length > 0) {
+                    document.getElementById('clientTableBody').innerHTML = active.map(c => `
+                        <tr>
+                            <td style="font-weight:600;">${c.username}</td>
+                            <td>${c.email}</td>
+                            <td><span class="plan-badge">${c.plan || 'SCHOOL'}</span></td>
+                            <td><span class="status-badge-table status-active">${c.is_active ? 'ACTIVE' : 'BLOCKED'}</span></td>
+                            <td>${c.subscription_start ? new Date(c.subscription_start).toLocaleDateString() : '-'}</td>
+                            <td>${c.subscription_expiry ? new Date(c.subscription_expiry).toLocaleDateString() : '-'}</td>
+                            <td><span class="days-remaining">${c.days_remaining !== undefined ? (c.days_remaining > 0 ? c.days_remaining + ' D' : '0 D') : '-'}</span></td>
+                            <td>₹${parseFloat(c.total_paid || 0).toFixed(2)}</td>
+                            <td>
+                                <button class="action-btn btn-credentials" onclick="showCredentials(${c.user_id})">📝 Credentials</button>
+                                <button class="action-btn btn-block" onclick="blockClient(${c.user_id}, '${c.username}')">🚫 Block</button>
+                                <button class="btn-icon" onclick="deleteClient(${c.user_id}, '${c.username}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    document.getElementById('clientTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:60px;">No active clients</td></tr>';
+                }
+                
+                document.getElementById('totalClients').textContent = clients.length;
+                document.getElementById('activeSubscriptions').textContent = active.length;
+                document.getElementById('pendingApprovals').textContent = pending.length;
+                const totalRevenue = active.reduce((sum, c) => sum + parseFloat(c.total_paid || 0), 0);
+                document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
+            } catch (e) {
+                console.error(e);
+                document.getElementById('clientTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:60px; color:#ef4444;">Error loading data</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
+</body>
+</html>

@@ -1,120 +1,196 @@
-"""
-Plan-Based Feature Access Control
-Centralized permission system for different subscription tiers
-"""
+from django.conf import settings
 
-# Feature definitions for each plan
-# Feature definitions for each plan
-PLAN_FEATURES = {
-    'COACHING': {
-        'students', 'batches', 'attendance', 'fees', 'notifications', 'reports', 'live_classes'
-    },
-    'SCHOOL': {
-        'students', 'classes', 'attendance', 'fees', 'notifications', 'reports',
-        'exams', 'transport', 'library', 'id_cards', 'parents'
-    },
-    'INSTITUTE': {
-        'students', 'classes', 'attendance', 'fees', 'notifications', 'reports',
-        'exams', 'transport', 'library', 'id_cards', 'parents',
-        'departments', 'hostel', 'lab', 'hr', 'events', 'multi_branch'
-    }
+# ==============================================================================
+# 🔐 CENTRAL PERMISSION MATRIX (PREMIUM ARCHITECTURE)
+# ==============================================================================
+# This module implements a "Layered Access Control" system.
+# Access = (Institution Type Features + Subscription Tier Features) + Ad-hoc Overrides
+# This allows for granular control like "Basic School" vs "Enterprise School".
+
+# 1. FEATURE GROUPS (Modular & Reusable)
+CORE_FEATURES = {
+    'dashboard', 'students', 'attendance', 'finance', 'calendar', 'profile', 'settings', 'logs'
 }
 
-# Feature display names and icons
+ACADEMIC_FEATURES = {
+    'library', 'exams', 'timetable', 'leaves', 'departments', 'routine', 'substitutes', 'assignments'
+}
+
+COACHING_FEATURES = {
+    'courses', 'live_classes', 'marketing', 'leads', 'batches', 'enrollments', 'lms_materials'
+}
+
+OPERATIONS_FEATURES = {
+    'hostel', 'transport', 'inventory', 'hr', 'payroll', 'roi_analytics'
+}
+
+ADVANCED_FEATURES = {
+    'audit_logs', 'global_settings', 'multi_branch', 'api_access', 'white_label', 'ai_insights'
+}
+
+# 2. INSTITUTION TYPE BASELINES (The "Domain" Layer)
+# Defines what modules are relevant for a specific business type.
+INSTITUTION_FEATURES = {
+    'SCHOOL': list(CORE_FEATURES | ACADEMIC_FEATURES | {'hr', 'payroll', 'transport'}), # Added transport/hr as standard for schools
+    'COACHING': list(CORE_FEATURES | COACHING_FEATURES),
+    'INSTITUTE': list(CORE_FEATURES | ACADEMIC_FEATURES | COACHING_FEATURES | OPERATIONS_FEATURES | {'approvals'}),
+    
+    # Special Types
+    'EDUCATION SYSTEM': list(
+        CORE_FEATURES | ACADEMIC_FEATURES | COACHING_FEATURES | OPERATIONS_FEATURES | ADVANCED_FEATURES | {'approvals', 'admin_approvals'}
+    ),
+    'SUPER_ADMIN': list(
+        CORE_FEATURES | ACADEMIC_FEATURES | COACHING_FEATURES | OPERATIONS_FEATURES | ADVANCED_FEATURES | {'approvals', 'admin_approvals'}
+    )
+}
+
+# 3. SUBSCRIPTION TIERS (The "Depth" Layer)
+# Defines additional capabilities based on payment tiers.
+# Note: These are ADDITIVE to the Institution Features.
+TIER_FEATURES = {
+    'BASIC': set(), # Standard Access
+    'PRO': {'reports', 'events', 'notifications', 'bulk_import'},
+    'ENTERPRISE': {'reports', 'events', 'notifications', 'bulk_import'} | OPERATIONS_FEATURES | ADVANCED_FEATURES
+}
+
+# 4. METADATA (For UI Rendering)
 FEATURE_META = {
-    'students': {'name': 'Student Management', 'icon': '👨‍🎓'},
-    'batches': {'name': 'Batch Management', 'icon': '👥'},
-    'classes': {'name': 'Class Management', 'icon': '🏫'},
-    'attendance': {'name': 'Attendance System', 'icon': '✅'},
-    'fees': {'name': 'Fee Management', 'icon': '💰'},
-    'notifications': {'name': 'Smart Notifications', 'icon': '🔔'},
-    'reports': {'name': 'Analytics & Reports', 'icon': '📊'},
-    'exams': {'name': 'Exam & Grading', 'icon': '📝'},
-    'transport': {'name': 'Transport System', 'icon': '🚌'},
-    'library': {'name': 'Digital Library', 'icon': '📚'},
-    'id_cards': {'name': 'ID Card Generator', 'icon': '🪪'},
-    'parents': {'name': 'Parent Portal', 'icon': '👪'},
-    'departments': {'name': 'Departments', 'icon': '🏛️'},
-    'hostel': {'name': 'Hostel Management', 'icon': '🏨'},
-    'lab': {'name': 'Lab Inventory', 'icon': '🔬'},
+    'library': {'name': 'Library', 'icon': '📚'},
+    'transport': {'name': 'Transport', 'icon': '🚌'},
+    'hostel': {'name': 'Hostel', 'icon': '🏢'},
     'hr': {'name': 'HR & Payroll', 'icon': '👔'},
-    'events': {'name': 'Event Management', 'icon': '📅'},
-    'multi_branch': {'name': 'Multi-Branch Control', 'icon': '🏢'}
+    'exams': {'name': 'Exams', 'icon': '📝'},
+    'courses': {'name': 'Courses', 'icon': '🎓'},
+    'live_classes': {'name': 'Live Classes', 'icon': '🔴'},
+    'dashboard': {'name': 'Dashboard', 'icon': '📊'},
+    'students': {'name': 'Student Management', 'icon': '🎓'},
+    'finance': {'name': 'Finance & Fees', 'icon': '💰'},
+    'attendance': {'name': 'Attendance', 'icon': '📅'},
+    'settings': {'name': 'Settings', 'icon': '⚙️'},
+    'reports': {'name': 'Advanced Reports', 'icon': '📈'},
+    'ai_insights': {'name': 'AI Analytics', 'icon': '🤖'},
 }
+
+# Backward Compatibility Alias
+PLAN_FEATURES = INSTITUTION_FEATURES 
+
+def get_feature_meta(feature_key):
+    return FEATURE_META.get(feature_key, {'name': feature_key.replace('_', ' ').title(), 'icon': '🔹'})
+
+def get_effective_permissions(user):
+    """
+    Computes the final set of permissions for a user based on their context.
+    Returns: Set[str] of feature keys.
+    """
+    if user.is_superuser:
+        return set(INSTITUTION_FEATURES['SUPER_ADMIN'])
+        
+    if not hasattr(user, 'profile'):
+        return set(INSTITUTION_FEATURES.get('SCHOOL', []))
+
+    profile = user.profile
+    
+    # A. Base Context Permissions (Institution)
+    inst_type = profile.institution_type or 'SCHOOL'
+    base_features = set(INSTITUTION_FEATURES.get(inst_type, INSTITUTION_FEATURES['SCHOOL']))
+    
+    # B. Tier Permissions (Subscription)
+    # Default to 'BASIC' if not specified
+    plan_tier = profile.subscription_plan or 'BASIC' 
+    tier_features = TIER_FEATURES.get(plan_tier, set())
+    
+    # Combine (Union)
+    # Logic: You only get features that are relevant to your Institution AND allowed by your Tier?
+    # OR strictly additive? 
+    # Current Decision: Additive, but filter by relevance if needed. 
+    # For simplicity/premium feel: Additive. An Enterprise Coaching center might want HR even if not standard.
+    effective_features = base_features | tier_features
+    
+    # C. Custom User/Role Overrides (Granular Control)
+    if profile.permissions:
+        # 'features' key in JSON field serves as an explicit Override/Allowlist
+        # If present, it takes precedence IF strict mode is desired.
+        # But for 'Add-on' logic, we just merge.
+        custom_allowed = set(profile.permissions.get('allow_features', []))
+        custom_denied = set(profile.permissions.get('deny_features', []))
+        
+        effective_features = (effective_features | custom_allowed) - custom_denied
+
+    return effective_features
 
 def has_feature_access(user, feature_name):
     """
-    Check if user has access to a specific feature based on their plan
-    
-    Args:
-        user: Django User object with profile
-        feature_name: String name of the feature (e.g., 'exams', 'finance')
-    
-    Returns:
-        bool: True if user has access, False otherwise
+    The Premium Gatekeeper.
+    Checks access against the computed matrix.
     """
-    if not hasattr(user, 'profile'):
-        return False
-    
-    # Super admins have access to everything
+    # 1. Super Admin Bypass
     if user.is_superuser:
         return True
-    
-    # Get user's plan type
-    plan_type = getattr(user.profile, 'institution_type', 'COACHING')
-    
-    # Get allowed features for this plan
-    allowed_features = PLAN_FEATURES.get(plan_type, PLAN_FEATURES['COACHING'])
-    
-    # STRICT EXPIRY CHECK
-    if hasattr(user, 'profile') and user.profile.is_plan_expired():
-        # Only allow absolutely basic features when expired
-        if feature_name in ['dashboard', 'subscription', 'payments']:
-             return True
-        return False
 
+    # 2. Expiry Check (Hard Stop)
+    if hasattr(user, 'profile') and user.profile.is_plan_expired():
+        # Minimal Access Mode
+        SAFE_FEATURES = {'dashboard', 'payment_renewal', 'profile', 'settings'}
+        if feature_name not in SAFE_FEATURES:
+            return False
+
+    # 3. Check Computed Permissions
+    allowed_features = get_effective_permissions(user)
+    
     return feature_name in allowed_features
 
+def get_user_plan(user):
+    """
+    Legacy Helper: Returns the primary identifier for the User's "Plan".
+    Now returns the Institution Type as the primary context.
+    """
+    if user.is_superuser: return 'SUPER_ADMIN'
+    if hasattr(user, 'profile'):
+        return user.profile.institution_type or 'SCHOOL'
+    return 'SCHOOL'
 
 def get_user_features(user):
     """
-    Get list of all features available to a user based on their plan
-    
-    Args:
-        user: Django User object with profile
-    
-    Returns:
-        dict: Dictionary with feature names as keys and metadata as values
+    Returns API-ready list of features with metadata.
     """
-    if user.is_superuser:
-        # Super admin gets everything
-        all_features = PLAN_FEATURES['INSTITUTE']
-        return {f: FEATURE_META[f] for f in all_features}
+    features_set = get_effective_permissions(user)
     
-    if not hasattr(user, 'profile'):
-        return {}
-    
-    plan_type = getattr(user.profile, 'institution_type', 'COACHING')
-    allowed_features = PLAN_FEATURES.get(plan_type, PLAN_FEATURES['COACHING'])
-    
-    return {f: FEATURE_META[f] for f in allowed_features}
+    features_dict = {}
+    for feature in features_set:
+        meta = get_feature_meta(feature)
+        features_dict[feature] = meta
+        
+    return features_dict
 
+# Pricing Configuration (Centralized)
+PLAN_PRICING = {
+    'COACHING': 500,
+    'SCHOOL': 1500,
+    'INSTITUTE': 3000,
+    'EDUCATION SYSTEM': 99999, # Enterprise/Internal
+    'SUPER_ADMIN': 0
+}
 
-def get_upgrade_plans_for_feature(current_plan, feature_name):
+def get_upgrade_options(user):
     """
-    Get list of plans that include a specific feature
-    
-    Args:
-        current_plan: Current user's plan type
-        feature_name: Feature they want to access
-    
-    Returns:
-        list: List of plan names that include this feature
+    Returns list of available upgrade plans based on pricing.
     """
-    available_in = []
+    current_plan = get_user_plan(user)
+    current_price = PLAN_PRICING.get(current_plan, 0)
     
-    for plan, features in PLAN_FEATURES.items():
-        if feature_name in features and plan != current_plan:
-            available_in.append(plan)
-    
-    return available_in
+    # If using a custom high-tier plan not in pricing, assume max tier
+    if current_plan not in PLAN_PRICING:
+        current_price = 99999
+
+    options = []
+    for plan_name, price in PLAN_PRICING.items():
+        # Only show upgrade if price is higher and it's a public plan
+        if price > current_price and price < 90000:
+            options.append({
+                "plan": plan_name,
+                "price": price,
+                "difference": price - current_price,
+                "label": f"{plan_name.title().replace('_', ' ')} (₹{price}/mo)"
+            })
+            
+    return sorted(options, key=lambda x: x['price'])

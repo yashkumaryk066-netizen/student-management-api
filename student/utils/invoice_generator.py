@@ -1,6 +1,7 @@
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from student.conf import CURRENCY_SYMBOL, CURRENCY_CODE
 from datetime import datetime
 
 def generate_invoice_pdf(payment):
@@ -44,7 +45,7 @@ def generate_invoice_pdf(payment):
     p.line(50, 600, 550, 600)
     p.setFont("Helvetica-Bold", 10)
     p.drawString(50, 585, "Description")
-    p.drawString(450, 585, "Amount (INR)")
+    p.drawString(450, 585, f"Amount ({CURRENCY_CODE})")
     p.line(50, 575, 550, 575)
     
     p.setFont("Helvetica", 10)
@@ -56,7 +57,7 @@ def generate_invoice_pdf(payment):
     p.line(50, 530, 550, 530)
     p.setFont("Helvetica-Bold", 12)
     p.drawString(350, 510, "Total:")
-    p.drawString(450, 510, f"INR {payment.amount}")
+    p.drawString(450, 510, f"{CURRENCY_CODE} {payment.amount}")
     
     # --- Footer ---
     p.setFont("Helvetica-Oblique", 8)

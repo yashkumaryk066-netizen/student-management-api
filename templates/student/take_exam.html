@@ -1,0 +1,400 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Exam - Y.S.M Academy</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-darker);
+            color: #e2e8f0;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .exam-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .question-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            border-color: rgba(245, 158, 11, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+        }
+
+        .option-input:checked+.option-text {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .option-input:checked~.check-icon {
+            opacity: 1;
+        }
+
+        .timer-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-950 z-50">
+        <div class="text-center">
+            <div class="loader mx-auto mb-4"></div>
+            <div class="text-slate-400 text-sm">Loading Exam Environment...</div>
+        </div>
+    </div>
+
+    <!-- Timer -->
+    <div id="timerDisplay" class="timer-badge hidden">
+        <i class="fa-regular fa-clock mr-2"></i> <span id="timeRemaining">--:--</span>
+    </div>
+
+    <div class="exam-container hidden" id="examContent">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2" id="examTitle">Loading...</h1>
+            <div class="flex gap-4 text-sm text-slate-400">
+                <span><i class="fa-solid fa-list-ol text-amber-500"></i> <span id="questionCount">--</span>
+                    Questions</span>
+                <span><i class="fa-solid fa-hourglass-half text-amber-500"></i> <span id="duration">--</span>
+                    Mins</span>
+                <span><i class="fa-solid fa-star text-amber-500"></i> <span id="totalMarks">--</span> Marks</span>
+            </div>
+        </div>
+
+        <!-- Questions -->
+        <form id="examForm" onsubmit="event.preventDefault(); submitExam();">
+            <div id="questionsList"></div>
+
+            <div class="mt-8 flex justify-end gap-4">
+                <button type="button" onclick="window.history.back()"
+                    class="px-6 py-3 rounded-lg border border-slate-600 text-slate-300 hover:bg-white/5 transition">Cancel</button>
+                <button type="submit"
+                    class="px-8 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold hover:shadow-lg hover:shadow-orange-500/20 transition transform hover:-translate-y-1">
+                    Submit Exam <i class="fa-solid fa-paper-plane ml-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Result Modal (Hidden) -->
+    <div id="resultModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div
+            class="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent pointer-events-none"></div>
+
+            <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-check text-4xl text-green-500"></i>
+            </div>
+
+            <h2 class="text-2xl font-bold text-white mb-2">Exam Submitted!</h2>
+            <p class="text-slate-400 mb-6">Your responses have been recorded successfully or graded instantly.</p>
+
+            <button onclick="window.location.href='/student-dashboard/'"
+                class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition">
+                Return to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const EXAM_ID = "{{ exam_id }}";
+        const API_BASE = window.location.origin + '/api';
+        const token = localStorage.getItem('authToken');
+        let examData = null;
+        let attemptId = null;
+
+        // Init
+        if (!token) window.location.href = '/login/';
+
+        // Fetch Exam Details & Start Session
+        async function initExam() {
+            try {
+                // 1. Get Exam Info
+                const res = await fetch(`${API_BASE}/online-exam-session/${EXAM_ID}/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error('Failed to load exam');
+                examData = await res.json();
+
+                // 2. Start Session (Create Attempt)
+                const startRes = await fetch(`${API_BASE}/online-exam-session/${EXAM_ID}/start/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (startRes.status === 400) {
+                    // Check error
+                    const err = await startRes.json();
+                    alert(err.error);
+                    return;
+                }
+
+                const attemptData = await startRes.json();
+                permitRender(examData, attemptData);
+
+            } catch (e) {
+                console.error(e);
+                alert("Error loading exam: " + e.message);
+            }
+        }
+
+        function permitRender(exam, attempt) {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('examContent').classList.remove('hidden');
+            document.getElementById('timerDisplay').classList.remove('hidden');
+
+            // Render Header
+            document.getElementById('examTitle').textContent = exam.title;
+            document.getElementById('questionCount').textContent = exam.questions ? exam.questions.length : 0;
+            document.getElementById('duration').textContent = exam.duration_minutes;
+            document.getElementById('totalMarks').textContent = exam.total_marks;
+
+            // Start Timer
+            startTimer(exam.duration_minutes, attempt.start_time);
+
+            // Render Questions
+            const list = document.getElementById('questionsList');
+            if (!exam.questions) return;
+
+            list.innerHTML = exam.questions.map((q, index) => {
+                return `
+                    <div class="question-card" id="q-${q.id}">
+                        <div class="flex justify-between mb-4">
+                            <span class="text-amber-500 font-bold">Question ${index + 1}</span>
+                            <span class="text-xs bg-slate-800 px-2 py-1 rounded border border-slate-700 text-slate-400">${q.marks} Marks</span>
+                        </div>
+                        <div class="text-lg text-white mb-6 font-medium">${q.question_text}</div>
+                        ${renderInput(q)}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderInput(q) {
+            if (q.question_type === 'MCQ' || q.question_type === 'TF') {
+                // Parse options if JSON string, else use as array
+                let options = [];
+                try {
+                    options = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
+                } catch (e) { options = []; }
+
+                if (!options || options.length === 0) {
+                    if (q.question_type === 'TF') options = ["True", "False"];
+                }
+
+                return `
+                    <div class="space-y-3">
+                        ${options.map(opt => `
+                            <label class="option-label group">
+                                <input type="radio" name="q_${q.id}" value="${opt}" class="option-input w-4 h-4 text-amber-500 bg-slate-800 border-slate-600 focus:ring-amber-500">
+                                <span class="ml-3 option-text text-slate-300 group-hover:text-white transition">${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                // Subjective (SA, LA)
+                return `
+                    <textarea name="q_${q.id}" placeholder="Type your answer here..." class="focus:border-amber-500 focus:ring-1 focus:ring-amber-500"></textarea>
+                `;
+            }
+        }
+
+        function startTimer(durationMinutes, startTimeISO) {
+            // Setup simple countdown locally
+            const durationSec = durationMinutes * 60;
+            const startTime = new Date(startTimeISO).getTime();
+            // Or just use local countdown for simplicity as server checks too
+
+            let timeLeft = durationSec;
+            // Better: Calculate remaining time relative to now if reloaded
+            // For now, simple countdown
+
+            const timerEl = document.getElementById('timeRemaining');
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    submitExam(true); // Auto submit
+                    return;
+                }
+
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                timerEl.textContent = `${m}:${s < 10 ? '0' + s : s}`;
+
+                if (timeLeft < 300) { // Red alert last 5 mins
+                    document.getElementById('timerDisplay').classList.add('text-red-500', 'animate-pulse');
+                }
+            }, 1000);
+        }
+
+        async function submitExam(auto = false) {
+            if (!confirm(auto ? "Time's up! Submitting..." : "Are you sure you want to finish the exam?")) return;
+
+            // Collect Responses
+            const responses = [];
+            examData.questions.forEach(q => {
+                // Get value
+                let val = null;
+                if (q.question_type === 'MCQ' || q.question_type === 'TF') {
+                    const el = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                    if (el) val = el.value;
+                } else {
+                    const el = document.querySelector(`textarea[name="q_${q.id}"]`);
+                    if (el) val = el.value;
+                }
+
+                if (val) {
+                    responses.push({
+                        question_id: q.id,
+                        marked_answer: val
+                    });
+                }
+            });
+
+            // API Call
+            try {
+                const res = await fetch(`${API_BASE}/online-exam-session/${EXAM_ID}/submit/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ responses })
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    const score = result.score_obtained || 0;
+                    const total = examData.total_marks || 100;
+
+                    document.getElementById('resultModal').innerHTML = `
+                        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-2xl relative overflow-hidden">
+                             <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent pointer-events-none"></div>
+                             
+                             <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                 <i class="fa-solid fa-trophy text-4xl text-amber-500"></i>
+                             </div>
+                             
+                             <h2 class="text-2xl font-bold text-white mb-2">Exam Completed!</h2>
+                             <div class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 my-4">
+                                ${score} / ${total}
+                             </div>
+                             <p class="text-slate-400 mb-6">Your answers have been submitted and AI-graded.</p>
+                             
+                             <button onclick="window.location.href='/student-dashboard/'" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition">
+                                 Return to Dashboard
+                             </button>
+                        </div>
+                    `;
+                    document.getElementById('resultModal').classList.remove('hidden');
+                    document.getElementById('resultModal').classList.add('flex');
+                } else {
+                    alert('Submission Error: ' + (result.error || 'Unknown'));
+                }
+
+            } catch (e) { console.error(e); alert("Network Error"); }
+        }
+
+        window.onload = initExam;
+    </script>
+</body>
+
+</html>

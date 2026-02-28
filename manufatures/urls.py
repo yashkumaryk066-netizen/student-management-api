@@ -26,9 +26,9 @@ from student.views import (
     LandingPageView,
     LoginPageView,
     DemoPageView,
-    DemoPageView,
     AdminDashboardTemplateView,
     SuperAdminDashboardTemplateView,
+    SuperAdminSubscriptionView,
     TeacherDashboardTemplateView,
     StudentDashboardTemplateView,
     ParentDashboardTemplateView,
@@ -38,8 +38,12 @@ from student.views import (
     robots_txt,
     sitemap_xml,
     google_verification,
+    # Legal Pages
+    PrivacyPolicyView,
+    TermsOfServiceView,
+    RefundPolicyView,
+    AIChatView,
 )
-from student.ai_chat_views import AIChatView
 
 urlpatterns = [
     # Django Admin Panel
@@ -62,8 +66,14 @@ urlpatterns = [
     path('developer/', DeveloperProfileView.as_view(), name='developer-profile-root'),
     path('resume/', ResumeView.as_view(), name='resume-view-root'),
     
+    # Legal Pages
+    path('privacy-policy/', PrivacyPolicyView.as_view(), name='privacy-policy'),
+    path('terms-of-service/', TermsOfServiceView.as_view(), name='terms-of-service'),
+    path('refund-policy/', RefundPolicyView.as_view(), name='refund-policy'),
+    
     # Dashboard Pages (after login)
     path('dashboard/super-admin/', SuperAdminDashboardTemplateView.as_view(), name='super-admin-dashboard'),
+    path('dashboard/super-admin/subscription/', SuperAdminSubscriptionView.as_view(), name='super-admin-subscription'),
     path('dashboard/admin/', AdminDashboardTemplateView.as_view(), name='admin-dashboard'),
     path('dashboard/teacher/', TeacherDashboardTemplateView.as_view(), name='teacher-dashboard'),
     path('dashboard/student/', StudentDashboardTemplateView.as_view(), name='student-dashboard'),
@@ -75,7 +85,6 @@ urlpatterns = [
     # API Endpoints
     path('api/', include('student.urls')),
     path('api/notifications/', include('notifications.urls')),
-    # path('rangrago/', include('rangrago.urls')), # RangraGo - Disabled
 
     # API Documentation  
     # API Documentation
@@ -83,7 +92,14 @@ urlpatterns = [
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
 ]
 
+# Serve media files in development
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 # Admin Panel Customization
-admin.site.site_header = "NextGen ERP Administration"
-admin.site.site_title = "NextGen ERP Portal"
-admin.site.index_title = "Institute Management Dashboard"
+admin.site.site_header = "Y.S.M ADVANCE ADMINISTRATION"
+admin.site.site_title = "Y.S.M ADVANCE PORTAL"
+admin.site.index_title = "SYSTEM CONTROL UNIT"

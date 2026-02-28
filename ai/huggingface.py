@@ -89,20 +89,24 @@ class HuggingFaceService:
             raise Exception(f"HuggingFace generation failed: {str(e)}")
     
     def ask_tutor(self, question: str, subject: str = "General", context: str = "", **kwargs) -> str:
-        """AI tutor using HuggingFace"""
+        """Y.S.M Universal AI - Community Engine"""
         
-        prompt = f"""<s>[INST] You are an expert AI assistant.
+        system_instruction = f"""You are **Y.S.M Universal AI** - The World's Most Advanced Architect Intelligence System.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**System Name:** Y.S.M Universal AI (Community Edition)
+**Creator:** Yash A Mishra
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You are an expert educational tutor. Provide clear, detailed explanations for {subject}.
+"""
+        
+        prompt = f"""<s>[INST] {system_instruction}
 
-Subject: {subject}
 Context: {context}
-
-User Question: {question}
-
-Provide a clear, helpful, and accurate response. [/INST]"""
+User Question: {question} [/INST]"""
         
         try:
             answer = self._generate(prompt, max_tokens=1500)
-            return f"🤗 {answer}"
+            return answer
         except Exception as e:
             logger.error(f"HuggingFace ask_tutor error: {str(e)}")
             raise
@@ -126,6 +130,57 @@ Provide a clear, helpful, and accurate response. [/INST]"""
         """Translate content"""
         prompt = f"Translate to {target_language}: {text}"
         return self._generate(prompt)
+
+    def generate_image(self, prompt: str) -> str:
+        """
+        Generate image using Hugging Face Inference API (Free Tier)
+        Uses Stable Diffusion XL or similar open models
+        """
+        # Backup Model List for Redundancy
+        models = [
+            "stabilityai/stable-diffusion-xl-base-1.0",
+            "runwayml/stable-diffusion-v1-5",
+            "prompthero/openjourney",
+            "CompVis/stable-diffusion-v1-4"
+        ]
+        
+        # Randomize order slightly to distribute load, but keep XL first 50% of time
+        import random
+        if random.random() > 0.5:
+             # Move XL to 2nd pos
+             models[0], models[1] = models[1], models[0]
+        
+        headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
+
+        for model in models:
+            API_URL = f"https://api-inference.huggingface.co/models/{model}"
+            try:
+                # If no API key, we can't really use this reliably, but try anyway
+                if not self.api_key:
+                    logger.warning(f"Attempting image gen on {model} without API Key")
+                
+                response = requests.post(API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
+                
+                if response.status_code == 503: # Model loading
+                     import time
+                     time.sleep(2)
+                     response = requests.post(API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
+
+                if response.status_code != 200:
+                    logger.warning(f"Model {model} failed: {response.text}")
+                    continue # Try next model
+                    
+                # Success
+                image_bytes = response.content
+                import base64
+                encoded_image = base64.b64encode(image_bytes).decode('utf-8')
+                return f"data:image/jpeg;base64,{encoded_image}"
+
+            except Exception as e:
+                logger.error(f"HuggingFace Image Gen Failed on {model}: {e}")
+                continue
+
+        raise Exception("All free image generation models are currently busy or rate-limited.")
 
 
 # Singleton

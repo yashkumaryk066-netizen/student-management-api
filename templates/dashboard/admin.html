@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-{% load plan_extras %}
+
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Y.S.M Education</title>
+    <title>Y.S.M Advance - Dashboard | Education OS</title>
+    <meta name="description"
+        content="Manage your school, coaching, or institute with Y.S.M Advance - The AI-Powered Education Operating System.">
     <link rel="icon" type="image/png" href="/static/img/ysm_logo.png">
-    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css?v=20260217-3">
+    <link rel="stylesheet" href="/static/css/responsive.css?v=20260217-3">
+    <link rel="stylesheet" href="/static/css/library-mobile.css?v=20260217-3">
     <link rel="stylesheet" href="/static/css/premium_modal.css">
     <link rel="stylesheet" href="/static/css/upgrade-modal.css">
     <link rel="stylesheet" href="/static/css/sidebar-overlay.css">
@@ -25,11 +29,133 @@
     <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
 
+    <!-- PREMIUM DATEPICKER ENGINE -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="/static/css/premium_datepicker.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!-- QRCode Scanning Engine -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
     <!-- Core API & Engine -->
-    <script src="/static/js/api.js" defer></script>
+    <script src="/static/js/api.js?v=5.2" defer></script>
+    <!-- Version 5.2: Removed Approvals menu items -->
+
+    <!-- PWA - NATIVE EXPERIENCE ENGINE -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e3a8a">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(reg => console.log('🛡️ Sovereign ERP: PWA Engine Online'))
+                    .catch(err => console.log('❌ PWA Engine Failed', err));
+            });
+        }
+    </script>
 </head>
 
-<body>
+<body class="sovereign-theme">
+    <!-- Magic Cursor -->
+    <div class="magic-cursor" id="magicCursor"></div>
+    <div class="magic-cursor-follower" id="magicFollower"></div>
+
+    <!-- Background Data Waves -->
+    <div class="data-wave"
+        style="top: -10%; left: -5%; width: 600px; height: 600px; background: rgba(59, 130, 246, 0.05); animation: waveMagic 30s infinite alternate;">
+    </div>
+    <div class="data-wave"
+        style="bottom: -10%; right: -5%; width: 700px; height: 700px; background: rgba(139, 92, 246, 0.05); animation: waveMagic 35s infinite alternate-reverse;">
+    </div>
+
+    <style>
+        .magic-cursor {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        .magic-cursor-follower {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .data-wave {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+            filter: blur(80px);
+            border-radius: 50%;
+        }
+
+        @keyframes waveMagic {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(100px, 50px) scale(1.2) rotate(45deg);
+            }
+        }
+
+        .stat-card,
+        .module-card,
+        .chart-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) !important;
+            cursor: none;
+        }
+
+        .stat-card::after,
+        .module-card::after,
+        .chart-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.06), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .stat-card:hover::after,
+        .module-card:hover::after,
+        .chart-card:hover::after {
+            opacity: 1;
+        }
+
+        .premium-brand-text {
+            background: linear-gradient(90deg, #fff, #3b82f6, #fff);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: brandShimmer 5s linear infinite;
+        }
+
+        @keyframes brandShimmer {
+            to {
+                background-position: 200% center;
+            }
+        }
+    </style>
     <!-- PREMIUM PRELOADER -->
     <div id="preloader">
         <div class="loader-branding">Y.S.M SYSTEM</div>
@@ -39,44 +165,9 @@
             INITIALIZING SECURE ENVIRONMENT...</div>
     </div>
     <script>
-        // --- SUPER ADMIN REDIRECTOR ---
-        // If this user is a superadmin, they shouldn't be here.
-        // Redirect them to the ADVANCED dashboard immediately.
-        (async function checkSuperAdmin() {
-            // Bypass logic: If allow_admin=true is present in the URL, don't redirect.
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('allow_admin') === 'true') {
-                console.log("🛡️ SuperAdmin bypass active.");
-                return;
-            }
-
-            const token = localStorage.getItem('authToken');
-            if (!token) return; // Not logged in, let normal flow handle it
-
-            // 1. Fast Check (Local Storage)
-            const isSuper = localStorage.getItem('isSuperuser');
-            if (isSuper === 'true') {
-                window.location.replace('/dashboard/super-admin/');
-                return;
-            }
-
-            // 2. Strong Check (Profile API) - In case local storage is empty
-            try {
-                const res = await fetch('/api/profile/', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (res.ok) {
-                    const profile = await res.json();
-                    if (profile.is_superuser) {
-                        localStorage.setItem('isSuperuser', 'true');
-                        window.location.replace('/dashboard/super-admin/');
-                    }
-                }
-            } catch (e) {
-                // Console only, don't block
-                console.log("Profile check failed", e);
-            }
-        })();
+        // SuperAdmin Redirect DISABLED - All admins use the same dashboard
+        // SuperAdmin privileges are enforced at backend/API level
+        console.log("🎯 Unified Dashboard Mode - SuperAdmin access via backend");
     </script>
 
 
@@ -109,33 +200,20 @@
                     </a>
                 </li>
 
-                <!-- APPROVALS (Client Admin Control) -->
-                <li class="nav-item">
-                    <a href="#approvals" class="nav-link" data-module="approvals">
-                        <span class="nav-icon">🛂</span>
-                        <span class="nav-text">Approvals</span>
-                        <span class="nav-badge" id="approvalBadge" style="background: #f59e0b; display:none;">0</span>
-                    </a>
-                </li>
+
 
                 <li class="nav-item">
-                    <a href="#students" class="nav-link {% if not user|has_feature:'students' %}locked{% endif %}"
-                        data-module="students">
+                    <a href="#students" class="nav-link" data-module="students">
                         <span class="nav-icon">👥</span>
                         <span class="nav-text">Student Management</span>
                         <span class="nav-badge" id="studentCount">1,234</span>
-                        {% if not user|has_feature:'students' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#courses" class="nav-link {% if not user|has_feature:'courses' %}locked{% endif %}"
-                        data-module="courses" data-plan="coaching">
+                    <a href="#courses" class="nav-link" data-module="courses" data-plan="coaching">
                         <span class="nav-icon">🎓</span>
                         <span class="nav-text">Courses & Batches</span>
-                        {% if not user|has_feature:'courses' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
@@ -147,46 +225,29 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#finance" class="nav-link {% if not user|has_feature:'payments' %}locked{% endif %}"
-                        data-module="payments">
+                    <a href="#finance" class="nav-link" data-module="payments">
                         <span class="nav-icon">💰</span>
                         <span class="nav-text">Finance & Payments</span>
                         <span class="nav-badge" id="pendingCount">47</span>
-                        {% if not user|has_feature:'payments' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
-                <!-- SUPER ADMIN ONLY -->
-                <li class="nav-item super-admin-only" style="display: none;">
-                    <a href="#admin-approvals" class="nav-link" data-module="admin_approvals"
-                        style="background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), transparent); border-left: 2px solid #ef4444;">
-                        <span class="nav-icon">🛡️</span>
-                        <span class="nav-text">Admin Approvals</span>
-                        <span class="nav-badge" style="background: #ef4444;">NEW</span>
-                    </a>
-                </li>
+
 
                 <!-- ACADEMIC MODULES (School & Institute) -->
                 <li class="nav-category">Academic Management</li>
 
                 <li class="nav-item">
-                    <a href="#library" class="nav-link {% if not user|has_feature:'library' %}locked{% endif %}"
-                        data-module="library" data-plan="school">
+                    <a href="#library" class="nav-link" data-module="library" data-plan="school">
                         <span class="nav-icon">📚</span>
                         <span class="nav-text">Library Management</span>
-                        {% if not user|has_feature:'library' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#exams" class="nav-link {% if not user|has_feature:'exams' %}locked{% endif %}"
-                        data-module="exams" data-plan="school">
+                    <a href="#exams" class="nav-link" data-module="exams" data-plan="school">
                         <span class="nav-icon">📝</span>
                         <span class="nav-text">Exams & Grading</span>
-                        {% if not user|has_feature:'exams' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
@@ -209,32 +270,23 @@
                 <li class="nav-category">Operations & Facilities</li>
 
                 <li class="nav-item">
-                    <a href="#hostel" class="nav-link {% if not user|has_feature:'hostel' %}locked{% endif %}"
-                        data-module="hostel" data-plan="institute">
+                    <a href="#hostel" class="nav-link" data-module="hostel" data-plan="institute">
                         <span class="nav-icon">🏢</span>
                         <span class="nav-text">Hostel Management</span>
-                        {% if not user|has_feature:'hostel' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#transport" class="nav-link {% if not user|has_feature:'transport' %}locked{% endif %}"
-                        data-module="transport" data-plan="institute">
+                    <a href="#transport" class="nav-link" data-module="transport" data-plan="institute">
                         <span class="nav-icon">🚌</span>
                         <span class="nav-text">Transportation</span>
-                        {% if not user|has_feature:'transport' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#hr" class="nav-link {% if not user|has_feature:'hr' %}locked{% endif %}" data-module="hr"
-                        data-plan="school">
+                    <a href="#hr" class="nav-link" data-module="hr" data-plan="school">
                         <span class="nav-icon">👔</span>
                         <span class="nav-text">HR & Payroll</span>
-                        {% if not user|has_feature:'hr' %}<span class="lock-icon"
-                            style="margin-left:auto; opacity:0.6;">🔒</span>{% endif %}
                     </a>
                 </li>
 
@@ -242,6 +294,69 @@
                     <a href="#events" class="nav-link" data-module="events">
                         <span class="nav-icon">📅</span>
                         <span class="nav-text">Events & Calendar</span>
+                    </a>
+                </li>
+
+                <!-- SOVEREIGN ERP 2.0 ADVANCED MODULES -->
+                <li class="nav-category">Institutional ERP 2.0</li>
+
+                <li class="nav-item">
+                    <a href="#roi-analytics" class="nav-link" data-module="roi_analytics">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">ROI & Finance Analytics</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#lms-materials" class="nav-link" data-module="lms_materials">
+                        <span class="nav-icon">📺</span>
+                        <span class="nav-text">Study Material (LMS)</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#assignments" class="nav-link" data-module="assignments">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">Digital Assignments</span>
+                    </a>
+                </li>
+
+                <!-- S.O.V.E.R.E.I.G.N INTELLIGENCE -->
+                <li class="nav-category" style="color:#3b82f6; text-shadow:0 0 10px rgba(59,130,246,0.3);">Sovereign
+                    Intelligence</li>
+
+                <li class="nav-item">
+                    <a href="#leads" class="nav-link" data-module="leads" data-plan="coaching">
+                        <span class="nav-icon">🤖</span>
+                        <span class="nav-text">AI Lead Predictor</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#substitutes" class="nav-link" data-module="substitutes" data-plan="school">
+                        <span class="nav-icon">🔄</span>
+                        <span class="nav-text">Smart Substitutes</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="DashboardApp.openScannerModal(); return false;">
+                        <span class="nav-icon" style="color:#10b981;">📸</span>
+                        <span class="nav-text">Scan & Go (Presence)</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#diary" class="nav-link" data-module="diary">
+                        <span class="nav-icon">📒</span>
+                        <span class="nav-text">Student Diary (Daily)</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#inventory" class="nav-link" data-module="inventory">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Inventory & Assets</span>
                     </a>
                 </li>
 
@@ -281,6 +396,16 @@
                         <span class="nav-icon">⚙️</span>
                         <span class="nav-text">Settings</span>
                     </a>
+                </li>
+
+                <!-- MOBILE APP INSTALL (PWA) -->
+                <li class="nav-item" id="pwaInstallItem" style="display: none; margin-top: 20px;">
+                    <button id="pwaInstallBtn" class="btn-primary"
+                        style="width: 100%; border-radius: 12px; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); border: none; font-family: 'Outfit'; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+                        <span>📲</span> Install Mobile App
+                    </button>
+                    <p style="font-size: 0.65rem; color: #94a3b8; text-align: center; margin-top: 5px;">Install on home
+                        screen for APK experience</p>
                 </li>
             </ul>
         </nav>
@@ -363,9 +488,9 @@
                 </script>
 
                 <div class="notification-wrapper" style="position: relative;">
-                    <button class="header-btn" id="notificationBtn">
+                    <button class="header-btn" id="notificationBtn" onclick="toggleNotifications()">
                         🔔
-                        <span class="notification-badge" id="notifBadge">3</span>
+                        <span class="notification-badge" id="notifBadge" style="display: none;">0</span>
                     </button>
                     <!-- Notification Dropdown -->
                     <div class="notif-dropdown" id="notifDropdown" style="
@@ -378,7 +503,7 @@
                                 border: 1px solid rgba(59, 130, 246, 0.2);
                                 border-radius: 16px;
                                 padding: 12px;
-                                z-index: 100;
+                                z-index: 10001; /* High Z-index */
                                 display: none;
                                 box-shadow: 0 10px 30px rgba(0,0,0,0.5);
                             ">
@@ -388,48 +513,21 @@
                                     margin-bottom: 8px;
                                 ">
                             <span style="color: #fff; font-weight: 600;">Notifications</span>
-                            <span style="color: #3b82f6; font-size: 0.8rem; cursor: pointer;">Mark all
-                                read</span>
+                            <span style="color: #3b82f6; font-size: 0.8rem; cursor: pointer;"
+                                onclick="markAllRead()">Mark all read</span>
                         </div>
-                        <div class="notif-list" style="max-height: 300px; overflow-y: auto;">
-                            <div class="notif-item" style="
-                                        padding: 12px; border-radius: 8px; background: rgba(59, 130, 246, 0.1);
-                                        margin-bottom: 8px; border-left: 3px solid #3b82f6; cursor: pointer;
-                                    ">
-                                <div style="font-size: 0.9rem; color: #fff; font-weight: 500;">New Admission
+                        <div class="notif-list" id="notificationList" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Dynamic Content -->
+                            <div style="padding: 20px; text-align: center; color: #94a3b8;">
+                                <div class="loader-spinner" style="width: 20px; height: 20px; margin: 0 auto 10px;">
                                 </div>
-                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Rahul Kumar
-                                    joined Class 10</div>
-                                <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px;">2 mins ago
-                                </div>
-                            </div>
-                            <div class="notif-item" style="
-                                        padding: 12px; border-radius: 8px; background: rgba(16, 185, 129, 0.1);
-                                        margin-bottom: 8px; border-left: 3px solid #10b981; cursor: pointer;
-                                    ">
-                                <div style="font-size: 0.9rem; color: #fff; font-weight: 500;">Fee Received
-                                </div>
-                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">₹15,000
-                                    received via Razorpay</div>
-                                <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px;">1 hour ago
-                                </div>
-                            </div>
-                            <div class="notif-item" style="
-                                        padding: 12px; border-radius: 8px; background: rgba(239, 68, 68, 0.1);
-                                        margin-bottom: 8px; border-left: 3px solid #ef4444; cursor: pointer;
-                                    ">
-                                <div style="font-size: 0.9rem; color: #fff; font-weight: 500;">Low Attendance
-                                    Alert</div>
-                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Class 9B
-                                    attendance below 75%</div>
-                                <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px;">3 hours ago
-                                </div>
+                                Loading...
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <button class="header-btn">
+                <button class="header-btn" onclick="window.location.href='/api/ai/chat/'" title="Open AI Chat">
                     💬
                 </button>
 
@@ -478,18 +576,19 @@
                                 transform-origin: top right;
                                 animation: dropdownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                             ">
-                        <!-- User Info (Visible on Mobile) -->
-                        <div class="mobile-user-info"
-                            style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; display: none;">
-                            <div style="font-weight: 700; color: #fff;">Super Admin</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8;">admin@ysm.edu</div>
+                        <!-- User Info -->
+                        <div class="dropdown-header"
+                            style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;">
+                            <div style="font-weight: 700; color: #fff;" id="dropdownUserName">User</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;" id="dropdownUserEmail">user@example.com
+                            </div>
                         </div>
 
-                        <div class="dropdown-item" onclick="window.location.hash='settings'"
+                        <div class="dropdown-item" id="navProfile"
                             style="padding: 12px; border-radius: 10px; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; font-weight: 500;">
                             <span style="font-size: 1.1rem;">👤</span> My Profile
                         </div>
-                        <div class="dropdown-item" onclick="window.location.hash='settings'"
+                        <div class="dropdown-item" id="navSettings"
                             style="padding: 12px; border-radius: 10px; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; font-weight: 500;">
                             <span style="font-size: 1.1rem;">⚙️</span> Settings
                         </div>
@@ -498,8 +597,7 @@
                             style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin: 6px 0;">
                         </div>
 
-                        <div class="dropdown-item"
-                            onclick="localStorage.removeItem('authToken'); window.location.href='/';"
+                        <div class="dropdown-item" id="navLogout"
                             style="padding: 12px; border-radius: 10px; color: #ef4444; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; font-weight: 600;">
                             <span style="font-size: 1.1rem;">🚪</span> Logout
                         </div>
@@ -510,19 +608,45 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-content" id="dashboardView">
-            <h1 class="page-title">Welcome! 👋</h1>
+            <h1 class="page-title magic-text">Welcome! 👋</h1>
             <p class="page-subtitle">Here's what's happening with your institute today</p>
+
+            <!-- SOVEREIGN AI INTELLIGENCE RADAR -->
+            <div id="aiIntelligenceRadar"
+                style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(59, 130, 246, 0.3); padding: 20px; border-radius: 16px; margin-bottom: 25px; display: flex; gap: 20px; align-items: center; backdrop-filter: blur(10px);">
+                <div
+                    style="width: 60px; height: 60px; background: rgba(59, 130, 246, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; position: relative; overflow: hidden;">
+                    <span class="ai-orbit"
+                        style="position: absolute; width: 100%; height: 100%; border: 2px dashed #3b82f6; border-radius: 50%; animation: spin 4s linear infinite;"></span>
+                    🤖
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h4 style="color: white; margin: 0; font-size: 0.9rem; letter-spacing: 0.5px;">SOVEREIGN AI
+                            REPORT</h4>
+                        <span class="pulse-dot"
+                            style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+                    </div>
+                    <div id="aiBusinessInsight"
+                        style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px; line-height: 1.5;">
+                        Generating strategic insights from financial and academic data...
+                    </div>
+                </div>
+                <button onclick="refreshROI()"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.8rem;">Refresh
+                    Report</button>
+            </div>
 
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-header">
                         <div class="stat-icon">👥</div>
-                        <div class="stat-trend up">
-                            ↑ 12%
+                        <div class="stat-trend up" id="studentTrend">
+                            ↑ 0%
                         </div>
                     </div>
-                    <div class="stat-value">1,234</div>
+                    <div class="stat-value" id="totalStudents">0</div>
                     <div class="stat-label">Total Students</div>
                 </div>
 
@@ -530,282 +654,307 @@
                     <div class="stat-header">
                         <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✅
                         </div>
-                        <div class="stat-trend up">
-                            ↑ 5%
+                        <div class="stat-trend up" id="attendanceTrend">
+                            ↑ 0%
                         </div>
                     </div>
-                    <div class="stat-value">94.2%</div>
+                    <div class="stat-value" id="attendanceToday">0%</div>
                     <div class="stat-label">Attendance Today</div>
                 </div>
 
-                <div class="stat-card">
+                <!-- SOVEREIGN ERP 2.0 ADVANCED CARDS -->
+                <div class="stat-card"
+                    style="border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(145deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5));">
                     <div class="stat-header">
-                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">💰
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">🏆
                         </div>
-                        <div class="stat-trend down">
-                            ↓ 3%
+                        <div class="stat-trend" style="color: #60a5fa;">
+                            Net ROI
                         </div>
                     </div>
-                    <div class="stat-value">₹4.8L</div>
-                    <div class="stat-label">Pending Fees</div>
+                    <div class="stat-value" id="netProfitSummary" style="color: #3b82f6;">₹0</div>
+                    <div class="stat-label">Annual Profit (Estimated)</div>
+                    <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">Revenue vs Expenses</div>
                 </div>
 
-                <div class="stat-card">
+                <div class="stat-card" style="border: 1px solid rgba(239, 68, 68, 0.3);">
                     <div class="stat-header">
-                        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">👔
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">⚠️
                         </div>
-                        <div class="stat-trend up">
-                            ↑ 2%
+                        <div class="stat-trend" style="color: #f87171;">
+                            Academic Risk
                         </div>
                     </div>
-                    <div class="stat-value">87</div>
-                    <div class="stat-label">Staff Members</div>
+                    <div class="stat-value" id="riskCountSummary" style="color: #ef4444;">0</div>
+                    <div class="stat-label">Students at Risk</div>
+                    <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">Avg marks < 40%</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">💰
+                            </div>
+                            <div class="stat-trend" id="revenueTrend">
+                                Pending
+                            </div>
+                        </div>
+                        <div class="stat-value" id="pendingFees">₹0</div>
+                        <div class="stat-label">Pending Fees</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">👔
+                            </div>
+                        </div>
+                        <div class="stat-value" id="totalStaff">0</div>
+                        <div class="stat-label">Staff Members</div>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS SECTION (NEW) -->
+                <div class="analytics-section">
+                    <!-- Quick Stats Row (Advanced) -->
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Monthly Revenue</div>
+                            <div class="stat-value">₹8.5L</div>
+                            <div class="stat-change positive">↑ 15% vs last month</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Active Users</div>
+                            <div class="stat-value">1,150</div>
+                            <div class="stat-change positive">↑ 8% vs last month</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Avg Attendance</div>
+                            <div class="stat-value">92%</div>
+                            <div class="stat-change positive">↑ 1% vs last month</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Fee Defaulters</div>
+                            <div class="stat-value">45</div>
+                            <div class="stat-change negative">↑ 2 from last month</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="analytics-grid">
+                        <!-- Revenue Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <span class="chart-icon">💸</span>
+                                    Revenue Trends
+                                </div>
+                                <select class="chart-period">
+                                    <option>This Year</option>
+                                    <option>Last Year</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <span class="chart-icon">📊</span>
+                                    Attendance Rate
+                                </div>
+                                <span class="chart-period">Today</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="attendanceChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Student Growth Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <span class="chart-icon">📈</span>
+                                    Student Growth
+                                </div>
+                                <span class="chart-period">2024</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="studentGrowthChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Fee Collection Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <span class="chart-icon">💰</span>
+                                    Fee Collection
+                                </div>
+                                <span class="chart-period">By Class</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="feeCollectionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management Modules Grid -->
+                <div class="cards-grid">
+                    <div class="module-card" onclick="navigateTo('students')">
+                        <div class="module-icon">👥</div>
+                        <h3 class="module-title">Student Management</h3>
+                        <p class="module-description">
+                            Manage student records, admissions, profiles, and academic histories
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">1,234</div>
+                                <div class="module-stat-label">Students</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">24</div>
+                                <div class="module-stat-label">Classes</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="navigateTo('attendance')">
+                        <div class="module-icon" style="background: linear-gradient(135deg, #10b981, #059669);">✅
+                        </div>
+                        <h3 class="module-title">Attendance System</h3>
+                        <p class="module-description">
+                            Track daily attendance, generate reports, and monitor student presence
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">94.2%</div>
+                                <div class="module-stat-label">Today</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">91.8%</div>
+                                <div class="module-stat-label">This Month</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="navigateTo('finance')">
+                        <div class="module-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰
+                        </div>
+                        <h3 class="module-title">Finance & Payments</h3>
+                        <p class="module-description">
+                            Fee collection, payment tracking, invoicing, and financial reports
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">₹12.4L</div>
+                                <div class="module-stat-label">Collected</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">₹4.8L</div>
+                                <div class="module-stat-label">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="navigateTo('library')">
+                        <div class="module-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📚
+                        </div>
+                        <h3 class="module-title">Library Management</h3>
+                        <p class="module-description">
+                            Book cataloging, issue/return tracking, and library inventory management
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">2,850</div>
+                                <div class="module-stat-label">Books</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">412</div>
+                                <div class="module-stat-label">Issued</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="navigateTo('hostel')">
+                        <div class="module-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🏢
+                        </div>
+                        <h3 class="module-title">Hostel Management</h3>
+                        <p class="module-description">
+                            Room allocation, mess management, gate pass system, and hostel inventory
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">456</div>
+                                <div class="module-stat-label">Residents</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">120</div>
+                                <div class="module-stat-label">Rooms</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="navigateTo('transport')">
+                        <div class="module-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">🚌
+                        </div>
+                        <h3 class="module-title">Transportation</h3>
+                        <p class="module-description">
+                            Fleet management, route planning, GPS tracking, and driver logs
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">18</div>
+                                <div class="module-stat-label">Buses</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">12</div>
+                                <div class="module-stat-label">Routes</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="navigateTo('hr')">
+                        <div class="module-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">👔
+                        </div>
+                        <h3 class="module-title">HR & Payroll</h3>
+                        <p class="module-description">
+                            Staff management, payroll processing, leave management, and recruitment
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">87</div>
+                                <div class="module-stat-label">Staff</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">₹2.1L</div>
+                                <div class="module-stat-label">This Month</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="navigateTo('exams')">
+                        <div class="module-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">📝
+                        </div>
+                        <h3 class="module-title">Exams & Grading</h3>
+                        <p class="module-description">
+                            Exam scheduling, grade management, result cards, and performance analytics
+                        </p>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">8</div>
+                                <div class="module-stat-label">Upcoming</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">3.8</div>
+                                <div class="module-stat-label">Avg GPA</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- ANALYTICS SECTION (NEW) -->
-            <div class="analytics-section">
-                <!-- Quick Stats Row (Advanced) -->
-                <div class="quick-stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Monthly Revenue</div>
-                        <div class="stat-value">₹8.5L</div>
-                        <div class="stat-change positive">↑ 15% vs last month</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Active Users</div>
-                        <div class="stat-value">1,150</div>
-                        <div class="stat-change positive">↑ 8% vs last month</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Avg Attendance</div>
-                        <div class="stat-value">92%</div>
-                        <div class="stat-change positive">↑ 1% vs last month</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Fee Defaulters</div>
-                        <div class="stat-value">45</div>
-                        <div class="stat-change negative">↑ 2 from last month</div>
-                    </div>
-                </div>
-
-                <!-- Charts Grid -->
-                <div class="analytics-grid">
-                    <!-- Revenue Chart -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <span class="chart-icon">💸</span>
-                                Revenue Trends
-                            </div>
-                            <select class="chart-period">
-                                <option>This Year</option>
-                                <option>Last Year</option>
-                            </select>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Attendance Chart -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <span class="chart-icon">📊</span>
-                                Attendance Rate
-                            </div>
-                            <span class="chart-period">Today</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="attendanceChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Student Growth Chart -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <span class="chart-icon">📈</span>
-                                Student Growth
-                            </div>
-                            <span class="chart-period">2024</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="studentGrowthChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Fee Collection Chart -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <span class="chart-icon">💰</span>
-                                Fee Collection
-                            </div>
-                            <span class="chart-period">By Class</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="feeCollectionChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Management Modules Grid -->
-            <div class="cards-grid">
-                <div class="module-card" onclick="navigateTo('students')">
-                    <div class="module-icon">👥</div>
-                    <h3 class="module-title">Student Management</h3>
-                    <p class="module-description">
-                        Manage student records, admissions, profiles, and academic histories
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">1,234</div>
-                            <div class="module-stat-label">Students</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">24</div>
-                            <div class="module-stat-label">Classes</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('attendance')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #10b981, #059669);">✅
-                    </div>
-                    <h3 class="module-title">Attendance System</h3>
-                    <p class="module-description">
-                        Track daily attendance, generate reports, and monitor student presence
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">94.2%</div>
-                            <div class="module-stat-label">Today</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">91.8%</div>
-                            <div class="module-stat-label">This Month</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('finance')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰
-                    </div>
-                    <h3 class="module-title">Finance & Payments</h3>
-                    <p class="module-description">
-                        Fee collection, payment tracking, invoicing, and financial reports
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">₹12.4L</div>
-                            <div class="module-stat-label">Collected</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">₹4.8L</div>
-                            <div class="module-stat-label">Pending</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('library')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📚
-                    </div>
-                    <h3 class="module-title">Library Management</h3>
-                    <p class="module-description">
-                        Book cataloging, issue/return tracking, and library inventory management
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">2,850</div>
-                            <div class="module-stat-label">Books</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">412</div>
-                            <div class="module-stat-label">Issued</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('hostel')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🏢
-                    </div>
-                    <h3 class="module-title">Hostel Management</h3>
-                    <p class="module-description">
-                        Room allocation, mess management, gate pass system, and hostel inventory
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">456</div>
-                            <div class="module-stat-label">Residents</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">120</div>
-                            <div class="module-stat-label">Rooms</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('transport')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">🚌
-                    </div>
-                    <h3 class="module-title">Transportation</h3>
-                    <p class="module-description">
-                        Fleet management, route planning, GPS tracking, and driver logs
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">18</div>
-                            <div class="module-stat-label">Buses</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">12</div>
-                            <div class="module-stat-label">Routes</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('hr')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">👔
-                    </div>
-                    <h3 class="module-title">HR & Payroll</h3>
-                    <p class="module-description">
-                        Staff management, payroll processing, leave management, and recruitment
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">87</div>
-                            <div class="module-stat-label">Staff</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">₹2.1L</div>
-                            <div class="module-stat-label">This Month</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="navigateTo('exams')">
-                    <div class="module-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">📝
-                    </div>
-                    <h3 class="module-title">Exams & Grading</h3>
-                    <p class="module-description">
-                        Exam scheduling, grade management, result cards, and performance analytics
-                    </p>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="module-stat-value">8</div>
-                            <div class="module-stat-label">Upcoming</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="module-stat-value">3.8</div>
-                            <div class="module-stat-label">Avg GPA</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </main>
 
     <script>
@@ -848,18 +997,63 @@
     <!-- Premium Modal System -->
     <script src="/static/js/premium_modal.js"></script>
 
+    <!-- OPTIMIZATION: Utility Library (NEW) - Must load BEFORE admin.js -->
+    <script src="/static/js/utils.js?v=2.0"></script>
 
     <!-- Dashboard SPA System (Updated Version) -->
-    <script src="/static/js/dashboard/admin.js?v=3.8"></script>
+    <script src="/static/js/admin.js?v=5.4.7"></script>
+    <script src="/static/js/modules/premium_modules.js?v=1.1"></script>
+
+    <!-- Premium Edit Student Modal (Must load AFTER admin.js) -->
+    <script src="/static/js/dashboard/premium_edit_modal.js?v=FIX_FINAL"></script>
+
+    <!-- Initialize Dashboard App -->
+    <script>
+        // CRITICAL: Initialize DashboardApp after script loads
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof DashboardApp !== 'undefined') {
+                console.log('🚀 Initializing DashboardApp...');
+                DashboardApp.init();
+            } else {
+                console.error('❌ DashboardApp not found! Check admin.js loading.');
+            }
+        });
+    </script>
 
     <!-- Premium Sidebar Manager (Plan-Based Access) -->
-    <script src="/static/js/sidebar-manager.js?v=1.1"></script>
+    <script src="/static/js/sidebar-manager.js?v=5.4.5"></script>
 
     <!-- Premium Motion JS -->
-    <script src="/static/js/premium_motion.js?v=1.1"></script>
+    <script src="/static/js/premium_motion.js?v=5.4.5"></script>
 
     <!-- Advanced Analytics JS -->
-    <script src="/static/js/analytics.js?v=1.1"></script>
+    <script src="/static/js/analytics.js?v=5.4.5"></script>
+
+    <script>
+        // SOVEREIGN ENGINE: CACHE & SERVICE WORKER TERMINATOR
+        (function () {
+            const CURRENT_VERSION = '5.4.5';
+            const LAST_SYNC = localStorage.getItem('SOVEREIGN_ENGINE_SYNC');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                        console.log('🛡️ Sovereign Engine: Dashboard Cache Cleared');
+                    }
+                });
+            }
+
+            if (LAST_SYNC !== CURRENT_VERSION) {
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        for (let name of names) caches.delete(name);
+                    });
+                }
+                localStorage.setItem('SOVEREIGN_ENGINE_SYNC', CURRENT_VERSION);
+            }
+        })();
+    </script>
     </div>
     </div>
     <!-- Branding Fetch Script -->
@@ -900,12 +1094,162 @@
                             logoEl.src = profile.institution_logo;
                         }
                     }
+
+                    // Apply adaptive typography classes after branding sync
+                    if (window.DashboardApp && typeof window.DashboardApp.applyAdaptiveBranding === 'function') {
+                        window.DashboardApp.applyAdaptiveBranding();
+                    }
                 }
             } catch (err) {
                 console.warn("Branding fetch failed", err);
             }
         });
     </script>
+    <!-- Sovereign Motion Engine JS -->
+    <script>
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('magicCursor');
+            const follower = document.getElementById('magicFollower');
+
+            if (cursor && follower) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                follower.style.left = e.clientX + 'px';
+                follower.style.top = e.clientY + 'px';
+            }
+
+            document.querySelectorAll('.stat-card, .module-card, .chart-card, .analytics-section, .ai-intelligence-radar').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            });
+        });
+
+
+        // --- PREMIUM NOTIFICATION ENGINE ---
+
+        // Define global functions to be accessible from HTML
+        window.toggleNotifications = function () {
+            const dropdown = document.getElementById('notifDropdown');
+            const isVisible = dropdown.style.display === 'block';
+
+            // Close all other dropdowns
+            document.querySelectorAll('.profile-dropdown, #searchResults').forEach(el => el.style.display = 'none');
+
+            if (isVisible) {
+                dropdown.style.display = 'none';
+            } else {
+                dropdown.style.display = 'block';
+                fetchNotifications(); // Refresh on open
+
+                // Animation
+                gsap.fromTo(dropdown,
+                    { opacity: 0, y: -10, scale: 0.95 },
+                    { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "back.out(1.7)" }
+                );
+            }
+        };
+
+        window.fetchNotifications = async function () {
+            const listContainer = document.getElementById('notificationList');
+            const badge = document.getElementById('notifBadge');
+
+            try {
+                const data = await DashboardUtils.apiCall('/notifications/');
+                const notifications = data.results || data; // Handle pagination if present
+
+                // Update Badge
+                const unreadCount = notifications.filter(n => !n.is_read).length;
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    badge.style.display = 'flex';
+                    badge.classList.add('pulse-animation');
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                // Render List
+                if (notifications.length === 0) {
+                    listContainer.innerHTML = `
+                        <div style="padding: 20px; text-align: center; color: #64748b;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🔕</div>
+                            No new notifications
+                        </div>
+                    `;
+                    return;
+                }
+
+                listContainer.innerHTML = notifications.map(n => {
+                    const iconColor = n.type === 'ALERT' ? '#ef4444' : (n.type === 'SUCCESS' ? '#10b981' : '#3b82f6');
+                    const bg = n.type === 'ALERT' ? 'rgba(239, 68, 68, 0.1)' : (n.type === 'SUCCESS' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)');
+
+                    return `
+            <div class="notif-item" onclick="viewNotification(${n.id})" style="
+                            padding: 12px; border-radius: 8px; background: ${n.is_read ? 'transparent' : bg};
+                            margin-bottom: 8px; border-left: 3px solid ${iconColor}; cursor: pointer;
+                            transition: all 0.2s; opacity: ${n.is_read ? 0.6 : 1};
+                        " onmouseenter="this.style.transform='translateX(5px)'" onmouseleave="this.style.transform='translateX(0)'">
+                <div style="font-size: 0.9rem; color: #fff; font-weight: 500;">${n.title}</div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">${n.message}</div>
+                <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px;">${new Date(n.created_at).toLocaleString()}</div>
+            </div>
+                `}).join('');
+
+            } catch (e) {
+                console.error("Notification fetch error:", e);
+                listContainer.innerHTML = `<div style="padding:10px; text-align:center; color:#ef4444;">Failed to load alerts</div>`;
+            }
+        };
+
+        window.markAllRead = async function () {
+            try {
+                await fetch('/api/notifications/mark-all-read/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                fetchNotifications(); // Refresh UI
+                if (window.showToast) window.showToast('All notifications marked as read', 'success');
+            } catch (e) { console.error(e); }
+        };
+
+        window.viewNotification = function (id) {
+            // Logic to view details or just mark read
+            // For now, just mark read locally and visually
+            fetchNotifications();
+        };
+
+        // Initial Fetch
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(fetchNotifications, 2000); // Delay slightly to let auth settle
+
+            // Polling every 60 seconds
+            setInterval(fetchNotifications, 60000);
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.notification-wrapper')) {
+                    document.getElementById('notifDropdown').style.display = 'none';
+                }
+            });
+        });
+
+        document.querySelectorAll('a, button, input, .nav-link').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const mc = document.getElementById('magicCursor');
+                if (mc) mc.style.transform = 'scale(4)';
+            });
+            el.addEventListener('mouseleave', () => {
+                const mc = document.getElementById('magicCursor');
+                if (mc) mc.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+    <!-- Magic Gen-Z Features -->
+    <link rel="stylesheet" href="/static/css/magic_genz.css">
+    <script src="/static/js/magic_genz.js"></script>
 </body>
 
 </html>

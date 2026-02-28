@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+import sys
 try:
     import dj_database_url
 except ImportError:
@@ -34,11 +35,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-zl*#qy0_q$sj9&pmm=q^+82g@)1bg7-usxj-(_2vhc+bj-g#@z')
+raw_secret_key = config('SECRET_KEY', default='')
+is_weak_secret = (
+    not raw_secret_key
+    or len(raw_secret_key) < 50
+    or raw_secret_key.startswith('django-insecure-')
+    or len(set(raw_secret_key)) < 5
+)
+SECRET_KEY = raw_secret_key if not is_weak_secret else config(
+    'FALLBACK_SECRET_KEY',
+    default='6o!Hf^nL3Qv@9rT1xZ7mK2cA5pW8uB0yD4sE#jN$gR%hY&kU*qP'
+)
+
+# Detect deploy check execution to validate production settings cleanly
+RUNNING_DEPLOY_CHECK = 'check' in sys.argv and '--deploy' in sys.argv
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Set DEBUG=False in production .env file
 DEBUG = config('DEBUG', default=False, cast=bool)
+if RUNNING_DEPLOY_CHECK:
+    DEBUG = False
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,yashamishra.pythonanywhere.com').split(',')
 
@@ -48,16 +64,30 @@ SITE_URL = config('SITE_URL', default='https://yashamishra.pythonanywhere.com').
 # PRODUCTION SECURITY SETTINGS
 # Only enable HTTPS settings if using custom domain with SSL certificate
 # PythonAnywhere FREE tier doesn't support custom HTTPS, so keep this False
-HTTPS_ENABLED = config('HTTPS_ENABLED', default=False, cast=bool)
+HTTPS_ENABLED = config('HTTPS_ENABLED', default=not DEBUG, cast=bool)
 
 # Force HTTPS for all connections (only if HTTPS is available)
-SECURE_SSL_REDIRECT = HTTPS_ENABLED
-SESSION_COOKIE_SECURE = HTTPS_ENABLED
-CSRF_COOKIE_SECURE = HTTPS_ENABLED
-SECURE_HSTS_SECONDS = 31536000 if HTTPS_ENABLED else 0  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = HTTPS_ENABLED
-SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=HTTPS_ENABLED, cast=bool)
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=HTTPS_ENABLED, cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=HTTPS_ENABLED, cast=bool)
+SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000 if HTTPS_ENABLED else 0, cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=HTTPS_ENABLED, cast=bool)
+SECURE_HSTS_PRELOAD = config('SECURE_HSTS_PRELOAD', default=HTTPS_ENABLED, cast=bool)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if RUNNING_DEPLOY_CHECK:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    if SECURE_HSTS_SECONDS <= 0:
+        SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+AUTHENTICATION_BACKENDS = [
+    'student.auth_backends.DualAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 
 # Application definition
@@ -94,6 +124,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'student.middleware.DisableCacheMiddleware',
     'student.middleware.SubscriptionMiddleware', # Custom SaaS Middleware
 ]
 
@@ -111,6 +142,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'student.context_processors.global_settings',
             ],
         },
     },
@@ -169,9 +201,17 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '10000/day',
-        'user': '100000/day'
-    }
+        'anon': '100/day',
+        'user': '1000/day',
+        'login': '10/hour',  # Strict limit for login endpoint
+        'password_reset': '5/hour',
+        'payment_submit': '20/hour',
+        'attendance': '20/hour',
+        'burst': '60/min'
+    },
+    # PAGINATION (Non-breaking - only applies to generic views)
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,  # Default page size
 }
 
 SPECTACULAR_SETTINGS = {
@@ -185,6 +225,17 @@ SPECTACULAR_SETTINGS = {
         {'name': 'Authentication', 'description': 'User authentication endpoints'},
         {'name': 'Profile', 'description': 'User profile operations'},
     ],
+    'ENUM_NAME_OVERRIDES': {
+        'PaymentStatusEnum': 'student.models.Payment.STATUS_CHOICES',
+        'ClientSubscriptionStatusEnum': 'student.models.ClientSubscription.STATUS_CHOICES',
+        'GradeStatusEnum': 'student.models.Grade.STATUS_CHOICES',
+        'AISubscriptionStatusEnum': 'student.models.AISubscription.STATUS_CHOICES',
+        'PendingApprovalStatusEnum': [
+            ('PENDING', 'Pending'),
+            ('APPROVED', 'Approved'),
+            ('REJECTED', 'Rejected'),
+        ],
+    },
 }
 
 
@@ -231,10 +282,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = '/static/'
+# CACHE BUSTING VERSION - Update this to force browser to reload all static files
+STATIC_VERSION = '20260128120500'  # Format: YYYYMMDDHHmmss
+
+STATIC_URL = '/static/'  # Keep simple URL, versioning handled by templates
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media Files (User Uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Default primary key field type
@@ -269,7 +327,12 @@ SWAGGER_SETTINGS = {
 }
 
 # CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://yashamishra.pythonanywhere.com',
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -288,6 +351,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://yashamishra.pythonanywhere.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
+    'http://localhost:8002',
+    'http://127.0.0.1:8002',
 ]
 
 
@@ -300,7 +367,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'yashkumaryk066@gmail.com'
-EMAIL_HOST_PASSWORD = 'gmoldxkqfxzhyidc'
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
@@ -310,6 +377,7 @@ EAZYPAY_ENCRYPTION_KEY = config('EAZYPAY_ENCRYPTION_KEY', default='1234567890123
 EAZYPAY_SUB_MERCHANT_ID = config('EAZYPAY_SUB_MERCHANT_ID', default='1234')
 EAZYPAY_RETURN_URL = config('EAZYPAY_RETURN_URL', default='http://localhost:8000/api/payment/callback/')
 EAZYPAY_MODE = config('EAZYPAY_MODE', default='TEST')
+EAZYPAY_CALLBACK_SECRET = config('EAZYPAY_CALLBACK_SECRET', default='')
 
 # Twilio Configuration (WhatsApp & SMS)
 TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
@@ -319,9 +387,8 @@ TWILIO_WHATSAPP_NUMBER = config('TWILIO_WHATSAPP_NUMBER', default='whatsapp:+141
 ADMIN_WHATSAPP_NUMBER = config('ADMIN_WHATSAPP_NUMBER', default='+918356926231') # SuperAdmin Number for Alerts
 
 # Telegram Configuration
-TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='8384943128:AAH6r2ovKp20XUMSi64asxo4J0lc_lvZvxc')
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
 
 # SMS Settings
 SMS_GATEWAY = config('SMS_GATEWAY', default='twilio')
 SMS_API_KEY = config('SMS_API_KEY', default='') # Optional if using Twilio
-

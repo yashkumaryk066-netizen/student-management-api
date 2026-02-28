@@ -8,22 +8,22 @@
 const PLAN_ACCESS = {
     'coaching': {
         name: 'Coaching Plan',
-        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'reports', 'subscription', 'settings', 'events', 'live_classes'],
+        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'reports', 'subscription', 'settings', 'events', 'live_classes', 'leads', 'lms_materials', 'assignments', 'diary', 'hr', 'timetable'],
         color: '#10b981'
     },
     'school': {
         name: 'School Plan',
-        modules: ['dashboard', 'students', 'attendance', 'payments', 'library', 'exams', 'hr', 'reports', 'subscription', 'settings', 'events', 'parents'],
+        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hr', 'reports', 'subscription', 'settings', 'events', 'parents', 'substitutes', 'lms_materials', 'assignments', 'diary', 'inventory', 'live_classes', 'roi_analytics', 'timetable'],
         color: '#f59e0b'
     },
     'institute': {
         name: 'Institute/University Plan',
-        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'users', 'logs', 'parents', 'lab', 'live_classes'],
+        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'users', 'logs', 'parents', 'lab', 'live_classes', 'roi_analytics', 'lms_materials', 'assignments', 'leads', 'substitutes', 'diary', 'inventory', 'timetable'],
         color: '#8b5cf6'
     },
     'super_admin': {
         name: 'Super Admin',
-        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'users', 'logs', 'parents', 'lab', 'live_classes', 'admin_approvals'],
+        modules: ['dashboard', 'students', 'courses', 'attendance', 'payments', 'library', 'exams', 'hostel', 'transport', 'hr', 'reports', 'subscription', 'settings', 'events', 'users', 'logs', 'parents', 'lab', 'live_classes', 'admin_approvals', 'roi_analytics', 'lms_materials', 'assignments', 'leads', 'substitutes', 'diary', 'inventory', 'timetable'],
         color: '#ef4444'
     }
 };
@@ -280,6 +280,7 @@ class PremiumSidebarManager {
             'hr': 'HR & Payroll',
             'exams': 'Exams & Grading',
             'events': 'Events & Calendar',
+            'timetable': 'Class Timetable',
             'live-classes': 'Live Classes',
             'reports': 'Reports & Analytics',
             'subscription': 'Plan & Subscription',

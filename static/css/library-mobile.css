@@ -1,0 +1,152 @@
+/* ============================================
+   LIBRARY MODULE - MOBILE RESPONSIVE FIX
+   Fixes for Add Book Modal
+   ============================================ */
+
+/* Base Modal Improvements */
+#addBookModal {
+    overflow-y: auto !important;
+}
+
+#addBookModal .modal-card {
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 95%;
+    margin: 20px auto;
+}
+
+/* Form Grid - Responsive */
+#addBookForm {
+    padding: 20px !important;
+}
+
+#addBookForm>div:first-of-type {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+}
+
+/* Cover Preview - Centered and Smaller */
+#coverPreview {
+    width: 100px !important;
+    height: 140px !important;
+    margin: 0 auto !important;
+}
+
+/* All Form Inputs - Full Width + No iOS Zoom */
+#addBookForm input[type="text"],
+#addBookForm input[type="number"],
+#addBookForm select {
+    width: 100% !important;
+    font-size: 16px !important;
+    /* Prevents iOS zoom */
+    box-sizing: border-box;
+}
+
+/* Form Labels */
+#addBookForm .form-label {
+    font-size: 0.85rem !important;
+    margin-bottom: 5px !important;
+    display: block !important;
+}
+
+/* Modal Footer - Stack Vertically on Mobile */
+#addBookModal .modal-footer {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    gap: 10px !important;
+    padding-top: 15px !important;
+}
+
+#addBookModal .modal-footer button {
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: 1rem !important;
+}
+
+/* ============================================
+   MOBILE SPECIFIC (< 768px)
+   ============================================ */
+@media (max-width: 767px) {
+    #addBookModal .modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        max-height: 100vh !important;
+        min-height: 100vh !important;
+    }
+
+    #addBookModal .modal-header {
+        padding: 12px 50px 12px 15px !important;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #1e293b;
+    }
+
+    #addBookModal .modal-header h2 {
+        font-size: 1.1rem !important;
+        margin: 0 !important;
+    }
+
+    #addBookModal .close-btn {
+        position: absolute !important;
+        top: 10px !important;
+        right: 10px !important;
+        font-size: 1.8rem !important;
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #addBookForm {
+        padding: 15px !important;
+    }
+
+    #addBookForm>div:first-of-type {
+        gap: 12px !important;
+    }
+
+    /* Sticky Footer on Mobile */
+    #addBookModal .modal-footer {
+        position: sticky;
+        bottom: 0;
+        background: #0f172a;
+        z-index: 10;
+        padding: 12px 15px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* ============================================
+   ULTRA SMALL MOBILE (< 480px)
+   ============================================ */
+@media (max-width: 480px) {
+    #addBookModal .modal-header h2 {
+        font-size: 1rem !important;
+    }
+
+    #addBookForm .form-label {
+        font-size: 0.8rem !important;
+    }
+
+    #coverPreview {
+        width: 80px !important;
+        height: 110px !important;
+    }
+
+    #coverPreview span:first-child {
+        font-size: 1.5rem !important;
+    }
+
+    #coverPreview span:last-child {
+        font-size: 0.7rem !important;
+    }
+
+    #addBookForm {
+        padding: 12px !important;
+    }
+}

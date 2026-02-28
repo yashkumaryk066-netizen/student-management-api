@@ -12,6 +12,8 @@
     <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <link rel="stylesheet" href="/static/css/premium_modal.css">
+    <link rel="stylesheet" href="/static/css/premium_dashboard.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -32,6 +34,27 @@
         .info-row span:last-child {
             color: white;
             font-weight: 600;
+        }
+
+        .hub-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .hub-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: rgba(0, 243, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
@@ -84,128 +107,358 @@
 
                             <!-- Left: Profile -->
                             <div style="display: flex; flex-direction: column; gap: 20px;">
-                                <div class="profile-card">
-                                    <div
-                                        style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 15px; color: white;">
-                                        🎓</div>
-                                    <h3 id="profileName" style="color: white; margin-bottom: 5px;">Student</h3>
-                                    <p id="profileId" style="color: #64748b; font-size: 0.85rem;">ID: ...</p>
-
-                                    <div style="margin-top: 20px; text-align: left;">
-                                        <div class="info-row"><span>Roll No</span> <span id="rollNo">...</span></div>
-                                        <div class="info-row"><span>Class</span> <span id="className">...</span></div>
-                                        <div class="info-row"><span>DOB</span> <span id="dob">...</span></div>
-                                        <div class="info-row"><span>Contact</span> <span id="contact">...</span></div>
-                                    </div>
+                                <div id="profilePhotoContainer"
+                                    style="width: 100px; height: 100px; background: #1e293b; border: 2px solid #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 15px; color: white; overflow: hidden; position: relative;">
+                                    <img id="profileImg" src=""
+                                        style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                    <span id="profilePlaceholder">🎓</span>
                                 </div>
+                                <h3 id="profileName" style="color: white; margin-bottom: 5px;">Student</h3>
+                                <p id="profileId" style="color: #64748b; font-size: 0.85rem;">ID: ...</p>
 
-                                <div class="kpi-card">
-                                    <div class="kpi-label">Overall Attendance</div>
-                                    <div class="kpi-value" id="attendancePercent">0%</div>
-                                    <div class="kpi-trend">
-                                        <div
-                                            style="width: 100%; height: 6px; background: #334155; border-radius: 3px; margin-top: 5px; overflow: hidden;">
-                                            <div id="attendanceBar"
-                                                style="width: 0%; height: 100%; background: #10b981;"></div>
+                                <div style="margin-top: 20px; text-align: left;">
+                                    <div class="info-row"><span>Roll No</span> <span id="rollNo">...</span></div>
+                                    <div class="info-row"><span>Class</span> <span id="className">...</span></div>
+                                    <div class="info-row"><span>DOB</span> <span id="dob">...</span></div>
+                                    <div class="info-row"><span>Contact</span> <span id="contact">...</span></div>
+                                </div>
+                            </div>
+
+                            <div class="kpi-card">
+                                <div class="kpi-label">Overall Attendance</div>
+                                <div class="kpi-value" id="attendancePercent">0%</div>
+                                <div class="kpi-trend">
+                                    <div
+                                        style="width: 100%; height: 6px; background: #334155; border-radius: 3px; margin-top: 5px; overflow: hidden;">
+                                        <div id="attendanceBar" style="width: 0%; height: 100%; background: #10b981;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Right: Details -->
-                            <div style="display: flex; flex-direction: column; gap: 20px;">
-
-                                <!-- Notifications -->
-                                <div id="notificationsContainer"
-                                    style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
-                                    <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📢 Notice Board
-                                    </h3>
-                                    <div id="notificationList">
-                                        <p class="text-muted">No new notifications.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Fee Status -->
-                                <div
-                                    style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                        <h3 style="color: white; font-size: 1.1rem;">💰 Fee Status</h3>
-                                        <div id="totalDueBadge" class="status-badge status-success">No Dues</div>
-                                    </div>
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Description</th>
-                                                <th>Due Date</th>
-                                                <th>Amount</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="feeTableBody">
-                                            <!-- JS populated -->
-                                        </tbody>
-                                    </table>
-                                </div>
-
+                            <!-- NEW: AI PERFORMANCE INSIGHT CHART -->
+                            <div class="kpi-card" style="padding: 15px;">
+                                <h4 style="color: white; font-size: 0.8rem; margin-bottom: 15px; opacity: 0.8;">📈
+                                    Academic Trend</h4>
+                                <canvas id="performanceChart" height="150"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Payment Options Row -->
-                    <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <!-- Bank Details Manual Option -->
-                        <div
-                            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
-                            <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">🏦 Bank Transfer
-                                (NEFT/IMPS)</h3>
-                            <div style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
-                                <p><strong>Bank Name:</strong> Canara Bank</p>
-                                <p><strong>Account Name:</strong> Institute Management</p>
-                                <p><strong>Account No:</strong> <span
-                                        style="background: #334155; padding: 2px 6px; border-radius: 4px; color: #fff; font-weight: bold;">4949120000179</span>
-                                </p>
-                                <p><strong>IFSC Code:</strong> <span
-                                        style="background: #334155; padding: 2px 6px; border-radius: 4px; color: #fff; font-weight: bold;">CNRB0004949</span>
-                                </p>
+                    <!-- Right: Details -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+                        <!-- Notifications & Routine Row -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div id="notificationsContainer"
+                                style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
+                                <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📢 Notice
+                                    Board
+                                </h3>
+                                <div id="notificationList" style="max-height: 200px; overflow-y: auto;">
+                                    <p class="text-muted">No new notifications.</p>
+                                </div>
                             </div>
+
                             <div
-                                style="margin-top: 15px; color: #10b981; font-size: 0.8rem; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
-                                ⚡ <strong>Auto-Verification System Active</strong><br>
-                                System will auto-match your payment with bank records via UTR.
+                                style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
+                                <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📅 Today's
+                                    Schedule</h3>
+                                <div id="todayRoutine" style="display: flex; flex-direction: column; gap: 10px;">
+                                    <p class="text-muted">No classes scheduled for today.</p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Manual QR Option -->
+                        <!-- Homework & Diary Row -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <!-- Homework / Assignments Section -->
+                            <div
+                                style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: white; font-size: 1.1rem;">📚 Assignments</h3>
+                                    <a href="#" style="color: #3b82f6; font-size: 0.8rem; text-decoration: none;">View
+                                        All</a>
+                                </div>
+                                <div id="homeworkList" style="display: flex; flex-direction: column; gap: 10px;">
+                                    <p class="text-muted">No pending assignments.</p>
+                                </div>
+                            </div>
+
+                            <!-- Digital Diary Section -->
+                            <div
+                                style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
+                                <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📝 Digital
+                                    Diary</h3>
+                                <div id="diaryList" style="display: flex; flex-direction: column; gap: 10px;">
+                                    <p class="text-muted">Your daily tasks will appear here.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PREMIUM: EXAM COUNTDOWN -->
+                        <div id="examCountdownSection"
+                            style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px; border-radius: 12px; color: white; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(217, 119, 6, 0.2);">
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <div style="font-size: 2.5rem; filter: drop-shadow(0 0 10px rgba(0,0,0,0.2));">⏳</div>
+                                <div style="flex: 1;">
+                                    <div
+                                        style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; opacity: 0.9; letter-spacing: 1px;">
+                                        Next Big Challenge</div>
+                                    <h3 id="nextExamTitle" style="margin: 3px 0; font-size: 1.3rem; font-weight: 800;">
+                                        Loading Exam...</h3>
+                                    <div id="examTimer"
+                                        style="font-family: 'Inter'; font-weight: 900; font-size: 1.8rem; letter-spacing: 1px; color: #fff;">
+                                        00d : 00h : 00m : 00s</div>
+                                </div>
+                                <button class="btn-action" onclick="window.location.search='?view=exams'"
+                                    style="background: white; color: #d97706; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">View
+                                    Admit Card</button>
+                            </div>
+                        </div>
+
+                        <!-- Live Classes Section -->
                         <div
-                            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; text-align: center;">
-                            <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📱 Scan & Pay (UPI)</h3>
-                            <img src="/static/img/upi_qr.jpg" alt="Institute UPI QR"
-                                style="width: 150px; border-radius: 8px; border: 4px solid white;">
-                            <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 10px;">
-                                Scan with GPay / PhonePe / Paytm.<br>
-                                <span style="color: #f59e0b;">Important: Enter the correct Transaction ID/UTR below for
-                                    instant
-                                    approval.</span>
-                            </p>
+                            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #8b5cf6; border-left: 5px solid #8b5cf6;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="color: white; font-size: 1.1rem;">🎥 Live Online Classes</h3>
+                                <div
+                                    style="background: #8b5cf6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
+                                    UPCOMING</div>
+                            </div>
+                            <div id="liveClassesList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <p class="text-muted">No live classes scheduled.</p>
+                            </div>
+                        </div>
+
+                        <!-- Fee Status -->
+                        <div
+                            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="color: white; font-size: 1.1rem;">💰 Fee Status</h3>
+                                <div id="totalDueBadge" class="status-badge status-success">No Dues</div>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Due Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feeTableBody">
+                                    <!-- JS populated -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Academic Hub -->
+                        <div
+                            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 243, 255, 0.2); margin-top: 20px;">
+                            <h3
+                                style="color: #00f3ff; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <span>🎓</span> Academic Hub
+                            </h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <button id="markGeoBtn" onclick="markPresenceGPS()" class="hub-btn"
+                                    style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05);">
+                                    <span style="font-size: 1.5rem;">📍</span>
+                                    <div>
+                                        <div style="font-weight: 600; color: #10b981;">Mark Presence</div>
+                                        <div style="font-size: 0.7rem; color: #94a3b8;">GPS Verification</div>
+                                    </div>
+                                </button>
+                                <button onclick="downloadReportCard()" class="hub-btn">
+                                    <span style="font-size: 1.5rem;">📊</span>
+                                    <div>
+                                        <div style="font-weight: 600;">Report Card</div>
+                                        <div style="font-size: 0.7rem; color: #94a3b8;">Final Progress Report
+                                        </div>
+                                    </div>
+                                </button>
+                                <button onclick="downloadAdmitCard()" class="hub-btn">
+                                    <span style="font-size: 1.5rem;">🎫</span>
+                                    <div>
+                                        <div style="font-weight: 600;">Admit Card</div>
+                                        <div style="font-size: 0.7rem; color: #94a3b8;">Exam Hall Ticket</div>
+                                    </div>
+                                </button>
+                                <button onclick="downloadIDCard()" class="hub-btn">
+                                    <span style="font-size: 1.5rem;">🪪</span>
+                                    <div>
+                                        <div style="font-weight: 600;">ID Card</div>
+                                        <div style="font-size: 0.7rem; color: #94a3b8;">Student Identity Card
+                                        </div>
+                                    </div>
+                                </button>
+                                <button onclick="downloadAdmissionLetter()" class="hub-btn">
+                                    <span style="font-size: 1.5rem;">📜</span>
+                                    <div>
+                                        <div style="font-weight: 600;">Admission Letter</div>
+                                        <div style="font-size: 0.7rem; color: #94a3b8;">Official Enrollment
+                                            Letter</div>
+                                    </div>
+                                </button>
+                                <button onclick="openLeaveModal()" class="hub-btn"
+                                    style="border-color: rgba(248, 113, 113, 0.3); background: rgba(248, 113, 113, 0.05);">
+                                    <span style="font-size: 1.5rem;">📝</span>
+                                    <div>
+                                        <div style="font-weight: 600; color: #f87171;">Apply Leave</div>
+                                        <div style="font-size: 0.7rem; color: #94a3b8;">Submit leave request
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <h4 style="color: white; font-size: 0.9rem; margin-bottom: 10px;">Recent Results
+                            </h4>
+                            <div id="resultsList" style="display: flex; flex-direction: column; gap: 8px;">
+                                <!-- JS Populated -->
+                                <div style="color: #64748b; font-size: 0.8rem; text-align: center; padding: 10px;">
+                                    Fetching latest exam scores...
+                                </div>
+                            </div>
                         </div>
                     </div>
 
             </div>
-            </main>
+        </div>
+    </div>
+
+    <!-- PREMIUM: ANTIGRAVITY AI TUTOR WIDGET -->
+    <div id="aiTutorWidget" class="ai-tutor-bubble">
+        <div class="ai-tutor-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="ai-orb"></span>
+                <span style="font-weight: 700; font-size: 0.8rem;">ANTIGRAVITY AI</span>
+            </div>
+            <button onclick="toggleAITutor()"
+                style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+        </div>
+        <div id="aiChatBody" class="ai-tutor-body">
+            <div class="ai-msg bot">Hi! I'm your private tutor. How can I help you with your studies today?</div>
+        </div>
+        <div class="ai-tutor-input">
+            <input type="text" id="aiInput" placeholder="Ask anything about your subjects..."
+                onkeypress="if(event.key==='Enter') sendAIMessage()">
+            <button onclick="sendAIMessage()">🪄</button>
+        </div>
+    </div>
+
+    <button id="aiTutorTrigger" class="ai-trigger-btn" onclick="toggleAITutor()">
+        <span class="ai-orb pulse"></span>
+        <span>Ask AI Tutor</span>
+    </button>
+
+    <!-- Payment Options Row -->
+    <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Bank Details Manual Option -->
+        <div style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
+            <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">🏦 Bank Transfer
+                (NEFT/IMPS)</h3>
+            <div style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
+                <p><strong>Bank Name:</strong> Canara Bank</p>
+                <p><strong>Account Name:</strong> Institute Management</p>
+                <p><strong>Account No:</strong> <span
+                        style="background: #334155; padding: 2px 6px; border-radius: 4px; color: #fff; font-weight: bold;">4949120000179</span>
+                </p>
+                <p><strong>IFSC Code:</strong> <span
+                        style="background: #334155; padding: 2px 6px; border-radius: 4px; color: #fff; font-weight: bold;">CNRB0004949</span>
+                </p>
+            </div>
+            <div
+                style="margin-top: 15px; color: #10b981; font-size: 0.8rem; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                ⚡ <strong>Auto-Verification System Active</strong><br>
+                System will auto-match your payment with bank records via UTR.
+            </div>
         </div>
 
-        <script src="/static/js/api.js"></script>
-        <script src="/static/js/auth.js"></script>
-        <script src="/static/js/dashboard/student.js"></script>
-        <script>
-            function logout() {
-                localStorage.clear();
-                window.location.href = '/';
-            }
-        </script>
-        <!-- Premium Motion JS -->
-        <script src="/static/js/premium_motion.js"></script>
+        <!-- Manual QR Option -->
+        <div
+            style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; text-align: center;">
+            <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📱 Scan & Pay (UPI)</h3>
+            <img src="/static/img/upi_qr.jpg" alt="Institute UPI QR"
+                style="width: 150px; border-radius: 8px; border: 4px solid white;">
+            <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 10px;">
+                Scan with GPay / PhonePe / Paytm.<br>
+                <span style="color: #f59e0b;">Important: Enter the correct Transaction ID/UTR below for
+                    instant
+                    approval.</span>
+            </p>
+        </div>
+    </div>
+
+    </div>
+    </main>
+    </div>
+
+    <!-- Leave Request Modal -->
+    <div id="leaveModal" class="modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center;">
+        <div
+            style="background: #1e293b; width: 420px; padding: 35px; border-radius: 24px; border: 1px solid rgba(248, 113, 113, 0.2); position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="color: white; margin: 0; font-size: 1.4rem;">📝 Apply for Leave</h3>
+                <button onclick="closeLeaveModal()"
+                    style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">✕</button>
+            </div>
+
+            <form id="leaveForm" style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="form-group">
+                    <label style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; display: block;">Leave
+                        Type</label>
+                    <select id="leaveType" class="form-input"
+                        style="background: rgba(0,0,0,0.2); border-color: #334155; color: white; width: 100%; padding: 10px;">
+                        <option value="SICK">Sick Leave</option>
+                        <option value="CASUAL">Casual / Personal</option>
+                        <option value="EMERGENCY">Family Emergency</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; display: block;">Start
+                            Date</label>
+                        <input type="date" id="leaveStart" class="form-input"
+                            style="background: rgba(0,0,0,0.2); border-color: #334155; color: white; width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; display: block;">End
+                            Date</label>
+                        <input type="date" id="leaveEnd" class="form-input"
+                            style="background: rgba(0,0,0,0.2); border-color: #334155; color: white; width: 100%;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; display: block;">Reason</label>
+                    <textarea id="leaveReason" class="form-input" placeholder="Please provide a detailed reason..."
+                        style="background: rgba(0,0,0,0.2); border-color: #334155; color: white; width: 100%; height: 100px; resize: none;"></textarea>
+                </div>
+                <button type="submit"
+                    style="background: #f87171; color: white; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(248, 113, 113, 0.3);">
+                    Submit Leave Application
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/dashboard/student.js"></script>
+    <script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+    </script>
+    <!-- Premium Motion JS -->
+    <script src="/static/js/premium_motion.js"></script>
     </div>
     </div>
 </body>

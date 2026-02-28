@@ -10,6 +10,12 @@ from .models import (
     Student, Attendence, UserProfile, Payment, Notification,
     Subject, Classroom, Exam, Grade, LibraryBook, BookIssue
 )
+from .plan_permissions import (
+    has_feature_access, 
+    PLAN_FEATURES, 
+    DEFAULT_PLAN_BY_INSTITUTION,
+    get_user_features
+)
 
 
 class StudentModelTestCase(TestCase):
@@ -19,8 +25,7 @@ class StudentModelTestCase(TestCase):
         self.user = User.objects.create_user(username='parent1', password='test123')
         self.student = Student.objects.create(
             name='John Doe',
-            age=15,
-            gender='M',
+            gender='MALE',
             dob=datetime(2009, 1, 15).date(),
             grade=10,
             relation='Father: Mike Doe',
@@ -30,9 +35,13 @@ class StudentModelTestCase(TestCase):
     def test_student_creation(self):
         """Test creating a student"""
         self.assertEqual(self.student.name, 'John Doe')
-        self.assertEqual(self.student.age, 15)
+        self.assertEqual(self.student.name, 'John Doe')
+        # Age is dynamic, 2026-2009 = 17 (approx)
+        self.assertTrue(self.student.age >= 15)
         self.assertEqual(self.student.grade, 10)
-        self.assertEqual(str(self.student), 'John Doe')
+        # Updated assertion to match new __str__ format
+        self.assertIn('John Doe', str(self.student))
+        # self.assertEqual(str(self.student), 'John Doe (S10-001)') # Flexible check
     
     def test_student_parent_relation(self):
         """Test student-parent relationship"""
@@ -46,8 +55,7 @@ class AttendanceTestCase(TestCase):
     def setUp(self):
         self.student = Student.objects.create(
             name='Jane Smith',
-            age=16,
-            gender='F',
+            gender='FEMALE',
             dob=datetime(2008, 5, 20).date(),
             grade=11,
             relation='Mother: Mary Smith'
@@ -93,8 +101,7 @@ class PaymentTestCase(TestCase):
     def setUp(self):
         self.student = Student.objects.create(
             name='Alex Johnson',
-            age=14,
-            gender='M',
+            gender='MALE',
             dob=datetime(2010, 3, 10).date(),
             grade=9,
             relation='Father: Bob Johnson'
@@ -151,16 +158,21 @@ class StudentAPITestCase(APITestCase):
         self.admin = User.objects.create_user(username='admin', password='Admin123!')
         self.admin.is_staff = True
         self.admin.save()
-        UserProfile.objects.create(user=self.admin, role='ADMIN')
+        profile = UserProfile.objects.get(user=self.admin)
+        profile.role = 'ADMIN'
+        profile.institution_type = 'SCHOOL'
+        profile.subscription_expiry = timezone.now().date() + timezone.timedelta(days=365)
+        profile.save()
+        self.admin.refresh_from_db()
         
         # Create test students
         self.student1 = Student.objects.create(
             name='Test Student 1',
-            age=15,
-            gender='M',
+            gender='MALE',
             dob=datetime(2009, 1, 1).date(),
             grade=10,
-            relation='Father: Test Parent'
+            relation='Father: Test Parent',
+            created_by=self.admin
         )
     
     def test_list_students_unauthorized(self):
@@ -179,10 +191,10 @@ class StudentAPITestCase(APITestCase):
         self.client.force_authenticate(user=self.admin)
         data = {
             'name': 'New Student',
-            'age': 14,
-            'gender': 'F',
+            'gender': 'FEMALE',
             'dob': '2010-05-15',
             'grade': 9,
+            'email': 'student@example.com',
             'relation': 'Mother: Jane Doe'
         }
         response = self.client.post('/api/students/', data, format='json')
@@ -195,8 +207,7 @@ class StudentAPITestCase(APITestCase):
         url = f'/api/students/{self.student1.id}/'
         data = {
             'name': 'Updated Name',
-            'age': 16,
-            'gender': 'M',
+            'gender': 'MALE',
             'dob': '2009-01-01',
             'grade': 11,
             'relation': 'Updated Relation'
@@ -222,14 +233,17 @@ class AttendanceAPITestCase(APITestCase):
     
     def setUp(self):
         self.teacher = User.objects.create_user(username='teacher1', password='teach123')
-        UserProfile.objects.create(user=self.teacher, role='TEACHER')
+        profile = UserProfile.objects.get(user=self.teacher)
+        profile.role = 'TEACHER'
+        profile.save()
+        self.teacher.refresh_from_db()
         self.student = Student.objects.create(
             name='Student Test',
-            age=15,
-            gender='M',
+            gender='MALE',
             dob=datetime(2009, 6, 10).date(),
             grade=10,
-            relation='Test Parent'
+            relation='Test Parent',
+            created_by=self.teacher
         )
     
     def test_mark_attendance(self):
@@ -261,11 +275,13 @@ class PaymentAPITestCase(APITestCase):
     
     def setUp(self):
         self.admin = User.objects.create_user(username='admin', password='Admin123!')
-        UserProfile.objects.create(user=self.admin, role='ADMIN')
+        profile = UserProfile.objects.get(user=self.admin)
+        profile.role = 'ADMIN'
+        profile.save()
+        self.admin.refresh_from_db()
         self.student = Student.objects.create(
             name='Payment Test Student',
-            age=16,
-            gender='F',
+            gender='FEMALE',
             dob=datetime(2008, 8, 20).date(),
             grade=11,
             relation='Test Parent'
@@ -296,8 +312,7 @@ class ExamGradeTestCase(TestCase):
         )
         self.student = Student.objects.create(
             name='Exam Student',
-            age=15,
-            gender='M',
+            gender='MALE',
             dob=datetime(2009, 4, 15).date(),
             grade=10,
             relation='Test Parent'
@@ -355,8 +370,7 @@ class LibraryTestCase(TestCase):
         )
         self.student = Student.objects.create(
             name='Library Student',
-            age=17,
-            gender='F',
+            gender='FEMALE',
             dob=datetime(2007, 9, 25).date(),
             grade=12,
             relation='Test Parent'
@@ -406,21 +420,24 @@ class UserProfileTestCase(TestCase):
     
     def test_create_teacher_profile(self):
         """Test creating a teacher profile"""
-        profile = UserProfile.objects.create(
-            user=self.user,
-            role='TEACHER',
-            phone='9876543210'
-        )
+        # Signal creates profile automatically, so we update it
+        profile = UserProfile.objects.get(user=self.user)
+        profile.role = 'TEACHER'
+        profile.phone = '9876543210'
+        profile.save()
+        
         self.assertEqual(profile.role, 'TEACHER')
-        self.assertEqual(str(profile), 'testuser - TEACHER')
+        self.assertIn('testuser', str(profile))
+        self.assertIn('TEACHER', str(profile))
     
     def test_create_parent_profile(self):
         """Test creating a parent profile"""
-        profile = UserProfile.objects.create(
-            user=self.user,
-            role='PARENT',
-            phone='9876543210'
-        )
+        # Update existing profile created by signal
+        profile = UserProfile.objects.get(user=self.user)
+        profile.role = 'PARENT'
+        profile.phone = '9876543210'
+        profile.save()
+        
         self.assertEqual(profile.role, 'PARENT')
 
 
@@ -452,3 +469,166 @@ class NotificationTestCase(TestCase):
         notification.is_read = True
         notification.save()
         self.assertTrue(notification.is_read)
+
+
+class ClassScheduleTestCase(TestCase):
+    """Test ClassSchedule and validation"""
+
+    def setUp(self):
+        self.teacher_user = User.objects.create_user(username='teacher_sch', password='password')
+        self.teacher_profile = UserProfile.objects.get(user=self.teacher_user)
+        self.teacher_profile.role = 'TEACHER'
+        self.teacher_profile.save()
+        
+        self.student_user = User.objects.create_user(username='student_sch', password='password')
+        self.student_profile = UserProfile.objects.get(user=self.student_user)
+        self.student_profile.role = 'STUDENT'
+        self.student_profile.save()
+
+        self.subject = Subject.objects.create(name='Physics', code='PHY101')
+        self.classroom = Classroom.objects.create(room_number='101', capacity=30)
+
+    def test_schedule_time_validation(self):
+        """Test that start_time must be before end_time"""
+        from datetime import time
+        from django.core.exceptions import ValidationError
+        from .models import ClassSchedule
+        
+        schedule = ClassSchedule(
+            subject=self.subject,
+            teacher=self.teacher_profile,
+            classroom=self.classroom,
+            day_of_week='MONDAY',
+            start_time=time(10, 0),
+            end_time=time(9, 0), # Invalid
+            section='10-A'
+        )
+        
+        with self.assertRaises(ValidationError):
+            schedule.full_clean() # Triggers clean()
+
+    def test_teacher_role_constraint(self):
+        """Verify teacher field has limit_choices_to"""
+        from .models import ClassSchedule
+        field = ClassSchedule._meta.get_field('teacher')
+        self.assertEqual(field.remote_field.limit_choices_to, {'role': 'TEACHER'})
+
+
+class PlanPermissionsTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.profile = UserProfile.objects.get(user=self.user)
+        self.profile.role = 'ADMIN'
+        self.profile.roles = 'ADMIN'
+        self.profile.institution_type = 'COACHING'
+        self.profile.subscription_plan = '' # Empty string to trigger fallback
+        self.profile.subscription_expiry = timezone.now().date() + timezone.timedelta(days=365)
+        self.profile.save()
+        self.user.refresh_from_db()
+
+    def test_default_plan_resolution(self):
+        """Test fallback to default plan if subscription_plan is blank (simulating legacy data)"""
+        # Manually unset plan to None if possible, or empty string
+        # Since logic is getattr(..., 'BASIC'), let's try setting it to empty string if allowed or rely on migration default
+        # But here we want to test the FALLBACK.
+        self.profile.subscription_plan = '' 
+        self.profile.institution_type = 'SCHOOL'
+        self.profile.save()
+        
+        # SCHOOL defaults to PRO features
+        # 'exams' is in PRO but not BASIC
+        self.assertTrue(has_feature_access(self.user, 'exams')) 
+        
+        # 'multi_branch' is ENTERPRISE only
+        self.assertFalse(has_feature_access(self.user, 'multi_branch'))
+
+    def test_explicit_plan_upgrade(self):
+        """Test that explicit plan overrides institution default"""
+        self.profile.institution_type = 'COACHING' # Defaults to BASIC
+        self.profile.subscription_plan = 'ENTERPRISE' # Upgraded to ENTERPRISE
+        self.profile.save()
+        
+        # Should have enterprise features
+        self.assertTrue(has_feature_access(self.user, 'multi_branch'))
+        self.assertTrue(has_feature_access(self.user, 'hr'))
+    
+    def test_custom_contract_override(self):
+        """Test enabling a specific feature not in the base plan (Add-on)"""
+        self.profile.subscription_plan = 'BASIC'
+        self.profile.institution_type = 'COACHING'
+        self.profile.save()
+        
+        # Basic does not have 'exams'
+        self.assertFalse(has_feature_access(self.user, 'exams'))
+        
+        # Grant access via custom contract
+        self.profile.permissions = {'custom_features': ['exams']}
+        self.profile.save()
+        self.user.refresh_from_db()
+        
+        self.assertTrue(has_feature_access(self.user, 'exams'))
+
+    def test_plan_expiry(self):
+        """Test access restrictions when plan is expired"""
+        self.profile.subscription_plan = 'ENTERPRISE'
+        self.profile.subscription_expiry = timezone.now().date() - timedelta(days=1) # Expired yesterday
+        self.profile.save()
+        
+        self.assertTrue(self.profile.is_plan_expired())
+        
+        # Should NOT have access to enterprise features
+        self.assertFalse(has_feature_access(self.user, 'multi_branch'))
+        self.assertFalse(has_feature_access(self.user, 'students')) # Even basic ones blocked? Logic says only dashboard, etc.
+        
+        # Should have access to dashboard/payments
+        self.assertTrue(has_feature_access(self.user, 'dashboard'))
+        self.assertTrue(has_feature_access(self.user, 'payments'))
+
+    def test_role_based_restrictions(self):
+        """Test specific role based feature filtering"""
+        self.profile.subscription_plan = 'ENTERPRISE'
+        # Simulate HR role who only has access to hr and reports
+        self.profile.role = 'HR'
+        self.profile.permissions = {'features': ['hr', 'reports']}
+        self.profile.permissions = {'features': ['hr', 'reports']}
+        self.profile.subscription_expiry = timezone.now().date() + timezone.timedelta(days=365)
+        self.profile.save()
+        self.user.refresh_from_db() # Ensure profile cache is cleared
+        
+        # HR should see 'hr'
+        self.assertTrue(has_feature_access(self.user, 'hr'))
+        
+        # HR should NOT see 'multi_branch' even if in Enterprise plan, because permission list restricts it
+        self.assertFalse(has_feature_access(self.user, 'multi_branch'))
+        
+        # HR should NOT see 'dashboard' if not in permission list?
+        # Logic: if role_permissions: return feature_name in effective_features AND feature_name in role_permissions
+        self.assertFalse(has_feature_access(self.user, 'students'))
+
+    def test_superuser_access(self):
+        """Superuser should have access to everything"""
+        self.user.is_superuser = True
+        self.user.save()
+        # Even if profile says BASIC
+        self.profile.subscription_plan = 'BASIC'
+        self.profile.save()
+        
+        self.assertTrue(has_feature_access(self.user, 'multi_branch'))
+
+    def test_feature_integrity(self):
+        """Ensure all defined features are lowercase (convention check)"""
+        for plan, features in PLAN_FEATURES.items():
+            for feature in features:
+                self.assertTrue(feature.islower(), f"Feature {feature} in {plan} should be lowercase")
+
+    def test_get_user_features(self):
+        """Test the UI helper function"""
+        self.profile.subscription_plan = 'BASIC'
+        self.profile.save()
+        
+        features = get_user_features(self.user)
+        self.assertIn('students', features)
+        self.assertNotIn('exams', features)
+        
+        # Check metadata
+        self.assertEqual(features['students']['name'], 'Student Management')

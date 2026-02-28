@@ -8,7 +8,13 @@ class SubscriptionSystemTest(TestCase):
     def setUp(self):
         # Create a user
         self.user = User.objects.create_user(username='testclient', email='test@client.com', password='password123')
-        self.profile = UserProfile.objects.create(user=self.user, role='ADMIN', institution_type='SCHOOL')
+        self.profile, _ = UserProfile.objects.get_or_create(
+            user=self.user,
+            defaults={'role': 'ADMIN', 'institution_type': 'SCHOOL'}
+        )
+        self.profile.role = 'ADMIN'
+        self.profile.institution_type = 'SCHOOL'
+        self.profile.save()
         
         # Create initial subscription
         self.sub = ClientSubscription.objects.create(

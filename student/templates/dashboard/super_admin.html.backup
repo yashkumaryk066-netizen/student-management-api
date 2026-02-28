@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Console - Y.S.M ADVANCE</title>
+
+    <!-- Enterprise Theme -->
+    <link rel="stylesheet" href="/static/css/enterprise_theme.css">
+    <link rel="icon" type="image/png" href="/static/img/ysm_logo.png">
+
+    <!-- Third Party -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Sidebar Specific Overrides for Super Admin */
+        .sidebar-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header img {
+            height: 32px;
+        }
+
+        .sidebar-header span {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .nav-label {
+            padding: 24px 24px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Active State Border Line */
+        .nav-link.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+            color: #60a5fa !important;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #94a3b8;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: #f1f5f9;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="app-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="/static/img/ysm_logo.png" alt="Logo">
+                <span>Y.S.M ADVANCE</span>
+            </div>
+
+            <nav class="sidebar-nav" style="padding:0;">
+                <div class="nav-label">Core Modules</div>
+                <a href="#dashboard" class="nav-link active" onclick="loadModule('dashboard')">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#clients" class="nav-link" onclick="loadModule('clients')">
+                    <i class="fas fa-building"></i> Institutes
+                </a>
+                <a href="#students" class="nav-link" onclick="loadModule('students')">
+                    <i class="fas fa-user-graduate"></i> Students (Global)
+                </a>
+                <a href="#finance" class="nav-link" onclick="loadModule('finance')">
+                    <i class="fas fa-wallet"></i> Finance & Fees
+                </a>
+
+                <div class="nav-label">Platform</div>
+                <a href="#approvals" class="nav-link" onclick="loadModule('approvals')">
+                    <i class="fas fa-check-circle"></i> Approvals
+                </a>
+                <a href="#analytics" class="nav-link" onclick="loadModule('analytics')">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a href="#users" class="nav-link" onclick="loadModule('users')">
+                    <i class="fas fa-users-cog"></i> User Management
+                </a>
+
+                <div class="nav-label">System</div>
+                <a href="#logs" class="nav-link" onclick="loadModule('logs')">
+                    <i class="fas fa-terminal"></i> Audit Logs
+                </a>
+                <a href="#settings" class="nav-link" onclick="loadModule('settings')">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+
+            <div style="padding: 20px; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05);">
+                <a href="/logout/"
+                    style="display: flex; align-items: center; color: #94a3b8; font-weight: 600; font-size: 0.9rem; padding: 10px; border-radius: 8px; transition: 0.2s;"
+                    onmouseover="this.style.color='#ef4444'; this.style.background='rgba(239,68,68,0.1)'"
+                    onmouseout="this.style.color='#94a3b8'; this.style.background='transparent'">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Exit Console
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="app-main">
+            <!-- TOP HEADER -->
+            <header class="app-header">
+                <div class="header-search">
+                    <i class="fas fa-search header-search-icon"></i>
+                    <input type="text" placeholder="Search global records...">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <div
+                        style="display:flex; align-items:center; gap:8px; color:#10b981; font-size:0.8rem; font-weight:600; background:rgba(16,185,129,0.1); padding:6px 12px; border-radius:30px; border:1px solid rgba(16,185,129,0.2);">
+                        <span
+                            style="width:6px; height:6px; background:#10b981; border-radius:50%; box-shadow:0 0 8px #10b981;"></span>
+                        LIVE SERVER
+                    </div>
+
+                    <button style="background:none; border:none; color: #cbd5e1; font-size:1.2rem; cursor:pointer;">
+                        <i class="fas fa-bell"></i>
+                    </button>
+
+                    <!-- Three Dot Menu (as requested "jesa tha") -->
+                    <button style="background:none; border:none; color: #cbd5e1; font-size:1.2rem; cursor:pointer;">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+
+                    <div
+                        style="display: flex; align-items: center; gap: 12px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.1);">
+                        <div style="text-align:right;">
+                            <div style="font-size:0.85rem; font-weight:600; color:white;">{{ user.username }}</div>
+                            <div style="font-size:0.7rem; color:#94a3b8;">Super Admin</div>
+                        </div>
+                        <div
+                            style="width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 0.8rem;">
+                            SA
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- DYNAMIC VIEW -->
+            <div id="appView" class="page-view">
+                <!-- Content Loads Here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1) || 'dashboard';
+            loadModule(hash);
+
+            // Highlight active link
+            updateActiveLink(hash);
+        });
+
+        // HTML Templates for Views
+        const VIEWS = {
+            dashboard: `
+                <div class="page-title-row">
+                    <div>
+                        <h1 class="page-title">System Overview</h1>
+                        <p style="color:var(--text-muted); margin-top:4px;">Welcome back, here's what's happening today.</p>
+                    </div>
+                    <button class="btn-primary" onclick="alert('Refresh Data')"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+                </div>
+                
+                <!-- METRICS -->
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Total Institutes</span>
+                        <div class="metric-value">42</div>
+                        <div class="metric-sub" style="color:var(--success);"><i class="fas fa-arrow-up"></i> +3 this month</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Active Students</span>
+                        <div class="metric-value">12,450</div>
+                         <div class="metric-sub" style="color:var(--success);"><i class="fas fa-arrow-up"></i> +120 new admissions</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Total Revenue</span>
+                        <div class="metric-value" style="color:var(--primary);">₹24.5L</div>
+                        <div class="metric-sub" style="color:var(--text-muted);">Dec 2025</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Pending Approvals</span>
+                        <div class="metric-value" style="color:var(--warning);">5</div>
+                        <div class="metric-sub" style="color:var(--warning);"><i class="fas fa-clock"></i> Action Required</div>
+                    </div>
+                </div>
+                
+                <h3 style="color:white; margin-bottom:20px; font-weight:600;">Recent Institutes</h3>
+                <div class="table-card">
+                    <table class="dark-table">
+                        <thead>
+                            <tr>
+                                <th>Institute Name</th>
+                                <th>Location</th>
+                                <th>Onboarded</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashClientList">
+                            <tr><td colspan="5" style="text-align:center; padding:30px;">Loading Data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `,
+            clients: `
+                <div class="page-title-row">
+                    <h1 class="page-title">Institute Management</h1>
+                    <button class="btn-primary">+ Onboard Institute</button>
+                </div>
+                <div class="table-card">
+                    <table class="dark-table">
+                        <thead>
+                            <tr>
+                                <th>Institute Name</th>
+                                <th>Email</th>
+                                <th>License Type</th>
+                                <th>Status</th>
+                                <th>Manage</th>
+                            </tr>
+                        </thead>
+                         <tbody id="fullClientList">
+                            <tr><td colspan="5" style="text-align:center; padding:30px;">Loading Data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `,
+            students: `
+                <div class="page-title-row">
+                    <h1 class="page-title">Global Student Directory</h1>
+                </div>
+                <div class="metric-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                     <div class="metric-card">
+                        <span class="metric-label">Total Students</span>
+                        <div class="metric-value">12,450</div>
+                    </div>
+                     <div class="metric-card">
+                        <span class="metric-label">New Today</span>
+                        <div class="metric-value" style="color:var(--success);">+45</div>
+                    </div>
+                </div>
+                 <div class="table-card">
+                    <table class="dark-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Institute</th>
+                                <th>Class</th>
+                                <th>Parent Phone</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="globalStudentList">
+                            <tr><td colspan="5" style="text-align:center; padding:30px;">Loading Data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `,
+            finance: `
+                <div class="page-title-row">
+                     <h1 class="page-title">Global Finance & Revenue</h1>
+                     <button class="btn-primary">Generate Report</button>
+                </div>
+                <div class="metric-grid">
+                    <div class="metric-card"><span class="metric-label">Total Revenue (YTD)</span><div class="metric-value">₹2.4 Cr</div></div>
+                    <div class="metric-card"><span class="metric-label">Pending Dues</span><div class="metric-value" style="color:#ef4444;">₹12.5L</div></div>
+                    <div class="metric-card"><span class="metric-label">Transactions Today</span><div class="metric-value">458</div></div>
+                </div>
+                <div style="padding:40px; text-align:center; background:rgba(255,255,255,0.02); border-radius:12px;">
+                    <i class="fas fa-chart-pie" style="font-size:3rem; margin-bottom:20px; color:#3b82f6;"></i>
+                    <h3>Detailed Finance Module Loading...</h3>
+                </div>
+            `,
+            analytics: `
+                <div class="page-title-row"><h1 class="page-title">Platform Analytics</h1></div>
+                <div style="height:400px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.2); border-radius:12px;">
+                    <div style="text-align:center;">
+                        <i class="fas fa-chart-line" style="font-size:4rem; color:#3b82f6; margin-bottom:20px; opacity:0.5;"></i>
+                        <h2>Analytics Dashboard</h2>
+                        <p style="color:#94a3b8;">Granular data visualization engine coming soon.</p>
+                    </div>
+                </div>
+            `,
+            approvals: `
+                <div class="page-title-row"><h1 class="page-title">Pending Approvals</h1></div>
+                <div class="table-card">
+                    <table class="dark-table">
+                        <thead><tr><th>Request ID</th><th>Institute</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody><tr><td colspan="5" style="text-align:center;">No pending approvals.</td></tr></tbody>
+                    </table>
+                </div>
+            `,
+            users: `<div class="page-title-row"><h1 class="page-title">User Management</h1></div><p>Manage Super Admin accounts and roles.</p>`,
+            logs: `<div class="page-title-row"><h1 class="page-title">Audit Logs</h1></div><p>System activity tracking.</p>`,
+            settings: `<div class="page-title-row"><h1 class="page-title">Global Settings</h1></div><p>System configuration.</p>`
+        };
+
+        function updateActiveLink(mod) {
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            // Try to match specific link, fallback to dashboard
+            let link = document.querySelector(`.nav-link[href="#${mod}"]`);
+            if (link) link.classList.add('active');
+        }
+
+        async function loadModule(mod) {
+            const container = document.getElementById('appView');
+            updateActiveLink(mod);
+
+            if (VIEWS[mod]) {
+                container.innerHTML = VIEWS[mod];
+
+                // Trigger Data Loads
+                if (mod === 'dashboard') fetchDashClients();
+                if (mod === 'clients') fetchFullClients();
+                if (mod === 'students') fetchGlobalStudents();
+            } else {
+                container.innerHTML = `
+                    <div style="padding:50px; text-align:center; opacity:0.6;">
+                        <i class="fas fa-tools" style="font-size:3rem; margin-bottom:20px;"></i>
+                        <h2>Module '${mod}' under construction</h2>
+                    </div>
+                `;
+            }
+        }
+
+        // --- DATA FETCHERS ---
+
+        async function fetchDashClients() {
+            try {
+                // Use session-based authentication (Django)
+                const res = await fetch('/api/super-admin/clients/', {
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+
+                const data = await res.json();
+
+                const html = data.slice(0, 5).map(c => `
+                    <tr>
+                        <td style="font-weight:600; color:white;">${c.institution_name || 'N/A'}</td>
+                        <td>${c.city || 'India'}</td>
+                        <td>${new Date(c.date_joined).toLocaleDateString()}</td>
+                        <td><span style="color:var(--success); background:rgba(16,185,129,0.1); padding:4px 8px; border-radius:4px; font-size:0.8rem;">Active</span></td>
+                        <td><button style="background:none; border:1px solid var(--border); color:var(--text-muted); padding:4px 10px; border-radius:4px; cursor:pointer;">View</button></td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('dashClientList').innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:20px;">No institutes found.</td></tr>';
+            } catch (e) {
+                console.error('Fetch error:', e);
+                document.getElementById('dashClientList').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--danger);">Error loading data.</td></tr>';
+            }
+        }
+
+        async function fetchFullClients() {
+            try {
+                const res = await fetch('/api/super-admin/clients/', {
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+
+                const html = data.map(c => `
+                    <tr>
+                        <td style="font-weight:600; color:white;">${c.institution_name || c.username}</td>
+                        <td>${c.email}</td>
+                        <td>${c.plan || 'Enterprise'}</td>
+                        <td><span style="color:var(--success); background:rgba(16,185,129,0.1); padding:4px 8px; border-radius:4px; font-size:0.8rem;">Active</span></td>
+                        <td><button class="btn-primary" style="padding:6px 12px; font-size:0.8rem;">Manage</button></td>
+                    </tr>
+                `).join('');
+                document.getElementById('fullClientList').innerHTML = html;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function fetchGlobalStudents() {
+            try {
+                const res = await fetch('/api/super-admin/students/', {
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+
+                const html = data.map(s => `
+                    <tr>
+                        <td style="font-weight:600; color:white;">${s.name}</td>
+                        <td>${s.institution_name || '-'}</td>
+                        <td>${s.student_class}</td>
+                        <td>${s.parents_phone}</td>
+                        <td><span style="color:var(--success); background:rgba(16,185,129,0.1); padding:4px 8px; border-radius:4px; font-size:0.8rem;">Active</span></td>
+                    </tr>
+                `).join('');
+                document.getElementById('globalStudentList').innerHTML = html || '<tr><td colspan="5" style="padding:20px; text-align:center;">No students found.</td></tr>';
+            } catch (e) { console.error(e); }
+        }
+
+        // Helper to get CSRF cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+</body>
+
+</html>

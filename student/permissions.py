@@ -1,258 +1,103 @@
 from rest_framework import permissions
-from django.utils import timezone
-from student.models import Student
+from .plan_permissions import PLAN_FEATURES, get_user_plan
 
-
-# =========================
-# BASIC ROLE PERMISSIONS
-# =========================
-
-class IsStudent(permissions.BasePermission):
-    """Allow only users with STUDENT role"""
-    def has_permission(self, request, view):
-        return bool(
-            request.user and request.user.is_authenticated and
-            hasattr(request.user, 'profile') and
-            request.user.profile.role == 'STUDENT'
-        )
-
-
-class IsTeacher(permissions.BasePermission):
-    """Allow only users with TEACHER role"""
-    def has_permission(self, request, view):
-        return bool(
-            request.user and request.user.is_authenticated and
-            hasattr(request.user, 'profile') and
-            request.user.profile.role == 'TEACHER'
-        )
-
-
-class IsParent(permissions.BasePermission):
-    """Allow only users with PARENT role"""
-    def has_permission(self, request, view):
-        return bool(
-            request.user and request.user.is_authenticated and
-            hasattr(request.user, 'profile') and
-            request.user.profile.role == 'PARENT'
-        )
-
-class IsHR(permissions.BasePermission):
-    """Allow only users with HR role"""
-    def has_permission(self, request, view):
-        return bool(
-            request.user and request.user.is_authenticated and
-            hasattr(request.user, 'profile') and
-            request.user.profile.role == 'HR'
-        )
-
-
-class IsAdminRole(permissions.BasePermission):
+class IsPlanFeatureEnabled(permissions.BasePermission):
     """
-    STRICT system admin (Django superuser only).
-    Clients are NOT admins here.
+    DRF Permission to gate API endpoints based on the User's Plan.
+    Usage in View:
+    permission_classes = [IsAuthenticated, IsPlanFeatureEnabled]
+    required_feature = 'library' 
     """
+    
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_superuser)
-
-
-# =========================
-# CLIENT / SUBSCRIPTION
-# =========================
-
-class IsClient(permissions.BasePermission):
-    """
-    Subscription Client Permission
-    - Active plan: Full access
-    - Expired plan: Read-only
-    - Suspended/Blocked: No access
-    """
-    def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
-
+        # 1. Unrestricted for Super Admin
         if request.user.is_superuser:
             return True
-
-        if not hasattr(request.user, 'profile'):
-            return False
-
-        profile = request.user.profile
-        if profile.role != 'CLIENT':
-            return False
-
-        # Hard block first
-        if hasattr(request.user, 'subscription'):
-            if request.user.subscription.status in ['SUSPENDED', 'BLOCKED']:
-                return False
-
-        # Expiry check
-        expiry = profile.subscription_expiry
-        is_active = not expiry or expiry >= timezone.now().date()
-
-        if is_active:
+            
+        # 2. Get required feature from View
+        # Views must define `required_feature = '...'`
+        required_feature = getattr(view, 'required_feature', None)
+        
+        if not required_feature:
+            # If view doesn't specify a feature, we assume it's open (or handled elsewhere)
             return True
-
-        # Expired → read-only
-        return request.method in permissions.SAFE_METHODS
-
+            
+        # 3. Check Plan
+        # 3. Check Access using Centralized Logic
+        from .plan_permissions import has_feature_access
+        return has_feature_access(request.user, required_feature)
 
 class IsTeacherOrAdmin(permissions.BasePermission):
     """
-    Allow TEACHER or CLIENT (Org Owner).
-    CLIENT access is subscription-aware.
+    Allows access to Teachers (Staff) and Admins (Owners).
     """
-    def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
-
+    def has_object_permission(self, request, view, obj):
+        # Super Admin Bypass
         if request.user.is_superuser:
             return True
 
-        if not hasattr(request.user, 'profile'):
+        if not request.user.is_authenticated:
             return False
 
-        role = request.user.profile.role
-
-        if role in ['TEACHER', 'ADMIN']:
+        # Owner Logic
+        if hasattr(request.user, 'profile') and request.user.profile.role in ['CLIENT', 'ADMIN']:
+            # Check if obj belongs to this owner (if obj has 'created_by' or 'user')
+            # Assuming obj is usually related to the owner directly or indirectly
+            # Basic check: owner is allowed
             return True
 
-        if role == 'CLIENT':
-            expiry = request.user.profile.subscription_expiry
-            if expiry and expiry < timezone.now().date():
-                return request.method in permissions.SAFE_METHODS
+        # Staff Logic
+        if hasattr(request.user, 'profile') and request.user.profile.role == 'TEACHER':
+            # Staff typically can view/edit specific things, refine as needed
             return True
-
+            
         return False
 
-
-# =========================
-# PLAN-BASED FEATURE ACCESS
-# =========================
-
-class HasPlanAccess(permissions.BasePermission):
-    """
-    View must define: required_feature = 'students' | 'hostel' | ...
-    """
-
-    PLAN_FEATURES = {
-        'SCHOOL': [
-            'dashboard', 'students', 'exams', 'attendance',
-            'transport', 'hostel', 'parents', 'teachers',
-            'reports', 'payments', 'events', 'settings', 'subscription', 'hr'
-        ],
-        'COACHING': [
-            'dashboard', 'students', 'courses', 'live_classes',
-            'attendance', 'reports', 'payments', 'events', 'settings', 'subscription'
-        ],
-        'INSTITUTE': [
-            'dashboard', 'students', 'exams', 'courses',
-            'attendance', 'transport', 'hostel',
-            'parents', 'teachers', 'reports', 'payments',
-            'lab', 'library', 'hr', 'events', 'settings', 'subscription', 'logs', 'users', 'live_classes'
-        ],
-    }
-
     def has_permission(self, request, view):
         if request.user.is_superuser:
             return True
-
-        if not request.user or not request.user.is_authenticated:
+        if not request.user.is_authenticated:
             return False
-
-        if not hasattr(request.user, 'profile'):
-            return False
-
-        # Use centralized permission logic
-        from .plan_permissions import has_feature_access
-        
-        required_feature = getattr(view, 'required_feature', None)
-        if not required_feature:
-            return True
-
-        # strict check using the centralized function (which now includes expiry check)
-        if not has_feature_access(request.user, required_feature):
-            self.message = f"Feature '{required_feature}' is locked for your current plan."
-            return False
-
-        return True
-
-
-# =========================
-# PLAN LIMITS
-# =========================
+        role = getattr(getattr(request.user, 'profile', None), 'role', None)
+        return role in ['TEACHER', 'CLIENT', 'ADMIN', 'HR']
 
 class StudentLimitPermission(permissions.BasePermission):
     """
-    COACHING: max 200 students
-    SCHOOL / INSTITUTE: unlimited
+    Checks if client has exceeded student limit.
     """
-    STUDENT_LIMITS = {'COACHING': 200, 'SCHOOL': None, 'INSTITUTE': None}
-
     def has_permission(self, request, view):
-        if request.method != 'POST' or request.user.is_superuser:
-            return True
-
-        if not hasattr(request.user, 'profile'):
-            return False
-
-        plan = (request.user.profile.institution_type or '').upper()
-        limit = self.STUDENT_LIMITS.get(plan)
-
-        if limit is None:
-            return True
-
-        current = Student.objects.filter(created_by=request.user).count()
-        if current >= limit:
-            self.message = f"Limit reached: {limit} students for {plan} plan."
-            return False
-
-        return True
-
-
-# =========================
-# STRICT PLAN GATES
-# =========================
-
-class IsSuperAdminExclusive(permissions.BasePermission):
-    """Only Django superusers"""
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_superuser)
-
-
-class IsSchool(permissions.BasePermission):
-    """Allow SCHOOL + INSTITUTE"""
-    def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
         if request.user.is_superuser:
             return True
-        try:
-            return request.user.profile.institution_type in ['SCHOOL', 'INSTITUTE']
-        except:
-            return False
+        return True # Placeholder for now
 
-
-class IsCoaching(permissions.BasePermission):
-    """Allow COACHING + INSTITUTE"""
+class IsStaffWithPermission(permissions.BasePermission):
+    """
+    Checks for specific granular permissions (e.g. 'can_manage_fees').
+    Usage:
+    permission_classes = [IsAuthenticated, IsStaffWithPermission]
+    required_permission = 'can_manage_fees'
+    """
     def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
+        # 1. Super Admin / Owner always has access
         if request.user.is_superuser:
             return True
-        try:
-            return request.user.profile.institution_type in ['COACHING', 'INSTITUTE']
-        except:
+            
+        profile = getattr(request.user, 'profile', None)
+        if not profile:
             return False
-
-
-class IsInstitute(permissions.BasePermission):
-    """Allow ONLY INSTITUTE"""
-    def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
-        if request.user.is_superuser:
+            
+        # Owners (Clients) and Admins usually have full access within their plan
+        if profile.role in ['CLIENT', 'ADMIN']:
             return True
-        try:
-            return request.user.profile.institution_type == 'INSTITUTE'
-        except:
-            return False
+
+        # 2. Check Granular Permission
+        required_perm = getattr(view, 'required_permission', None)
+        if not required_perm:
+            return True # If no specific permission required, allow generic staff
+            
+        # Check if permission exists in user's profile
+        # Structure: profile.permissions = {'capabilities': ['can_manage_fees', 'can_edit_students']}
+        if profile.permissions and 'capabilities' in profile.permissions:
+            return required_perm in profile.permissions['capabilities']
+            
+        return False

@@ -140,6 +140,8 @@
             height: -webkit-fill-available;
             position: fixed;
             width: 100%;
+            cursor: none;
+            /* Hide real cursor to favor magic cursor */
         }
 
         body {
@@ -354,6 +356,33 @@
             outline: none;
         }
 
+        /* Responsive: AI Chat */
+        @media (max-width: 768px) {
+            #mainSidebar {
+                width: 80vw !important;
+                max-width: 320px;
+            }
+
+            .chat-container {
+                padding: 0 8px;
+            }
+
+            .msg-ai,
+            .msg-user {
+                max-width: 100% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #mainSidebar {
+                width: 90vw !important;
+            }
+
+            .input-area {
+                padding: 10px 12px !important;
+            }
+        }
+
         /* Messages */
         .msg-user {
             background: rgba(99, 102, 241, 0.2);
@@ -463,8 +492,8 @@
 
         /* --- PREMIUM MARKDOWN STYLES --- */
         .markdown-content {
-            font-size: 0.95rem;
-            line-height: 1.7;
+            font-size: 0.98rem;
+            line-height: 1.75;
         }
 
         .markdown-content h1,
@@ -475,6 +504,27 @@
             font-weight: 700;
             color: #fff;
             letter-spacing: -0.02em;
+        }
+
+        .markdown-content h2 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #a5b4fc;
+        }
+
+        .markdown-content hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 1.2rem 0;
+        }
+
+        .markdown-content blockquote {
+            border-left: 3px solid rgba(99, 102, 241, 0.6);
+            background: rgba(99, 102, 241, 0.08);
+            padding: 0.75rem 1rem;
+            border-radius: 0.6rem;
+            color: #cbd5e1;
         }
 
         .markdown-content p {
@@ -601,10 +651,134 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* --- PREMIUM MOTION ENGINE (MAGIC ADDITIONS) --- */
+        .text-shimmer {
+            background: linear-gradient(90deg, #fff 0%, #f59e0b 50%, #fff 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .magical-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .magical-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(245, 158, 11, 0.1), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .magical-card:hover::after {
+            opacity: 1;
+        }
+
+        .magical-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(245, 158, 11, 0.4) !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 15px rgba(245, 158, 11, 0.1);
+        }
+
+        .neon-pulse {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neon-pulse::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+            animation: neonRotate 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes neonRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Floating Shapes for Depth */
+        .float-shape {
+            position: fixed;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(40px);
+        }
+
+        .magic-cursor {
+            width: 15px;
+            height: 15px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        .magic-cursor-follower {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
     </style>
 </head>
 
 <body class="flex">
+    <!-- MAGIC MOTION ENGINE ELEMENTS -->
+    <div class="magic-cursor" id="magicCursor"></div>
+    <div class="magic-cursor-follower" id="magicFollower"></div>
+    <div class="float-shape"
+        style="top: 10%; left: 5%; width: 300px; height: 300px; background: rgba(245, 158, 11, 0.05); animation: floatMagic 20s infinite alternate;">
+    </div>
+    <div class="float-shape"
+        style="bottom: 10%; right: 5%; width: 400px; height: 400px; background: rgba(99, 102, 241, 0.05); animation: floatMagic 25s infinite alternate-reverse;">
+    </div>
+
+    <style>
+        @keyframes floatMagic {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(100px, 50px) rotate(90deg);
+            }
+        }
+    </style>
 
     <!-- CRITICAL: Loading Spinner - Shows immediately, hides when ready -->
     <div id="appLoader">
@@ -704,9 +878,11 @@
                     <div class="text-white font-medium">{{ display_name }}</div>
                     <div class="text-amber-500">{{ role|upper }}</div>
                 </div>
-                <a href="/api/ai/logout/" class="ml-auto text-slate-400 hover:text-red-500 transition" title="Logout">
+                <!-- Logout -->
+                <button onclick="AuthAPI.logout()" class="ml-auto text-slate-400 hover:text-red-500 transition"
+                    title="Logout">
                     <i class="fa-solid fa-power-off"></i>
-                </a>
+                </button>
             </div>
         </div>
     </aside>
@@ -736,7 +912,7 @@
                 <!-- Brand Badge -->
                 <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
                     <span class="text-amber-500 text-sm">✨</span>
-                    <span class="text-xs font-semibold text-slate-300">Y.S.M AI</span>
+                    <span class="text-xs font-semibold text-slate-300 text-shimmer">Y.S.M AI</span>
                 </div>
 
                 <!-- PREMIUM: Global Search Bar (Desktop) -->
@@ -900,7 +1076,7 @@
                     <div class="text-xs text-slate-500 mb-3 text-left">✨ Suggested prompts:</div>
                     <div class="flex flex-wrap gap-2">
                         <button onclick="setInput('Build me a complete Django REST API with authentication')"
-                            class="suggestion-chip px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
+                            class="suggestion-chip magical-card px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/10 transition">
                             Build Django API
                         </button>
                         <button onclick="setInput('Optimize my database query performance')"
@@ -935,7 +1111,7 @@
                     <div class="space-y-2">
                         <!-- Recent Chat Item 1 -->
                         <button
-                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group">
+                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group magical-card">
                             <div class="flex items-center gap-3">
                                 <div
                                     class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -954,7 +1130,7 @@
 
                         <!-- Recent Chat Item 2 -->
                         <button
-                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group">
+                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group magical-card">
                             <div class="flex items-center gap-3">
                                 <div
                                     class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -973,7 +1149,7 @@
 
                         <!-- Recent Chat Item 3 -->
                         <button
-                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group">
+                            class="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition group magical-card">
                             <div class="flex items-center gap-3">
                                 <div
                                     class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -1055,7 +1231,7 @@
                             oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
 
                         <button id="sendBtn"
-                            class="p-3 bg-gradient-to-tr from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white rounded-lg shadow-lg shadow-amber-500/20 transition-all active:scale-95 flex-shrink-0"
+                            class="p-3 bg-gradient-to-tr from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white rounded-lg shadow-lg shadow-amber-500/20 transition-all active:scale-95 flex-shrink-0 neon-pulse"
                             onclick="sendMessage()">
                             <i class="fa-solid fa-arrow-up"></i>
                         </button>
@@ -1070,6 +1246,22 @@
         </div>
 
     </main>
+
+    <!-- NEURAL VOICE ORB OVERLAY -->
+    <div id="voiceOrbOverlay"
+        class="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-md hidden">
+        <div class="text-center">
+            <div class="voice-orb-overlay active !static !bottom-0 !left-0 !transform-none mx-auto mb-8">
+                <div class="voice-orb"></div>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2 glow-text">Y.S.M NEURAL VOICE</h2>
+            <p class="text-amber-400 font-mono animate-pulse">Listening to your command...</p>
+            <button onclick="stopListening()"
+                class="mt-8 px-8 py-3 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition">
+                Click to Cancel
+            </button>
+        </div>
+    </div>
 
     <!-- SETTINGS MODAL -->
     <div id="settingsModal" class="fixed inset-0 z-[100] hidden">
@@ -1095,17 +1287,17 @@
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">AI Brain Model</label>
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="setProvider('openai')" id="prov-openai"
+                        <button onclick="setProvider('standard')" id="prov-standard"
                             class="p-3 rounded-xl border border-white/10 bg-slate-800 hover:border-amber-500/50 hover:bg-amber-500/10 transition flex flex-col items-center gap-2 group provider-btn active">
                             <i class="fa-solid fa-brain text-amber-400 text-xl group-hover:scale-110 transition"></i>
                             <span class="text-xs font-medium text-slate-300">Y.S.M Standard</span>
                         </button>
-                        <button onclick="setProvider('gemini')" id="prov-gemini"
+                        <button onclick="setProvider('premium')" id="prov-premium"
                             class="p-3 rounded-xl border border-white/10 bg-slate-800 hover:border-amber-500/50 hover:bg-amber-500/10 transition flex flex-col items-center gap-2 group provider-btn">
                             <i class="fa-solid fa-bolt text-purple-400 text-xl group-hover:scale-110 transition"></i>
                             <span class="text-xs font-medium text-slate-300">Y.S.M Ultra</span>
                         </button>
-                        <button onclick="setProvider('groq')" id="prov-groq"
+                        <button onclick="setProvider('quantum')" id="prov-quantum"
                             class="p-3 rounded-xl border border-white/10 bg-slate-800 hover:border-amber-500/50 hover:bg-amber-500/10 transition flex flex-col items-center gap-2 group provider-btn">
                             <i class="fa-solid fa-wind text-cyan-400 text-xl group-hover:scale-110 transition"></i>
                             <span class="text-xs font-medium text-slate-300">Y.S.M Flash</span>
@@ -1402,13 +1594,25 @@
             recognition = new webkitSpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = false;
-            recognition.lang = 'en-US'; // Can be made dynamic
+
+            // Premium: Switch based on locality or detect? For now use common Hinglish/English
+            recognition.lang = 'hi-IN'; // Default to Hindi-In to capture Hinglish better
+            // Fallback to English if no results? SpeechRecognition doesn't support multiple langs easily
+            // But hi-IN captures mixed English words well.
 
             recognition.onstart = function () {
                 isVoiceActive = true;
-                document.getElementById('micBtn').classList.add('text-white', 'bg-red-500');
-                document.getElementById('voiceOrb').classList.add('active'); // Activate Orb
-                document.getElementById('promptInput').placeholder = "Listening...";
+                const micBtn = document.getElementById('micBtn');
+                const micPing = document.getElementById('micPing');
+                micBtn.classList.add('text-white', 'bg-red-500', 'animate-pulse');
+                if (micPing) micPing.classList.remove('hidden');
+
+                // Show Animated Voice Orb
+                const voiceOverlay = document.getElementById('voiceOrbOverlay');
+                if (voiceOverlay) voiceOverlay.classList.remove('hidden');
+
+                document.getElementById('promptInput').placeholder = "Listening (English/Hindi)...";
+                sfxSend.play().catch(e => console.log("Audio play blocked"));
             };
 
             recognition.onend = function () {
@@ -1433,8 +1637,14 @@
         function stopListening() {
             isVoiceActive = false;
             if (recognition) recognition.stop();
-            document.getElementById('micBtn').classList.remove('text-white', 'bg-red-500');
-            document.getElementById('voiceOrb').classList.remove('active'); // Deactivate Orb
+            const micBtn = document.getElementById('micBtn');
+            const micPing = document.getElementById('micPing');
+            micBtn.classList.remove('text-white', 'bg-red-500', 'animate-pulse');
+            if (micPing) micPing.classList.add('hidden');
+
+            const voiceOverlay = document.getElementById('voiceOrbOverlay');
+            if (voiceOverlay) voiceOverlay.classList.add('hidden');
+
             document.getElementById('promptInput').placeholder = "Ask Y.S.M AI (Code, Architecture, Analysis)...";
         }
 
@@ -1771,7 +1981,8 @@
                 }
 
                 // Replace Loading with Real Response
-                let answer = data.answer || "No response received.";
+                const rawAnswer = data.answer || "No response received.";
+                let answer = rawAnswer;
 
                 // Auto-speak disabled by default
 
@@ -1782,7 +1993,7 @@
                 answer = parseMarkdown(answer);
 
                 // Add AI response to history
-                chatHistory.push({ role: 'assistant', content: answer });
+                chatHistory.push({ role: 'assistant', content: rawAnswer });
 
                 // Play Receive Sound
                 sfxReceive.volume = 0.3;
@@ -1862,20 +2073,7 @@
                     });
                 }
 
-                // Render Mermaid Diagrams
-                aiDiv.querySelectorAll('.mermaid').forEach((element, index) => {
-                    const id = 'mermaid-' + Math.floor(Math.random() * 10000) + '-' + index;
-                    const graphDefinition = element.innerText;
-                    element.id = id;
-                    try {
-                        mermaid.render(id + '-svg', graphDefinition).then(({ svg }) => {
-                            element.innerHTML = svg;
-                        });
-                    } catch (e) {
-                        console.error("Mermaid Render Error", e);
-                        element.innerHTML = `<div class="text-red-400 text-xs">Diagram Error</div>`;
-                    }
-                });
+
 
                 // Smooth Scroll to bottom
                 requestAnimationFrame(() => {
@@ -1969,6 +2167,26 @@
             updatePreview();
         }
         function parseMarkdown(text) {
+            // Y.S.M-style light structuring
+            function enhanceBrandedStyle(raw) {
+                const trimmed = (raw || '').trim();
+                if (!trimmed) return raw;
+                if (/^#{1,3}\s/m.test(trimmed)) return raw;
+
+                const firstLine = trimmed.split('\n').find(l => l.trim());
+                if (firstLine && /^(\d+\.|\-|\*|•)/.test(firstLine.trim())) {
+                    return raw;
+                }
+
+                const sections = trimmed.split(/\n\s*\n/);
+                if (sections.length >= 2) {
+                    const first = sections.shift();
+                    const rest = sections.join('\n\n');
+                    return `## Summary\n${first}\n\n## Details\n${rest}`;
+                }
+                return raw;
+            }
+
             // 0. Extract & Remove Suggestions Block
             let suggestions = [];
             const suggestionRegex = /\/\/\/_SUGGESTIONS_\/\/\/ (\[.*?\])/s;
@@ -2007,21 +2225,26 @@
             }
 
             // 2. Parse Regular Markdown
+            text = enhanceBrandedStyle(text);
             let html = marked.parse(text);
 
-            // 3. Render Mermaid - Use post-processing or pre-processing
-            // For marked, code blocks become <pre><code class="...">...</code></pre>
-            // We just detect code.language-mermaid
-
+            // 3. Render Mermaid - Optimized for Mermaid v10+
+            // Replace code blocks marked as mermaid
             html = html.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, (match, code) => {
-                return `<div class="mermaid-container my-4 bg-white/5 p-4 rounded-lg overflow-x-auto text-center">${escapeHtml(code)}</div>`;
+                // Decode HTML entities because marked escapes them in code blocks
+                const decoded = code
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'");
+                return `<div class="mermaid my-6 bg-white/5 p-4 rounded-lg overflow-x-auto text-center">${decoded}</div>`;
             });
 
             // 4. Append Suggestion Chips
             if (suggestions.length > 0) {
                 let chipsHtml = '<div class="mt-4 flex flex-wrap gap-2">';
                 suggestions.forEach(q => {
-                    // Escape quotes for the onclick call
                     const safeQ = q.replace(/"/g, "&quot;");
                     chipsHtml += `<button class="suggestion-chip" onclick="setInput('${safeQ}')">✨ ${q}</button>`;
                 });
@@ -2033,14 +2256,26 @@
             // 5. Trigger Renders asynchronously (Math + Mermaid)
             setTimeout(() => {
                 try {
-                    renderMathInElement(document.getElementById('messages'), {
-                        delimiters: [
-                            { left: "$$", right: "$$", display: true },
-                            { left: "$", right: "$", display: false }
-                        ]
-                    });
-                    mermaid.init(undefined, document.querySelectorAll('.mermaid-container'));
-                } catch (e) { console.log(e); }
+                    // Math formatting
+                    if (window.renderMathInElement) {
+                        renderMathInElement(document.getElementById('messages'), {
+                            delimiters: [
+                                { left: "$$", right: "$$", display: true },
+                                { left: "$", right: "$", display: false },
+                                { left: "\\(", right: "\\)", display: false },
+                                { left: "\\[", right: "\\]", display: true }
+                            ],
+                            throwOnError: false
+                        });
+                    }
+
+                    // Mermaid Rendering
+                    if (window.mermaid) {
+                        mermaid.run({
+                            nodes: document.querySelectorAll('.mermaid')
+                        });
+                    }
+                } catch (e) { console.log('Visual Render Error:', e); }
             }, 100);
 
             return reasoningHTML + html;
@@ -2121,7 +2356,21 @@
         }
 
         function setProvider(provider) {
-            localStorage.setItem('preferred_ai_provider', provider);
+            // Map generic names to real providers for backend
+            const providerMap = {
+                'standard': 'openai',
+                'premium': 'gemini',
+                'quantum': 'groq'
+            };
+            const displayNames = {
+                'standard': 'Y.S.M Standard',
+                'premium': 'Y.S.M Ultra',
+                'quantum': 'Y.S.M Flash'
+            };
+
+            const realProvider = providerMap[provider] || provider;
+            localStorage.setItem('preferred_ai_provider', realProvider);
+            localStorage.setItem('selected_ai_provider_branded', provider);
 
             // Visual Update
             document.querySelectorAll('.provider-btn').forEach(btn => {
@@ -2135,7 +2384,7 @@
                 activeBtn.classList.add('border-amber-500', 'bg-amber-500/10');
             }
 
-            showToast(`✅ Switched to ${provider.toUpperCase()}`);
+            showToast(`✅ Initialized ${displayNames[provider] || 'Y.S.M AI'}`);
         }
 
         function toggleAutoSpeakSetting(checkbox) {
@@ -2173,7 +2422,7 @@
 
         // Initialize Settings from Storage
         window.addEventListener('DOMContentLoaded', () => {
-            const provider = localStorage.getItem('preferred_ai_provider') || 'openai';
+            const provider = localStorage.getItem('selected_ai_provider_branded') || 'standard';
             setProvider(provider);
 
             // Keyframe for modal
@@ -2195,8 +2444,53 @@
         document.head.appendChild(styleSheet);
     </script>
 
+    <!-- Core System Scripts -->
+    <script src="{% static 'js/api.js' %}"></script>
+    <script src="{% static 'js/auth.js' %}"></script>
+
     <!-- ✅ REAL CHAT INTEGRATION (Production Grade) -->
     <script src="{% static 'js/real_chat_integration.js' %}"></script>
+
+    <!-- PREMIUM MAGIC MOTION ENGINE JS -->
+    <script>
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('magicCursor');
+            const follower = document.getElementById('magicFollower');
+
+            if (cursor && follower) {
+                // Move simple cursor
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+
+                // Move glow follower with delay/smoothness
+                follower.style.left = e.clientX + 'px';
+                follower.style.top = e.clientY + 'px';
+            }
+
+            // Track mouse for magical card luster effects
+            document.querySelectorAll('.magical-card').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Interactive cursor scaling
+        document.querySelectorAll('button, a, .suggestion-chip').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const cursor = document.getElementById('magicCursor');
+                if (cursor) cursor.style.transform = 'scale(4)';
+            });
+            el.addEventListener('mouseleave', () => {
+                const cursor = document.getElementById('magicCursor');
+                if (cursor) cursor.style.transform = 'scale(1)';
+            });
+        });
+
+        console.log("🪄 Y.S.M Magic Engine Activated on AI Chat");
+    </script>
 </body>
 
 </html>

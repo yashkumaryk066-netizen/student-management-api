@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal - NextGen ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #22d3ee;
+            --primary-glow: rgba(34, 211, 238, 0.4);
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-darker);
+            color: #e2e8f0;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        .parent-portal {
+            background: var(--bg-darker);
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .portal-header {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .text-shimmer {
+            background: linear-gradient(90deg, #fff 0%, var(--primary) 50%, #fff 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .magical-card {
+            background: var(--glass) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 24px !important;
+            padding: 30px;
+            margin-bottom: 25px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .magical-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.06), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .magical-card:hover::after {
+            opacity: 1;
+        }
+
+        .magical-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(34, 211, 238, 0.5) !important;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 20px rgba(34, 211, 238, 0.1);
+        }
+
+        .child-header {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .child-photo {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22d3ee, #0891b2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.05);
+            height: 12px;
+            border-radius: 30px;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22d3ee, #0891b2);
+            transition: width 1s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #020617;
+            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .fee-card {
+            padding: 25px;
+            border-radius: 20px;
+            border-left: 5px solid transparent;
+            background: rgba(255, 255, 255, 0.02);
+            transition: 0.3s;
+        }
+
+        .fee-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Magic Cursor */
+        .magic-cursor {
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        .magic-cursor-follower {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .float-shape {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.4;
+            filter: blur(60px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Magic Cursor -->
+    <div class="magic-cursor" id="magicCursor"></div>
+    <div class="magic-cursor-follower" id="magicFollower"></div>
+
+    <!-- Background Shapes -->
+    <div class="float-shape"
+        style="top: 10%; left: 15%; width: 400px; height: 400px; background: #22d3ee; animation: floatMagic 20s infinite alternate;">
+    </div>
+    <div class="float-shape"
+        style="bottom: 10%; right: 15%; width: 500px; height: 500px; background: #0ea5e9; animation: floatMagic 25s infinite alternate-reverse;">
+    </div>
+
+    <div class="parent-portal">
+        <div class="portal-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="text-shimmer" style="margin: 0; font-size: 2.5rem; font-weight: 800;">👨‍👩‍👧‍👦 Parent
+                        Oversight Portal</h1>
+                    <p style="color: #94a3b8; margin: 8px 0 0 0; font-weight: 500;">
+                        <i class="fa-solid fa-home-user text-cyan-400"></i> Welcome back, <span id="parentName"
+                            style="color: white">Parent</span>
+                    </p>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <a href="/ai-chat/"
+                        style="background: var(--glass); color: white; border: 1px solid var(--border); padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-robot text-amber-500"></i> Y.S.M AI
+                    </a>
+                    <button onclick="logout()"
+                        style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.3s;">
+                        <i class="fa-solid fa-power-off"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <h2
+            style="margin-left: 10px; font-size: 1.2rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">
+            <i class="fa-solid fa-children"></i> Registered Children</h2>
+        <div id="childrenList">
+            <!-- Dynamic loading -->
+            <div class="magical-card text-center" style="padding: 60px;">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-cyan-500"></i>
+                <p class="mt-4">Synchronizing student data...</p>
+            </div>
+        </div>
+
+        <div class="magical-card">
+            <h2 style="margin-top: 0; font-size: 1.5rem;"><i class="fa-solid fa-bolt text-amber-500"></i> Operational
+                Commands</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                <button class="btn-action" onclick="viewAllAttendance()"><i class="fa-solid fa-calendar-check"></i>
+                    Attendance Report</button>
+                <button class="btn-action" onclick="viewAllResults()"><i class="fa-solid fa-chart-line"></i> Academic
+                    Progress</button>
+                <button class="btn-action" onclick="payFees()"><i class="fa-solid fa-credit-card"></i> Pay Fees</button>
+                <button class="btn-action" onclick="viewNotifications()"><i class="fa-solid fa-bell"></i>
+                    Notifications</button>
+                <button class="btn-action" onclick="contactTeacher()"><i class="fa-solid fa-envelope"></i> Contact
+                    Teacher</button>
+                <button class="btn-action" onclick="downloadReports()"><i class="fa-solid fa-file-pdf"></i> Download
+                    Reports</button>
+            </div>
+        </div>
+
+        <div class="magical-card">
+            <h2 style="margin-top: 0;"><i class="fa-solid fa-wallet text-cyan-400"></i> Financial Overview</h2>
+            <div id="feeSummary"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                <div class="fee-card" style="border-left-color: #22c55e;">
+                    <div style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Total Paid</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #22c55e;">₹0</div>
+                </div>
+                <div class="fee-card" style="border-left-color: #eab308;">
+                    <div style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Pending</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #eab308;">₹0</div>
+                </div>
+                <div class="fee-card" style="border-left-color: #ef4444;">
+                    <div style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Overdue</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #ef4444;">₹0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="magical-card">
+            <h2 style="margin-top: 0;"><i class="fa-solid fa-message"></i> Recent Broadcasts</h2>
+            <div id="notificationsList">
+                <div style="text-align: center; padding: 60px; color: #94a3b8;">
+                    <i class="fa-solid fa-inbox" style="font-size: 4rem; opacity: 0.2; margin-bottom: 20px;"></i>
+                    <p>No new transmissions detected.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        const token = localStorage.getItem('authToken');
+
+        if (!token) window.location.href = '/';
+
+        async function loadParentData() {
+            try {
+                const res = await fetch(`${API_BASE}/profile/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                document.getElementById('parentName').textContent = data.user.first_name || data.user.username;
+                loadChildren();
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadChildren() {
+            try {
+                const res = await fetch(`${API_BASE}/students/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                const children = data.results || data;
+                const container = document.getElementById('childrenList');
+
+                if (children.length === 0) {
+                    container.innerHTML = `<div class="magical-card text-center">No children registered in the system.</div>`;
+                    return;
+                }
+
+                container.innerHTML = children.map(child => `
+                    <div class="magical-card">
+                        <div class="child-header">
+                            <div class="child-photo">
+                                ${child.photo ? `<img src="${child.photo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '<i class="fa-solid fa-user"></i>'}
+                            </div>
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0; font-size: 1.5rem; color: white;">${child.name}</h3>
+                                <p style="margin: 5px 0; color: #94a3b8; font-weight: 500;">Roll No: ${child.roll_number || '--'} | Class: ${child.grade || '--'}</p>
+                            </div>
+                            <button class="btn-action" onclick="viewChildDetails(${child.id})">Operational Intel →</button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 25px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-weight: 600;">Attendance Rate</span>
+                                    <span style="color: var(--primary); font-weight: 800;">85%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-weight: 600;">Academic Performance</span>
+                                    <span style="color: var(--primary); font-weight: 800;">92%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 92%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        // Magic Motion Engine
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('magicCursor');
+            const follower = document.getElementById('magicFollower');
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            follower.style.left = e.clientX + 'px';
+            follower.style.top = e.clientY + 'px';
+
+            document.querySelectorAll('.magical-card').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            });
+        });
+
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mouseenter', () => document.getElementById('magicCursor').style.transform = 'scale(4)');
+            el.addEventListener('mouseleave', () => document.getElementById('magicCursor').style.transform = 'scale(1)');
+        });
+
+        function logout() { localStorage.removeItem('authToken'); window.location.href = '/'; }
+        function viewChildDetails(id) { alert(`Intel for ID ${id} loading...`); }
+
+        loadParentData();
+    </script>
+    <style>
+        @keyframes floatMagic {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(50px, 30px) rotate(45deg);
+            }
+        }
+    </style>
+</body>
+
+</html>

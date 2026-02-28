@@ -157,7 +157,7 @@ async function sendMessage() {
             body: JSON.stringify({
                 conversation_id: currentConversationId,
                 message: msg || "Analyze this image", // Default text if only image sent
-                model: localStorage.getItem('selected_ai_model') || 'gemini-2.0-flash',
+                model: localStorage.getItem('preferred_ai_provider') || 'gemini',
                 system_prompt: getCurrentModePrompt(),
                 images: tempImages // Send images
             })
@@ -225,7 +225,7 @@ function addMessageToUI(role, content, images = []) {
                         <i class="fa-solid fa-cube text-cyan-400 text-xs"></i>
                     </div>
                 </div>
-                <div class="msg-ai p-4 text-slate-300 shadow-lg flex-1 markdown-content overflow-hidden">
+                <div class="msg-ai p-4 text-slate-300 shadow-lg flex-1 markdown-content overflow-hidden magical-card">
                     ${parsedContent}
                     <div class="message-tools mt-3 flex flex-wrap gap-2 opacity-0 group-hover:opacity-100 transition">
                         <button onclick="copyMessage(this)" class="text-xs px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/10" title="Copy">
@@ -264,16 +264,18 @@ function addTypingIndicator() {
     div.className = 'flex justify-start typing-indicator';
     div.innerHTML = `
         <div class="flex gap-4 max-w-4xl">
-            <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center mt-1">
-                <i class="fa-solid fa-brain text-xs text-white"></i>
+            <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center mt-1 border border-amber-500/30 animate-pulse">
+                <i class="fa-solid fa-brain text-xs text-amber-500"></i>
             </div>
             <div class="msg-ai p-4 text-slate-300 shadow-none bg-transparent border-none">
-                <div class="flex gap-1">
-                    <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
-                    <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
-                    <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
+                <div class="flex gap-2 items-center">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-amber-500 rounded-full typing-dot"></div>
+                    </div>
+                    <span class="text-xs text-amber-500/60 font-mono tracking-widest uppercase animate-pulse">Neural Processing...</span>
                 </div>
-                <span class="text-xs text-slate-500 ml-2">Analyzing...</span>
             </div>
         </div>
     `;
@@ -346,10 +348,13 @@ async function loadNotifications() {
             headers: { 'X-CSRFToken': getCookie('csrftoken') }
         });
         const data = await response.json();
-        if (data.success) {
+        if (data.success || Array.isArray(data)) {
+            const unreadCount = Array.isArray(data)
+                ? data.filter(n => !n.is_read).length
+                : (data.unread_count || 0);
             const badge = document.querySelector('.notification-badge');
-            if (badge && data.unread_count > 0) {
-                badge.textContent = data.unread_count > 9 ? '9+' : data.unread_count;
+            if (badge && unreadCount > 0) {
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
                 badge.style.display = 'block';
             }
         }

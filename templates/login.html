@@ -4,188 +4,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Y.S.M Advance Education System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <title>Y.S.M ADVANCE - Private Elite Access</title>
+
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Sora:wght@300;400;600&family=Orbitron:wght@700;900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/login_premium.css">
+
+    <!-- Elite Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/login_premium.css?v=6.0">
     <link rel="stylesheet" href="/static/css/premium_modal.css">
 
-    <!-- GSAP Core -->
+    <!-- Motion Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 
-<body>
-    <!-- Background Effects -->
-    <div class="cursor-glow" id="cursorGlow"></div>
-    <div class="bg-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
+<body class="ysm-advance-theme">
+    <!-- Magic Cursor -->
+    <div class="magic-cursor" id="magicCursor"></div>
+    <div class="magic-cursor-follower" id="magicFollower"></div>
+
+    <!-- Background Shapes -->
+    <div class="float-shape"
+        style="top: 10%; left: 5%; width: 400px; height: 400px; background: rgba(226, 176, 54, 0.1); animation: floatMagic 20s infinite alternate;">
+    </div>
+    <div class="float-shape"
+        style="bottom: 10%; right: 5%; width: 500px; height: 500px; background: rgba(14, 165, 233, 0.1); animation: floatMagic 25s infinite alternate-reverse;">
     </div>
 
-    <!-- Main Container -->
-    <div class="login-container">
-        <div class="login-card">
+    <style>
+        .magic-cursor {
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
 
-            <div class="logo-section">
-                <div class="logo-icon">🎓</div>
-                <h1>Institute Pro</h1>
-                <p>Advanced Management System</p>
-            </div>
+        .magic-cursor-follower {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(226, 176, 54, 0.15) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <input type="text" id="usernameInput" required placeholder=" " autocomplete="off">
-                    <label for="usernameInput">Username</label>
+        .float-shape {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.4;
+            filter: blur(60px);
+        }
+
+        @keyframes floatMagic {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(50px, 30px) rotate(45deg);
+            }
+        }
+
+        .portal-inner {
+            cursor: none;
+            position: relative;
+        }
+
+        .portal-inner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(226, 176, 54, 0.08), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .portal-inner:hover::after {
+            opacity: 1;
+        }
+
+        .portal-inner>* {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+    <!-- Visual Core Layer -->
+    <div class="hero-visual-layer"></div>
+    <div class="overlay-gradient"></div>
+    <div class="ambient-dust"></div>
+
+    <!-- Portal Stage -->
+    <div class="portal-stage">
+        <div class="tilt-box" id="tiltBox">
+            <div class="portal-flipper" id="portalFlipper">
+
+                <!-- FRONT: INTEL ACCESS -->
+                <div class="portal-face front-face">
+                    <div class="portal-inner">
+                        <!-- Back Button -->
+                        <a href="/"
+                            style="position: absolute; top: 25px; left: 25px; color: rgba(255,255,255,0.3); font-size: 1.1rem; cursor: pointer; transition: all 0.3s; z-index: 10;"
+                            onmouseover="this.style.color='#fff'; this.style.transform='translateX(-3px)'"
+                            onmouseout="this.style.color='rgba(255,255,255,0.3)'; this.style.transform='translateX(0)'"
+                            title="Return to Home">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <div class="brand-header">
+                            <span class="brand-ysm">Y.S.M</span>
+                            <span class="brand-advance">ADVANCE</span>
+
+                            <div class="brand-separator">
+                                <span></span>
+                                <div class="dot"></div>
+                                <span></span>
+                            </div>
+
+                            <p class="portal-descriptor" id="systemIdentity">Elite Educational Management</p>
+                            <div class="target-markets">SCHOOLS • COACHING • INSTITUTES</div>
+                        </div>
+
+                        <form id="loginForm" class="elite-form">
+                            <!-- STEP 1: IDENTITY -->
+                            <div id="loginStep1">
+                                <div class="elite-input-group">
+                                    <input type="text" id="usernameInput" placeholder=" " required autocomplete="off">
+                                    <label>Identity Handle (Username)</label>
+                                    <i class="fas fa-shield-halved icon"></i>
+                                </div>
+                                <button type="button" class="btn-elite-glow" id="btnIdentify"
+                                    onclick="verifyIdentityStep()">
+                                    <span class="btn-text">VERIFY IDENTITY</span>
+                                    <div class="elite-shimmer"></div>
+                                    <span id="idLoader" style="display: none; margin-left:10px;">
+                                        <i class="fas fa-circle-notch fa-spin"></i>
+                                    </span>
+                                </button>
+
+                                <div style="margin-top: 20px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 10px;">
+                                        OR AUTHENTICATE WITH</div>
+                                    <div style="display: flex; gap: 15px; justify-content: center;">
+                                        <button type="button" class="bio-btn" title="Biometric Access"
+                                            onclick="triggerBiometricMock()">
+                                            <i class="fas fa-fingerprint"></i>
+                                        </button>
+                                        <button type="button" class="bio-btn" title="Smart Card"
+                                            onclick="triggerSmartCardMock()">
+                                            <i class="fas fa-id-card"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 2: SECURITY -->
+                            <div id="loginStep2" style="display:none; opacity:0; transform:translateY(20px);">
+                                <div class="user-profile-preview" style="text-align:center; margin-bottom:25px;">
+                                    <div style="position:relative; width:80px; height:80px; margin:0 auto;">
+                                        <img id="userAvatar" src="/static/img/default-avatar.png"
+                                            style="width:100%; height:100%; border-radius:50%; object-fit:cover; border:2px solid var(--ysm-gold); padding:2px; box-shadow: 0 0 20px rgba(226, 176, 54, 0.3);">
+                                        <div
+                                            style="position:absolute; bottom:0; right:0; width:20px; height:20px; background:#10b981; border-radius:50%; border:2px solid #000;">
+                                        </div>
+                                    </div>
+                                    <h3 id="userGreeting"
+                                        style="margin-top:12px; font-size:1.1rem; color:white; font-family:'Outfit', sans-serif;">
+                                        Welcome Back</h3>
+                                    <button type="button" onclick="resetLoginStep()"
+                                        style="background:none; border:none; color:rgba(255,255,255,0.4); font-size:0.8rem; cursor:pointer; margin-top:5px; text-decoration:underline;">Not
+                                        you?</button>
+                                </div>
+
+                                <div class="elite-input-group">
+                                    <input type="password" id="password" placeholder=" " required autocomplete="off">
+                                    <label>Security Key</label>
+                                    <i class="fas fa-key icon"></i>
+                                    <i class="fas fa-eye-slash pass-view-toggle" id="togglePass"></i>
+                                </div>
+
+                                <div class="portal-options">
+                                    <label class="portal-check">
+                                        <input type="checkbox" id="rememberMe">
+                                        <span>Maintain Access</span>
+                                    </label>
+                                    <button type="button" class="recover-action" onclick="flipFace(180)">Request
+                                        Recovery</button>
+                                </div>
+
+                                <button type="submit" class="btn-elite-glow" id="loginBtn">
+                                    <span class="btn-text">INITIATE ACCESS</span>
+                                    <div class="elite-shimmer"></div>
+                                    <span id="loginLoader" style="display: none; margin-left:10px;">
+                                        <i class="fas fa-circle-notch fa-spin"></i>
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="portal-footer">
+                            <div class="security-badge">
+                                <div class="dot"></div>
+                                <span>256-BIT ENCRYPTION ACTIVE</span>
+                            </div>
+                            <p class="credit-line">Engineered for Excellence by <span class="yash">Yash Kumar</span></p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <input type="password" id="password" required placeholder=" " autocomplete="off">
-                    <label for="password">Password</label>
-                    <i class="fas fa-eye password-toggle"></i>
+                <!-- BACK: SYSTEM RECOVERY -->
+                <div class="portal-face back-face">
+                    <div class="portal-inner">
+                        <div class="brand-header">
+                            <h2 style="font-family:'Outfit'; font-weight:900; letter-spacing:2px; font-size:1.4rem;">
+                                SECURITY RECOVERY</h2>
+                            <div class="brand-separator">
+                                <span></span>
+                                <div class="dot"></div>
+                                <span></span>
+                            </div>
+                            <p class="portal-descriptor">Bypass existing protection protocol</p>
+                        </div>
+
+                        <div id="recoveryFlow">
+                            <!-- Step 1 -->
+                            <div id="recStep1">
+                                <div class="elite-input-group">
+                                    <input type="text" id="resetIdentifier" placeholder=" " required>
+                                    <label>Verification Handle</label>
+                                    <i class="fas fa-envelope-open icon"></i>
+                                </div>
+                                <button onclick="requestOTP()" id="btnGetOTP" class="btn-elite-glow">
+                                    <span>TRANSMIT SECURITY CODE</span>
+                                </button>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div id="recStep2" style="display:none;">
+                                <div class="elite-input-group">
+                                    <input type="text" id="resetOTP" maxlength="4" placeholder=" " required>
+                                    <label>4-Digit Authentication Code</label>
+                                </div>
+                                <div class="elite-input-group">
+                                    <input type="password" id="newPassword" placeholder=" " required>
+                                    <label>Apply New Protection Key</label>
+                                </div>
+                                <button onclick="confirmReset()" id="btnReset" class="btn-elite-glow">
+                                    <span>SIGN NEW PROTOCOL</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="portal-options centered" style="justify-content:center; margin-top:30px;">
+                            <button type="button" class="recover-action" onclick="flipFace(0)">← Return to Entry
+                                Terminal</button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-options">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="rememberMe">
-                        Remember me
-                    </label>
-                    <a href="#" class="forgot-link" onclick="openResetModal()">Recovery Access</a>
-                </div>
-
-                <button type="submit" class="btn-primary" id="loginBtn">
-                    <span id="loginText">Sign In</span>
-                    <span id="loginLoader" class="loader" style="display: none;">
-                        <i class="fas fa-circle-notch fa-spin"></i>
-                    </span>
-                </button>
-            </form>
-
-            <div class="login-footer">
-                <p>New here? <a href="/#pricing">Request Access</a></p>
-                <div style="margin-top: 15px;">
-                    <a href="/"
-                        style="font-size: 0.8rem; color: var(--text-secondary); opacity: 0.7; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.3s;"
-                        onmouseover="this.style.opacity='1'; this.style.transform='translateX(-3px)'"
-                        onmouseout="this.style.opacity='0.7'; this.style.transform='translateX(0)'">
-                        <i class="fas fa-arrow-left" style="font-size: 0.7rem;"></i> Surface Home
-                    </a>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Cinematic Transition Layer -->
-    <div id="transition-layer">
-        <div class="logo-icon transition-logo">✨</div>
-        <div class="transition-loader">
-            <div class="transition-loader-fill"></div>
-        </div>
-    </div>
-
-    <!-- Password Reset Modal (Preserved Functionality) -->
-    <div id="resetModal"
-        style="display:none; position:fixed; inset:0; z-index:10000; align-items:center; justify-content:center; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px);">
-        <div class="login-card" style="width:90%; max-width:400px; animation: none;">
-            <button onclick="closeResetModal()"
-                style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
-            <h3 style="margin-bottom:20px; font-size:1.5rem; color:#fff;">Reset Password</h3>
-
-            <!-- Step 1 -->
-            <div id="resetStep1">
-                <p style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem;">Enter your registered
-                    details to verify identity.</p>
-                <div class="form-group">
-                    <input type="text" id="resetIdentifier" placeholder=" " required>
-                    <label>Email or Phone</label>
-                </div>
-                <button onclick="requestOTP()" id="btnGetOTP" class="btn-primary">Send Verification OTP</button>
+    <!-- Transition Engine Overlay -->
+    <div id="portal-transition">
+        <div class="kinetic-logo">Y.S.M</div>
+        <div class="kinetic-status">SYNCHRONIZING SECURE CHANNELS...</div>
+        <div
+            style="width: 250px; height: 1px; background: rgba(255,255,255,0.05); margin-top:30px; position:relative; overflow:hidden;">
+            <div id="transProgress"
+                style="width: 0%; height: 100%; background: var(--ysm-gold); box-shadow: 0 0 15px var(--ysm-gold);">
             </div>
-
-            <!-- Step 2 -->
-            <div id="resetStep2" style="display:none;">
-                <p style="color:var(--text-secondary); margin-bottom:20px;">Enter the code sent to your device.</p>
-                <div class="form-group">
-                    <input type="text" id="resetOTP" placeholder=" " maxlength="4"
-                        style="text-align:center; letter-spacing:4px;">
-                    <label>4-Digit Code</label>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="newPassword" placeholder=" ">
-                    <label>New Password</label>
-                </div>
-                <button onclick="confirmReset()" id="btnReset" class="btn-primary">Reset Password</button>
-                <button onclick="backToStep1()"
-                    style="width:100%; margin-top:15px; background:none; border:none; color:var(--text-secondary); cursor:pointer;">Back</button>
-            </div>
-
-            <div id="resetMessage"
-                style="color:var(--danger); margin-top:15px; text-align:center; font-size:0.9rem; display:none;"></div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="/static/js/api.js?v=4.0"></script>
-    <script src="/static/js/auth.js?v=4.0"></script>
-    <script src="/static/js/premium_modal.js"></script>
-    <script src="/static/js/login_premium.js"></script>
+    <script src="/static/js/api.js?v=6.0"></script>
+    <script src="/static/js/auth.js?v=6.0"></script>
+    <script src="/static/js/premium_modal.js?v=6.0"></script>
+    <script src="/static/js/login_premium.js?v=6.0"></script>
 
-    <!-- Reset Script (Inline for simplicity) -->
     <script>
-        const API_BASE = '/api';
+        // PREMIUM IDENTITY DETECTION
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const inst = urlParams.get('inst');
+            const target = document.getElementById('systemIdentity');
 
-        function openResetModal() {
-            const modal = document.getElementById('resetModal');
-            modal.style.display = 'flex';
-            gsap.fromTo(modal.querySelector('.login-card'),
-                { scale: 0.9, opacity: 0 },
-                { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" }
-            );
+            if (inst) {
+                if (inst.toLowerCase() === 'superadmin') {
+                    target.innerHTML = `<span style="color: #ef4444; font-weight: 800; letter-spacing: 1px;">🔐 SUPER-ADMIN CONSOLE</span>`;
+                    document.querySelector('.brand-ysm').style.color = '#ef4444';
+                    document.querySelector('.brand-ysm').style.textShadow = '0 0 20px rgba(239, 68, 68, 0.5)';
+                } else {
+                    target.innerHTML = `Verified Node: <span style="color: #f59e0b; font-weight: 800;">${decodeURIComponent(inst)}</span>`;
+                }
+            }
+        });
+
+        function flipFace(deg) {
+            gsap.to('#portalFlipper', {
+                rotationY: deg,
+                duration: 1.2,
+                ease: "expo.inOut"
+            });
         }
 
-        function closeResetModal() {
-            document.getElementById('resetModal').style.display = 'none';
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
 
         async function requestOTP() {
             const identifier = document.getElementById('resetIdentifier').value.trim();
             const btn = document.getElementById('btnGetOTP');
-            const msg = document.getElementById('resetMessage');
-
-            if (!identifier) {
-                showToast("Please enter email or phone", "error");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Sending...";
-
+            if (!identifier) return showToast("Handle required", "error");
+            btn.disabled = true; btn.querySelector('span').innerText = "TRANSMITTING...";
             try {
-                const res = await fetch(`${API_BASE}/auth/password-reset/request/`, {
+                const res = await fetch('/api/auth/password-reset/request/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identifier: identifier })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ identifier })
                 });
-                const data = await res.json();
-
                 if (res.ok) {
-                    // if (data.dev_otp) console.log("OTP:", data.dev_otp);
-                    document.getElementById('resetStep1').style.display = 'none';
-                    document.getElementById('resetStep2').style.display = 'block';
+                    document.getElementById('recStep1').style.display = 'none';
+                    document.getElementById('recStep2').style.display = 'block';
+                    showToast("Code Sent to Registered Email", "success");
                 } else {
-                    showToast(data.error || "Failed to send OTP", "error");
+                    const data = await res.json();
+                    showToast(data.error || "Broadcast Failed", "error");
                 }
-            } catch (e) {
-                showToast("Network Error", "error");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Send Verification OTP";
-            }
-        }
-
-        function backToStep1() {
-            document.getElementById('resetStep2').style.display = 'none';
-            document.getElementById('resetStep1').style.display = 'block';
+            } catch (e) { console.error(e); showToast("Network Desync", "error"); }
+            finally { btn.disabled = false; btn.querySelector('span').innerText = "TRANSMIT SECURITY CODE"; }
         }
 
         async function confirmReset() {
@@ -193,43 +370,58 @@
             const otp = document.getElementById('resetOTP').value.trim();
             const pass = document.getElementById('newPassword').value.trim();
             const btn = document.getElementById('btnReset');
-
-            if (!otp || !pass) {
-                showToast("Please enter OTP and new password", "error");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Verifying...";
-
+            if (!otp || !pass) return showToast("All keys required", "error");
+            btn.disabled = true; btn.querySelector('span').innerText = "OVERWRITING...";
             try {
-                const res = await fetch(`${API_BASE}/auth/password-reset/confirm/`, {
+                const res = await fetch('/api/auth/password-reset/confirm/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identifier: identifier, otp: otp, new_password: pass })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ identifier, otp, new_password: pass })
                 });
                 const data = await res.json();
-
                 if (res.ok) {
-                    closeResetModal();
-                    ModalSystem.show(`
-                        Recovery Successful!<br/><br/>
-                        Username: <b>${data.username}</b><br/>
-                        Password: <b>${data.password}</b>
-                    `, "Success", "success");
-
+                    flipFace(0);
+                    showToast("Protocol Restored Successfully", "success");
                     document.getElementById('usernameInput').value = data.username;
-                    document.getElementById('password').value = data.password;
+                    document.getElementById('password').value = data.password; // Auto-fill
                 } else {
-                    showToast(data.error || "Reset Failed", "error");
+                    showToast(data.error || "Sync Denied", "error");
                 }
-            } catch (e) {
-                showToast("Error resetting password", "error");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Reset Password";
-            }
+            } catch (e) { showToast("Network Desync", "error"); }
+            finally { btn.disabled = false; btn.querySelector('span').innerText = "SIGN NEW PROTOCOL"; }
         }
+        // Magic Motion Engine
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('magicCursor');
+            const follower = document.getElementById('magicFollower');
+
+            if (cursor && follower) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                follower.style.left = e.clientX + 'px';
+                follower.style.top = e.clientY + 'px';
+            }
+
+            document.querySelectorAll('.portal-inner').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            });
+        });
+
+        document.querySelectorAll('button, input, a').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const mc = document.getElementById('magicCursor');
+                if (mc) mc.style.transform = 'scale(4)';
+            });
+            el.addEventListener('mouseleave', () => {
+                const mc = document.getElementById('magicCursor');
+                if (mc) mc.style.transform = 'scale(1)';
+            });
+        });
     </script>
 </body>
 

@@ -7,24 +7,27 @@
     <title>Parent Portal | Y.S.M Education</title>
     <link rel="icon" type="image/png" href="/static/img/ysm_logo.png">
     <link rel="stylesheet" href="/static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Cinematic Motion Engine -->
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
     <link rel="stylesheet" href="/static/css/premium_motion.css">
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
     <div id="smooth-wrapper">
         <div id="smooth-content">
+            <div class="dashboard-bg"></div>
             <div class="dashboard-container">
                 <!-- Sidebar -->
                 <aside class="dash-sidebar">
                     <div class="dash-brand">
-                        <span>👪</span> PARENT
+                        <img src="/static/img/ysm_logo.png" alt="Y.S.M"
+                            style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(218,165,32,0.6));">
+                        PARENT
                     </div>
 
                     <div class="dash-nav">
@@ -84,6 +87,53 @@
                         </div>
                     </div>
                 </main>
+            </div>
+
+            <!-- Modals -->
+            <div id="leaveModal" class="modal"
+                style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+                <div
+                    style="background: #1e293b; width: 400px; padding: 30px; border-radius: 20px; border: 1px solid #334155; position: relative;">
+                    <h3 style="color: white; margin-top: 0;">Apply Leave</h3>
+                    <p id="leaveStudentName" style="color: #94a3b8; font-size: 0.9rem;"></p>
+
+                    <form id="leaveForm" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                        <input type="hidden" id="leaveStudentId">
+                        <div class="form-group">
+                            <label style="color: #94a3b8; font-size: 0.8rem;">Leave Type</label>
+                            <select id="leaveType" class="form-input"
+                                style="background: #0f172a; border-color: #334155; color: white;">
+                                <option value="SICK">Sick Leave</option>
+                                <option value="CASUAL">Casual / Personal</option>
+                                <option value="EMERGENCY">Family Emergency</option>
+                            </select>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group">
+                                <label style="color: #94a3b8; font-size: 0.8rem;">Start Date</label>
+                                <input type="date" id="leaveStart" class="form-input"
+                                    style="background: #0f172a; border-color: #334155; color: white;">
+                            </div>
+                            <div class="form-group">
+                                <label style="color: #94a3b8; font-size: 0.8rem;">End Date</label>
+                                <input type="date" id="leaveEnd" class="form-input"
+                                    style="background: #0f172a; border-color: #334155; color: white;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: #94a3b8; font-size: 0.8rem;">Reason</label>
+                            <textarea id="leaveReason" class="form-input" placeholder="Explain the reason..."
+                                style="background: #0f172a; border-color: #334155; color: white; height: 80px;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" onclick="closeLeaveModal()"
+                                style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: transparent; color: white; cursor: pointer;">Cancel</button>
+                            <button type="submit"
+                                style="flex: 1; padding: 12px; border-radius: 10px; border: none; background: #3b82f6; color: white; font-weight: 700; cursor: pointer;">Submit
+                                Request</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <script src="/static/js/api.js"></script>

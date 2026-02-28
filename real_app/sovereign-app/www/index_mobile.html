@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <title>Sovereign ERP Mobile</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .splash-container {
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="splash-container">
+        <img src="img/logo.png" class="logo" id="appLogo">
+        <center>
+            <div class="loader"></div>
+        </center>
+        <div class="status" id="statusText">INITIALIZING SYSTEM...</div>
+    </div>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('deviceready', () => {
+            console.log('Native Bridge Ready');
+
+            // Deep Research Solution: Advanced Bridge-to-Web Handshake
+            // Replace with your actual production URL
+            const PRODUCTION_URL = window.location.origin; // In real app, this will be your deployed domain
+
+            setTimeout(() => {
+                document.getElementById('statusText').textContent = "ESTABLISHING SECURE CONNECTION...";
+
+                // Check connectivity
+                if (navigator.onLine) {
+                    // Redirect to the live ERP
+                    // We append a native marker so the website knows it's being opened as an APP
+                    window.location.href = "https://your-production-url.com/?mode=native_app";
+                } else {
+                    document.getElementById('statusText').textContent = "OFFLINE - CHECK CONNECTION";
+                    document.getElementById('statusText').style.color = "#ef4444";
+                }
+            }, 2000);
+        }, false);
+    </script>
+</body>
+
+</html>

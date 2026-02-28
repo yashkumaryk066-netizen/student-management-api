@@ -11,15 +11,20 @@ class EazypayIntegrationTest(TestCase):
     def setUp(self):
         # Create a user and student profile
         self.user = User.objects.create_user(username='teststudent', password='password123')
-        self.profile = UserProfile.objects.create(user=self.user, role='STUDENT')
+        self.profile, _ = UserProfile.objects.get_or_create(
+            user=self.user,
+            defaults={'role': 'STUDENT'}
+        )
+        self.profile.role = 'STUDENT'
+        self.profile.save()
         self.student = Student.objects.create(
             user=self.user,
             name='Test Student',
-            age=20,
-            gender='Male',
+            gender='MALE',
             dob=date(2000, 1, 1),
             grade=12,
-            relation='Self'
+            relation='Self',
+            email='teststudent@example.com'
         )
         self.client = Client()
         self.init_url = reverse('payment-eazypay-init')
@@ -108,7 +113,8 @@ class EazypayIntegrationTest(TestCase):
             transaction_id=txn_id,
             amount=1000.00,
             due_date=date.today(),
-            status='PENDING'
+            status='PENDING',
+            description='Failed Fee Test'
         )
         
         callback_data = {
@@ -119,7 +125,7 @@ class EazypayIntegrationTest(TestCase):
         response = self.client.post(self.callback_url, callback_data)
         
         payment.refresh_from_db()
-        self.assertEqual(payment.status, 'FAILED')
+        self.assertEqual(payment.status, 'REJECTED')
 
     def test_callback_invalid_txn(self):
         """Test callback with non-existent transaction"""

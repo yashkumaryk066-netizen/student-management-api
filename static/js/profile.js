@@ -39,6 +39,37 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Profile/Settings Navigation
+        const profileLink = document.getElementById('navProfile');
+        const settingsLink = document.getElementById('navSettings');
+        const logoutBtn = document.getElementById('navLogout');
+
+        if (profileLink) {
+            profileLink.onclick = () => {
+                profileDropdown.style.display = 'none';
+                if (window.navigateTo) window.navigateTo('settings');
+            };
+        }
+
+        if (settingsLink) {
+            settingsLink.onclick = () => {
+                profileDropdown.style.display = 'none';
+                if (window.navigateTo) window.navigateTo('settings');
+            };
+        }
+
+        // Logout
+        if (logoutBtn) {
+            logoutBtn.onclick = () => {
+                if (window.AuthAPI && typeof AuthAPI.logout === 'function') {
+                    AuthAPI.logout();
+                } else {
+                    localStorage.removeItem('authToken');
+                    window.location.href = '/';
+                }
+            };
+        }
+
         // Add hover effects to dropdown items
         const items = profileDropdown.querySelectorAll('.dropdown-item');
         items.forEach(item => {

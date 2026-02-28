@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/responsive.css">
     <title>Identity Verification | Y.S.M AI</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap"
@@ -13,7 +14,10 @@
     <style>
         :root {
             --primary: #f59e0b;
+            --primary-glow: rgba(245, 158, 11, 0.4);
             --bg-darker: #020617;
+            --glass: rgba(15, 23, 42, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
@@ -26,6 +30,33 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
+            cursor: none;
+            /* Hide real cursor */
+        }
+
+        /* Magic Cursor */
+        .magic-cursor {
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        .magic-cursor-follower {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .scanlines {
@@ -39,14 +70,30 @@
 
         .hud-border {
             position: relative;
-            background: rgba(15, 23, 42, 0.6);
+            background: var(--glass);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow: hidden;
+        }
+
+        .hud-border::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(245, 158, 11, 0.1), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .hud-border:hover::after {
+            opacity: 1;
         }
 
         .hud-border::before,
-        .hud-border::after {
+        .hud-border::after-corner {
             content: '';
             position: absolute;
             width: 20px;
@@ -55,31 +102,75 @@
             transition: all 0.5s;
         }
 
-        .hud-border::before {
+        /* Custom decorative corners */
+        .corner-tl {
+            position: absolute;
             top: -2px;
             left: -2px;
-            border-right: 0;
-            border-bottom: 0;
+            width: 30px;
+            height: 30px;
+            border-left: 3px solid var(--primary);
+            border-top: 3px solid var(--primary);
         }
 
-        .hud-border::after {
+        .corner-tr {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 30px;
+            height: 30px;
+            border-right: 3px solid var(--primary);
+            border-top: 3px solid var(--primary);
+        }
+
+        .corner-bl {
+            position: absolute;
+            bottom: -2px;
+            left: -2px;
+            width: 30px;
+            height: 30px;
+            border-left: 3px solid var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .corner-br {
+            position: absolute;
             bottom: -2px;
             right: -2px;
-            border-left: 0;
-            border-top: 0;
+            width: 30px;
+            height: 30px;
+            border-right: 3px solid var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .text-shimmer {
+            background: linear-gradient(90deg, #fff 0%, var(--primary) 50%, #fff 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: 200% center;
+            }
         }
 
         input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: 0.3s;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
         }
 
         input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
-            outline: none;
+            border-color: var(--primary) !important;
+            background: rgba(255, 255, 255, 0.07) !important;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2) !important;
+            transform: translateY(-2px);
         }
 
         .scanner-line {
@@ -89,9 +180,9 @@
             right: 0;
             height: 2px;
             background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-            animation: scan 2s ease-in-out infinite;
-            opacity: 0.5;
+            box-shadow: 0 0 15px var(--primary);
+            animation: scan 3s ease-in-out infinite;
+            z-index: 5;
         }
 
         @keyframes scan {
@@ -109,96 +200,166 @@
                 opacity: 0;
             }
         }
+
+        .float-shape {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+            filter: blur(60px);
+        }
+
+        .btn-magical {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .btn-magical::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-magical:hover::before {
+            left: 100%;
+        }
+
+        .btn-magical:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+        }
     </style>
 </head>
 
 <body>
+    <!-- Magic Cursor -->
+    <div class="magic-cursor" id="magicCursor"></div>
+    <div class="magic-cursor-follower" id="magicFollower"></div>
+
+    <!-- Background Shapes -->
+    <div class="float-shape"
+        style="top: 10%; left: 10%; width: 400px; height: 400px; background: rgba(245, 158, 11, 0.1); animation: floatMagic 20s infinite alternate;">
+    </div>
+    <div class="float-shape"
+        style="bottom: 10%; right: 10%; width: 500px; height: 500px; background: rgba(99, 102, 241, 0.1); animation: floatMagic 25s infinite alternate-reverse;">
+    </div>
 
     <div class="scanlines"></div>
 
-    <!-- Background Elements -->
-    <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse"
-            style="animation-delay: 1s;"></div>
-    </div>
-
     <!-- Auth Container -->
-    <div class="hud-border w-full max-w-md p-8 rounded-xl z-20 relative overflow-hidden group">
-        <div class="scanner-line group-hover:block hidden"></div>
+    <div class="hud-border w-full max-w-md p-10 rounded-3xl z-20 relative group">
+        <div class="corner-tl"></div>
+        <div class="corner-tr"></div>
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
 
-        <div class="text-center mb-8">
+        <div class="scanner-line"></div>
+
+        <div class="text-center mb-10">
             <div
-                class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20">
-                <i class="fa-solid fa-fingerprint text-3xl text-white"></i>
+                class="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/30 transform transition-transform group-hover:rotate-12">
+                <i class="fa-solid fa-fingerprint text-4xl text-white"></i>
             </div>
-            <h1 class="text-2xl font-bold font-mono tracking-wider glow-text">IDENTITY VERIFICATION</h1>
-            <p class="text-xs text-slate-400 mt-2 uppercase">Y.S.M Secure Access v4.0</p>
+            <h1 class="text-3xl font-black font-mono tracking-tighter text-shimmer">IDENTITY VERIFICATION</h1>
+            <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.3em] font-bold">Y.S.M Secure Protocol
+                v4.0.0-GOLD</p>
         </div>
 
         <!-- Forms -->
-        <div id="auth-forms" class="space-y-4">
-
-            <!-- Phone/Email Input -->
+        <div id="auth-forms" class="space-y-6">
+            <!-- Email Input -->
             <div class="space-y-2">
-                <label class="text-xs text-slate-400 font-mono ml-1">PRIMARY IDENTIFIER (EMAIL)</label>
+                <label class="text-[10px] text-amber-500/60 font-black font-mono ml-1 tracking-widest">ENCRYPTED
+                    IDENTIFIER</label>
                 <div class="relative">
-                    <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-500"></i>
-                    <input type="email" id="email" placeholder="user@domain.com"
-                        class="w-full p-3 pl-10 rounded-lg font-mono placeholder-slate-600">
+                    <i class="fa-solid fa-envelope absolute left-4 top-4 text-slate-500"></i>
+                    <input type="email" id="email" placeholder="user@quantum.net"
+                        class="w-full p-4 pl-12 rounded-xl font-mono placeholder-slate-600 focus:ring-0">
                 </div>
             </div>
 
             <!-- Password -->
             <div class="space-y-2">
-                <label class="text-xs text-slate-400 font-mono ml-1">SECURITY KEY (PASSWORD)</label>
+                <label class="text-[10px] text-amber-500/60 font-black font-mono ml-1 tracking-widest">SECURITY
+                    CIPHER</label>
                 <div class="relative">
-                    <i class="fa-solid fa-key absolute left-4 top-3.5 text-slate-500"></i>
+                    <i class="fa-solid fa-key absolute left-4 top-4 text-slate-500"></i>
                     <input type="password" id="password" placeholder="••••••••"
-                        class="w-full p-3 pl-10 rounded-lg font-mono placeholder-slate-600">
+                        class="w-full p-4 pl-12 rounded-xl font-mono placeholder-slate-600 focus:ring-0">
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="pt-4 grid grid-cols-2 gap-4">
+            <div class="pt-6 grid grid-cols-2 gap-4">
                 <button onclick="handleAuth('signup')"
-                    class="p-3 rounded-lg border border-white/10 hover:bg-white/5 transition text-sm font-mono text-slate-300">
-                    <i class="fa-solid fa-user-plus mr-2"></i>REGISTER
+                    class="p-4 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm font-mono text-slate-400 btn-magical">
+                    <i class="fa-solid fa-user-plus mr-2"></i>INITIATE
                 </button>
                 <button onclick="handleAuth('login')"
-                    class="p-3 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:to-amber-400 transition text-sm font-bold shadow-lg shadow-amber-500/20">
+                    class="p-4 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:scale-105 active:scale-95 transition-all text-sm font-black text-white shadow-xl shadow-amber-500/20 btn-magical">
                     <i class="fa-solid fa-right-to-bracket mr-2"></i>ACCESS
                 </button>
             </div>
 
-            <p id="status-msg" class="text-center text-xs font-mono mt-4 min-h-[1.5em] text-cyan-400"></p>
+            <p id="status-msg"
+                class="text-center text-[10px] font-mono mt-6 min-h-[1.5em] text-cyan-400 tracking-wider uppercase font-bold">
+            </p>
         </div>
 
-        <div class="mt-6 border-t border-white/5 pt-4 flex justify-between text-[10px] text-slate-500 font-mono">
-            <span>SECURE PROTOCOL: TLS 1.3</span>
-            <span>SERVER: ONLINE</span>
+        <div
+            class="mt-8 border-t border-white/5 pt-6 flex justify-between text-[9px] text-slate-600 font-mono tracking-tighter">
+            <span class="flex items-center gap-1"><span
+                    class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> SYSTEM: NOMINAL</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> E2E ENCRYPTION:
+                ACTIVE</span>
         </div>
     </div>
 
     <script>
+        // Magic Motion Engine
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('magicCursor');
+            const follower = document.getElementById('magicFollower');
+
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            follower.style.left = e.clientX + 'px';
+            follower.style.top = e.clientY + 'px';
+
+            const hud = document.querySelector('.hud-border');
+            const rect = hud.getBoundingClientRect();
+            hud.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+            hud.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+        });
+
+        // Hover scale effect
+        document.querySelectorAll('button, input').forEach(el => {
+            el.addEventListener('mouseenter', () => document.getElementById('magicCursor').style.transform = 'scale(4)');
+            el.addEventListener('mouseleave', () => document.getElementById('magicCursor').style.transform = 'scale(1)');
+        });
+
         async function handleAuth(action) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const status = document.getElementById('status-msg');
 
             if (!email || !password) {
-                status.innerText = "ERROR: MISSING CREDENTIALS";
-                status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-red-500 animate-pulse";
+                status.innerText = ">> CRITICAL ERROR: MISSING_CREDENTIALS";
+                status.className = "text-center text-[10px] font-mono mt-6 min-h-[1.5em] text-red-500 animate-pulse tracking-wider uppercase font-bold";
                 return;
             }
 
-            status.innerText = action === 'login' ? "AUTHENTICATING..." : "REGISTERING IDENTITY...";
-            status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-amber-500 animate-pulse";
+            status.innerText = action === 'login' ? ">> AUTHENTICATING_NEURAL_LINK..." : ">> REGISTERING_QUANTUM_IDENTITY...";
+            status.className = "text-center text-[10px] font-mono mt-6 min-h-[1.5em] text-amber-500 animate-pulse tracking-wider uppercase font-bold";
 
             try {
-                // Get CSRF Token if needed, but we are using Basic JSON POST for this view
-                // For simulated security/verification delay
-                await new Promise(r => setTimeout(r, 800));
+                await new Promise(r => setTimeout(r, 1200));
 
                 const response = await fetch('/api/ai/auth/', {
                     method: 'POST',
@@ -210,23 +371,23 @@
                         action: action,
                         email: email,
                         password: password,
-                        phone: '0000000000' // Placeholder
+                        phone: '0000000000'
                     })
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    status.innerText = "ACCESS GRANTED. REDIRECTING...";
-                    status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-green-500";
-                    setTimeout(() => window.location.href = data.redirect, 500);
+                    status.innerText = ">> ACCESS_GRANTED. DECRYPTING_DASHBOARD...";
+                    status.className = "text-center text-[10px] font-mono mt-6 min-h-[1.5em] text-green-500 tracking-wider uppercase font-bold";
+                    setTimeout(() => window.location.href = data.redirect, 800);
                 } else {
                     throw new Error(data.error || "Access Denied");
                 }
 
             } catch (err) {
-                status.innerText = "ERROR: " + err.message.toUpperCase();
-                status.className = "text-center text-xs font-mono mt-4 min-h-[1.5em] text-red-500";
+                status.innerText = ">> FAILED: " + err.message.toUpperCase();
+                status.className = "text-center text-[10px] font-mono mt-6 min-h-[1.5em] text-red-500 tracking-wider uppercase font-bold";
             }
         }
 
@@ -245,6 +406,17 @@
             return cookieValue;
         }
     </script>
+    <style>
+        @keyframes floatMagic {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(60px, 40px) rotate(30deg);
+            }
+        }
+    </style>
 </body>
 
 </html>

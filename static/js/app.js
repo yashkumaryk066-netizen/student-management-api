@@ -129,38 +129,11 @@ function contactSales() {
     setTimeout(() => window.open(url, '_blank'), 800);
 }
 
-/* ---------- SMOOTH SCROLL ---------- */
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-        e.preventDefault();
-        document.querySelector(a.getAttribute('href'))?.scrollIntoView({
-            behavior: 'smooth'
-        });
-    });
-});
-
 /* ---------- MODAL OUTSIDE CLICK ---------- */
 window.addEventListener('click', e => {
     if (e.target === document.getElementById('loginModal')) {
         closeLoginModal();
     }
-});
-
-/* ---------- INTERSECTION ANIM ---------- */
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
-    });
-}, { threshold: 0.1 });
-
-document.querySelectorAll('.pricing-card').forEach(card => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(30px)';
-    card.style.transition = 'all 0.6s ease';
-    observer.observe(card);
 });
 
 /* ---------- BRAND LOG ---------- */

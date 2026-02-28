@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import DemoRequest
+from .models import DemoRequest, Notification
+import logging
 
-
+logger = logging.getLogger(__name__)
 class DemoRequestSerializer(serializers.ModelSerializer):
     """Serializer for demo request submissions"""
     
@@ -18,8 +19,8 @@ class DemoRequestSerializer(serializers.ModelSerializer):
         # Send notifications to admin asynchronously (or synchronously for now)
         try:
             notifications_result = demo_request.send_notifications()
-            print(f"Notifications sent for demo request {demo_request.id}: {notifications_result}")
+            logger.info(f"Notifications sent for demo request {demo_request.id}: {notifications_result}")
         except Exception as e:
-            print(f"Error sending notifications: {e}")
+            logger.error(f"Error sending notifications: {e}")
         
         return demo_request

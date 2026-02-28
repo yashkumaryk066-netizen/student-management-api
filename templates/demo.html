@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/responsive.css">
     <title>Enterprise ERP Demo | Read-Only View</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -339,7 +340,7 @@
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Fee Collection (Today)</div>
-                        <div class="kpi-value">₹ 4,50,000</div>
+                        <div class="kpi-value">{{ CURRENCY_SYMBOL }} 4,50,000</div>
                         <div class="kpi-trend up">98% of daily target</div>
                     </div>
                     <div class="kpi-card">
@@ -380,28 +381,28 @@
                                         <td>#TX99</td>
                                         <td>Rahul Sharma</td>
                                         <td>B.Tech CS-II</td>
-                                        <td>₹ 45,000</td>
+                                        <td>{{ CURRENCY_SYMBOL }} 45,000</td>
                                         <td><span class="status-badge status-success">PAID</span></td>
                                     </tr>
                                     <tr>
                                         <td>#TX98</td>
                                         <td>Priya Singh</td>
                                         <td>Class 10-A</td>
-                                        <td>₹ 12,500</td>
+                                        <td>{{ CURRENCY_SYMBOL }} 12,500</td>
                                         <td><span class="status-badge status-success">PAID</span></td>
                                     </tr>
                                     <tr>
                                         <td>#TX97</td>
                                         <td>Amit Kumar</td>
                                         <td>MBA Sem-1</td>
-                                        <td>₹ 60,000</td>
+                                        <td>{{ CURRENCY_SYMBOL }} 60,000</td>
                                         <td><span class="status-badge status-warning">PENDING</span></td>
                                     </tr>
                                     <tr>
                                         <td>#TX96</td>
                                         <td>Sneha Gupta</td>
                                         <td>Class 12-B</td>
-                                        <td>₹ 5,000</td>
+                                        <td>{{ CURRENCY_SYMBOL }} 5,000</td>
                                         <td><span class="status-badge status-error">FAILED</span></td>
                                     </tr>
                                 </tbody>

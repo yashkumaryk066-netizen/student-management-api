@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
+from django.utils import timezone
+from student.conf import CURRENCY_SYMBOL
 from student.models import Student, UserProfile, Payment, Notification
 from datetime import date, timedelta
 
@@ -94,7 +96,7 @@ class Command(BaseCommand):
                     }
                 )
                 if created:
-                    self.stdout.write(self.style.SUCCESS(f'✓ Created payment for {student.name}: ₹5000'))
+                    self.stdout.write(self.style.SUCCESS(f'✓ Created payment for {student.name}: {CURRENCY_SYMBOL}5000'))
                     
                     # Create notification for parent
                     if student.parent:
@@ -102,7 +104,7 @@ class Command(BaseCommand):
                             recipient_type='PARENT',
                             recipient=student.parent,
                             title=f'Payment Due for {student.name}',
-                            message=f'A payment of ₹5000 is due on {payment.due_date.strftime("%d-%b-%Y")}. Please pay before the due date.'
+                            message=f'A payment of {CURRENCY_SYMBOL}5000 is due on {payment.due_date.strftime("%d-%b-%Y")}. Please pay before the due date.'
                         )
                         self.stdout.write(self.style.SUCCESS(f'✓ Created payment notification for parent'))
         

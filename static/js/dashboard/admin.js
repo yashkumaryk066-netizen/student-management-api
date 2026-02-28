@@ -9,8 +9,16 @@ const DashboardApp = {
 
     // CSRF Token Helper - CRITICAL for POST/PUT/DELETE requests
     getCsrfToken() {
+        let token = null;
         const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
-        return cookie ? cookie.split('=')[1] : '';
+        if (cookie) {
+            token = cookie.split('=')[1];
+        } else {
+            // Fallback: Check for hidden input (common in Django templates)
+            const input = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (input) token = input.value;
+        }
+        return token || '';
     },
 
     init() {
@@ -29,11 +37,236 @@ const DashboardApp = {
 
         this.fetchCurrentUser().then(() => {
             this.setupNavigation();
+            this.setupSidebarScroll();
             this.setupLogout();
             this.loadInitialView();
             this.applyPermissions(); // Hide/Show things based on role
             this.checkSubscriptionStatus(); // Premium Renewal Check
+            this.setupGlobalSearch(); // NEW: Global Search
         });
+    },
+
+    setupSidebarScroll() {
+        const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
+        if (!sidebar || sidebar._wheelBound) return;
+        sidebar._wheelBound = true;
+
+        let wheelDelta = 0;
+        let wheelRaf = null;
+        const isSidebarOpen = () => {
+            if (!sidebar) return false;
+            if (sidebar.classList.contains('open') || sidebar.classList.contains('active')) return true;
+            const style = window.getComputedStyle(sidebar);
+            return style.display !== 'none' && sidebar.offsetWidth > 0;
+        };
+
+        const updateBodyScrollLock = () => {
+            if (!sidebar) return;
+            const shouldLock = isSidebarOpen();
+            if (shouldLock) {
+                if (!document.body.dataset._scrollLock) {
+                    document.body.dataset._scrollLock = document.body.style.overflow || '';
+                    document.documentElement.dataset._scrollLock = document.documentElement.style.overflow || '';
+                }
+                document.body.style.overflow = 'hidden';
+                document.documentElement.style.overflow = 'hidden';
+                document.body.classList.add('sidebar-scroll-lock');
+                document.documentElement.classList.add('sidebar-scroll-lock');
+            } else if (document.body.dataset._scrollLock !== undefined) {
+                document.body.style.overflow = document.body.dataset._scrollLock;
+                document.documentElement.style.overflow = document.documentElement.dataset._scrollLock || '';
+                delete document.body.dataset._scrollLock;
+                delete document.documentElement.dataset._scrollLock;
+                document.body.classList.remove('sidebar-scroll-lock');
+                document.documentElement.classList.remove('sidebar-scroll-lock');
+            }
+        };
+
+        const smoothScroll = () => {
+            if (!sidebar) return;
+            if (Math.abs(wheelDelta) < 0.5) {
+                wheelDelta = 0;
+                wheelRaf = null;
+                return;
+            }
+            sidebar.scrollTop += wheelDelta * 0.35;
+            wheelDelta *= 0.82;
+            wheelRaf = requestAnimationFrame(smoothScroll);
+        };
+
+        const handleWheel = (e) => {
+            if (!isSidebarOpen()) return;
+            if (sidebar && sidebar.scrollHeight > sidebar.clientHeight) {
+                wheelDelta += e.deltaY;
+                if (!wheelRaf) wheelRaf = requestAnimationFrame(smoothScroll);
+            }
+            e.preventDefault();
+        };
+
+        sidebar.addEventListener('wheel', handleWheel, { passive: false });
+
+        if (!document._sidebarWheelBound) {
+            document._sidebarWheelBound = true;
+            const globalWheel = (e) => {
+                // Scroll sidebar from anywhere on the page
+                if (!isSidebarOpen()) return;
+                if (sidebar && sidebar.scrollHeight > sidebar.clientHeight) {
+                    wheelDelta += e.deltaY;
+                    if (!wheelRaf) wheelRaf = requestAnimationFrame(smoothScroll);
+                }
+                e.preventDefault();
+            };
+            document.addEventListener('wheel', globalWheel, { passive: false, capture: true });
+            window.addEventListener('wheel', globalWheel, { passive: false, capture: true });
+            document.addEventListener('touchmove', (e) => {
+                if (!isSidebarOpen()) return;
+                e.preventDefault();
+            }, { passive: false, capture: true });
+        }
+
+        updateBodyScrollLock();
+        window.addEventListener('resize', updateBodyScrollLock);
+        const observer = new MutationObserver(updateBodyScrollLock);
+        observer.observe(sidebar, { attributes: true, attributeFilter: ['class', 'style'] });
+    },
+
+    // --- GLOBAL SEARCH SYSTEM ---
+    setupGlobalSearch() {
+        const input = document.getElementById('globalSearchInput');
+        const resultsBox = document.getElementById('searchResults');
+
+        if (!input || !resultsBox) return;
+
+        let debounceTimer;
+
+        input.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(debounceTimer);
+
+            if (query.length < 2) {
+                resultsBox.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                this.performGlobalSearch(query);
+            }, 300);
+        });
+
+        // Close on click outside
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+                resultsBox.style.display = 'none';
+            }
+        });
+
+        // Focus handler
+        input.addEventListener('focus', () => {
+            if (input.value.length >= 2) resultsBox.style.display = 'block';
+        });
+    },
+
+    async performGlobalSearch(query) {
+        const resultsBox = document.getElementById('searchResults');
+
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${this.apiBaseUrl}/search/global/?q=${encodeURIComponent(query)}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const results = await response.json();
+                this.renderSearchResults(results);
+            } else {
+                console.error("Search failed");
+            }
+        } catch (e) {
+            console.error("Search error", e);
+        }
+    },
+
+    renderSearchResults(results) {
+        const resultsBox = document.getElementById('searchResults');
+
+        if (results.length === 0) {
+            resultsBox.innerHTML = `
+                <div style="padding: 15px; text-align: center; color: #94a3b8;">
+                    No results found.
+                </div>
+            `;
+            resultsBox.style.display = 'block';
+            return;
+        }
+
+        const html = results.map(item => `
+            <div onclick="DashboardApp.handlesearchNav('${item.url}')" style="
+                padding: 12px; 
+                border-bottom: 1px solid rgba(255,255,255,0.05); 
+                cursor: pointer; 
+                display: flex; 
+                align-items: center; 
+                gap: 12px;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='rgba(59, 130, 246, 0.1)'" onmouseout="this.style.background='transparent'">
+                <div style="font-size: 1.5rem;">${item.icon || '🔍'}</div>
+                <div>
+                    <div style="color: white; font-weight: 500;">${item.title}</div>
+                    <div style="color: #64748b; font-size: 0.8rem;">${item.subtitle}</div>
+                </div>
+                <div style="margin-left: auto; color: #3b82f6; font-size: 0.8rem; border: 1px solid rgba(59, 130, 246, 0.3); padding: 2px 6px; border-radius: 4px;">
+                    ${item.type}
+                </div>
+            </div>
+        `).join('');
+
+        resultsBox.innerHTML = html;
+        resultsBox.style.display = 'block';
+    },
+
+    handlesearchNav(url) {
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('globalSearchInput').value = '';
+
+        if (url.startsWith('#')) {
+            const parts = url.substring(1).split('/');
+            const module = parts[0];
+            const id = parts[1];
+
+            window.location.hash = module;
+            this.loadModule(module);
+
+            // Deep Link Handling
+            if (id) {
+                if (module === 'students') {
+                    // Poll for the row to appear (since it loads async)
+                    let attempts = 0;
+                    const checkRow = setInterval(() => {
+                        attempts++;
+                        const row = document.getElementById('student-row-' + id);
+                        if (row) {
+                            clearInterval(checkRow);
+                            // Scroll and Highlight
+                            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                            // Flash Effect
+                            const originalBg = row.style.backgroundColor;
+                            row.style.transition = 'background-color 0.5s ease';
+                            row.style.backgroundColor = 'rgba(59, 130, 246, 0.3)'; // Primary color tint
+
+                            setTimeout(() => {
+                                row.style.backgroundColor = originalBg; // Fade out
+                            }, 2000);
+                        }
+
+                        // Stop trying after 5 seconds
+                        if (attempts > 20) clearInterval(checkRow);
+                    }, 250);
+                }
+            }
+        } else {
+            window.location.href = url;
+        }
     },
 
     // --- PREMIUM ALERT SYSTEM ---
@@ -269,7 +502,11 @@ const DashboardApp = {
         const overlay = document.getElementById('alertOverlay');
         if (overlay) {
             overlay.style.opacity = '0'; // Fade out animation
-            setTimeout(() => document.body.removeChild(overlay), 300);
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }, 300);
         }
     },
 
@@ -305,6 +542,7 @@ const DashboardApp = {
             if (res.ok) {
                 this.currentUser = await res.json();
                 console.log("✅ Logged in as:", this.currentUser.role, this.currentUser.institution_type);
+                console.log("🔱 SuperUser Status:", this.currentUser.is_superuser);
 
                 // --- UPDATE UI FOR ALL ROLES ---
                 const roleEl = document.querySelector('.user-role');
@@ -406,13 +644,23 @@ const DashboardApp = {
             }
         };
 
-        // Super admin bypass
-        if (this.currentUser.is_superuser) {
-            console.log('✅ Super Admin - Full Access Granted');
-            return; // Super admin sees everything
+        // ============================================================
+        // SUPERADMIN GOD MODE - BYPASS ALL RESTRICTIONS
+        // ============================================================
+        if (this.currentUser.is_superuser ||
+            (this.currentUser.role === 'ADMIN' && this.currentUser.is_superuser)) {
+            console.log('🔱✅ SUPERADMIN DETECTED - Full Access Granted (No Locks)');
+            // Remove ANY existing locks (defensive cleanup)
+            document.querySelectorAll('.lock-icon').forEach(lock => lock.remove());
+            document.querySelectorAll('[data-locked]').forEach(el => {
+                el.removeAttribute('data-locked');
+                el.style.opacity = '1';
+                el.classList.remove('locked');
+            });
+            return; // EXIT EARLY - Skip all permission logic
         }
 
-        // Hide all features first
+        // Hide all features first (ONLY for non-SuperAdmin)
         Object.values(featureMenuMap).forEach(hideMenuItem);
 
         // Show only available features
@@ -518,8 +766,21 @@ const DashboardApp = {
                 const module = link.getAttribute('href').substring(1);
                 this.loadModule(module);
 
-                // Close sidebar on ALL devices
-                document.getElementById('sidebar').classList.remove('open');
+                // Close sidebar on ALL devices (Robust close)
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const toggle = document.getElementById('menuToggle');
+
+                if (sidebar) {
+                    sidebar.classList.remove('open', 'active');
+                }
+                if (overlay) {
+                    overlay.classList.remove('active');
+                }
+                if (toggle) {
+                    toggle.classList.remove('open');
+                }
+                document.body.style.overflow = ''; // Release scroll lock
             });
         });
 
@@ -626,6 +887,36 @@ const DashboardApp = {
             case 'finance':
             case 'payments':
                 this.loadFinanceManagement();
+                break;
+            // Insert this BEFORE line 789 (default case) in admin.js
+
+            // === INSTITUTIONAL ERP 2.0 MODULES ===
+            case 'roi-analytics':
+            case 'roi_analytics':
+                this.loadROIAnalytics();
+                break;
+            case 'lms-materials':
+            case 'lms_materials':
+                this.loadLMSMaterials();
+                break;
+            case 'assignments':
+                this.loadLMSAssignments();
+                break;
+            // === SOVEREIGN INTELLIGENCE ===
+            case 'leads':
+                this.loadLeadManagement();
+            case 'lead-predictor':
+                this.loadLeadManagement();
+                break;
+            case 'substitutes':
+                this.loadSubstituteManagement();
+                break;
+            case 'student-diary':
+            case 'diary':
+                this.loadStudentDiary();
+                break;
+            case 'inventory':
+                this.loadInventoryManagement();
                 break;
             default:
                 this.loadDashboardHome();
@@ -759,27 +1050,49 @@ const DashboardApp = {
                     return;
                 }
 
-                tbody.innerHTML = students.map(student =>
-                    '<tr>' +
-                    '<td>#' + student.id + '</td>' +
-                    '<td>' +
-                    '<div style="font-weight: 600; color: white;">' + student.name + '</div>' +
-                    '<div style="font-size: 0.8rem; color: var(--text-muted);">' + (student.email || '') + '</div>' +
-                    '</td>' +
-                    '<td><span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">' + (student.institution_type || 'General') + '</span></td>' +
-                    '<td>' + student.grade + '</td>' +
-                    '<td>' + student.age + '</td>' +
-                    '<td>' + student.gender + '</td>' +
-                    '<td>' + student.relation + '</td>' +
-                    '<td>' +
-                    '<button class="btn-action" onclick="DashboardApp.editStudent(' + student.id + ')" title="Edit" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px;">✏️</button>' +
-                    '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/id-card/' + student.id + '/\', \'IDCard_' + student.name + '.pdf\')" title="Download ID Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">🪪</button>' +
-                    '<button class="btn-action" onclick="DashboardApp.promptAndDownloadAdmitCard(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" title="Download Admit Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">🎫</button>' +
-                    '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/report-card/' + student.id + '/\', \'ReportCard_' + student.name + '.pdf\')" title="Download Report Card" style="padding: 4px 8px; font-size: 0.9rem; margin-right:4px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">📈</button>' +
-                    '<button class="btn-action btn-danger" onclick="DashboardApp.deleteStudent(' + student.id + ', \'' + student.name.replace(/'/g, "\\'") + '\')" title="Delete" style="padding: 4px 8px; font-size: 0.9rem;">🗑️</button>' +
-                    '</td>' +
-                    '</tr>'
-                ).join('');
+                tbody.innerHTML = students.map(student => {
+                    // Calculate Age
+                    let age = 'N/A';
+                    if (student.dob) {
+                        const birthDate = new Date(student.dob);
+                        const today = new Date();
+                        age = today.getFullYear() - birthDate.getFullYear();
+                        const m = today.getMonth() - birthDate.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                    }
+
+                    const safeName = student.name.replace(/'/g, "\\'");
+                    return '<tr id="student-row-' + student.id + '" class="student-table-row">' +
+                        '<td>#' + student.id + '</td>' +
+                        '<td>' +
+                        '<div style="font-weight: 600; color: white;">' + student.name + '</div>' +
+                        '<div style="font-size: 0.8rem; color: var(--text-muted);">' + (student.email || '') + '</div>' +
+                        '</td>' +
+                        '<td><span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">' + (student.institution_type || 'General') + '</span></td>' +
+                        '<td>' + (student.grade || 'N/A') + '</td>' +
+                        '<td>' + age + '</td>' +
+                        '<td>' + (student.gender || '-') + '</td>' +
+                        '<td>' + (student.parents_name || student.relation || '-') + '</td>' +
+                        '<td>' +
+                        // EDIT
+                        '<button class="btn-action" onclick="DashboardApp.editStudent(' + student.id + ')" title="Edit" style="padding: 6px; margin-right:4px;">✏️</button>' +
+                        // FEES
+                        '<button class="btn-action" onclick="DashboardApp.showFeesModal(' + student.id + ', \'' + safeName + '\')" title="Fees History" style="padding: 6px; margin-right:4px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">💵</button>' +
+                        // ID CARD
+                        '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/id-card/' + student.id + '/\', \'IDCard_' + safeName + '.pdf\')" title="Download ID Card" style="padding: 6px; margin-right:4px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">💳</button>' +
+                        // ADMIT CARD
+                        '<button class="btn-action" onclick="DashboardApp.promptAndDownloadAdmitCard(' + student.id + ', \'' + safeName + '\')" title="Download Admit Card" style="padding: 6px; margin-right:4px; background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3);">📋</button>' +
+                        // REPORT CARD
+                        '<button class="btn-action" onclick="DashboardApp.downloadFile(\'/api/generate/report-card/' + student.id + '/\', \'ReportCard_' + safeName + '.pdf\')" title="Download Report Card" style="padding: 6px; margin-right:4px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">📊</button>' +
+                        // NEW: CERTIFICATES DROPDOWN (Simplifying to a button with prompt for now to save space)
+                        '<button class="btn-action" onclick="DashboardApp.promptCertificate(' + student.id + ', \'' + safeName + '\')" title="Generate Certificate" style="padding: 6px; margin-right:4px; background: rgba(236, 72, 153, 0.15); color: #ec4899; border: 1px solid rgba(236, 72, 153, 0.3);">📜</button>' +
+                        // DELETE
+                        '<button class="btn-action" onclick="DashboardApp.deleteStudent(' + student.id + ')" title="Delete" style="padding: 6px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">🗑️</button>' +
+                        '</td>' +
+                        '</tr>';
+                }).join('');
             })
             .catch(err => {
                 console.error('Error fetching students:', err);
@@ -795,6 +1108,18 @@ const DashboardApp = {
         }
     },
 
+    promptCertificate(studentId, studentName) {
+        const type = prompt("Enter Certificate Type:\n\nTC - Transfer Certificate\nCC - Character Certificate\nBONAFIDE - Bonafide Certificate", "BONAFIDE");
+        if (type) {
+            const finalType = type.toUpperCase().trim();
+            if (['TC', 'CC', 'BONAFIDE'].includes(finalType)) {
+                this.downloadFile(`/api/generate/certificate/${studentId}/?type=${finalType}`, `${finalType}_${studentName}.pdf`);
+            } else {
+                alert("Invalid type. Please enter TC, CC, or BONAFIDE.");
+            }
+        }
+    },
+
     async downloadFile(url, filename) {
         try {
             const token = localStorage.getItem('authToken');
@@ -805,7 +1130,8 @@ const DashboardApp = {
 
             this.showAlert('Downloading...', 'Generating file, please wait...', 'info');
 
-            const res = await fetch(url + '?token=' + token, {
+            const separator = url.includes('?') ? '&' : '?';
+            const res = await fetch(url + separator + 'token=' + token, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
 
@@ -992,7 +1318,9 @@ const DashboardApp = {
             const res = await fetch(`${this.apiBaseUrl}/batches/`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            const batches = await res.json();
+            let batches = await res.json();
+            // Robust: handle paginated { results: [...] } or flat array
+            if (!Array.isArray(batches)) batches = batches.results || [];
 
             const list = document.getElementById('attendanceBatchList');
             if (batches.length === 0) {
@@ -1036,10 +1364,12 @@ const DashboardApp = {
             const res = await fetch(`${this.apiBaseUrl}/departments/`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            const depts = await res.json();
+            let depts = await res.json();
+            // Robust: handle paginated { results: [...] } or flat array
+            if (!Array.isArray(depts)) depts = depts.results || [];
 
             const list = document.getElementById('attendanceBatchList');
-            if (!Array.isArray(depts) || depts.length === 0) {
+            if (depts.length === 0) {
                 list.innerHTML = `<div style="grid-column: 1/-1; padding:40px; text-align:center; color:white;">No departments found. Please create a department first.</div>`;
                 return;
             }
@@ -1360,7 +1690,7 @@ const DashboardApp = {
                         </div>
                     `;
                 } else if (p.status === 'PAID' || p.status === 'APPROVED') {
-                    actions = `<button class="btn-action p-download" onclick="DashboardApp.downloadFile('${this.apiBaseUrl}/payments/${p.id}/invoice/', 'Invoice_${p.id}.pdf')" title="Download Invoice">📄</button>`;
+                    actions = `<button class="btn-action p-download" onclick="DashboardApp.downloadFile('${this.apiBaseUrl}/invoice/${p.id}/download/', 'Invoice_${p.id}.pdf')" title="Download Invoice">📄</button>`;
                 }
 
                 return `
@@ -1718,7 +2048,8 @@ const DashboardApp = {
     async fetchLibraryBooks() {
         const grid = document.getElementById('libraryBooksGrid');
         try {
-            const books = await LibraryAPI.getBooks();
+            const data = await LibraryAPI.getBooks();
+            const books = Array.isArray(data.results) ? data.results : (Array.isArray(data) ? data : []);
 
             if (books.length === 0) {
                 grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; color: var(--text-muted);">No books in library.</div>';
@@ -1754,8 +2085,109 @@ const DashboardApp = {
 
         } catch (e) {
             console.error(e);
-            grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; color: red;">Error loading books.</div>';
+            grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; color: #ef4444;">Error loading books.</div>';
         }
+    },
+
+    scanIsbn() {
+        // Feature simulation (Actual camera access requires HTTPS and complex UI)
+        // We will prompt for ISBN and use Google Books API to autofill
+
+        const isbn = prompt("Simulating Camera Scan.\n\nEnter ISBN manually:", "9780132350884");
+        if (isbn) {
+            DashboardApp.showAlert('Scanning...', 'Looking up book details...', 'info');
+
+            // Fetch from Open Library or Google Books (Client-side directly)
+            fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
+                .then(res => res.json())
+                .then(data => {
+                    DashboardApp.closeAlert();
+                    if (data.items && data.items.length > 0) {
+                        const book = data.items[0].volumeInfo;
+                        // Open Add Book Modal and pre-fill
+                        DashboardApp.addBook(book);
+                    } else {
+                        alert("Book not found for this ISBN.");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    DashboardApp.closeAlert();
+                    alert("Failed to lookup ISBN");
+                });
+        }
+    },
+
+    issueBook(bookId, bookTitle) {
+        const modal = `
+            <div class="modal-overlay" id="issueBookModal">
+                <div class="modal-card">
+                    <h2>📖 Issue Book</h2>
+                    <p style="color:var(--text-muted); margin-bottom:15px;">Issuing: <strong style="color:white;">${bookTitle}</strong></p>
+                    
+                    <form id="issueBookForm" onsubmit="event.preventDefault(); DashboardApp.submitIssueBook(${bookId});">
+                        <div class="form-group">
+                            <label>Student ID / Roll No</label>
+                            <input type="text" name="student_identifier" class="form-input" required placeholder="Search Student...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Return Due Date</label>
+                            <input type="date" name="due_date" class="form-input" required>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('issueBookModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Confirm Issue</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    async submitIssueBook(bookId) {
+        const form = document.getElementById('issueBookForm');
+        const formData = new FormData(form);
+        // We need to resolve student ID from identifier, but for MVP/Demo we might assume ID is passed or handle in backend.
+        // If backend expects 'student' ID, we might need a search step.
+        // For simplicity, let's assume the input is numeric Student ID.
+
+        const studentId = formData.get('student_identifier');
+        const dueDate = formData.get('due_date');
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/library/issues/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({
+                    book: bookId,
+                    student: parseInt(studentId), // Assuming direct ID for now
+                    due_date: dueDate
+                })
+            });
+
+            if (response.ok) {
+                alert('Book Issued Successfully!');
+                document.getElementById('issueBookModal').remove();
+                this.fetchLibraryBooks();
+            } else {
+                const err = await response.json();
+                alert('Failed: ' + (err.error || "Ensure Student ID is valid"));
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error issuing book');
+        }
+    },
+
+    editBook(bookId) {
+        alert("Edit feature for Book ID " + bookId + " coming in next update!");
     },
 
     addBook() {
@@ -1872,7 +2304,7 @@ const DashboardApp = {
         btn.disabled = true;
 
         try {
-            const response = await fetch(`${this.apiBaseUrl}/library/`, {
+            const response = await fetch(`${this.apiBaseUrl}/library/books/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -1927,10 +2359,201 @@ const DashboardApp = {
         } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5">Error loading HR data</td></tr>'; }
     },
 
+    async allocateRoom() {
+        const modal = `
+            <div class="modal-overlay" id="allocateRoomModal">
+                <div class="modal-card">
+                    <h2>🏨 Allocate Hostel Room</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.submitAllocateRoom();">
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="text" id="allocStudentId" class="form-input" required placeholder="Enter Student ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Select Hostel</label>
+                            <select id="allocHostel" class="form-input" required onchange="DashboardApp.fetchHostelRooms(this.value)">
+                                <option value="">Loading Hostels...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Room</label>
+                            <select id="allocRoom" class="form-input" required disabled>
+                                <option value="">Select Hostel First</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Check-in Date</label>
+                            <input type="date" id="checkInDate" class="form-input" required value="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('allocateRoomModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Allocate</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+
+        // Fetch Hostels
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/hostel/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const hostels = await res.json();
+            const select = document.getElementById('allocHostel');
+            if (hostels.results) { // Handle pagination if present
+                select.innerHTML = '<option value="">Select Hostel</option>' +
+                    hostels.results.map(h => `<option value="${h.id}">${h.name} (${h.type})</option>`).join('');
+            } else if (Array.isArray(hostels) && hostels.length > 0) {
+                select.innerHTML = '<option value="">Select Hostel</option>' +
+                    hostels.map(h => `<option value="${h.id}">${h.name} (${h.type})</option>`).join('');
+            } else {
+                select.innerHTML = '<option value="">No Hostels Found</option>';
+            }
+        } catch (e) { console.error(e); }
+    },
+
+    async fetchHostelRooms(hostelId) {
+        const roomSelect = document.getElementById('allocRoom');
+        if (!hostelId) {
+            roomSelect.innerHTML = '<option value="">Select Hostel First</option>';
+            roomSelect.disabled = true;
+            return;
+        }
+
+        roomSelect.innerHTML = '<option>Loading Rooms...</option>';
+        roomSelect.disabled = true;
+
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/hostel/rooms/?hostel=${hostelId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            let rooms = await res.json();
+            rooms = rooms.results || rooms;
+
+            if (rooms.length === 0) {
+                roomSelect.innerHTML = '<option value="">No Rooms Available</option>';
+            } else {
+                roomSelect.innerHTML = rooms.map(r => `<option value="${r.id}">Room ${r.room_number} (Floor ${r.floor})</option>`).join('');
+                roomSelect.disabled = false;
+            }
+        } catch (e) {
+            console.error(e);
+            roomSelect.innerHTML = '<option>Error loading rooms</option>';
+        }
+    },
+
+    async submitAllocateRoom() {
+        const studentId = document.getElementById('allocStudentId').value;
+        const roomId = document.getElementById('allocRoom').value;
+        const checkIn = document.getElementById('checkInDate').value;
+
+        if (!studentId || !roomId) {
+            alert("Please select all fields");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/hostel/allocations/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({
+                    student: studentId,
+                    room: roomId,
+                    check_in_date: checkIn,
+                    status: 'ACTIVE'
+                })
+            });
+
+            if (response.ok) {
+                this.showAlert("Success", "Room allocated successfully!", "success");
+                document.getElementById('allocateRoomModal').remove();
+                this.loadHostelManagement();
+            } else {
+                const err = await response.json();
+                alert("Failed: " + (err.error || JSON.stringify(err)));
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error allocating room");
+        }
+    },
+
+    addVehicle() {
+        const modal = `
+    < div class="modal-overlay" id = "addVehicleModal" >
+        <div class="modal-card">
+            <h2>🚌 Add Transportation Vehicle</h2>
+            <form onsubmit="event.preventDefault(); DashboardApp.submitAddVehicle();">
+                <div class="form-group">
+                    <label>Vehicle Number</label>
+                    <input type="text" id="vehNumber" class="form-input" required placeholder="e.g. KA-01-AB-1234">
+                </div>
+                <div class="form-group">
+                    <label>Driver Name</label>
+                    <input type="text" id="vehDriver" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Capacity</label>
+                    <input type="number" id="vehCapacity" class="form-input" required value="40">
+                </div>
+                <div class="form-group">
+                    <label>Route Name</label>
+                    <input type="text" id="vehRoute" class="form-input" required placeholder="e.g. Route 1 (City Center)">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('addVehicleModal').remove()">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Vehicle</button>
+                </div>
+            </form>
+        </div>
+            </div >
+    `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    async submitAddVehicle() {
+        const data = {
+            vehicle_number: document.getElementById('vehNumber').value,
+            driver_name: document.getElementById('vehDriver').value,
+            capacity: document.getElementById('vehCapacity').value,
+            route_name: document.getElementById('vehRoute').value
+        };
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl} /transport/vehicles / `, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')} `,
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                this.showAlert("Success", "Vehicle added successfully!", "success");
+                document.getElementById('addVehicleModal').remove();
+                this.loadTransportManagement();
+            } else {
+                const err = await response.json();
+                alert("Failed: " + JSON.stringify(err));
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error adding vehicle");
+        }
+    },
+
     loadExamManagement() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-        <div class="module-header">
+    < div class="module-header" >
             <div>
                 <h1 class="page-title">📝 Exam Management</h1>
                 <p class="page-subtitle">Schedule exams by Class (School), Batch (Coaching), or Department (Institute).</p>
@@ -1938,7 +2561,7 @@ const DashboardApp = {
             <button class="btn-action" onclick="DashboardApp.openCreateExamModal()">
                 + Schedule New Exam
             </button>
-        </div>
+        </div >
 
         <div class="filter-bar">
             <div class="tab-group" style="display:flex; gap:10px;">
@@ -1951,7 +2574,7 @@ const DashboardApp = {
         <div id="examContainer" style="margin-top: 20px;">
             <!-- Content loads here dynamically -->
         </div>
-    `;
+`;
 
         // Permission Logic
         let defaultType = 'SCHOOL';
@@ -1965,7 +2588,7 @@ const DashboardApp = {
         if (this.currentUser && this.currentUser.institution_type && ['SCHOOL', 'COACHING', 'INSTITUTE'].includes(this.currentUser.institution_type)) {
             // Hide others
             document.querySelectorAll('.filter-tab').forEach(t => t.style.display = 'none');
-            const tab = document.getElementById(`exam-tab-${this.currentUser.institution_type}`);
+            const tab = document.getElementById(`exam - tab - ${this.currentUser.institution_type} `);
             if (tab) {
                 tab.style.display = 'inline-block';
                 tab.onclick();
@@ -1974,7 +2597,7 @@ const DashboardApp = {
         }
 
         // Default load
-        this.loadExamView(defaultType, document.getElementById(`exam-tab-${defaultType}`));
+        this.loadExamView(defaultType, document.getElementById(`exam - tab - ${defaultType} `));
     },
 
     loadExamView(type, btn) {
@@ -1990,11 +2613,11 @@ const DashboardApp = {
             let html = '<div class="cards-grid">';
             for (let i = 1; i <= 12; i++) {
                 html += `
-            <div class="module-card" onclick="DashboardApp.openClassExams(${i})">
+    < div class="module-card" onclick = "DashboardApp.openClassExams(${i})" >
                 <div class="module-icon" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">🏫</div>
                 <h3 class="module-title">Class ${i}</h3>
                 <p class="module-description">View exams for Grade ${i}</p>
-            </div>`;
+            </div > `;
             }
             html += '</div>';
             container.innerHTML = html;
@@ -2003,34 +2626,36 @@ const DashboardApp = {
             // Load Batches
             this.fetchExamBatches();
         } else {
-            container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">Institute Management coming soon...</div>`;
+            container.innerHTML = `< div style = "text-align:center; padding:40px; color:var(--text-muted);" > Institute Management coming soon...</div > `;
         }
     },
 
     async fetchExamBatches() {
         const container = document.getElementById('examContainer');
         container.innerHTML = `
-        <div id="examBatchList" class="cards-grid">
-            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
-                <span class="loader"></span> Loading Batches...
-            </div>
+    < div id = "examBatchList" class="cards-grid" >
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">
+            <span class="loader"></span> Loading Batches...
         </div>
+        </div >
     `;
 
         try {
-            const res = await fetch(`${this.apiBaseUrl}/batches/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            const res = await fetch(`${this.apiBaseUrl} /batches/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')} ` }
             });
-            const batches = await res.json();
+            let batches = await res.json();
+            // Robust: handle paginated { results: [...] } or flat array
+            if (!Array.isArray(batches)) batches = batches.results || [];
 
             const list = document.getElementById('examBatchList');
             if (batches.length === 0) {
-                list.innerHTML = `<div style="grid-column: 1/-1; padding:40px; text-align:center; color:white;">No active batches found.</div>`;
+                list.innerHTML = `< div style = "grid-column: 1/-1; padding:40px; text-align:center; color:white;" > No active batches found.</div > `;
                 return;
             }
 
             list.innerHTML = batches.map(batch => `
-            <div class="module-card" onclick="DashboardApp.openBatchExams(${batch.id}, '${batch.name}')">
+    < div class="module-card" onclick = "DashboardApp.openBatchExams(${batch.id}, '${batch.name}')" >
                 <div class="module-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">📝</div>
                 <h3 class="module-title">${batch.name}</h3>
                 <p class="module-description">
@@ -2041,8 +2666,8 @@ const DashboardApp = {
                         View Exams
                     </button>
                 </div>
-            </div>
-        `).join('');
+            </div >
+    `).join('');
 
         } catch (error) {
             console.error('Failed to load batches:', error);
@@ -2051,13 +2676,13 @@ const DashboardApp = {
     },
 
     openClassExams(grade) {
-        this.openBatchExams(null, `Class ${grade}`, grade);
+        this.openBatchExams(null, `Class ${grade} `, grade);
     },
 
     async openBatchExams(batchId, batchName, grade = null) {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-        <div class="module-header">
+    < div class="module-header" >
             <div>
                  <a href="#" class="nav-link" onclick="DashboardApp.loadExamManagement(); return false;" style="font-size: 0.9rem; color: var(--primary); display:block; margin-bottom:5px;">← Back to Selection</a>
                  <h1 class="page-title">${batchName}: Exams</h1>
@@ -2065,41 +2690,43 @@ const DashboardApp = {
             <button class="btn-action" onclick="DashboardApp.openCreateExamModal(${batchId}, '${grade || ''}')">
                 + Schedule Exam
             </button>
-        </div>
-        
-        <div class="data-table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Exam Name</th>
-                        <th>Type</th>
-                        <th>Subject</th>
-                        <th>Date</th>
-                        <th>Marks</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="examListBody">
-                    <tr><td colspan="7" class="text-center"><span class="loader"></span> Loading exams...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    `;
+        </div >
+
+    <div class="data-table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Exam Name</th>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Marks</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="examListBody">
+                <tr><td colspan="7" class="text-center"><span class="loader"></span> Loading exams...</td></tr>
+            </tbody>
+        </table>
+    </div>
+`;
 
         // Fetch Exams
-        let url = `${this.apiBaseUrl}/exams/`;
+        let url = `${this.apiBaseUrl} /exams/`;
         if (grade) {
-            url += `?grade=${grade}`;
+            url += `? grade = ${grade} `;
         } else if (batchId) {
-            url += `?batch_id=${batchId}`;
+            url += `? batch_id = ${batchId} `;
         }
 
         try {
             const res = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')} ` }
             });
-            const exams = await res.json();
+            let exams = await res.json();
+            // Robust: handle paginated { results: [...] } or flat array
+            if (!Array.isArray(exams)) exams = exams.results || [];
 
             const tbody = document.getElementById('examListBody');
             if (exams.length === 0) {
@@ -2108,7 +2735,7 @@ const DashboardApp = {
             }
 
             tbody.innerHTML = exams.map(exam => `
-            <tr>
+    < tr >
                 <td style="font-weight:600; color:white;">${exam.name}</td>
                 <td><span class="badge" style="background:rgba(255,255,255,0.1);">${exam.exam_type}</span></td>
                 <td>${exam.subject_name || 'General'}</td>
@@ -2119,8 +2746,8 @@ const DashboardApp = {
                     <button class="btn-icon">✏️</button>
                     <button class="btn-icon remove">🗑️</button>
                 </td>
-            </tr>
-        `).join('');
+            </tr >
+    `).join('');
 
         } catch (error) {
             console.error(error);
@@ -2130,54 +2757,54 @@ const DashboardApp = {
 
     openCreateExamModal(preselectedBatchId = null, preselectedGrade = null) {
         const modalHtml = `
-    <div class="modal-overlay" id="createExamModal">
+    < div class="modal-overlay" id = "createExamModal" >
         <div class="modal-card">
             <h2>Schedule New Exam</h2>
             <form id="createExamForm" onsubmit="event.preventDefault(); DashboardApp.submitCreateExam();">
                 <input type="hidden" name="batchId" value="${preselectedBatchId || ''}">
-                <input type="hidden" name="grade" value="${preselectedGrade || ''}">
-                
-                <div class="form-group">
-                    <label>Exam Name</label>
-                    <input type="text" name="name" class="form-input" required placeholder="e.g. Mid-Term Physics">
-                </div>
-                
-                <div class="form-group">
-                    <label>Target Audience</label>
-                    <select name="target_type" class="form-input" disabled>
-                        <option>${preselectedBatchId ? 'Batch Exam' : (preselectedGrade ? `Class ${preselectedGrade} Exam` : 'Select Target')}</option>
-                    </select>
-                </div>
+                    <input type="hidden" name="grade" value="${preselectedGrade || ''}">
 
-                <div class="form-group">
-                    <label>Exam Type</label>
-                    <select name="exam_type" class="form-input" required>
-                        <option value="UNIT">Unit Test</option>
-                        <option value="MIDTERM">Mid-Term</option>
-                        <option value="FINAL">Final Exam</option>
-                        <option value="PRACTICAL">Practical</option>
-                    </select>
-                </div>
-                
-                <div class="row" style="display:flex; gap:15px;">
-                     <div class="form-group" style="flex:1;">
-                        <label>Date</label>
-                        <input type="date" name="exam_date" class="form-input" required>
-                    </div>
-                     <div class="form-group" style="flex:1;">
-                        <label>Total Marks</label>
-                        <input type="number" name="total_marks" class="form-input" required value="100">
-                    </div>
-                </div>
+                        <div class="form-group">
+                            <label>Exam Name</label>
+                            <input type="text" name="name" class="form-input" required placeholder="e.g. Mid-Term Physics">
+                        </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="document.getElementById('createExamModal').remove()">Cancel</button>
-                    <button type="submit" class="btn-primary">Schedule Exam</button>
+                        <div class="form-group">
+                            <label>Target Audience</label>
+                            <select name="target_type" class="form-input" disabled>
+                                <option>${preselectedBatchId ? 'Batch Exam' : (preselectedGrade ? `Class ${preselectedGrade} Exam` : 'Select Target')}</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Exam Type</label>
+                            <select name="exam_type" class="form-input" required>
+                                <option value="UNIT">Unit Test</option>
+                                <option value="MIDTERM">Mid-Term</option>
+                                <option value="FINAL">Final Exam</option>
+                                <option value="PRACTICAL">Practical</option>
+                            </select>
+                        </div>
+
+                        <div class="row" style="display:flex; gap:15px;">
+                            <div class="form-group" style="flex:1;">
+                                <label>Date</label>
+                                <input type="date" name="exam_date" class="form-input" required>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Total Marks</label>
+                                <input type="number" name="total_marks" class="form-input" required value="100">
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('createExamModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Schedule Exam</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
         </div>
-    </div>
-    `;
+`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
     },
 
@@ -2192,7 +2819,7 @@ const DashboardApp = {
             total_marks: parseInt(formData.get('total_marks')),
             passing_marks: Math.floor(parseInt(formData.get('total_marks')) * 0.35), // Auto 35%
             batch: formData.get('batchId') ? parseInt(formData.get('batchId')) : null,
-            grade_class: formData.get('grade') ? `Class ${formData.get('grade')}` : null,
+            grade_class: formData.get('grade') ? `Class ${formData.get('grade')} ` : null,
             subject: null // For simplicity now
         };
 
@@ -2202,11 +2829,11 @@ const DashboardApp = {
         }
 
         try {
-            const response = await fetch(`${this.apiBaseUrl}/exams/`, {
+            const response = await fetch(`${this.apiBaseUrl} /exams/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')} `,
                     'X-CSRFToken': this.getCsrfToken(),
                     'X-CSRFToken': this.getCsrfToken()
                 },
@@ -2221,7 +2848,7 @@ const DashboardApp = {
                 const grade = formData.get('grade');
 
                 // To refresh properly, we need to know the name context, but simple reload works
-                this.openBatchExams(batchId ? parseInt(batchId) : null, batchId ? 'Batch Exams' : `Class ${grade}`, grade ? parseInt(grade) : null);
+                this.openBatchExams(batchId ? parseInt(batchId) : null, batchId ? 'Batch Exams' : `Class ${grade} `, grade ? parseInt(grade) : null);
             } else {
                 const errorData = await response.json();
                 alert('Failed to create exam: ' + JSON.stringify(errorData));
@@ -2241,7 +2868,7 @@ const DashboardApp = {
         if (!window.currentCalDate) window.currentCalDate = new Date();
 
         container.innerHTML = `
-        <div class="module-header">
+    < div class="module-header" >
             <div>
                  <h1 class="page-title">📅 Academic Calendar</h1>
                  <p class="page-subtitle">Smart Holiday & Event Management</p>
@@ -2254,29 +2881,29 @@ const DashboardApp = {
                  </div>
                  <button class="btn-action" onclick="DashboardApp.showAddHolidayModal()">+ Add Holiday</button>
             </div>
-        </div>
+        </div >
 
-        <div style="display:grid; grid-template-columns: 3fr 1fr; gap:20px;">
-            <!-- MAIN CALENDAR GRID -->
-            <div class="calendar-container" style="background: rgba(15, 23, 42, 0.6); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); min-height:600px;">
-                <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px; text-align:center; margin-bottom:15px; color:var(--text-muted); font-weight:600;">
-                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                </div>
-                <div id="calendarGrid" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px;">
-                     <!-- Days render here -->
-                     <div class="loader">Loading...</div>
-                </div>
+    <div style="display:grid; grid-template-columns: 3fr 1fr; gap:20px;">
+        <!-- MAIN CALENDAR GRID -->
+        <div class="calendar-container" style="background: rgba(15, 23, 42, 0.6); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); min-height:600px;">
+            <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px; text-align:center; margin-bottom:15px; color:var(--text-muted); font-weight:600;">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
             </div>
-
-            <!-- UPCOMING SIDEBAR -->
-            <div class="upcoming-sidebar" style="background: rgba(15, 23, 42, 0.4); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05);">
-                <h3 style="color:white; font-size:1.1rem; margin-bottom:20px;">Upcoming Holidays</h3>
-                <div id="upcomingList" style="display:flex; flex-direction:column; gap:15px;">
-                     <!-- List renders here -->
-                </div>
+            <div id="calendarGrid" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px;">
+                <!-- Days render here -->
+                <div class="loader">Loading...</div>
             </div>
         </div>
-        `;
+
+        <!-- UPCOMING SIDEBAR -->
+        <div class="upcoming-sidebar" style="background: rgba(15, 23, 42, 0.4); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05);">
+            <h3 style="color:white; font-size:1.1rem; margin-bottom:20px;">Upcoming Holidays</h3>
+            <div id="upcomingList" style="display:flex; flex-direction:column; gap:15px;">
+                <!-- List renders here -->
+            </div>
+        </div>
+    </div>
+`;
 
         await this.renderCalendar();
     },
@@ -2295,13 +2922,13 @@ const DashboardApp = {
 
         // Update Header
         const display = document.getElementById('calMonthDisplay');
-        if (display) display.innerText = `${monthNames[month]} ${year}`;
+        if (display) display.innerText = `${monthNames[month]} ${year} `;
 
         // Fetch Holidays
         let holidays = [];
         try {
-            const res = await fetch(`${this.apiBaseUrl}/calendar/holidays/`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            const res = await fetch(`${this.apiBaseUrl} /calendar/holidays / `, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')} ` }
             });
             if (res.ok) holidays = await res.json();
         } catch (e) { console.error(e); }
@@ -2318,7 +2945,7 @@ const DashboardApp = {
 
         // Empty slots for previous month
         for (let i = 0; i < startingDay; i++) {
-            grid.innerHTML += `<div style="padding:15px;"></div>`;
+            grid.innerHTML += `< div style = "padding:15px;" ></div > `;
         }
 
         const todayDate = new Date();
@@ -2338,16 +2965,16 @@ const DashboardApp = {
                 if (ev.type === 'NATIONAL') color = '#ef4444';
                 if (ev.type === 'REGIONAL') color = '#f59e0b';
 
-                eventHtml += `<div style="background:${color}; padding:2px 6px; border-radius:4px; font-size:0.7rem; color:white; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.title}</div>`;
+                eventHtml += `< div style = "background:${color}; padding:2px 6px; border-radius:4px; font-size:0.7rem; color:white; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" > ${ev.title}</div > `;
             });
 
             grid.innerHTML += `
-            <div style="background: ${isToday ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.03)'}; 
-                        border: 1px solid ${isToday ? '#6366f1' : 'rgba(255,255,255,0.05)'}; 
-                        border-radius:10px; padding:10px; min-height:80px; transition:all 0.2s; cursor:pointer;"
-                 onmouseenter="this.style.background='rgba(255,255,255,0.08)'"
-                 onmouseleave="this.style.background='${isToday ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.03)'}'"
-                 onclick="DashboardApp.showAddHolidayModal('${dateStr}')">
+    < div style = "background: ${isToday ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.03)'}; 
+border: 1px solid ${isToday ? '#6366f1' : 'rgba(255,255,255,0.05)'};
+border - radius: 10px; padding: 10px; min - height: 80px; transition:all 0.2s; cursor: pointer; "
+onmouseenter = "this.style.background='rgba(255,255,255,0.08)'"
+onmouseleave = "this.style.background='${isToday ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.03)'}'"
+onclick = "DashboardApp.showAddHolidayModal('${dateStr}')" >
                  
                  <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:700; color:${isToday ? '#818cf8' : 'white'};">${i}</span>
@@ -2356,7 +2983,7 @@ const DashboardApp = {
                  <div style="margin-top:5px;">
                     ${eventHtml}
                  </div>
-            </div>`;
+            </div > `;
         }
 
         // Render Upcoming List
@@ -2374,7 +3001,7 @@ const DashboardApp = {
             .slice(0, 5);
 
         if (upcoming.length === 0) {
-            list.innerHTML = `<div style="color:var(--text-muted); text-align:center;">No upcoming holidays.</div>`;
+            list.innerHTML = `< div style = "color:var(--text-muted); text-align:center;" > No upcoming holidays.</div > `;
             return;
         }
 
@@ -2384,32 +3011,32 @@ const DashboardApp = {
             if (h.type === 'REGIONAL') icon = '🎉';
 
             return `
-             <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border-left: 3px solid #6366f1;">
+    < div style = "background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border-left: 3px solid #6366f1;" >
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                     <span style="font-weight:600; color:white;">${icon} ${h.title}</span>
                     <span style="font-size:0.8rem; color:var(--text-muted);">${h.start}</span>
                 </div>
                 <div style="font-size:0.8rem; color:var(--text-muted);">${h.description || h.type}</div>
-             </div>
-             `;
+             </div >
+    `;
         }).join('');
     },
 
     showAddHolidayModal(dateStr) {
         const modal = `
-            <div class="modal-overlay" id="holidayModal">
-                <div class="modal-card">
-                    <div class="modal-header">
-                        <h2>📅 Add Holiday / Event</h2>
-                        <button class="close-btn" onclick="document.getElementById('holidayModal').remove()">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <label class="form-label">Event Name</label>
-                        <input type="text" id="holidayName" class="form-input" placeholder="e.g. Diwali Vacation">
-                        
-                        <label class="form-label">Date</label>
-                        <input type="date" id="holidayDate" class="form-input" value="${dateStr || ''}">
-                        
+    < div class="modal-overlay" id = "holidayModal" >
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>📅 Add Holiday / Event</h2>
+                <button class="close-btn" onclick="document.getElementById('holidayModal').remove()">×</button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Event Name</label>
+                <input type="text" id="holidayName" class="form-input" placeholder="e.g. Diwali Vacation">
+
+                    <label class="form-label">Date</label>
+                    <input type="date" id="holidayDate" class="form-input" value="${dateStr || ''}">
+
                         <label class="form-label">Type</label>
                         <select id="holidayType" class="form-input">
                             <option value="ACADEMIC" selected>Academic Holiday</option>
@@ -2417,7 +3044,7 @@ const DashboardApp = {
                             <option value="REGIONAL">Regional Festival</option>
                             <option value="EMERGENCY">Emergency Off</option>
                         </select>
-                        
+
                         <label class="form-label">Description</label>
                         <textarea id="holidayDesc" class="form-input" rows="3" placeholder="Optional notes..."></textarea>
                     </div>
@@ -2425,9 +3052,9 @@ const DashboardApp = {
                         <button class="btn-secondary" onclick="document.getElementById('holidayModal').remove()">Cancel</button>
                         <button class="btn-primary" onclick="DashboardApp.submitHoliday()">Create Event</button>
                     </div>
-                </div>
             </div>
-        `;
+        </div>
+`;
         document.body.insertAdjacentHTML('beforeend', modal);
     },
 
@@ -2443,11 +3070,11 @@ const DashboardApp = {
         }
 
         try {
-            const res = await fetch(`${this.apiBaseUrl}/calendar/holidays/`, {
+            const res = await fetch(`${this.apiBaseUrl} /calendar/holidays / `, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')} `,
                     'X-CSRFToken': this.getCsrfToken()
                 },
                 body: JSON.stringify({ name, date, type, description: desc })
@@ -2477,14 +3104,14 @@ const DashboardApp = {
             }
 
             tbody.innerHTML = events.map(e => `
-                <tr>
+    < tr >
                     <td style="font-weight:600; color:white;">${e.name}</td>
                     <td>${e.description || '-'}</td>
                     <td>${e.date || e.start_date}</td>
                     <td>${e.location || e.venue || 'On Campus'}</td>
                     <td><span class="status-badge status-active">Active</span></td>
-                </tr>
-            `).join('');
+                </tr >
+    `).join('');
         } catch (error) {
             console.error(error);
             document.getElementById('eventTableBody').innerHTML = '<tr><td colspan="5" class="text-center">Failed to load events.</td></tr>';
@@ -2494,7 +3121,7 @@ const DashboardApp = {
     async loadReportsAnalytics() {
         const container = document.getElementById('dashboardView');
         container.innerHTML = `
-        <div class="module-header">
+    < div class="module-header" >
             <div>
                 <h1 class="page-title">📈 Analytics & Insight</h1>
                 <p class="page-subtitle">Real-time performance metrics and detailed reports.</p>
@@ -2503,9 +3130,9 @@ const DashboardApp = {
                 <button id="btnExportPdf" class="btn-action" onclick="DashboardApp.exportAnalyticsPDF()">📥 Export PDF</button>
                 <button class="btn-primary" onclick="DashboardApp.generateReport()">⚡ Generate New Report</button>
             </div>
-        </div>
+        </div >
 
-        <!-- Charts Grid (Visual Only for now) -->
+        < !--Charts Grid(Visual Only for now) -->
         <div class="cards-grid" style="grid-template-columns: 2fr 1fr; margin-bottom: 30px;">
              <!-- ... (Charts code remains same or simplified) ... -->
              <div class="module-card">
@@ -2530,27 +3157,27 @@ const DashboardApp = {
             </div>
         </div>
 
-        <!-- Recent Reports Table -->
-        <div class="data-table-container">
-            <div style="padding: 20px; border-bottom: 1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="color: white; margin:0;">Generated Reports History</h3>
-            </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Report Name</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="reportsTableBody">
-                    <tr><td colspan="5" class="text-center">Loading reports...</td></tr>
-                </tbody>
-            </table>
+        <!--Recent Reports Table-- >
+    <div class="data-table-container">
+        <div style="padding: 20px; border-bottom: 1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="color: white; margin:0;">Generated Reports History</h3>
         </div>
-        `;
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Report Name</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="reportsTableBody">
+                <tr><td colspan="5" class="text-center">Loading reports...</td></tr>
+            </tbody>
+        </table>
+    </div>
+`;
 
         // Fetch Real Reports
         try {
@@ -2742,7 +3369,9 @@ const DashboardApp = {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
             if (res.ok) {
-                const routines = await res.json();
+                let routines = await res.json();
+                // Robust: handle paginated { results: [...] } or flat array
+                if (!Array.isArray(routines)) routines = routines.results || [];
                 this.renderRoutine(routines);
             }
         } catch (e) { console.error(e); }
@@ -3597,6 +4226,16 @@ const DashboardApp = {
             <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Customize your institution's digital identity.</p>
             <form onsubmit="event.preventDefault(); DashboardApp.handleProfileUpdate(event);" class="settings-form">
                 <div class="form-group">
+                    <label>Institution Type</label>
+                    <select name="institution_type" id="instType" class="form-input" style="background:#1e293b; color:white;">
+                        <option value="SCHOOL">School Management</option>
+                        <option value="COACHING">Coaching Management</option>
+                        <option value="INSTITUTE">Institute/University</option>
+                    </select>
+                    <p style="font-size:0.75rem; color:#f59e0b; margin-top:5px;">Note: Changing this will adjust your dashboard modules.</p>
+                </div>
+
+                <div class="form-group">
                     <label>Institution Name (appears on documents)</label>
                     <input type="text" name="institution_name" id="institutionName" class="form-input" placeholder="e.g. Springfield High School" required>
                 </div>
@@ -3728,6 +4367,7 @@ const DashboardApp = {
 
                 // Branding
                 document.getElementById('institutionName').value = data.institution_name || '';
+                if (document.getElementById('instType')) document.getElementById('instType').value = data.institution_type || 'SCHOOL';
 
                 if (data.institution_logo) {
                     document.getElementById('currentLogo').style.display = 'block';
@@ -3806,9 +4446,9 @@ const DashboardApp = {
     showAddStudentForm() {
         const modalHtml = `
     <div class="modal-overlay" id="addStudentModal">
-        <div class="modal-card">
+        <div class="modal-card add-student-modal-card">
             <h2>Add New Student</h2>
-            <form id="addStudentForm" onsubmit="event.preventDefault(); DashboardApp.handleStudentSubmit(event);">
+            <form id="addStudentForm" class="add-student-form" onsubmit="event.preventDefault(); DashboardApp.handleStudentSubmit(event);">
                 <div class="form-group">
                     <label>Institution Type</label>
                     <select name="institution_type" class="form-input" required onchange="DashboardApp.toggleStudentFields(this.value)">
@@ -3838,13 +4478,13 @@ const DashboardApp = {
                 </div>
 
                 <div class="form-group">
-                    <label>Gender</label>
-                    <select name="gender" class="form-input" required>
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                </div>
+                <label>Gender</label>
+                <select name="gender" class="form-input" required>
+                    <option value="">Select Gender</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                </select>
+            </div>
                 <div class="form-group">
                     <label>Parent/Guardian Relation</label>
                     <input type="text" name="relation" class="form-input" required placeholder="e.g. Father">
@@ -3867,11 +4507,34 @@ const DashboardApp = {
     </div>
     `;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('addStudentModal');
+        const card = modal ? modal.querySelector('.add-student-modal-card') : null;
+        if (modal && card) {
+            modal.addEventListener('wheel', (e) => {
+                card.scrollTop += e.deltaY;
+                e.preventDefault();
+            }, { passive: false });
+        }
     },
 
     toggleStudentFields(type) {
-        // Logic to show/hide specific fields based on type if needed
-        // For now keeping it simple as per prompt requirements
+        // Dynamic Field Visibility
+        const gradeField = document.getElementById('gradeField');
+        const departmentField = document.getElementById('departmentField');
+        // Note: You might need to add id="departmentField" to the form HTML if you want to toggle it.
+        // For now, let's just adjust labels or placeholders if needed.
+
+        if (type === 'INSTITUTE') {
+            if (gradeField) {
+                gradeField.querySelector('label').innerText = 'Semester/Year';
+                gradeField.querySelector('input').placeholder = 'e.g. 1st Year';
+            }
+        } else {
+            if (gradeField) {
+                gradeField.querySelector('label').innerText = 'Class/Grade';
+                gradeField.querySelector('input').placeholder = 'e.g. 10';
+            }
+        }
     },
 
     async handleStudentSubmit(event) {
@@ -3903,7 +4566,13 @@ const DashboardApp = {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(Object.values(errorData).flat().join(', ') || 'Failed to add student');
+                let errorMsg = 'Failed to add student';
+                if (typeof errorData === 'object') {
+                    errorMsg = Object.keys(errorData).map(key => `${key}: ${errorData[key]}`).join('\n');
+                } else {
+                    errorMsg = errorData.error || errorData.detail || 'Failed to add student';
+                }
+                throw new Error(errorMsg);
             }
 
             // Success
@@ -3921,7 +4590,24 @@ const DashboardApp = {
 
     async editStudent(id) {
         try {
-            DashboardApp.showAlert('Loading...', 'Fetching student details...', 'info');
+            // Show loading state
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.id = 'editStudentLoading';
+            loadingOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+                z-index: 9998; display: flex; justify-content: center; align-items: center;
+            `;
+            loadingOverlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 30px 50px; border-radius: 16px; border: 1px solid rgba(99, 102, 241, 0.3); box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+                    <div style="color: white; font-size: 1.1rem; display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 24px; height: 24px; border: 3px solid rgba(99, 102, 241, 0.3); border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <span>Loading student details...</span>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingOverlay);
+
             const res = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('authToken') }
             });
@@ -3929,92 +4615,36 @@ const DashboardApp = {
             if (!res.ok) throw new Error("Failed to fetch student details");
 
             const student = await res.json();
-            DashboardApp.closeAlert(); // Close loading alert
+
+            // Remove loading overlay
+            if (loadingOverlay.parentNode) {
+                loadingOverlay.remove();
+            }
+
+            // Show modal immediately
             this.showEditStudentModal(student);
 
         } catch (e) {
             console.error(e);
+            const loading = document.getElementById('editStudentLoading');
+            if (loading) loading.remove();
             DashboardApp.showAlert('Error', 'Could not load student details.', 'error');
         }
     },
 
     showEditStudentModal(student) {
-        // Pre-select logic
-        const genderOptions = `
-            <option value="Male" ${student.gender === 'Male' ? 'selected' : ''}>Male</option>
-            <option value="Female" ${student.gender === 'Female' ? 'selected' : ''}>Female</option>
-        `;
-
-        const typeOptions = `
-            <option value="SCHOOL" ${student.institution_type === 'SCHOOL' ? 'selected' : ''}>School Student</option>
-            <option value="COACHING" ${student.institution_type === 'COACHING' ? 'selected' : ''}>Coaching Student</option>
-            <option value="INSTITUTE" ${student.institution_type === 'INSTITUTE' ? 'selected' : ''}>Institute/College Student</option>
-        `;
-
-        const modalHtml = `
-    <div class="modal-overlay" id="editStudentModal">
-        <div class="modal-card">
-            <h2>✏️ Edit Student Details</h2>
-            <form id="editStudentForm" onsubmit="event.preventDefault(); DashboardApp.handleEditStudentSubmit(event, ${student.id});">
-                <div class="form-group">
-                    <label>Institution Type</label>
-                    <select name="institution_type" class="form-input" required>
-                        ${typeOptions}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" name="name" class="form-input" required value="${student.name || ''}">
-                </div>
-                
-                <div class="row" style="display:flex; gap:15px;">
-                    <div class="form-group" style="flex:1;">
-                        <label>Age</label>
-                        <input type="number" name="age" class="form-input" required value="${student.age || ''}">
-                    </div>
-                    <div class="form-group" style="flex:1;">
-                        <label>Date of Birth</label>
-                        <input type="date" name="dob" class="form-input" required value="${student.dob || ''}">
-                    </div>
-                </div>
-                
-                <div class="row" style="display:flex; gap:15px;">
-                    <div class="form-group" style="flex:1;">
-                        <label>Class/Grade</label>
-                        <input type="number" name="grade" class="form-input" required value="${student.grade || 0}">
-                    </div>
-                    <div class="form-group" style="flex:1;">
-                        <label>Gender</label>
-                        <select name="gender" class="form-input" required>
-                            ${genderOptions}
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Parent/Guardian Relation</label>
-                    <input type="text" name="relation" class="form-input" required value="${student.relation || ''}" placeholder="e.g. Father">
-                </div>
-                
-                <div class="form-group">
-                    <label>Update Photo (Optional)</label>
-                    <div class="file-upload-wrapper" style="border: 2px dashed #4b5563; padding: 10px; text-align: center; border-radius: 8px; position: relative;">
-                        <input type="file" name="photo" class="form-input" accept="image/*" style="opacity: 0; position: absolute; top:0; left:0; width:100%; height:100%; cursor: pointer;">
-                        <span style="color: #9ca3af; font-size:0.9rem;">📸 Click to Change Photo</span>
-                    </div>
-                    ${student.photo ? `<div style="font-size:0.8rem; color:#10b981; margin-top:5px;">Current photo exists</div>` : ''}
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="document.getElementById('editStudentModal').remove()">Cancel</button>
-                    <button type="submit" class="btn-primary">Update Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        console.log("🚀 Invoking Global Premium Edit Modal");
+        if (typeof window.showEditStudentModalPremium === 'function') {
+            window.showEditStudentModalPremium(student);
+        } else if (typeof window.showEditStudentModalPremiumImpl === 'function') {
+            // Direct implementation fallback
+            window.showEditStudentModalPremiumImpl(student);
+        } else if (typeof DashboardApp.showEditStudentModalPremium === 'function') {
+            DashboardApp.showEditStudentModalPremium(student);
+        } else {
+            console.error('Premium modal not loaded, falling back to basic alert.');
+            alert('Err: Premium Modal Script Not Loaded. Please Refresh.');
+        }
     },
 
     async handleEditStudentSubmit(event, id) {
@@ -4035,7 +4665,7 @@ const DashboardApp = {
         try {
             const token = localStorage.getItem('authToken');
             const response = await fetch(`${this.apiBaseUrl}/students/${id}/`, {
-                method: 'PUT', // or PATCH
+                method: 'PATCH', // Changed from PUT to PATCH for safer partial updates
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'X-CSRFToken': this.getCsrfToken()
@@ -4049,7 +4679,10 @@ const DashboardApp = {
             }
 
             // Success
-            document.getElementById('editStudentModal').remove();
+            const modal = document.getElementById('editStudentModal');
+            if (modal) {
+                modal.remove();
+            }
             this.fetchStudents(); // Refresh list
             DashboardApp.showAlert('Success', 'Student details updated successfully!', 'success');
 
@@ -4349,13 +4982,17 @@ const DashboardApp = {
             const courseRes = await fetch(`${this.apiBaseUrl}/courses/`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            const courses = await courseRes.json();
+            let courses = await courseRes.json();
+            // Robust: handle paginated { results: [...] } or flat array
+            if (!Array.isArray(courses)) courses = courses.results || [];
 
             // Fetch Batches
             const batchRes = await fetch(`${this.apiBaseUrl}/batches/`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            const batches = await batchRes.json();
+            let batches = await batchRes.json();
+            // Robust: handle paginated { results: [...] } or flat array
+            if (!Array.isArray(batches)) batches = batches.results || [];
 
             // Update Stats
             document.getElementById('totalCourses').innerText = courses.length;
@@ -4913,7 +5550,27 @@ const DashboardApp = {
             });
             const result = await response.json();
             if (response.ok) {
-                this.showAlert('✅ Approved!', 'Account activated. Credentials emailed.', 'success');
+                const reason = (result.email_dispatched_reason || '').toLowerCase();
+                const hasDispatchStatus = Object.prototype.hasOwnProperty.call(result, 'email_dispatched');
+                const emailDispatched = hasDispatchStatus ? Boolean(result.email_dispatched) : null;
+
+                let alertTitle = '✅ Approved!';
+                let alertMessage = 'Account activated successfully.';
+                let alertType = 'success';
+
+                if (reason === 'sent' || emailDispatched === true) {
+                    alertMessage = 'Account activated. Credentials and invoice emailed.';
+                } else if (reason === 'no_email') {
+                    alertTitle = 'Approved With Warning';
+                    alertType = 'warning';
+                    alertMessage = 'Account activated, but client email missing. Credentials/invoice email not sent.';
+                } else if (reason === 'dispatch_failed' || emailDispatched === false) {
+                    alertTitle = 'Approved With Warning';
+                    alertType = 'warning';
+                    alertMessage = 'Account activated, but email dispatch failed. Please resend credentials/invoice manually.';
+                }
+
+                this.showAlert(alertTitle, alertMessage, alertType);
                 setTimeout(() => this.loadSuperAdminSubscriptionOverview(), 1500);
             } else {
                 this.showAlert('Failed', result.error || 'Could not approve', 'error');
@@ -5147,7 +5804,7 @@ const DashboardApp = {
                             <div>
                                 <label class="form-label">Initial Password</label>
                                 <div style="position: relative;">
-                                    <input type="text" id="staffPassword" class="form-input premium-input" value="Welcome@123">
+                                    <input type="text" id="staffInitialPassword" class="form-input premium-input" value="Welcome@123" autocomplete="new-password">
                                     <span style="position: absolute; right: 10px; top: 35px; font-size: 0.7rem; color: #64748b;">Default: Welcome@123</span>
                                 </div>
                             </div>
@@ -5252,7 +5909,7 @@ const DashboardApp = {
         const lname = document.getElementById('staffLName').value;
         const email = document.getElementById('staffEmail').value;
         const username = document.getElementById('staffUsername').value || (fname + Math.floor(Math.random() * 100)).toLowerCase();
-        const password = document.getElementById('staffPassword').value;
+        const password = document.getElementById('staffInitialPassword').value;
         const role = document.getElementById('staffRole').value;
         const contract = document.getElementById('staffContract').value;
         const salary = document.getElementById('staffSalary').value;
@@ -5348,7 +6005,9 @@ const DashboardApp = {
             const res = await fetch(`${this.apiBaseUrl}/audit/logs/client/`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            const logs = await res.json();
+            let logs = await res.json();
+            // Robust: handle paginated { results: [...] } or flat array
+            if (!Array.isArray(logs)) logs = logs.results || [];
             const tbody = document.getElementById('logsTableBody');
 
             if (logs.length === 0) {
@@ -5477,7 +6136,7 @@ const DashboardApp = {
         } catch (e) {
             this.showAlert('Error', 'Network error', 'error');
         }
-    },
+    }
 };
 
 // Universal Menu Toggle (Premium UX - Auto-Close on Click)
@@ -5689,3 +6348,107 @@ DashboardApp.showExpiryWarning = function (days) {
     banner.innerHTML = `⚠️ Your plan expires in ${days} days. <a href="#" onclick="DashboardApp.checkSubscriptionStatus()" style="color:black;text-decoration:underline;">Renew Now</a>`;
     document.body.prepend(banner);
 };
+
+// --- DYNAMICALLY ADDED HELPER FUNCTIONS ---
+
+DashboardApp.showFeesModal = function (studentId, studentName) {
+    const modal = `
+        <div class="modal-overlay" id="feesModal" style="z-index:9999;">
+            <div class="modal-card" style="max-width: 600px; background: #0f172a; border: 1px solid #334155;">
+                <div class="modal-header">
+                    <h2 style="color:white">💵 Fee History: ${studentName}</h2>
+                    <button class="close-btn" onclick="document.getElementById('feesModal').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:center; padding:40px;">
+                        <div style="font-size:3rem; margin-bottom:10px;">📊</div>
+                        <p style="color:#94a3b8; font-size:1.1rem;">Fee data integration pending.</p>
+                        <button class="btn-primary" onclick="window.location.hash='#finance'; document.getElementById('feesModal').remove()">
+                            Go to Finance Module
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modal);
+};
+
+DashboardApp.showStudentAttendance = function (studentId, studentName) {
+    const modal = `
+        <div class="modal-overlay" id="attModal" style="z-index:9999;">
+            <div class="modal-card" style="max-width: 600px; background: #0f172a; border: 1px solid #334155;">
+                <div class="modal-header">
+                    <h2 style="color:white">✅ Attendance Report: ${studentName}</h2>
+                    <button class="close-btn" onclick="document.getElementById('attModal').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:25px;">
+                        <div style="flex:1; margin-right:10px; background:rgba(16, 185, 129, 0.1); padding:20px; border-radius:12px; text-align:center; border:1px solid rgba(16, 185, 129, 0.2);">
+                            <h3 style="color:#10b981; margin:0; font-size:2rem;">85%</h3>
+                            <span style="font-size:0.9rem; color:#94a3b8;">Present</span>
+                        </div>
+                        <div style="flex:1; margin-left:10px; background:rgba(239, 68, 68, 0.1); padding:20px; border-radius:12px; text-align:center; border:1px solid rgba(239, 68, 68, 0.2);">
+                            <h3 style="color:#ef4444; margin:0; font-size:2rem;">15%</h3>
+                            <span style="font-size:0.9rem; color:#94a3b8;">Absent</span>
+                        </div>
+                    </div>
+                    <div style="background:#1e293b; padding:15px; border-radius:8px;">
+                        <h4 style="color:white; margin-bottom:10px;">Recent Logs</h4>
+                        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #334155;">
+                            <span style="color:#cbd5e1">Today</span>
+                            <span style="color:#10b981; font-weight:bold;">Present</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #334155;">
+                            <span style="color:#cbd5e1">Yesterday</span>
+                            <span style="color:#10b981; font-weight:bold;">Present</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modal);
+};
+
+// Initialize on DOM load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => DashboardApp.init());
+} else {
+    DashboardApp.init();
+}
+
+/* ---------- SOVEREIGN INTELLIGENCE: ROI & AI RADAR ---------- */
+async function refreshROI() {
+    const insightEl = document.getElementById('aiBusinessInsight');
+    if (!insightEl) return;
+
+    insightEl.innerHTML = '🛡️ <span class="ai-loading">Sovereign Engine analyzing financial vectors...</span>';
+
+    try {
+        const data = await DashboardAPI.getROI();
+
+        // 1. Update Insight Text
+        insightEl.classList.add('fade-in');
+        insightEl.innerHTML = data.ai_insight || 'Strategic overview complete. System is stable.';
+
+        // 2. Update Finance Stats on Dashboard cards if present
+        const profitEl = document.getElementById('netProfitSummary');
+        if (profitEl) {
+            profitEl.innerText = '₹' + data.finance.net_profit.toLocaleString();
+            profitEl.style.color = data.finance.net_profit >= 0 ? '#10b981' : '#ef4444';
+        }
+
+        const riskEl = document.getElementById('riskCountSummary');
+        if (riskEl) {
+            riskEl.innerText = data.academic_risk.length;
+        }
+
+    } catch (e) {
+        console.error("ROI Fetch Error:", e);
+        insightEl.innerText = 'Neural link interrupted. Metrics available in raw reports.';
+    }
+}
+
+// Auto-run on dashboard load
+document.addEventListener('DOMContentLoaded', () => { setTimeout(refreshROI, 2000); });

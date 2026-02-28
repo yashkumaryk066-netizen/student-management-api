@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Policy - Y.S.M AI Education System</title>
+    <link rel="icon" type="image/png" href="/static/img/ysm_logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 24px;
+            padding: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        h2 {
+            color: #10b981;
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 4px solid #10b981;
+        }
+
+        h3 {
+            color: #34d399;
+            font-size: 1.3rem;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #cbd5e1;
+        }
+
+        ul,
+        ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+
+        .highlight {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10b981;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #f59e0b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            color: #10b981;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(16, 185, 129, 0.2);
+            transform: translateX(-5px);
+        }
+
+        strong {
+            color: #e0e7ff;
+        }
+
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            padding-left: 50px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Home</a>
+
+        <div class="header">
+            <h1>Refund & Cancellation Policy</h1>
+            <p>Last Updated: February 12, 2026</p>
+        </div>
+
+        <div class="highlight">
+            <p><strong>We want you to be completely satisfied with Y.S.M AI.</strong> Our refund policy is designed to
+                be fair and transparent. Please read the terms below carefully.</p>
+        </div>
+
+        <h2>1. 30-Day Money-Back Guarantee</h2>
+        <p>We offer a <strong>full refund with no questions asked</strong> if you cancel within 30 days of your initial
+            purchase.</p>
+
+        <h3>Eligibility:</h3>
+        <ul>
+            <li>✅ Valid for new subscribers only (first-time purchase)</li>
+            <li>✅ Must request refund within 30 calendar days of payment</li>
+            <li>✅ 100% refund to original payment method</li>
+            <li>✅ No deductions or processing fees</li>
+        </ul>
+
+        <h2>2. Refunds After 30 Days</h2>
+        <p>If you cancel after the 30-day guarantee period, refunds are calculated on a pro-rated basis:</p>
+
+        <div class="highlight">
+            <p><strong>Pro-Rated Refund Formula:</strong></p>
+            <p
+                style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;">
+                Refund Amount = (Annual Fee ÷ 12) × Unused Months - Processing Fee (₹200)
+            </p>
+        </div>
+
+        <h3>Example Calculations:</h3>
+        <ul>
+            <li><strong>Scenario 1:</strong> School Plan (₹4,999), cancelled after 3 months
+                <br>→ Refund = (₹4,999 ÷ 12) × 9 months - ₹200 = <strong>₹3,549</strong>
+            </li>
+            <li><strong>Scenario 2:</strong> Institute Plan (₹6,999), cancelled after 6 months
+                <br>→ Refund = (₹6,999 ÷ 12) × 6 months - ₹200 = <strong>₹3,300</strong>
+            </li>
+            <li><strong>Scenario 3:</strong> Coaching Plan (₹2,999), cancelled after 10 months
+                <br>→ Refund = (₹2,999 ÷ 12) × 2 months - ₹200 = <strong>₹300</strong>
+            </li>
+        </ul>
+
+        <div class="warning">
+            <p><strong>⚠️ Important Notes:</strong></p>
+            <ul>
+                <li>Refunds are available only if at least 2 months remain in your subscription</li>
+                <li>No refunds for subscriptions cancelled in the last month</li>
+                <li>Processing fee of ₹200 applies to all pro-rated refunds</li>
+            </ul>
+        </div>
+
+        <h2>3. Non-Refundable Scenarios</h2>
+        <p>Refunds will NOT be provided in the following cases:</p>
+
+        <ul>
+            <li>❌ Account terminated due to Terms of Service violation</li>
+            <li>❌ Fraudulent payment or chargeback disputes</li>
+            <li>❌ Account suspended for non-payment</li>
+            <li>❌ Subscription already expired or renewed</li>
+            <li>❌ Custom development or integration services (if purchased separately)</li>
+            <li>❌ Training or consulting services rendered</li>
+        </ul>
+
+        <h2>4. How to Request a Refund</h2>
+        <p>Follow these steps to initiate a refund:</p>
+
+        <ol class="steps">
+            <li>
+                <strong>Submit Request:</strong>
+                <br>Email <a href="mailto:support@ysm.education" style="color: #10b981;">support@ysm.education</a> with
+                subject line "Refund Request - [Your Institution Name]"
+            </li>
+            <li>
+                <strong>Provide Details:</strong>
+                <br>Include: Transaction ID/UTR, payment date, registered email, and reason for cancellation
+            </li>
+            <li>
+                <strong>Verification:</strong>
+                <br>Our team will verify your account and payment details (1-2 business days)
+            </li>
+            <li>
+                <strong>Approval:</strong>
+                <br>You'll receive a refund approval email with amount breakdown
+            </li>
+            <li>
+                <strong>Processing:</strong>
+                <br>Refund will be processed to your original payment method within 7-14 business days
+            </li>
+        </ol>
+
+        <h2>5. Refund Processing Timeline</h2>
+        <div class="highlight">
+            <ul>
+                <li><strong>Bank Transfer/UPI:</strong> 3-5 business days</li>
+                <li><strong>Credit/Debit Card:</strong> 7-10 business days</li>
+                <li><strong>Online Wallets:</strong> 5-7 business days</li>
+                <li><strong>International Payments:</strong> 10-14 business days</li>
+            </ul>
+            <p style="margin-top: 15px; color: #94a3b8;">
+                <em>Note: Processing time may vary depending on your bank or payment provider. We initiate refunds
+                    within 48 hours of approval.</em>
+            </p>
+        </div>
+
+        <h2>6. Cancellation Process</h2>
+        <p>You can cancel your subscription anytime through:</p>
+
+        <h3>Option 1: Self-Service (Instant)</h3>
+        <ol>
+            <li>Login to your Y.S.M AI dashboard</li>
+            <li>Go to <strong>Settings → Subscription</strong></li>
+            <li>Click "Cancel Subscription"</li>
+            <li>Confirm cancellation and select reason</li>
+            <li>Your access continues until the end of the current billing period</li>
+        </ol>
+
+        <h3>Option 2: Contact Support</h3>
+        <ul>
+            <li>📧 Email: <a href="mailto:support@ysm.education" style="color: #10b981;">support@ysm.education</a></li>
+            <li>📱 WhatsApp: <a href="tel:+918356926231" style="color: #10b981;">+91 8356926231</a></li>
+        </ul>
+
+        <h2>7. Data Export After Cancellation</h2>
+        <p>Upon cancellation, you have <strong>30 days</strong> to export your data:</p>
+
+        <div class="highlight">
+            <p><strong>Available Data Export Formats:</strong></p>
+            <ul>
+                <li>📊 Student Records (CSV, Excel)</li>
+                <li>📈 Attendance Reports (PDF, CSV)</li>
+                <li>💰 Payment History (CSV, Excel)</li>
+                <li>📚 Academic Results (CSV, PDF)</li>
+                <li>📄 Uploaded Documents (ZIP)</li>
+            </ul>
+            <p style="margin-top: 15px; color: #f59e0b;">
+                ⚠️ <strong>Important:</strong> After 30 days, your data will be permanently deleted and cannot be
+                recovered.
+            </p>
+        </div>
+
+        <h2>8. Upgrade/Downgrade Policy</h2>
+
+        <h3>Upgrading Your Plan:</h3>
+        <ul>
+            <li>Pay only the pro-rated difference for the remaining period</li>
+            <li>Instant access to upgraded features</li>
+            <li>No processing fees for upgrades</li>
+        </ul>
+
+        <h3>Downgrading Your Plan:</h3>
+        <ul>
+            <li>Downgrade takes effect at next renewal cycle</li>
+            <li>No refund for the current period</li>
+            <li>You retain access to premium features until renewal date</li>
+        </ul>
+
+        <h2>9. Exceptional Circumstances</h2>
+        <p>In certain cases, we may offer refunds outside the standard policy:</p>
+        <ul>
+            <li>Extended service outages (>72 hours)</li>
+            <li>Critical feature unavailability affecting core functionality</li>
+            <li>Billing errors or duplicate charges</li>
+            <li>Force majeure events (natural disasters, pandemics)</li>
+        </ul>
+        <p>These are evaluated on a case-by-case basis. Contact support for review.</p>
+
+        <h2>10. Chargeback Policy</h2>
+        <div class="warning">
+            <p><strong>⚠️ Please Contact Us Before Filing a Chargeback</strong></p>
+            <p>If you file a chargeback without contacting us first:</p>
+            <ul>
+                <li>Your account will be immediately suspended</li>
+                <li>You forfeit the right to refund or data export</li>
+                <li>We may pursue legal action for fraudulent chargebacks</li>
+            </ul>
+            <p style="margin-top: 10px;">We're here to help resolve any payment issues amicably. Please reach out to us
+                first!</p>
+        </div>
+
+        <h2>11. Disputes and Resolution</h2>
+        <p>If you're not satisfied with our refund decision:</p>
+        <ol>
+            <li>Email your concern to <a href="mailto:escalations@ysm.education"
+                    style="color: #10b981;">escalations@ysm.education</a></li>
+            <li>Provide your case reference number and detailed explanation</li>
+            <li>A senior team member will review within 3-5 business days</li>
+            <li>Final decision will be communicated via email</li>
+        </ol>
+
+        <h2>12. Contact Information</h2>
+        <div class="highlight">
+            <p><strong>For refund requests or questions:</strong></p>
+            <p>
+                📧 Email: <a href="mailto:support@ysm.education" style="color: #10b981;">support@ysm.education</a><br>
+                📧 Escalations: <a href="mailto:escalations@ysm.education"
+                    style="color: #10b981;">escalations@ysm.education</a><br>
+                📱 Phone/WhatsApp: <a href="tel:+918356926231" style="color: #10b981;">+91 8356926231</a><br>
+                🏢 Address: Varanasi, Uttar Pradesh, India<br>
+                ⏰ Support: 24/7 Available
+            </p>
+        </div>
+
+        <h2>13. Policy Updates</h2>
+        <p>We reserve the right to modify this Refund Policy. Changes will be communicated via:</p>
+        <ul>
+            <li>Email notification to all active subscribers</li>
+            <li>Announcement on the dashboard</li>
+            <li>Updated policy posted on our website</li>
+        </ul>
+        <p>Modified policy applies to new purchases. Existing subscriptions retain original terms.</p>
+
+        <div
+            style="margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(16, 185, 129, 0.2); text-align: center; color: #94a3b8;">
+            <p>© 2026 Y.S.M AI Education System. All Rights Reserved.</p>
+            <p style="margin-top: 10px;">
+                <a href="/" style="color: #10b981; text-decoration: none;">Home</a> |
+                <a href="/privacy-policy/" style="color: #10b981; text-decoration: none;">Privacy Policy</a> |
+                <a href="/terms-of-service/" style="color: #10b981; text-decoration: none;">Terms of Service</a>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

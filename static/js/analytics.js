@@ -43,7 +43,16 @@ class DashboardAnalytics {
     // Revenue Trend Chart (Line Chart)
     initRevenueChart() {
         const canvas = document.getElementById('revenueChart');
-        if (!canvas) return;
+        if (!canvas) {
+            console.log('📊 Revenue chart canvas not found, skipping...');
+            return;
+        }
+
+        // Check if canvas is visible
+        if (canvas.offsetParent === null) {
+            console.log('📊 Revenue chart hidden, skipping...');
+            return;
+        }
 
         // Destroy existing chart if it exists
         if (this.charts.revenue) {
@@ -51,6 +60,10 @@ class DashboardAnalytics {
         }
 
         const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.warn('📊 Could not get 2D context for revenue chart');
+            return;
+        }
 
         // Create gradient
         const gradient = ctx.createLinearGradient(0, 0, 0, 300);
@@ -114,7 +127,10 @@ class DashboardAnalytics {
     // Attendance Rate Chart (Donut Chart)
     initAttendanceChart() {
         const canvas = document.getElementById('attendanceChart');
-        if (!canvas) return;
+        if (!canvas || canvas.offsetParent === null) {
+            console.log('📊 Attendance chart not available, skipping...');
+            return;
+        }
 
         // Destroy existing chart if it exists
         if (this.charts.attendance) {
@@ -122,6 +138,7 @@ class DashboardAnalytics {
         }
 
         const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
         this.charts.attendance = new Chart(ctx, {
             type: 'doughnut',
@@ -166,7 +183,10 @@ class DashboardAnalytics {
     // Student Growth Chart (Bar Chart)
     initStudentGrowthChart() {
         const canvas = document.getElementById('studentGrowthChart');
-        if (!canvas) return;
+        if (!canvas || canvas.offsetParent === null) {
+            console.log('📊 Student growth chart not available, skipping...');
+            return;
+        }
 
         // Destroy existing chart if it exists
         if (this.charts.studentGrowth) {
@@ -174,6 +194,7 @@ class DashboardAnalytics {
         }
 
         const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
         this.charts.studentGrowth = new Chart(ctx, {
             type: 'bar',
@@ -230,7 +251,10 @@ class DashboardAnalytics {
     // Fee Collection Progress Chart (Horizontal Bar)
     initFeeCollectionChart() {
         const canvas = document.getElementById('feeCollectionChart');
-        if (!canvas) return;
+        if (!canvas || canvas.offsetParent === null) {
+            console.log('📊 Fee collection chart not available, skipping...');
+            return;
+        }
 
         // Destroy existing chart if it exists
         if (this.charts.feeCollection) {
@@ -238,6 +262,7 @@ class DashboardAnalytics {
         }
 
         const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
         this.charts.feeCollection = new Chart(ctx, {
             type: 'bar',

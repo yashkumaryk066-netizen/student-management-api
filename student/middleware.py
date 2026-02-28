@@ -2,6 +2,21 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 
+class DisableCacheMiddleware:
+    """
+    Disable caching for all responses to ensure fresh data.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response["Pragma"] = "no-cache"
+        response["Expires"] = "0"
+        return response
+
+
 class SubscriptionMiddleware:
     """
     Enterprise Subscription Middleware
@@ -31,12 +46,12 @@ class SubscriptionMiddleware:
             '/hostel/',
             '/payroll/',
             '/library/',
-            '/analytics/',
+            # '/analytics/', # REMOVED: ROI Analytics needed for Owners
         ),
         'SCHOOL': (
             '/hostel/',
             '/payroll/',
-            '/analytics/',
+            # '/analytics/', # REMOVED: ROI Analytics needed for Owners
         ),
         'INSTITUTE': (),  # Full access
     }
@@ -45,13 +60,21 @@ class SubscriptionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # DEBUG LOGGING - ACTIVE for troubleshooting
+        user = getattr(request, 'user', None)
+        print(f"🔍 MIDDLEWARE: User={user}, Auth={user.is_authenticated if user else False}, Superuser={user.is_superuser if user else False}, Path={request.path}")
 
         # --------------------------------------------------
         # 1. FAST EXIT – unauthenticated / superuser
         # --------------------------------------------------
         user = getattr(request, 'user', None)
 
-        if not user or not user.is_authenticated or user.is_superuser:
+        if not user or not user.is_authenticated:
+            return self.get_response(request)
+
+        # CRITICAL: Superuser bypass - MUST be checked AFTER authentication
+        # Superadmins have UNRESTRICTED access to ALL features
+        if user.is_superuser:
             return self.get_response(request)
 
         profile = getattr(user, 'profile', None)
@@ -95,9 +118,6 @@ class SubscriptionMiddleware:
             
             return self.get_response(request)
 
-            # Read-only allowed, skip plan restrictions
-            return self.get_response(request)
-
         # --------------------------------------------------
         # 3. PLAN-BASED FEATURE GATING (ACTIVE SUBS ONLY)
         # --------------------------------------------------
@@ -114,7 +134,139 @@ class SubscriptionMiddleware:
                     }
                 }, status=403)
 
-        # --------------------------------------------------
-        # 4. ALLOW REQUEST
-        # --------------------------------------------------
         return self.get_response(request)
+
+
+# =============================================================================
+# SECURITY MIDDLEWARE (Added for Security Audit Fixes)
+# =============================================================================
+
+import logging
+from django.utils.deprecation import MiddlewareMixin
+from student.models import AuditLog
+
+logger = logging.getLogger('security')
+
+
+class SecurityHeadersMiddleware(MiddlewareMixin):
+    """
+    Adds comprehensive security headers to all responses
+    Implements OWASP recommended security headers
+    """
+    
+    def process_response(self, request, response):
+        # Prevent MIME type sniffing
+        response['X-Content-Type-Options'] = 'nosniff'
+        
+        # Enable XSS protection
+        response['X-XSS-Protection'] = '1; mode=block'
+        
+        # Prevent clickjacking
+        response['X-Frame-Options'] = 'DENY'
+        
+        # Referrer policy
+        response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        
+        # Content Security Policy (adjust based on your needs)
+        response['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' data:; "
+            "connect-src 'self';"
+        )
+        
+        # Permissions Policy (formerly Feature-Policy)
+        response['Permissions-Policy'] = (
+            "geolocation=(self), "
+            "microphone=(), "
+            "camera=()"
+        )
+        
+        return response
+
+
+class RequestValidationMiddleware(MiddlewareMixin):
+    """
+    Validates incoming requests for suspicious patterns
+    Blocks requests with excessively large payloads or suspicious headers
+    """
+    
+    MAX_REQUEST_SIZE = 10 * 1024 * 1024  # 10MB
+    
+    def process_request(self, request):
+        # Check request size
+        if request.META.get('CONTENT_LENGTH'):
+            try:
+                content_length = int(request.META['CONTENT_LENGTH'])
+                if content_length > self.MAX_REQUEST_SIZE:
+                    logger.warning(
+                        f"⚠️ Request too large: {content_length} bytes from {request.META.get('REMOTE_ADDR')}"
+                    )
+                    return JsonResponse({
+                        'error': 'Request payload too large'
+                    }, status=413)
+            except (ValueError, TypeError):
+                pass
+        
+        # Check for suspicious user agents (basic bot detection)
+        user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
+        suspicious_patterns = ['sqlmap', 'nikto', 'nmap', 'masscan', 'nessus']
+        
+        if any(pattern in user_agent for pattern in suspicious_patterns):
+            logger.warning(
+                f"⚠️ Suspicious user agent detected: {user_agent} from {request.META.get('REMOTE_ADDR')}"
+            )
+            return JsonResponse({
+                'error': 'Access denied'
+            }, status=403)
+        
+        return None
+
+
+class AuditLoggingMiddleware(MiddlewareMixin):
+    """
+    Logs security-sensitive operations for audit trail
+    """
+    
+    SENSITIVE_PATHS = [
+        '/api/login',
+        '/api/password-reset',
+        '/api/admin',
+        '/api/payments',
+        '/api/super-admin'
+    ]
+    
+    def process_response(self, request, response):
+        # Log sensitive operations
+        if any(request.path.startswith(path) for path in self.SENSITIVE_PATHS):
+            # Only log if user is authenticated or if it's a failed auth attempt
+            if hasattr(request, 'user') and request.user.is_authenticated:
+                try:
+                    AuditLog.objects.create(
+                        created_by=request.user,
+                        action=f"{request.method} {request.path}",
+                        description=f"Status: {response.status_code}",
+                        ip_address=self.get_client_ip(request)
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to create audit log: {e}")
+            elif response.status_code in [401, 403]:
+                # Log failed authentication attempts
+                logger.warning(
+                    f"⚠️ Failed auth attempt: {request.method} {request.path} "
+                    f"from {self.get_client_ip(request)} - Status: {response.status_code}"
+                )
+        
+        return response
+    
+    def get_client_ip(self, request):
+        """Extract client IP from request, handling proxies"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR', 'unknown')
+        return ip
+
