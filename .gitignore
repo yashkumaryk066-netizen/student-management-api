@@ -59,3 +59,14 @@ server.log
 *.log
 # AI Memory Database
 .ai_memory/
+
+# Node modules
+node_modules/
+app_mobile/node_modules/
+dist/
+build/
+.cache/
+
+# SQLite test databases
+temp_test_db_*.sqlite3
+db_dump.json
