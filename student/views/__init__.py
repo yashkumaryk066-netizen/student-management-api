@@ -423,10 +423,10 @@ def robots_txt(request):
 
 def sitemap_xml(request):
     from datetime import date
+    from django.conf import settings
     today = date.today().isoformat()
-    # Replace with your actual domain
-    domain = "https://ysm.education" 
-    
+    domain = getattr(settings, 'SITE_URL', 'https://yashamishra.pythonanywhere.com').rstrip('/')
+
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
    <url>
@@ -446,6 +446,12 @@ def sitemap_xml(request):
       <lastmod>{today}</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.7</priority>
+   </url>
+   <url>
+      <loc>{domain}/developer</loc>
+      <lastmod>{today}</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.5</priority>
    </url>
 </urlset>"""
     return HttpResponse(xml_content, content_type="application/xml")

@@ -11,7 +11,7 @@ from student.serializers import (
     OnlineExamSerializer, OnlineQuestionSerializer, ExamAttemptSerializer, ExamResponseSerializer
 )
 from student.permissions import IsTeacherOrAdmin
-from ai.manager import get_ai_manager
+from ai.manager import get_ai_manager, AIServiceManager
 from student.constants import AI_SUBSCRIPTION_PRICE
 from decimal import Decimal
 from drf_spectacular.utils import extend_schema
@@ -68,28 +68,31 @@ class AIAuthView(APIView):
 class AIChatView(APIView):
     """Main AI Chat interface using AIServiceManager"""
     permission_classes = [permissions.AllowAny]
-    
+
     def get(self, request):
-        # Determine user display info
-        if request.user.is_authenticated:
-            display_name = getattr(request.user, 'first_name', request.user.username) or request.user.username
-            role = "Administrator" if request.user.is_staff else "Member"
-        else:
-            display_name = "Guest Architect"
-            role = "Visitor"
-            
+        from django.shortcuts import redirect as django_redirect
+
+        # If user is not logged in, send them to the AI auth page
+        if not request.user.is_authenticated:
+            return django_redirect('/api/ai/auth/')
+
+        display_name = (
+            getattr(request.user, 'first_name', None) or request.user.username
+        )
+        role = "Administrator" if request.user.is_staff else "Member"
+
         context = {
             "display_name": display_name,
             "role": role,
-            "is_authenticated": request.user.is_authenticated
+            "is_authenticated": True,
         }
         return render(request, 'student/ai_chat.html', context)
-    
+
     def post(self, request):
         question = request.data.get('message')
         if not question:
             return Response({"error": "Message is required"}, status=400)
-            
+
         ai = get_ai_manager()
         response = ai.ask_tutor(question, context=request.data.get('context', ''))
         return Response({"answer": response})
@@ -225,9 +228,54 @@ class ContentTranslatorView(APIView):
         ai = get_ai_manager()
         translation = ai.translate_content(text, target_language)
         return Response({"translation": translation})
-class UnifiedAITutorView(AITutorView):
-    """Alias for AITutorView"""
-    pass
+class UnifiedAITutorView(APIView):
+    """
+    Unified AI Tutor endpoint used by the AI Chat frontend.
+    Supports Session Auth (browser) and JWT/Token Auth (API clients).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        question = request.data.get('question') or request.data.get('message', '')
+        subject = request.data.get('subject', 'General')
+        context = request.data.get('context', '')
+        history = request.data.get('history', [])
+        files = request.data.get('files', [])
+        provider = request.data.get('provider', None)
+
+        if not question:
+            return Response({"error": "Question is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            ai = get_ai_manager()
+            # If user requested a specific provider, switch to it
+            if provider:
+                try:
+                    ai = AIServiceManager.switch_provider(provider)
+                except Exception:
+                    pass  # Fall back to default provider silently
+
+
+            answer = ai.ask_tutor(
+                question,
+                subject=subject,
+                context=context,
+                history=history,
+                media_data=files
+            )
+
+            return Response({
+                "success": True,
+                "answer": answer,
+                "provider": getattr(ai, 'provider', 'ai')
+            })
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"UnifiedAITutorView error: {e}", exc_info=True)
+            return Response(
+                {"error": "AI service temporarily unavailable. Please try again."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
 class ExamPaperGeneratorView(QuizGeneratorView):
     """Alias for QuizGeneratorView specialized for exams"""

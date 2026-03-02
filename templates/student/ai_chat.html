@@ -757,7 +757,7 @@
     </style>
 </head>
 
-<body class="flex">
+<body class="flex" data-auth="{% if is_authenticated %}true{% else %}false{% endif %}">
     <!-- MAGIC MOTION ENGINE ELEMENTS -->
     <div class="magic-cursor" id="magicCursor"></div>
     <div class="magic-cursor-follower" id="magicFollower"></div>
@@ -1399,6 +1399,14 @@
         let synth = window.speechSynthesis;
         let chatHistory = [];
 
+        // ===== AUTH GUARD =====
+        // Read auth status from the body data-auth attribute (set by Django template)
+        // This prevents 401 errors when a guest tries to use the AI API
+        const IS_AUTHENTICATED = document.body.dataset.auth === 'true';
+        if (!IS_AUTHENTICATED) {
+            window.location.replace('/api/ai/auth/');
+        }
+
         // Initialize Mermaid
         mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
 
@@ -1943,7 +1951,7 @@
                 // Check if user has token (this page might be public or protected, assume needs auth for real API)
                 // Use the Unified API
                 const token = localStorage.getItem('authToken');
-                const csrfToken = getCookie('csrftoken'); // Ensure CSRF if session auth
+                const csrfToken = getCookie('csrftoken');
 
                 // Process Files (Base64)
                 let filesData = [];
@@ -1951,19 +1959,26 @@
                     filesData = attachedFiles.map(f => f.data);
                 }
 
+                // Build headers — only include Authorization if we have a real token
+                // Sending a blank 'Bearer ' header causes DRF to reject session auth (401)
+                const requestHeaders = {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                };
+                if (token) {
+                    requestHeaders['Authorization'] = 'Bearer ' + token;
+                }
+
                 const response = await fetch('/api/ai/unified/tutor/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': token ? 'Bearer ' + token : '',
-                        'X-CSRFToken': csrfToken
-                    },
+                    headers: requestHeaders,
+                    credentials: 'same-origin', // Important: sends session cookie
                     body: JSON.stringify({
                         question: msg,
                         files: filesData,
                         provider: localStorage.getItem('preferred_ai_provider') || null,
                         context: "User is asking for 'Advanced Level' assistance. You are 'Y.S.M AI'.",
-                        history: chatHistory // Send conversation history
+                        history: chatHistory
                     })
                 });
 
@@ -2448,8 +2463,6 @@
     <script src="{% static 'js/api.js' %}"></script>
     <script src="{% static 'js/auth.js' %}"></script>
 
-    <!-- ✅ REAL CHAT INTEGRATION (Production Grade) -->
-    <script src="{% static 'js/real_chat_integration.js' %}"></script>
 
     <!-- PREMIUM MAGIC MOTION ENGINE JS -->
     <script>

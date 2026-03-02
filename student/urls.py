@@ -94,7 +94,11 @@ urlpatterns = [
     
     # Resume Download (Public)
     path('resume/download/', DownloadResumeView.as_view(), name='resume-download'),
-    
+
+    # Demo Request (Public - from Landing Page)
+    path('demo/request/', DemoRequestView.as_view(), name='demo-request'),
+    path('demo-request/', DemoRequestView.as_view(), name='demo-request-alt'),  # Backward compat
+
     # Auth Endpoints
     path('auth/login/', SecuredTokenObtainPairView.as_view(), name='auth_login'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # CRITICAL FOR STAYING LOGGED IN

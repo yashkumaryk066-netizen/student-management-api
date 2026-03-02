@@ -58,19 +58,28 @@ class ChatSendMessageView(APIView):
         if not conversation.title:
             conversation.auto_generate_title()
         
-        # Call AI
+        # Call AI with RAG context
         ai = get_ai_manager()
         rag_context = self._get_rag_context(request.user)
-        full_context = f"SYSTEM RAG CONTEXT:\n{rag_context}\n\nUSER MESSAGE:\n{user_message}"
-        
+
         ai_response = ai.ask_tutor(user_message, context=rag_context)
-        
+
         # Save AI message
-        ChatMessage.objects.create(conversation=conversation, role='ai', content=ai_response)
-        
+        ai_msg = ChatMessage.objects.create(conversation=conversation, role='ai', content=ai_response)
+
         return Response({
+            "success": True,
             "conversation_id": conversation.id,
-            "answer": ai_response
+            "conversation_title": conversation.title or "New Conversation",
+            # Legacy key for older JS
+            "answer": ai_response,
+            # New key expected by real_chat_integration.js (data.message.content)
+            "message": {
+                "id": ai_msg.id,
+                "role": "ai",
+                "content": ai_response,
+                "timestamp": ai_msg.timestamp.isoformat() if hasattr(ai_msg, 'timestamp') else None,
+            }
         })
 
 class ChatConversationListView(generics.ListAPIView):
