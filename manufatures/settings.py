@@ -367,7 +367,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'yashkumaryk066@gmail.com'
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
@@ -387,7 +387,7 @@ TWILIO_WHATSAPP_NUMBER = config('TWILIO_WHATSAPP_NUMBER', default='whatsapp:+141
 ADMIN_WHATSAPP_NUMBER = config('ADMIN_WHATSAPP_NUMBER', default='+918356926231') # SuperAdmin Number for Alerts
 
 # Telegram Configuration
-TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='')
 
 # SMS Settings
 SMS_GATEWAY = config('SMS_GATEWAY', default='twilio')
