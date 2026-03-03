@@ -1,22 +1,41 @@
+# ============================================================
+# robots.txt - Yash Kumar Mishra (Rangra Developer, Bihar)
+# Website: https://yashamishra.pythonanywhere.com
+# Y.S.M AI Education System by Telepathy Infotech
+# ============================================================
+
+# Allow all bots to crawl public pages
 User-agent: *
 Allow: /
 Allow: /developer/
 Allow: /resume/
 Allow: /ai-chat/
-
+Allow: /rangrago/
 Allow: /static/
 Allow: /static/images/
+Allow: /static/css/
+Allow: /static/js/
 
-# Disallow backend paths to save Crawl Budget
+# Block private/backend paths (save crawl budget)
 Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
+Disallow: /student/
+Disallow: /dashboard/
 
-# Explicitly Allow Google Image Bot
+# Allow Google Image Bot full access to images
 User-agent: Googlebot-Image
 Allow: /
 Allow: /static/images/
 Allow: /static/img/
 
-# Sitemap Location
+# Allow Google to crawl main pages (explicit)
+User-agent: Googlebot
+Allow: /
+Allow: /developer/
+Allow: /resume/
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap Location (submit this URL in Google Search Console too)
 Sitemap: https://yashamishra.pythonanywhere.com/static/sitemap.xml
