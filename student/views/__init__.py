@@ -434,34 +434,34 @@ def sitemap_xml(request):
     today = date.today().isoformat()
     domain = getattr(settings, 'SITE_URL', 'https://yashamishra.pythonanywhere.com').rstrip('/')
 
+    pages = [
+        {'loc': f'{domain}/',             'priority': '1.0', 'changefreq': 'weekly'},
+        {'loc': f'{domain}/demo',          'priority': '0.9', 'changefreq': 'monthly'},
+        {'loc': f'{domain}/developer',     'priority': '0.8', 'changefreq': 'monthly'},
+        {'loc': f'{domain}/login',         'priority': '0.3', 'changefreq': 'yearly'},
+        {'loc': f'{domain}/privacy-policy','priority': '0.5', 'changefreq': 'yearly'},
+        {'loc': f'{domain}/terms',         'priority': '0.5', 'changefreq': 'yearly'},
+        {'loc': f'{domain}/refund-policy', 'priority': '0.4', 'changefreq': 'yearly'},
+    ]
+
+    url_entries = ''.join([
+        f"""   <url>
+      <loc>{p['loc']}</loc>
+      <lastmod>{today}</lastmod>
+      <changefreq>{p['changefreq']}</changefreq>
+      <priority>{p['priority']}</priority>
+   </url>
+""" for p in pages
+    ])
+
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-   <url>
-      <loc>{domain}/</loc>
-      <lastmod>{today}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>1.0</priority>
-   </url>
-   <url>
-      <loc>{domain}/login</loc>
-      <lastmod>{today}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.8</priority>
-   </url>
-   <url>
-      <loc>{domain}/demo</loc>
-      <lastmod>{today}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-   </url>
-   <url>
-      <loc>{domain}/developer</loc>
-      <lastmod>{today}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.5</priority>
-   </url>
-</urlset>"""
-    return HttpResponse(xml_content, content_type="application/xml")
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+{url_entries}</urlset>"""
+    return HttpResponse(xml_content, content_type='application/xml')
+
 
 def google_verification(request):
     return HttpResponse("google-site-verification: google7ec15807e3134773.html", content_type="text/plain")
