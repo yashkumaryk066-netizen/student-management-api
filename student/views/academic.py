@@ -229,17 +229,31 @@ class HolidayListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return filter_by_owner(Holiday.objects.all(), self.request.user)
+        # Holiday model uses 'owner' field (not AuditModel created_by)
+        owner = get_owner_user(self.request.user)
+        return Holiday.objects.filter(owner=owner) if owner else Holiday.objects.none()
 
     def perform_create(self, serializer):
-        serializer.save(created_by=get_owner_user(self.request.user))
+        owner = get_owner_user(self.request.user)
+        serializer.save(owner=owner)
 
 class RoutineListCreateView(generics.ListCreateAPIView):
     serializer_class = ClassRoutineSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return filter_by_owner(ClassRoutine.objects.all(), self.request.user)
+        # ClassRoutine model uses 'owner' field (not AuditModel created_by)
+        owner = get_owner_user(self.request.user)
+        qs = ClassRoutine.objects.filter(owner=owner) if owner else ClassRoutine.objects.none()
+        # Optional: filter by batch or grade
+        batch_id = self.request.query_params.get('batch')
+        grade = self.request.query_params.get('grade')
+        if batch_id:
+            qs = qs.filter(batch_id=batch_id)
+        if grade:
+            qs = qs.filter(grade=grade)
+        return qs
 
     def perform_create(self, serializer):
-        serializer.save(created_by=get_owner_user(self.request.user))
+        owner = get_owner_user(self.request.user)
+        serializer.save(owner=owner)

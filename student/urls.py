@@ -262,6 +262,13 @@ urlpatterns = [
     path('audit/logs/client/', AuditLogView.as_view(), name='audit-logs-client'),
     path('audit/logs/global/', AuditLogView.as_view(), name='audit-logs-global'),
 
+    # ✅ Class Timetable / Routine (FIX: was missing - frontend calls this)
+    path('academic/routine/', RoutineListCreateView.as_view(), name='routine-list'),
+
+    # ✅ Holiday Calendar (FIX: was missing - frontend calendar calls this)
+    path('calendar/holidays/', HolidayListCreateView.as_view(), name='holiday-list'),
+    path('calendar/holidays/<int:pk>/', HolidayListCreateView.as_view(), name='holiday-detail'),
+
     # Notifications API
     path('notifications/', NotificationListView.as_view(), name='notifications-list'),
     path('notifications/create/', NotificationCreateView.as_view(), name='notifications-create'),

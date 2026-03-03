@@ -107,7 +107,8 @@ class DataBackupView(APIView):
                     'name', 'roll_number', 'grade', 'parents_phone', 'dob', 'address', 'blood_group'
                 )),
                 "employees": list(Employee.objects.filter(**owner_filter).values(
-                    'name', 'employee_id', 'designation', 'phone', 'email', 'salary'
+                    'user__first_name', 'user__last_name', 'user__email',
+                    'designation__title', 'contract_type', 'joining_date', 'basic_salary'
                 )),
                 "payments": list(Payment.objects.filter(**{'student__created_by': user} if not user.is_superuser else {}).values(
                     'amount', 'payment_date', 'status', 'description', 'transaction_id'
