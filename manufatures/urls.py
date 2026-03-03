@@ -92,12 +92,19 @@ urlpatterns = [
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
 ]
 
-# Serve media files in development
+# Serve media files (works in both dev and production on PythonAnywhere)
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve as media_serve
+from django.urls import re_path
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # PythonAnywhere serves via Django static serve view in production
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', media_serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
 # Admin Panel Customization
 admin.site.site_header = "Y.S.M ADVANCE ADMINISTRATION"

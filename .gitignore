@@ -11,6 +11,9 @@ venv/
 env/
 ENV/
 .venv
+helper_env/
+paramiko_env/
+paramiko_env_new/
 
 # Django
 *.log

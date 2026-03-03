@@ -413,11 +413,18 @@ class SuperAdminAdvancedDashboardView(APIView):
 
 # SEO / PWA Views
 def robots_txt(request):
+    from django.conf import settings
+    site_url = getattr(settings, 'SITE_URL', 'https://yashamishra.pythonanywhere.com').rstrip('/')
     lines = [
         "User-agent: *",
         "Disallow: /admin/",
         "Disallow: /api/",
-        "Allow: /"
+        "Disallow: /schema/",
+        "Disallow: /swagger/",
+        "Disallow: /media/",
+        "Allow: /",
+        "",
+        f"Sitemap: {site_url}/sitemap.xml"
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 

@@ -379,8 +379,6 @@ class AdminPaymentApprovalView(APIView):
 
                 return Response({"error": "Invalid action. Use APPROVE or REJECT"}, status=400)
                 
-                return Response({"error": "Invalid action. Use APPROVE or REJECT"}, status=400)
-                
         except Payment.DoesNotExist:
             return Response({"error": "Payment not found"}, status=404)
         except Exception as e:
