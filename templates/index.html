@@ -23,9 +23,27 @@
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <link rel="canonical" href="https://yashamishra.pythonanywhere.com/">
 
+    <!-- ===================== PERFORMANCE PRECONNECT (Core Web Vitals — Used by Google, Flipkart) ===================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://unpkg.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+
+    <!-- ===================== PWA & MOBILE META (Byju's, PhysicsWallah use this) ===================== -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Y.S.M AI">
+    <meta name="application-name" content="Y.S.M AI ERP">
+    <meta name="msapplication-TileColor" content="#6366f1">
+
     <!-- Geo Targeting -->
     <meta name="geo.region" content="IN-BR">
     <meta name="geo.placename" content="Rangra, Bhagalpur, Bihar, India">
+    <meta name="geo.position" content="25.2425;86.9842">
+    <meta name="ICBM" content="25.2425, 86.9842">
 
     <!-- ===================== OPEN GRAPH ===================== -->
     <meta property="og:type" content="website">
@@ -39,19 +57,68 @@
     <meta property="og:site_name" content="Y.S.M AI Education System">
     <meta property="og:locale" content="en_IN">
 
-    <!-- ===================== TWITTER CARD ===================== -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://yashamishra.pythonanywhere.com/">
-    <meta property="twitter:title" content="Y.S.M AI – Advance Education ERP | Yash Ankush Mishra">
-    <meta property="twitter:description"
-        content="India's Most Advanced AI ERP for Schools & Institutes. Designed by Yash Ankush Mishra from Rangra, Bihar.">
-    <meta property="twitter:image" content="https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg">
+    <!-- og:image:alt for accessibility & LinkedIn -->
+    <meta property="og:image:alt" content="Y.S.M AI Education ERP by Yash Ankush Mishra">
+    <meta property="og:locale:alternate" content="hi_IN">
 
-    <!-- ===================== JSON-LD STRUCTURED DATA ===================== -->
+    <!-- ===================== TWITTER / X CARD ===================== -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://yashamishra.pythonanywhere.com/">
+    <meta name="twitter:title" content="Y.S.M AI – Advance Education ERP | Yash Ankush Mishra">
+    <meta name="twitter:description"
+        content="India's Most Advanced AI ERP for Schools & Institutes. Designed by Yash Ankush Mishra from Rangra, Bihar.">
+    <meta name="twitter:image" content="https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg">
+    <meta name="twitter:image:alt" content="Y.S.M AI ERP Dashboard Preview">
+    <meta name="twitter:creator" content="@YashMishraDev">
+    <meta name="twitter:site" content="@YSMAIEducation">
+
+    <!-- ===================== ENTERPRISE JSON-LD STRUCTURED DATA ===================== -->
+    <!-- 8 Schema Types — Used by Razorpay, Byju's, Zomato, Flipkart for maximum Google rankings -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://yashamishra.pythonanywhere.com/#website",
+          "url": "https://yashamishra.pythonanywhere.com/",
+          "name": "Y.S.M AI Education System",
+          "description": "India's #1 AI-powered School, Coaching & Institute Management ERP",
+          "publisher": {"@id": "https://yashamishra.pythonanywhere.com/#org"},
+          "inLanguage": "en-IN",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://yashamishra.pythonanywhere.com/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://yashamishra.pythonanywhere.com/#webpage",
+          "url": "https://yashamishra.pythonanywhere.com/",
+          "name": "Y.S.M AI – Best School & Coaching Management System India",
+          "isPartOf": {"@id": "https://yashamishra.pythonanywhere.com/#website"},
+          "about": {"@id": "https://yashamishra.pythonanywhere.com/#org"},
+          "description": "Y.S.M AI — India's #1 AI-powered ERP for schools, coaching institutes and colleges.",
+          "breadcrumb": {"@id": "https://yashamishra.pythonanywhere.com/#breadcrumb"},
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg"
+          },
+          "datePublished": "2024-01-01",
+          "dateModified": "2026-03-03",
+          "inLanguage": "en-IN"
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://yashamishra.pythonanywhere.com/#breadcrumb",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://yashamishra.pythonanywhere.com/"}
+          ]
+        },
         {
           "@type": "SoftwareApplication",
           "@id": "https://yashamishra.pythonanywhere.com/#app",
@@ -61,41 +128,138 @@
           "applicationCategory": "EducationalApplication",
           "applicationSubCategory": "School Management System",
           "description": "India's #1 AI-powered School, Coaching & Institute Management ERP System with 30+ modules including Finance, Attendance, HR, Library, Hostel, and AI Analytics.",
+          "featureList": [
+            "AI-Powered Student Performance Analytics",
+            "Automated Attendance with Biometrics",
+            "Smart Fee Management & Invoice Generation",
+            "Online Exam Portal with AI Auto-Grading",
+            "HR & Payroll Management",
+            "Library & Inventory Management",
+            "Hostel & Transport Management",
+            "ROI Analytics Dashboard",
+            "Multi-Role Login (Admin, Teacher, Student, Parent)"
+          ],
+          "screenshot": "https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg",
           "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": "4.9",
-            "ratingCount": "1250"
+            "ratingCount": "1250",
+            "bestRating": "5",
+            "worstRating": "1"
           },
           "offers": {
             "@type": "Offer",
             "price": "2000",
             "priceCurrency": "INR",
-            "availability": "https://schema.org/InStock"
+            "availability": "https://schema.org/InStock",
+            "priceValidUntil": "2026-12-31",
+            "description": "Starting from Rs.2000/month for schools and coaching institutes"
           },
-          "author": {
-            "@type": "Person",
-            "name": "Yash Ankush Mishra",
-            "alternateName": ["Yash A Mishra", "Yash Kumar Mishra", "Rangra Developer"],
-            "url": "https://yashamishra.pythonanywhere.com/developer/"
-          },
-          "inLanguage": "en-IN"
+          "author": {"@id": "https://yashamishra.pythonanywhere.com/developer/#person"},
+          "publisher": {"@id": "https://yashamishra.pythonanywhere.com/#org"},
+          "inLanguage": "en-IN",
+          "isAccessibleForFree": false,
+          "keywords": "School ERP, Coaching Management, AI Education, Student Management India"
         },
         {
           "@type": "Organization",
           "@id": "https://yashamishra.pythonanywhere.com/#org",
           "name": "Telepathy Infotech",
+          "alternateName": "Y.S.M AI",
           "url": "https://yashamishra.pythonanywhere.com",
-          "founder": {
-            "@type": "Person",
-            "name": "Yash Ankush Mishra",
-            "url": "https://yashamishra.pythonanywhere.com/developer/"
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg",
+            "width": 512,
+            "height": 512
           },
+          "founder": {"@id": "https://yashamishra.pythonanywhere.com/developer/#person"},
+          "foundingDate": "2024",
+          "description": "Telepathy Infotech builds advanced AI-powered educational ERP software for schools, coaching institutes and colleges across India.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rangra",
+            "addressLocality": "Bhagalpur",
+            "addressRegion": "Bihar",
+            "postalCode": "812001",
+            "addressCountry": "IN"
+          },
+          "contactPoint": [
+            {"@type": "ContactPoint", "contactType": "sales", "availableLanguage": ["English", "Hindi"], "areaServed": "IN"},
+            {"@type": "ContactPoint", "contactType": "technical support", "availableLanguage": ["English", "Hindi"], "areaServed": "IN"}
+          ],
+          "sameAs": [
+            "https://github.com/yashkumaryk066-netizen",
+            "https://yashamishra.pythonanywhere.com/developer/"
+          ]
+        },
+        {
+          "@type": "Person",
+          "@id": "https://yashamishra.pythonanywhere.com/developer/#person",
+          "name": "Yash Ankush Mishra",
+          "givenName": "Yash",
+          "familyName": "Mishra",
+          "alternateName": ["Yash A Mishra", "Yash Kumar Mishra", "Rangra Developer", "YashkumarK066"],
+          "url": "https://yashamishra.pythonanywhere.com/developer/",
+          "jobTitle": "Full Stack Developer & AI Engineer",
+          "worksFor": {"@id": "https://yashamishra.pythonanywhere.com/#org"},
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Rangra, Bhagalpur",
             "addressRegion": "Bihar",
             "addressCountry": "IN"
-          }
+          },
+          "knowsAbout": ["Django", "Python", "Artificial Intelligence", "School Management System", "ERP Development"],
+          "sameAs": ["https://github.com/yashkumaryk066-netizen", "https://yashamishra.pythonanywhere.com/developer/"]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://yashamishra.pythonanywhere.com/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is Y.S.M AI School Management System?",
+              "acceptedAnswer": {"@type": "Answer", "text": "Y.S.M AI is India's most advanced AI-powered ERP software for schools, coaching institutes, and colleges. It includes 30+ modules: attendance, fee management, online exams, AI tutor, HR, payroll, library, inventory, hostel, and transport management all in one platform."}
+            },
+            {
+              "@type": "Question",
+              "name": "How much does Y.S.M AI School ERP cost?",
+              "acceptedAnswer": {"@type": "Answer", "text": "Y.S.M AI ERP pricing starts from Rs.2,000/month for basic plans. We offer School, Coaching, and College plans with different feature sets. Enterprise plans with unlimited students are also available."}
+            },
+            {
+              "@type": "Question",
+              "name": "Who created Y.S.M AI?",
+              "acceptedAnswer": {"@type": "Answer", "text": "Y.S.M AI was created by Yash Ankush Mishra (also known as Yash A Mishra or Rangra Developer), a Full Stack Developer and AI Engineer from Rangra, Bhagalpur, Bihar, India. He founded Telepathy Infotech to bring AI-powered education management to Indian schools."}
+            },
+            {
+              "@type": "Question",
+              "name": "Does Y.S.M AI work for coaching institutes?",
+              "acceptedAnswer": {"@type": "Answer", "text": "Yes! Y.S.M AI is designed for schools, coaching institutes, and colleges. Features include batch management, student enrollment, fee tracking, online tests, attendance, and AI-powered performance analytics."}
+            },
+            {
+              "@type": "Question",
+              "name": "Is Y.S.M AI available in Bihar?",
+              "acceptedAnswer": {"@type": "Answer", "text": "Yes, Y.S.M AI was developed by Yash Ankush Mishra from Rangra, Bhagalpur, Bihar. The system is available across India and is especially optimized for schools and coaching institutes in Bihar, UP, and other states."}
+            },
+            {
+              "@type": "Question",
+              "name": "What AI features does Y.S.M have?",
+              "acceptedAnswer": {"@type": "Answer", "text": "Y.S.M AI includes: AI Tutor powered by ChatGPT, Gemini, Claude, AI-powered exam auto-grading, student performance risk analysis, AI quiz generator, lesson plan generator, content summarizer, and natural language chatbot support in English and Hindi."}
+            }
+          ]
+        },
+        {
+          "@type": "ItemList",
+          "@id": "https://yashamishra.pythonanywhere.com/#features",
+          "name": "Y.S.M AI ERP Features",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "AI-Powered Tutoring & Chatbot", "url": "https://yashamishra.pythonanywhere.com/#ai-features"},
+            {"@type": "ListItem", "position": 2, "name": "Automated Attendance Management", "url": "https://yashamishra.pythonanywhere.com/#attendance"},
+            {"@type": "ListItem", "position": 3, "name": "Smart Fee & Payment Management", "url": "https://yashamishra.pythonanywhere.com/#finance"},
+            {"@type": "ListItem", "position": 4, "name": "Online Examination Portal", "url": "https://yashamishra.pythonanywhere.com/#exams"},
+            {"@type": "ListItem", "position": 5, "name": "HR & Employee Payroll", "url": "https://yashamishra.pythonanywhere.com/#hr"},
+            {"@type": "ListItem", "position": 6, "name": "ROI Analytics Dashboard", "url": "https://yashamishra.pythonanywhere.com/#analytics"}
+          ]
         }
       ]
     }
