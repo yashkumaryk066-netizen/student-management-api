@@ -6,46 +6,51 @@
   <!-- ==================== HOME PAGE ==================== -->
   <url>
     <loc>https://yashamishra.pythonanywhere.com/</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
-      <image:title>Y.S.M AI - Best School Management System by Yash Ankush Mishra, Rangra Bihar</image:title>
-      <image:caption>Y.S.M AI Education ERP by Yash Ankush Mishra - Developer from Rangra, Bhagalpur, Bihar. India's #1 School, Coaching & Institute Management System.</image:caption>
+      <image:title>Y.S.M AI - Best School Management System by Yash Ankush Mishra, Naugachiya, Rangra, Bhagalpur, Bihar</image:title>
+      <image:caption>Y.S.M AI Education ERP by Yash Ankush Mishra - Developer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar. Serving Patna, Mumbai, Jaipur. India's #1 School, Coaching &amp; Institute Management System.</image:caption>
     </image:image>
   </url>
 
   <!-- ==================== DEVELOPER PROFILE (MOST IMPORTANT) ==================== -->
   <url>
     <loc>https://yashamishra.pythonanywhere.com/developer/</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
-      <image:title>Yash Ankush Mishra - Software Developer from Rangra, Bhagalpur, Bihar | YSM AI Founder</image:title>
-      <image:caption>Yash Ankush Mishra (Yash A Mishra) - Founder of YSM AI, Full Stack Developer & AI Architect from Rangra, Bhagalpur, Bihar. Expert in Python, Django, React, AI/ML.</image:caption>
+      <image:title>Yash Ankush Mishra - Top Software Developer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar | YSM AI Founder</image:title>
+      <image:caption>Yash Ankush Mishra (Yash A Mishra) - Founder of YSM AI, Full Stack Developer &amp; AI Architect from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar. Serving Kuhari, Patna, Mumbai, Jaipur. Expert in Python, Django, React, AI/ML.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
+      <image:title>Naugachiya Developer - Yash Ankush Mishra | Best Developer Bihar | YSM AI</image:title>
+      <image:caption>Naugachiya ka developer Yash Ankush Mishra - Bihar ka top software developer jo Naugachiya, Rangra, Bhagalpur, Katihar, Kuhari mein services deta hai.</image:caption>
     </image:image>
   </url>
 
   <!-- ==================== RESUME ==================== -->
   <url>
     <loc>https://yashamishra.pythonanywhere.com/resume/</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <image:image>
       <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
-      <image:title>Yash Ankush Mishra Resume 2026 - Software Architect CV | Rangra Developer</image:title>
-      <image:caption>Resume and CV of Yash Ankush Mishra, Chief Software Architect from Rangra, Bhagalpur, Bihar. Founder of YSM AI. MCA from Bengaluru University.</image:caption>
+      <image:title>Yash Ankush Mishra Resume 2026 - Software Architect CV | Developer from Naugachiya, Rangra, Bihar</image:title>
+      <image:caption>Resume and CV of Yash Ankush Mishra, Chief Software Architect from Naugachiya, Rangra, Bhagalpur, Bihar. Founder of YSM AI. MCA from Bengaluru University. Serving Katihar, Patna, Mumbai, Jaipur.</image:caption>
     </image:image>
   </url>
 
   <!-- ==================== AI CHAT ==================== -->
   <url>
     <loc>https://yashamishra.pythonanywhere.com/ai-chat/</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -53,15 +58,35 @@
   <!-- ==================== RANGRAGO ==================== -->
   <url>
     <loc>https://yashamishra.pythonanywhere.com/rangrago/</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-05</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
+      <image:title>RangraGo - App by Yash Ankush Mishra from Rangra, Naugachiya, Bhagalpur, Bihar</image:title>
+      <image:caption>RangraGo application created by Yash Ankush Mishra - developer from Rangra, near Naugachiya, Bhagalpur, Bihar, India.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ==================== NAUGACHIYA DEVELOPER PAGE (Virtual/Location SEO) ==================== -->
+  <url>
+    <loc>https://yashamishra.pythonanywhere.com/developer/</loc>
+    <lastmod>2026-03-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://yashamishra.pythonanywhere.com/developer/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yashamishra.pythonanywhere.com/developer/"/>
+    <image:image>
+      <image:loc>https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg</image:loc>
+      <image:title>Best Developer in Naugachiya Bihar - Yash Ankush Mishra | Python Django AI Expert</image:title>
+      <image:caption>Top software developer from Naugachiya, Bihar - Yash Ankush Mishra. Expert in Python, Django, React, Artificial Intelligence. Serving Naugachiya, Rangra, Bhagalpur, Katihar, Kuhari, Patna and all India remotely.</image:caption>
+    </image:image>
   </url>
 
   <!-- ==================== LOGIN (Low priority, private) ==================== -->
   <url>
     <loc>https://yashamishra.pythonanywhere.com/login/</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
