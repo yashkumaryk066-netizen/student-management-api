@@ -6,7 +6,9 @@
   Contact: yashkumaryk066@gmail.com
   Phone: +91-8356926231
   LinkedIn: linkedin.com/in/yash-kumar-342330213
-  GitHub: github.com/yashkumaryk066
+  GitHub: github.com/yashkumaryk066-netizen
+  Instagram: instagram.com/yash_a_mishra
+  Twitter/X: x.com/yashmishra362
   Website: https://yashamishra.pythonanywhere.com
 
 /* SITE */

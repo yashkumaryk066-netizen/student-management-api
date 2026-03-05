@@ -20,9 +20,9 @@ class ResumeProfile(models.Model):
     website = models.URLField(blank=True, default='https://yash.dev')
     
     # Social Links
-    github = models.URLField(default='https://github.com/yashkumaryk066')
-    linkedin = models.URLField(default='https://linkedin.com/in/yash-mishra-developer')
-    twitter = models.URLField(blank=True)
+    github = models.URLField(default='https://github.com/yashkumaryk066-netizen')
+    linkedin = models.URLField(default='https://www.linkedin.com/in/yash-kumar-342330213/')
+    twitter = models.URLField(blank=True, default='https://x.com/yashmishra362')
     
     # Summary
     professional_summary = models.TextField(default='Visionary technologist with 8+ years building scalable AI-native ecosystems')

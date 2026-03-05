@@ -45,7 +45,11 @@ DEVELOPER_PROFILE = {
         "profile_image_alt": "Yash Ankush Mishra - Developer"
     },
     "social": {
-        "github": "yashkumaryk066",
+        "github": "yashkumaryk066-netizen",
+        "github_url": "https://github.com/yashkumaryk066-netizen",
+        "linkedin": "https://www.linkedin.com/in/yash-kumar-342330213/",
+        "instagram": "https://www.instagram.com/yash_a_mishra/",
+        "twitter": "https://x.com/yashmishra362",
         "project_repo": "student-management-api"
     }
 }

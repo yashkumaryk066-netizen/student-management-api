@@ -56,8 +56,8 @@ class DownloadResumeView(View):
             'email': 'yashkumaryk066@gmail.com',
             'phone': '+91 83569 26231',
             'location': 'Rangra, Bihar, India',
-            'github': 'https://github.com/yashkumaryk066',
-            'linkedin': 'https://linkedin.com/in/yash-mishra-developer',
+            'github': 'https://github.com/yashkumaryk066-netizen',
+            'linkedin': 'https://www.linkedin.com/in/yash-kumar-342330213/',
             'website': 'https://yash.dev',
             
             'summary': (
