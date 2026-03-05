@@ -1,17 +1,29 @@
-/* Team */
-  Author: Yash A Mishra (Rangra Developer)
-  Role: Creator of Best AI in World
-  Location: Rangra, Bhagalpur, Bihar, India
+/* TEAM */
+  Author: Yash Ankush Mishra (Yash A Mishra)
+  Role: Founder of YSM AI | Chief Software Architect | AI Developer
+  Location: Naugachiya, Rangra, Bhagalpur, Katihar, Bihar, India
+  Serving: Naugachiya, Rangra, Bhagalpur, Katihar, Kuhari, Patna, Mumbai, Jaipur
   Contact: yashkumaryk066@gmail.com
-  Twitter: @RangraDeveloper
-  LinkedIn: linkedin.com/in/yash-mishra-rangra
+  Phone: +91-8356926231
+  LinkedIn: linkedin.com/in/yash-kumar-342330213
+  GitHub: github.com/yashkumaryk066
+  Website: https://yashamishra.pythonanywhere.com
 
-/* Site */
-  Software: YSM AI (Y.S.M AI)
-  Type: Best Education Software in India
-  BuiltWith: HTML5, CSS3, JavaScript, Python, Django, AI
-  LastUpdated: 2026-01-13
+/* SITE */
+  Software: Y.S.M AI (YSM AI / Ankush AI)
+  Type: India's #1 AI-Powered Education ERP (School, Coaching, College)
+  BuiltWith: Python, Django, React, AI/ML, PostgreSQL, Docker, AWS
+  LastUpdated: 2026-03-05
+  CMS: Custom Django Framework by Telepathy Infotech
 
-/* Mission */
-  To provide the Sabse Achha AI (Best AI) educational tools to the world from Bihar.
-  Dominate Global Search Rankings for 'Best Education Software'.
+/* LOCATIONS SERVED */
+  Primary: Naugachiya, Bihar, India (PIN: 853204)
+  Primary: Rangra, Bhagalpur, Bihar, India
+  Service: Katihar, Kuhari, Bhagalpur, Patna (Bihar)
+  Remote: Mumbai, Jaipur, Pan-India
+
+/* MISSION */
+  To build India's most advanced AI Educational ERP from Bihar.
+  Connecting students, teachers and parents across Naugachiya,
+  Rangra, Bhagalpur, Katihar and all of India through technology.
+  Naugachiya ka Developer - Bihar ka Best Software Architect.

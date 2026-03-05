@@ -1,47 +1,62 @@
 {
-  "name": "Sovereign Academic ERP",
-  "short_name": "Sovereign",
-  "description": "Professional Institutional Management & Learning Platform",
+  "name": "Y.S.M AI - Best School ERP by Yash Ankush Mishra, Naugachiya Rangra Bihar",
+  "short_name": "YSM AI",
+  "description": "India's #1 AI-powered School, Coaching & Institute Management ERP. By Yash Ankush Mishra from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f172a",
-  "theme_color": "#3b82f6",
+  "theme_color": "#6366f1",
   "categories": [
     "education",
-    "productivity"
+    "productivity",
+    "business"
   ],
+  "lang": "en-IN",
+  "dir": "ltr",
+  "keywords": "school ERP, education software, Naugachiya developer, Rangra developer, Bhagalpur developer, Bihar software",
   "icons": [
     {
-      "src": "/static/img/icon-192.png",
+      "src": "/static/images/yash_profile.jpg",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     },
     {
-      "src": "/static/img/icon-512.png",
+      "src": "/static/images/yash_profile.jpg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/images/yash_profile.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "label": "Y.S.M AI Dashboard - by Yash Ankush Mishra from Naugachiya, Rangra, Bihar"
     }
   ],
   "shortcuts": [
     {
-      "name": "Student Search",
-      "url": "/#students",
+      "name": "Developer Profile - Naugachiya, Rangra Developer",
+      "short_name": "Dev Profile",
+      "description": "View profile of Yash Ankush Mishra - top developer from Naugachiya, Rangra, Bhagalpur, Bihar",
+      "url": "/developer/",
       "icons": [
         {
-          "src": "/static/img/icon-192.png",
+          "src": "/static/images/yash_profile.jpg",
           "sizes": "192x192"
         }
       ]
     },
     {
-      "name": "Fee Collection",
-      "url": "/#finance",
+      "name": "Student Management",
+      "short_name": "Students",
+      "url": "/#students",
       "icons": [
         {
-          "src": "/static/img/icon-192.png",
+          "src": "/static/images/yash_profile.jpg",
           "sizes": "192x192"
         }
       ]
