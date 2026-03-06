@@ -26,6 +26,8 @@ class DashboardAnalytics {
         this.initStudentGrowthChart();
         this.initFeeCollectionChart();
 
+        this.setupListeners();
+
         console.log('📊 Dashboard Analytics Initialized');
     }
 
@@ -315,11 +317,88 @@ class DashboardAnalytics {
     }
 
     // Update chart data (for real-time updates)
-    updateChart(chartName, newData) {
+    updateChart(chartName, newData, newLabels = null) {
         if (this.charts[chartName]) {
+            if (newLabels) {
+                this.charts[chartName].data.labels = newLabels;
+            }
             this.charts[chartName].data.datasets[0].data = newData;
             this.charts[chartName].update('active');
         }
+    }
+
+    setupListeners() {
+        // Revenue Period Change
+        const revenuePeriod = document.getElementById('revenuePeriod');
+        if (revenuePeriod) {
+            revenuePeriod.addEventListener('change', (e) => {
+                const period = e.target.value;
+                this.handleRevenueChange(period);
+            });
+        }
+
+        // Student Growth Period Change
+        const growthPeriod = document.getElementById('studentGrowthPeriod');
+        if (growthPeriod) {
+            growthPeriod.addEventListener('change', (e) => {
+                const year = e.target.value;
+                this.handleGrowthChange(year);
+            });
+        }
+
+        // Fee Collection Segment Change
+        const feeSegment = document.getElementById('feeCollectionSegment');
+        if (feeSegment) {
+            feeSegment.addEventListener('change', (e) => {
+                const segment = e.target.value;
+                this.handleFeeChange(segment);
+            });
+        }
+    }
+
+    handleRevenueChange(period) {
+        console.log('📈 Switching Revenue to:', period);
+        // Simulated data for demo/interaction
+        const data = {
+            'This Year': [45000, 52000, 48000, 61000, 58000, 67000, 72000, 69000, 75000, 82000, 88000, 95000],
+            'Last Year': [38000, 41000, 39000, 45000, 42000, 48000, 51000, 49000, 55000, 58000, 62000, 65000]
+        };
+        const selectedData = data[period] || data['This Year'];
+        this.updateChart('revenue', selectedData);
+    }
+
+    handleGrowthChange(year) {
+        console.log('📈 Switching Growth Year to:', year);
+        const datasets = {
+            '2026': { new: [45, 52, 38, 61, 48, 57, 62, 59, 65, 72, 68, 75], drop: [5, 3, 7, 4, 6, 3, 4, 5, 3, 2, 4, 3] },
+            '2025': { new: [32, 45, 51, 44, 39, 42, 48, 50, 47, 55, 60, 58], drop: [4, 6, 3, 5, 4, 8, 2, 4, 6, 3, 5, 4] },
+            '2024': { new: [25, 30, 28, 35, 32, 38, 40, 35, 39, 42, 45, 48], drop: [2, 4, 5, 3, 4, 2, 5, 3, 4, 5, 3, 2] }
+        };
+        const selected = datasets[year] || datasets['2026'];
+
+        if (this.charts.studentGrowth) {
+            this.charts.studentGrowth.data.datasets[0].data = selected.new;
+            this.charts.studentGrowth.data.datasets[1].data = selected.drop;
+            this.charts.studentGrowth.update('active');
+        }
+    }
+
+    handleFeeChange(segment) {
+        console.log('📈 Switching Fee Segment to:', segment);
+        let labels, data;
+
+        if (segment === 'class') {
+            labels = ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6'];
+            data = [95, 88, 92, 85, 90, 87];
+        } else if (segment === 'month') {
+            labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            data = [98, 94, 91, 95, 89, 93];
+        } else {
+            labels = ['Tuition', 'Transport', 'Library', 'Hostel', 'Exam'];
+            data = [92, 75, 88, 82, 95];
+        }
+
+        this.updateChart('feeCollection', data, labels);
     }
 
     // Destroy all charts (cleanup)

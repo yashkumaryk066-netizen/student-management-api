@@ -747,7 +747,7 @@
                                     <span class="chart-icon">💸</span>
                                     Revenue Trends
                                 </div>
-                                <select class="chart-period">
+                                <select class="chart-period" id="revenuePeriod">
                                     <option>This Year</option>
                                     <option>Last Year</option>
                                 </select>
@@ -778,7 +778,11 @@
                                     <span class="chart-icon">📈</span>
                                     Student Growth
                                 </div>
-                                <span class="chart-period">2024</span>
+                                <select class="chart-period" id="studentGrowthPeriod">
+                                    <option value="2026">2026</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                </select>
                             </div>
                             <div class="chart-container">
                                 <canvas id="studentGrowthChart"></canvas>
@@ -792,7 +796,11 @@
                                     <span class="chart-icon">💰</span>
                                     Fee Collection
                                 </div>
-                                <span class="chart-period">By Class</span>
+                                <select class="chart-period" id="feeCollectionSegment">
+                                    <option value="class">By Class</option>
+                                    <option value="month">By Month</option>
+                                    <option value="category">By Category</option>
+                                </select>
                             </div>
                             <div class="chart-container">
                                 <canvas id="feeCollectionChart"></canvas>
