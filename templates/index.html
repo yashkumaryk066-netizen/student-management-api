@@ -353,6 +353,21 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
+        /* Float Animation */
+        @keyframes floatImg {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -1346,7 +1361,8 @@
                         </div>
                     </div>
                     <!-- Right Side Visual -->
-                    <div class="hero-right" style="position: relative; animation: slideInRight 1s ease-out;">
+                    <div class="hero-right floating-magic"
+                        style="position: relative; animation: slideInRight 1s ease-out, floatImg 6s ease-in-out infinite;">
                         <div style="position: relative; border-radius: 20px; overflow: hidden; transform: perspective(1000px) rotateY(-5deg); transition: transform 0.5s; box-shadow: 0 20px 50px rgba(99, 102, 241, 0.3); border: 1px solid rgba(255,255,255,0.1);"
                             onmouseover="this.style.transform='perspective(1000px) rotateY(0deg) scale(1.02)'"
                             onmouseout="this.style.transform='perspective(1000px) rotateY(-5deg)'">
@@ -3101,6 +3117,54 @@
                         ease: "sine.inOut",
                         stagger: 1
                     });
+                }
+            });
+        </script>
+        <script>
+            // Custom Neon Cursor Glow
+            document.addEventListener('mousemove', function (e) {
+                // Disabled on small screens
+                if (window.innerWidth < 768) return;
+                let cursor = document.getElementById('neon-cursor');
+                if (!cursor) {
+                    cursor = document.createElement('div');
+                    cursor.id = 'neon-cursor';
+                    document.body.appendChild(cursor);
+
+                    Object.assign(cursor.style, {
+                        position: 'fixed',
+                        width: '400px',
+                        height: '400px',
+                        borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(0,0,0,0) 70%)',
+                        pointerEvents: 'none',
+                        zIndex: '1',
+                        transform: 'translate(-50%, -50%)',
+                        transition: 'width 0.2s, height 0.2s',
+                        mixBlendMode: 'screen'
+                    });
+                }
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+
+            // Typewriter effect for Hero Title
+            document.addEventListener('DOMContentLoaded', () => {
+                const el = document.querySelector('.text-shimmer');
+                if (el) {
+                    const text = el.innerText;
+                    el.innerText = '';
+                    el.style.borderRight = '3px solid var(--primary)';
+                    let i = 0;
+                    const typing = setInterval(() => {
+                        if (i < text.length) {
+                            el.innerText += text.charAt(i);
+                            i++;
+                        } else {
+                            clearInterval(typing);
+                            el.style.borderRight = 'none'; // remove cursor when done
+                        }
+                    }, 40); // Fast typing speed
                 }
             });
         </script>

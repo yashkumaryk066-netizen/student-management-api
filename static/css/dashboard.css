@@ -1958,8 +1958,12 @@ body {
 
 .stat-card:hover {
     transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    box-shadow:
+        0 15px 30px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(99, 102, 241, 0.4),
+        inset 0 0 10px rgba(99, 102, 241, 0.1);
     z-index: 10;
+    border-color: rgba(99, 102, 241, 0.5);
 }
 
 /* Holographic Shine Effect */
@@ -3820,14 +3824,18 @@ select option {
    LIGHT MODE OVERRIDES (Premium)
    ============================================ */
 body.light-mode {
-    --bg-dark: #f8fafc; /* Slate 50 */
+    --bg-dark: #f8fafc;
+    /* Slate 50 */
     --bg-panel: rgba(255, 255, 255, 0.85);
     --bg-card: rgba(255, 255, 255, 0.7);
-    --text-main: #0f172a; /* Slate 900 */
-    --text-muted: #64748b; /* Slate 500 */
-    --glass-border: rgba(0,0,0,0.08); /* Darker border for visibility */
-    --glass-shine: rgba(255,255,255,0.6);
-    --glass-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+    --text-main: #0f172a;
+    /* Slate 900 */
+    --text-muted: #64748b;
+    /* Slate 500 */
+    --glass-border: rgba(0, 0, 0, 0.08);
+    /* Darker border for visibility */
+    --glass-shine: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
 }
 
 body.light-mode .dashboard-bg {
@@ -3835,18 +3843,21 @@ body.light-mode .dashboard-bg {
 }
 
 body.light-mode .dashboard-bg::before {
-    background: rgba(59, 130, 246, 0.2); /* Softer Primary */
+    background: rgba(59, 130, 246, 0.2);
+    /* Softer Primary */
 }
 
 body.light-mode .dashboard-bg::after {
-    background: rgba(139, 92, 246, 0.2); /* Softer Secondary */
+    background: rgba(139, 92, 246, 0.2);
+    /* Softer Secondary */
 }
 
 body.light-mode .sidebar,
 body.light-mode .dash-sidebar {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98));
     border-right: 1px solid rgba(226, 232, 240, 0.8);
-    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.05); /* Softer shadow */
+    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.05);
+    /* Softer shadow */
 }
 
 body.light-mode .sidebar-header,
@@ -3939,13 +3950,19 @@ body.light-mode .data-table-container {
     border: 1px solid #e2e8f0;
 }
 
-body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode h5, body.light-mode h6 {
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode h4,
+body.light-mode h5,
+body.light-mode h6 {
     color: #0f172a;
 }
 
 body.light-mode .section-danger {
-   background: rgba(254, 226, 226, 0.3) !important; /* Extremely light Red */
-   border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(254, 226, 226, 0.3) !important;
+    /* Extremely light Red */
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 /* ============================================
@@ -3982,65 +3999,65 @@ body.light-mode .section-danger {
 
 /* Switch UI */
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 26px;
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
 }
 
-.switch input { 
-  opacity: 0;
-  width: 0;
-  height: 0;
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255,255,255,0.2);
-  -webkit-transition: .4s;
-  transition: .4s;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
-input:checked + .slider {
-  background-color: var(--primary);
+input:checked+.slider {
+    background-color: var(--primary);
 }
 
-input:focus + .slider {
-  box-shadow: 0 0 1px var(--primary);
+input:focus+.slider {
+    box-shadow: 0 0 1px var(--primary);
 }
 
-input:checked + .slider:before {
-  -webkit-transform: translateX(22px);
-  -ms-transform: translateX(22px);
-  transform: translateX(22px);
+input:checked+.slider:before {
+    -webkit-transform: translateX(22px);
+    -ms-transform: translateX(22px);
+    transform: translateX(22px);
 }
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+    border-radius: 34px;
 }
 
 .slider.round:before {
-  border-radius: 50%;
+    border-radius: 50%;
 }
 
 .toggle-item:hover {
-    background: rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
 }
