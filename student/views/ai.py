@@ -600,26 +600,19 @@ class OnlineExamCertificateDownloadView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, attempt_id):
+        from student.online_exam_certificate_utils import generate_online_exam_certificate_pdf
+        from django.http import HttpResponse
+
         attempt = get_object_or_404(ExamAttempt, id=attempt_id, student__user=request.user)
         
         if not attempt.is_submitted:
             return Response({"error": "Exam not yet submitted"}, status=400)
             
-        # FIX M-4: Honest response — PDF generation not implemented yet
-        certificate_data = {
-            "student_name": attempt.student.user.get_full_name(),
-            "exam_title": attempt.exam.title,
-            "score": attempt.score_obtained,
-            "date": attempt.submitted_at,
-            "certificate_id": f"CERT-{attempt.id}-{attempt.exam.id}"
-        }
+        pdf_buffer = generate_online_exam_certificate_pdf(attempt)
         
-        return Response({
-            "success": True,
-            "message": "Certificate data ready. PDF generation coming soon.",
-            "data": certificate_data,
-            "status": "PDF_GENERATION_PENDING"
-        })
+        response = HttpResponse(pdf_buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Certificate_Exam_{attempt.exam.id}.pdf"'
+        return response
 
 class PublicResultVerificationView(APIView):
     permission_classes = [permissions.AllowAny]

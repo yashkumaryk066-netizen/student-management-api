@@ -1141,31 +1141,23 @@ class DemoRequest(models.Model):
         return f"{self.name} - {self.phone} ({self.status})"
     
     def send_notifications(self):
-        """Send WhatsApp and SMS notifications to admin"""
-        # Note: Imports are inside method to manage circular dependency if notifications app uses student models
-        # Assuming notifications module is separate app or utility
+        """Send notification to admin"""
         try:
-             from notifications import whatsapp_service, sms_service
+             from django.contrib.auth.models import User
+             from student.models import Notification
              
-             # Send WhatsApp to admin
-             whatsapp_result = whatsapp_service.send_demo_request_notification(
-                 requester_name=self.name,
-                 requester_phone=self.phone,
-                 requester_email=self.email,
-                 institution_name=self.institution_name
-             )
-             
-             # Send SMS as backup
-             sms_message = f"New Demo Request: {self.name} ({self.phone}) from {self.institution_name or 'Unknown'}. Check WhatsApp for details."
-             sms_result = sms_service.send_message('+918356926231', sms_message)
-             
-             return {
-                 'whatsapp': whatsapp_result,
-                 'sms': sms_result
-             }
-        except ImportError:
-            return {'error': 'Notification service not found'}
-
+             admins = User.objects.filter(is_superuser=True)
+             for admin in admins:
+                 Notification.objects.create(
+                     recipient=admin,
+                     title=f"New Demo Request: {self.institution_name}",
+                     message=f"{self.name} ({self.phone}) requested a demo for their institution."
+                 )
+             return {"status": "success"}
+        except Exception as e:
+            import logging
+            logging.error(f"Demo notification failed: {e}")
+            return {"status": "error", "message": str(e)}
 class SupportTicket(models.Model):
     """Support Ticket System for SuperAdmin"""
     PRIORITY_CHOICES = [

@@ -118,15 +118,66 @@ class DocumentGenerationView(APIView):
 class GenerateBulkAdmitCardView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        return Response({"message": "Bulk Admit Card generation logic can be implemented here using a zip flow."})
+        import zipfile
+        import io
+        from django.http import HttpResponse
+        
+        owner = get_owner_user(request.user)
+        grade = request.query_params.get('grade')
+        batch_id = request.query_params.get('batch_id')
+        
+        students = Student.objects.filter(created_by=owner)
+        if grade:
+            students = students.filter(grade=grade)
+        if batch_id:
+            students = students.filter(batch_id=batch_id)
+            
+        if not students.exists():
+            return Response({"error": "No students found for given criteria"}, status=404)
+            
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zf:
+            for student in students:
+                exams = Exam.objects.filter(grade_class=student.grade, created_by=owner).order_by('exam_date')
+                if not exams.exists() and student.batch:
+                    exams = Exam.objects.filter(batch=student.batch, created_by=owner).order_by('exam_date')
+                    
+                pdf_buffer = generate_admit_card_pdf(student, exams)
+                zf.writestr(f"AdmitCard_{student.roll_number}_{student.name.replace(' ', '_')}.pdf", pdf_buffer)
+                
+        response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="Bulk_Admit_Cards.zip"'
+        return response
 
 class GenerateBulkIDCardView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
+        import zipfile
+        import io
+        from django.http import HttpResponse
+        
+        owner = get_owner_user(request.user)
         grade = request.query_params.get('grade')
-        return Response({"message": f"Bulk ID Card generation for Grade {grade} initiated."})
-
-
+        batch_id = request.query_params.get('batch_id')
+        
+        students = Student.objects.filter(created_by=owner)
+        if grade:
+            students = students.filter(grade=grade)
+        if batch_id:
+            students = students.filter(batch_id=batch_id)
+            
+        if not students.exists():
+            return Response({"error": "No students found for given criteria"}, status=404)
+            
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zf:
+            for student in students:
+                pdf_buffer = generate_id_card_pdf(student)
+                zf.writestr(f"IDCard_{student.roll_number}_{student.name.replace(' ', '_')}.pdf", pdf_buffer)
+                
+        response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="Bulk_ID_Cards.zip"'
+        return response
 class MyReportCardView(APIView):
     """
     Compatibility endpoint for legacy student dashboard.

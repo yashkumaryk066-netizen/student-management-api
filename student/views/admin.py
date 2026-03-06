@@ -1,8 +1,9 @@
 from .base import *
-from student.models import Employee, UserProfile, AuditLog, Student, Batch, Course
+from student.models import Employee, UserProfile, AuditLog, Student, Batch, Course, SupportTicket, GlobalAnnouncement
 from student.serializers import (
     EmployeeSerializer, UserProfileSerializer, AuditLogSerializer,
-    StudentSerializer, BatchSerializer, CourseSerializer
+    StudentSerializer, BatchSerializer, CourseSerializer,
+    SupportTicketSerializer, GlobalAnnouncementSerializer
 )
 from django.contrib.auth.models import User
 
@@ -162,3 +163,33 @@ class AdminApprovalActionView(APIView):
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
     def post(self, request, action_type, item_id):
         return Response({"message": f"{action_type} performed on {item_id}"})
+
+class SupportTicketViewSet(viewsets.ModelViewSet):
+    serializer_class = SupportTicketSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return SupportTicket.objects.all()
+        return SupportTicket.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class GlobalAnnouncementViewSet(viewsets.ModelViewSet):
+    serializer_class = GlobalAnnouncementSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return GlobalAnnouncement.objects.all()
+        # Non-superusers can only view active announcements
+        return GlobalAnnouncement.objects.filter(is_active=True)
+
+    def perform_create(self, serializer):
+        # Only super admins or authorized roles should create global announcements
+        if not self.request.user.is_superuser:
+             raise PermissionDenied("Only system administrators can create global announcements.")
+        serializer.save(created_by=self.request.user)

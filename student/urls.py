@@ -23,6 +23,7 @@ from .views import (
     VehicleListCreateView, RouteListCreateView, TransportAllocationListCreateView,
     EmployeeListCreateView, LeaveRequestListCreateView,
     ExamListCreateView, GradeListCreateView, EventListCreateView,
+    ClassroomViewSet, ClassScheduleViewSet,
     CourseListCreateView, CourseDetailView, BatchListCreateView, EnrollmentListCreateView,
     LiveClassListCreateView, LiveClassDetailView,
     
@@ -62,6 +63,7 @@ from .views import (
     StudentLeadViewSet, SubstituteAllocationViewSet, StudentDiaryViewSet, LMSMaterialViewSet,
     LMSAssignmentViewSet, AssignmentSubmissionViewSet, InventoryItemViewSet,
     InstitutionExpenseViewSet, StudentLeaveRequestViewSet, SubjectViewSet,
+    PayrollViewSet,
     
     # Misc
     AuditLogView, HolidayListCreateView, RoutineListCreateView, BulkImportView,
@@ -69,7 +71,8 @@ from .views import (
     VerifyIdentityView, CheckPublicAvailabilityView, RequestPasswordResetView, VerifyAndResetPasswordView,
     CheckInstitutionView, CheckUsernameView,
     ReportListView, ReportDownloadView,
-    InstitutionSettingsView, DataBackupView, TriggerAutomationView
+    InstitutionSettingsView, DataBackupView, TriggerAutomationView,
+    SupportTicketViewSet, GlobalAnnouncementViewSet
 )
 from .sa_views import (
     SuperAdminClientsView,
@@ -234,6 +237,9 @@ urlpatterns = [
     path('ai/lesson-plan-generator/', LessonPlanGeneratorView.as_view(), name='ai-lesson-plan-generator'),
     path('ai/grader/', AssignmentGraderView.as_view(), name='ai-assignment-grader'),
     path('ai/writing-analyzer/', WritingAnalyzerView.as_view(), name='ai-writing-analyzer'),
+    path('ai/summarizer/', ContentSummarizerView.as_view(), name='ai-content-summarizer'),
+    path('ai/translator/', ContentTranslatorView.as_view(), name='ai-content-translator'),
+    path('ai/explainer/', ConceptExplainerView.as_view(), name='ai-concept-explainer'),
     
     # Online Exam System interaction
     path('portal/exam/<int:exam_id>/', ExamPortalView.as_view(), name='student-take-exam'),
@@ -307,6 +313,11 @@ router.register(r'expenses', InstitutionExpenseViewSet, basename='expenses')
 router.register(r'leave-requests', StudentLeaveRequestViewSet, basename='student-leave-requests')
 router.register(r'subjects', SubjectViewSet, basename='subjects')
 router.register(r'online-exams', OnlineExamViewSet, basename='online-exams')
+router.register(r'payroll', PayrollViewSet, basename='payroll')
+router.register(r'classrooms', ClassroomViewSet, basename='classrooms')
+router.register(r'class-schedules', ClassScheduleViewSet, basename='class-schedules')
+router.register(r'support-tickets', SupportTicketViewSet, basename='support-tickets')
+router.register(r'announcements', GlobalAnnouncementViewSet, basename='announcements')
 
 urlpatterns += [
     path('', include(router.urls)),

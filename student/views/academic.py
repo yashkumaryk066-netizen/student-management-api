@@ -3,13 +3,14 @@ from student.models import (
     Course, Batch, Enrollment, LiveClass, 
     LMSMaterial, LMSAssignment, AssignmentSubmission,
     StudentDiary, StudentLeaveRequest, Subject,
-    Event, Exam, Grade, Holiday, ClassRoutine
+    Event, Exam, Grade, Holiday, ClassRoutine, Classroom, ClassSchedule
 )
 from student.serializers import (
     CourseSerializer, BatchSerializer, EnrollmentSerializer, LiveClassSerializer,
     LMSMaterialSerializer, LMSAssignmentSerializer, AssignmentSubmissionSerializer,
     StudentDiarySerializer, StudentLeaveRequestSerializer, SubjectSerializer,
-    EventSerializer, ExamSerializer, GradeSerializer, HolidaySerializer, ClassRoutineSerializer
+    EventSerializer, ExamSerializer, GradeSerializer, HolidaySerializer, ClassRoutineSerializer,
+    ClassroomSerializer, ClassScheduleSerializer
 )
 
 # --- COURSE MANAGEMENT ---
@@ -186,6 +187,31 @@ class SubjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return filter_by_owner(Subject.objects.all(), self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
+# --- CLASSROOM & SCHEDULE ---
+
+class ClassroomViewSet(viewsets.ModelViewSet):
+    serializer_class = ClassroomSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return filter_by_owner(Classroom.objects.all(), self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=get_owner_user(self.request.user))
+
+
+class ClassScheduleViewSet(viewsets.ModelViewSet):
+    serializer_class = ClassScheduleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = ClassSchedule.objects.all()
+        # Additional filtering could go here (e.g., student filters by grade)
+        return filter_by_owner(qs, self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(created_by=get_owner_user(self.request.user))

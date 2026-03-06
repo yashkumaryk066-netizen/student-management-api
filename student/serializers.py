@@ -8,7 +8,7 @@ from .models import (
     Course, Batch, Enrollment, LiveClass, AuditLog,
     StudentDiary, StudentLeaveRequest, LMSMaterial, LMSAssignment, AssignmentSubmission,
     InventoryItem, InstitutionExpense, StudentLead, SubstituteAllocation, ResultCard,
-    Holiday, ClassRoutine, Subject,
+    Holiday, ClassRoutine, Subject, Classroom, ClassSchedule, SupportTicket, GlobalAnnouncement,
     OnlineExam, OnlineQuestion, ExamAttempt, ExamResponse, StudentPerformanceInsight,
     LoginAttempt, ClientSubscription, ChatConversation, ChatMessage
 )
@@ -54,6 +54,34 @@ class ExamAttemptSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ExamAttempt
+        fields = "__all__"
+
+class SupportTicketSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    class Meta:
+        model = SupportTicket
+        fields = "__all__"
+        read_only_fields = ['created_at', 'updated_at', 'resolved_at']
+
+class GlobalAnnouncementSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(source='created_by.username', read_only=True)
+    class Meta:
+        model = GlobalAnnouncement
+        fields = "__all__"
+        read_only_fields = ['created_at']
+
+class ClassroomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        fields = "__all__"
+
+class ClassScheduleSerializer(serializers.ModelSerializer):
+    subject_name = serializers.CharField(source='subject.name', read_only=True)
+    teacher_name = serializers.CharField(source='teacher.user.get_full_name', read_only=True)
+    classroom_name = serializers.CharField(source='classroom.room_number', read_only=True)
+    
+    class Meta:
+        model = ClassSchedule
         fields = "__all__"
 
 class StudentPerformanceInsightSerializer(serializers.ModelSerializer):

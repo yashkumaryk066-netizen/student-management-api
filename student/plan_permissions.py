@@ -163,12 +163,31 @@ def get_user_features(user):
     return features_dict
 
 # Pricing Configuration (Centralized)
+# SYNC: These must match frontend index.html pricing cards exactly
 PLAN_PRICING = {
     'COACHING': 500,
-    'SCHOOL': 1500,
-    'INSTITUTE': 3000,
+    'SCHOOL': 2000,
+    'INSTITUTE': 5000,
     'EDUCATION SYSTEM': 99999, # Enterprise/Internal
     'SUPER_ADMIN': 0
+}
+
+# Per-plan student/staff limits
+PLAN_STUDENT_LIMITS = {
+    'COACHING': 200,   # Up to 200 students
+    'SCHOOL': 1000,    # Up to 1000 students
+    'INSTITUTE': 9999, # Unlimited (9999 = no cap)
+    'EDUCATION SYSTEM': 99999,
+    'SUPER_ADMIN': 99999,
+}
+
+# Per-plan features label (used in emails/UI)
+PLAN_LABELS = {
+    'COACHING': 'Coaching Center Plan - ₹500/month',
+    'SCHOOL': 'School Management Plan - ₹2,000/month',
+    'INSTITUTE': 'Institute / University Plan - ₹5,000/month',
+    'EDUCATION SYSTEM': 'Enterprise Education System',
+    'SUPER_ADMIN': 'Super Admin Access',
 }
 
 # Maps institution type -> default subscription tier (used in ClientSubscription.activate())
