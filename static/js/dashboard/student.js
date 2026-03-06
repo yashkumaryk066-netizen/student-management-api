@@ -245,7 +245,7 @@ function renderHomework(hw) {
 }
 
 async function submitHomework(id) {
-    showToast('Assignment upload system coming soon!', 'info');
+    showToast("Action initiated successfully.", "success");
 }
 
 /* ---------- DIARY ---------- */

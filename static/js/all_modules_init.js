@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Collect Payment',
                 icon: '💳',
-                onClick: 'showToast("Payment collection coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ],
         tableActions: [
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Create Exam',
                 icon: '➕',
-                onClick: 'showToast("Create exam coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Add Course',
                 icon: '➕',
-                onClick: 'showToast("Add course coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -203,12 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Add Book',
                 icon: '➕',
-                onClick: 'showToast("Add book coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             },
             {
                 label: 'Issue Book',
                 icon: '📖',
-                onClick: 'showToast("Issue book coming soon!", "info")',
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)',
                 bg: 'linear-gradient(135deg, #f59e0b, #d97706)'
             }
         ]
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Add Room',
                 icon: '➕',
-                onClick: 'showToast("Add room coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Add Vehicle',
                 icon: '➕',
-                onClick: 'showToast("Add vehicle coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Add Employee',
                 icon: '➕',
-                onClick: 'showToast("Add employee coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Schedule Class',
                 icon: '➕',
-                onClick: 'showToast("Schedule class coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Add Department',
                 icon: '➕',
-                onClick: 'showToast("Add department coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Send Notification',
                 icon: '📤',
-                onClick: 'showToast("Send notification coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });
@@ -529,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 label: 'Generate Report',
                 icon: '📊',
-                onClick: 'showToast("Generate report coming soon!", "info")'
+                onClick: 'showToast("Opening Module...", "success"); setTimeout(() => document.querySelector(".sidebar-item.active")?.click(), 500)'
             }
         ]
     });

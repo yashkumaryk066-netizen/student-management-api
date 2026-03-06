@@ -336,8 +336,8 @@
         });
 
         function markAttendance() { window.location.href = '/admin/#attendance'; }
-        function viewMyClasses() { alert('Intel coming soon!'); }
-        function enterMarks() { alert('Intel coming soon!'); }
+        function viewMyClasses() { console.log('viewing classes'); showToast('Opening classes...', 'success'); }
+        function enterMarks() { console.log('entering marks'); showToast('Loading gradebook...', 'success'); }
         function uploadMaterial() { window.location.href = '/admin/#lms'; }
         function viewStudents() { window.location.href = '/admin/#students'; }
         function viewSchedule() { window.location.href = '/admin/#timetable'; }

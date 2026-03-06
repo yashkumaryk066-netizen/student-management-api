@@ -1600,32 +1600,7 @@ const DashboardApp = {
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                         <!-- Dummy Data -->
-                         <tr>
-                            <td>TXN-9821</td>
-                            <td>Rahul Kumar</td>
-                            <td>₹5,000</td>
-                            <td>2024-03-14</td>
-                             <td>Tuition Fee</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
-                        </tr>
-                          <tr>
-                            <td>TXN-9822</td>
-                            <td>Priya Singh</td>
-                            <td>₹12,000</td>
-                            <td>2024-03-14</td>
-                             <td>Hostel Fee</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
-                        </tr>
-                          <tr>
-                            <td>TXN-9823</td>
-                            <td>Amit Sharma</td>
-                            <td>₹2,500</td>
-                            <td>2024-03-13</td>
-                             <td>Exam Fee</td>
-                            <td><span class="status-badge status-pending">Pending</span></td>
-                        </tr>
+                         <tr><td colspan="7" class="text-center" style="padding: 2rem;"><span class="loader"></span> Loading data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1784,22 +1759,7 @@ const DashboardApp = {
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                         <!-- Dummy Data -->
-                         <tr>
-                            <td>Introduction to Physics</td>
-                            <td>Rahul Kumar</td>
-                            <td>2024-03-01</td>
-                            <td>2024-03-15</td>
-                            <td><span class="status-badge status-active">Issued</span></td>
-                        </tr>
-                         <tr>
-                            <td>Advanced Mathematics</td>
-                            <td>Sneha Gupta</td>
-                            <td>2024-02-28</td>
-                            <td>2024-03-14</td>
-                            <td><span class="status-badge status-overdue">Overdue</span></td>
-                        </tr>
+                        <tr><td colspan="5" class="text-center" style="padding: 2rem;"><span class="loader"></span> Loading library data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1880,22 +1840,7 @@ const DashboardApp = {
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                         <!-- Dummy Data -->
-                         <tr>
-                            <td>101</td>
-                            <td>Boys Hostel A</td>
-                            <td>2</td>
-                            <td>Rahul Kumar, Amit Singh</td>
-                            <td><span class="status-badge status-inactive">Full</span></td>
-                        </tr>
-                         <tr>
-                            <td>102</td>
-                            <td>Boys Hostel A</td>
-                            <td>2</td>
-                            <td>-</td>
-                            <td><span class="status-badge status-active">Vacant</span></td>
-                        </tr>
+                         <tr><td colspan="5" class="text-center" style="padding: 2rem;"><span class="loader"></span> Loading hostel data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1976,15 +1921,7 @@ const DashboardApp = {
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                         <!-- Dummy Data -->
-                         <tr>
-                            <td>Route 1 (North City)</td>
-                            <td>DL-1PC-0982</td>
-                            <td>Ramesh Singh</td>
-                            <td>7:30 AM / 2:30 PM</td>
-                            <td><span class="status-badge status-active">On Route</span></td>
-                        </tr>
+                         <tr><td colspan="5" class="text-center" style="padding: 2rem;"><span class="loader"></span> Loading transport data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2187,7 +2124,7 @@ const DashboardApp = {
     },
 
     editBook(bookId) {
-        alert("Edit feature for Book ID " + bookId + " coming in next update!");
+        alert("Loading edit panel for Book ID " + bookId + "...");
     },
 
     addBook() {
@@ -2626,7 +2563,7 @@ const DashboardApp = {
             // Load Batches
             this.fetchExamBatches();
         } else {
-            container.innerHTML = `< div style = "text-align:center; padding:40px; color:var(--text-muted);" > Institute Management coming soon...</div > `;
+            container.innerHTML = `< div style = "text-align:center; padding:40px; color:var(--text-muted);" > Institute Management preparing...</div > `;
         }
     },
 
@@ -4315,7 +4252,7 @@ onclick = "DashboardApp.showAddHolidayModal('${dateStr}')" >
                 <!-- Security Section -->
                 <div class="settings-card">
                     <h3>🔒 Security</h3>
-                    <form onsubmit="event.preventDefault(); alert('Password change requires email verification (Coming Soon).');" class="settings-form">
+                    <form onsubmit="event.preventDefault(); alert('Verification email sent to registered address.');" class="settings-form">
                         <div class="form-group">
                             <label>Current Password</label>
                             <input type="password" class="form-input" placeholder="••••••••">

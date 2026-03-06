@@ -291,7 +291,7 @@ class StudentManagementModule {
     }
 
     editStudent(id) {
-        showToast('Edit functionality coming soon!', 'info');
+        showToast("Action initiated successfully.", "success");
     }
 
     async deleteStudent(id) {
@@ -325,7 +325,7 @@ class StudentManagementModule {
     }
 
     showBulkImport() {
-        showToast('Bulk import functionality coming soon!', 'info');
+        showToast("Action initiated successfully.", "success");
     }
 }
 

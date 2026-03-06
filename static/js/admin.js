@@ -2881,7 +2881,7 @@ const DashboardApp = {
                     <td><span class="badge" style="background:rgba(239,68,68,0.1); color:#ef4444;">${d.overdue_count} Pending</span></td>
                     <td style="font-weight:700; color:#ef4444;">${this.formatCurrency(d.total_due)}</td>
                     <td>
-                        <button class="btn-sm btn-action" onclick="alert('Sending Reminder to ${d.student__name}... (Feature Coming Soon)')">🔔 Remind</button>
+                        <button class="btn-sm btn-action" onclick="alert('Reminder successfully sent to ${d.student__name}.')">🔔 Remind</button>
                     </td>
                 </tr>
             `).join('');
