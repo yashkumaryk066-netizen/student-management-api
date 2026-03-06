@@ -7,15 +7,26 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     /* ---------------- SAFETY & FALLBACK ---------------- */
+    // CRITICAL FIX: Use pure CSS, NOT gsap.set() - gsap may not be loaded yet!
     const forceVisibility = () => {
-        const targets = document.querySelectorAll('.reveal-section, .pricing-card, .bento-card, .hero-content');
+        const targets = document.querySelectorAll(
+            '.reveal-section, .pricing-card, .bento-card, .hero-content, ' +
+            '.hero-left h1, .hero-description, .hero-buttons, .hero-left'
+        );
         targets.forEach(el => {
-            gsap.set(el, { opacity: 1, visibility: 'visible', y: 0, scale: 1, filter: 'blur(0px)' });
+            el.style.opacity = '1';
+            el.style.visibility = 'visible';
+            el.style.transform = 'none';
+            el.style.filter = 'none';
         });
         console.log("🛡️ Y.S.M Stability: Everything Restored");
     };
 
-    // Global Fallback
+    // Run immediately as CSS-only safety net (before GSAP even starts)
+    // This ensures text is visible even if GSAP hasn't loaded yet
+    forceVisibility();
+
+    // Global Fallback timeout (3s max)
     const visibilityTimeout = setTimeout(forceVisibility, 3000);
 
     if (!window.gsap || !window.Lenis) {
