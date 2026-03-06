@@ -1,0 +1,73 @@
+====================================================
+Y.S.M AI - WHATSAPP MARKETING TEMPLATES
+====================================================
+
+You can copy-paste these templates directly on WhatsApp Web.
+Always replace the bracketed text like [Institute Name] before sending!
+
+----------------------------------------------------
+TEMPLATE 1: The Initial Hook (For Coaching Institutes)
+----------------------------------------------------
+
+Hello Director Sir, 
+
+I am Yash Mishra, a Software Engineer from Naugachiya. 
+
+I noticed [Institute Name] is one of the top institutes in our city. I have built 'Y.S.M AI' - India's most advanced Institute Management System specifically designed to solve two major problems:
+1. Pending Fees Tracking 💰 (Auto-reminders to parents)
+2. Paper Generation 📄 (AI makes question papers in seconds)
+
+We are offering a FREE 7-Day Live Trial for select institutes. 
+Can I visit your office tomorrow for just 10 minutes to show a magical demo? Let me know what time works best!
+
+Thanks,
+Yash A Mishra
+Founder, Telepathy Infotech
+🌐 yashamishra.pythonanywhere.com
+
+----------------------------------------------------
+TEMPLATE 2: Follow-Up (If they didn't reply)
+----------------------------------------------------
+
+Good Morning Sir! 
+
+Just following up on my previous message. I know managing [Institute Name] keeps you very busy. 
+
+Our AI system is already helping other local institutes save 20+ hours every week and recover 100% of their pending fees automatically. 
+
+Here is a 1-minute video of how our AI works: [Link to YouTube/Drive Video if you have one, else remove this line]
+
+Would Thursday at 2 PM be a good time to call you for 2 minutes?
+
+Regards,
+Yash Mishra
+
+----------------------------------------------------
+TEMPLATE 3: Post-Demo (Sending Proposal & Login)
+----------------------------------------------------
+
+Thank you so much for your time today, Sir! It was great learning about the vision you have for [Institute Name].
+
+As promised, here are the ID/Passwords for your 7-Day Free Trial.
+
+🔗 Software Link: https://yashamishra.pythonanywhere.com/login/
+👤 Admin ID: [Dummy_ID]
+🔑 Password: [Password]
+
+Please try checking the 'Finance Module' and 'AI Chat'. 
+I will call you on Friday for your feedback. I am available 24/7 on this number if you need any help!
+
+Best Regards,
+Yash A. Mishra
+
+----------------------------------------------------
+TEMPLATE 4: The "Urgency/Offer" Close
+----------------------------------------------------
+
+Hello Sir! Hope you liked the Trial. 
+
+We are currently onboarding our first 5 premium clients from Bhagalpur/Naugachiya and offering a lifetime "Local Founder Discount" - waiving off the entire ₹5000 Setup & Data Uploading Fee!
+
+This offer is only valid till [Date]. Let's digitize [Institute Name] together starting Monday. 
+
+Should I send the onboarding form?
