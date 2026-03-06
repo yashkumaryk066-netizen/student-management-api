@@ -3148,25 +3148,6 @@
                 cursor.style.top = e.clientY + 'px';
             });
 
-            // Typewriter effect for Hero Title
-            document.addEventListener('DOMContentLoaded', () => {
-                const el = document.querySelector('.text-shimmer');
-                if (el) {
-                    const text = el.innerText;
-                    el.innerText = '';
-                    el.style.borderRight = '3px solid var(--primary)';
-                    let i = 0;
-                    const typing = setInterval(() => {
-                        if (i < text.length) {
-                            el.innerText += text.charAt(i);
-                            i++;
-                        } else {
-                            clearInterval(typing);
-                            el.style.borderRight = 'none'; // remove cursor when done
-                        }
-                    }, 40); // Fast typing speed
-                }
-            });
         </script>
 </body>
 
