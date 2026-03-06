@@ -60,6 +60,8 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,yashamishra
 
 # The base URL for the site, used for absolute link generation in emails/sitemaps
 SITE_URL = config('SITE_URL', default='https://yashamishra.pythonanywhere.com').rstrip('/')
+# FIX C-1: email_service.py references settings.FRONTEND_URL. Alias it here.
+FRONTEND_URL = SITE_URL
 
 # PRODUCTION SECURITY SETTINGS
 # Only enable HTTPS settings if using custom domain with SSL certificate
@@ -243,8 +245,12 @@ SPECTACULAR_SETTINGS = {
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=90),
+    # FIX M-1: 90 days is dangerously long. Reduced to 7 days.
+    # Users log in via refresh token; 7 days is standard SaaS practice.
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
+    'ROTATE_REFRESH_TOKENS': True,   # Issue new refresh token on every use
+    'BLACKLIST_AFTER_ROTATION': False, # Keep False unless simplejwt blacklist app added
 }
 
 

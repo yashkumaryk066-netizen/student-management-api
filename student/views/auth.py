@@ -42,7 +42,7 @@ class ProfileView(APIView):
                     "digital_signature": None,
                     "phone": "",
                     "address": "System Root",
-                    "institution_type": "EDUCATION SYSTEM",
+                    "institution_type": "EDUCATION SYSTEM",  # FIX L-3: consistent value
                     "subscription_plan": "ENTERPRISE",
                 })
             
@@ -79,7 +79,7 @@ class ProfileView(APIView):
             return Response(data)
         except Exception as e:
             logger.error("❌ CRITICAL ERROR IN PROFILE VIEW ❌", exc_info=True)
-            return Response({"error": str(e), "trace": traceback.format_exc()}, status=500)
+            return Response({"error": "An internal error occurred. Please try again."}, status=500)
     
     def put(self, request):
         """Update user profile information"""
@@ -91,9 +91,13 @@ class ProfileView(APIView):
             user.first_name = data['first_name']
         if 'last_name' in data:
             user.last_name = data['last_name']
+        # FIX H-5: Email uniqueness check before allowing update
         if 'email' in data:
-            user.email = data['email']
-        
+            new_email = (data['email'] or '').strip().lower()
+            if new_email and new_email != user.email.lower():
+                if User.objects.filter(email__iexact=new_email).exclude(pk=user.pk).exists():
+                    return Response({'error': 'This email address is already in use by another account.'}, status=400)
+                user.email = new_email
         user.save()
         
         # Update Profile model fields if profile exists

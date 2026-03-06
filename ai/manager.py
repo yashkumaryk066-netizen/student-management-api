@@ -129,22 +129,17 @@ class AIServiceManager:
             self._try_fallback_providers()
     
     def _try_fallback_providers(self):
-        """Try alternative FREE providers in cascade"""
-        # Order: Groq -> DeepSeek -> HuggingFace -> Gemini -> ChatGPT
-        fallback_order = ['groq', 'deepseek', 'gemini', 'chatgpt']
+        """Try alternative providers in cascade. FIX H-1: Added mistral + deepseek to fallback list."""
+        fallback_order = ['groq', 'deepseek', 'mistral', 'gemini', 'chatgpt', 'huggingface']
         
         for fallback in fallback_order:
             if fallback == self.provider:
                 continue  # Skip current failed provider
                 
             try:
-                # logger.info(f"🔄 Switching to fallback provider: {fallback}")
-                
                 if fallback == 'huggingface':
                     from .huggingface import get_huggingface_service
                     service = get_huggingface_service()
-                    # Test if it actually works (lightweight check)
-                    # if not service.api_key and self.provider == 'huggingface': continue
                 elif fallback == 'gemini':
                     from .gemini import get_gemini_service
                     service = get_gemini_service()
@@ -154,6 +149,12 @@ class AIServiceManager:
                 elif fallback == 'chatgpt':
                     from .chatgpt import get_chatgpt_service
                     service = get_chatgpt_service()
+                elif fallback == 'deepseek':
+                    from .deepseek import get_deepseek_service
+                    service = get_deepseek_service()
+                elif fallback == 'mistral':
+                    from .mistral import get_mistral_service
+                    service = get_mistral_service()
                 else:
                     continue
 
@@ -163,7 +164,7 @@ class AIServiceManager:
                 return
                     
             except Exception as e:
-                # logger.warning(f"Fallback {fallback} failed: {str(e)}")
+                logger.warning(f"⚠️ Fallback {fallback} failed: {str(e)}")
                 continue
         
         logger.error("❌ All AI providers failed. System entering offline mode.")
@@ -186,11 +187,21 @@ class AIServiceManager:
                     return "I cannot fulfill this request due to safety guidelines. I am here to help with educational and technical topics."
 
                 # --- AUTO-SWITCH TO VISION ENGINE IF MEDIA PRESENT ---
+                # FIX M-3: Check Gemini API key exists before force-switching
                 if kwargs.get('media_data') and self.provider != self.GEMINI:
-                    logger.info("📸 Visual content detected. Switching to Y.S.M Vision Engine.")
-                    from .gemini import get_gemini_service
-                    vision_service = get_gemini_service()
-                    return vision_service.ask_tutor(question, subject, context, **kwargs)
+                    gemini_key = None
+                    try:
+                        from decouple import config as dc
+                        gemini_key = dc('GEMINI_API_KEY', default=None)
+                    except Exception:
+                        pass
+                    if gemini_key:
+                        logger.info("📸 Visual content detected. Switching to Y.S.M Vision Engine.")
+                        from .gemini import get_gemini_service
+                        vision_service = get_gemini_service()
+                        return vision_service.ask_tutor(question, subject, context, **kwargs)
+                    else:
+                        logger.warning("⚠️ Vision requested but GEMINI_API_KEY not configured. Using current provider.")
 
                 # --- HISTORY TRIMMING (TOKEN SAFETY) ---
                 # Check if 'history' kwarg exists and trim it
@@ -314,16 +325,18 @@ class AIServiceManager:
 
             except Exception as e:
                 logger.warning(f"Primary AI ({self.provider}) failed: {str(e)}. Retrying with backups...")
-                # If primary fails during execution (e.g. timeout), try to switch provider immediately
-                self.service = None 
+                # FIX C-3: Reset singleton so next request gets a fresh instance
+                global _ai_manager
+                _ai_manager = None
+
+                self.service = None
                 self._try_fallback_providers()
                 if self.service:
                     try:
-                         # Retry logic
                         return self.service.ask_tutor(question, subject, context, **kwargs)
                     except Exception as fe:
                         logger.error(f"Fallback AI ({self.provider}) also failed: {fe}")
-                        self.service = None # Reset so we don't try it again
+                        self.service = None
         
         # 2. Try Local AI (TinyLlama)
         try:

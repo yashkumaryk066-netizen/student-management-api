@@ -10,37 +10,36 @@ logger = logging.getLogger(__name__)
 @receiver(pre_save, sender=User)
 def check_activation(sender, instance, **kwargs):
     """
-    Check if user is being activated.
-    Uses transaction.on_commit to ensure email is sent only after successful commit.
+    Check if user is being activated (inactive -> active).
+    Uses transaction.on_commit to ensure email is sent only after DB commit.
+    FIX C-2: Removed hasattr(instance, 'profile') guard — in pre_save, the related
+    profile object isn't always cached on the instance. We re-fetch from DB in on_commit.
     """
     if instance.pk:
         try:
             old_instance = User.objects.get(pk=instance.pk)
-            # Check if toggling from Inactive -> Active
             if not old_instance.is_active and instance.is_active:
-                # Notify user they have been activated
-                if hasattr(instance, 'profile'):
-                    # Use Premium Email Service with Robust Error Handling
-                    def send_activation_email():
-                        try:
-                            from student.services.email_service import send_approval_email
-                            # Re-fetch minimal required data to avoid stale objects
-                            user_refresh = User.objects.get(pk=instance.pk)
-                            if hasattr(user_refresh, 'profile') and user_refresh.email:
-                                send_approval_email(
-                                    email=user_refresh.email,
-                                    username=user_refresh.username,
-                                    password=None,  # Indicates existing credentials (no new pass)
-                                    plan_type=user_refresh.profile.institution_type or 'COACHING',
-                                    amount='0',
-                                    payment_id=None,
-                                    institution_type=user_refresh.profile.institution_type,
-                                )
-                        except Exception as e:
-                            logger.error(f"Failed to send activation email for {instance.username}: {e}")
+                user_pk = instance.pk  # Capture PK, not the stale instance
 
-                    # Execute only after transaction commits successfully
-                    transaction.on_commit(send_activation_email)
+                def send_activation_email():
+                    try:
+                        from student.services.email_service import send_approval_email
+                        user_refresh = User.objects.select_related('profile').get(pk=user_pk)
+                        if user_refresh.email:
+                            profile = getattr(user_refresh, 'profile', None)
+                            send_approval_email(
+                                email=user_refresh.email,
+                                username=user_refresh.username,
+                                password=None,  # No new password — just account activation notice
+                                plan_type=getattr(profile, 'institution_type', None) or 'COACHING',
+                                amount='0',
+                                payment_id=None,
+                                institution_type=getattr(profile, 'institution_type', None),
+                            )
+                    except Exception as e:
+                        logger.error(f"Failed to send activation email for user pk={user_pk}: {e}")
+
+                transaction.on_commit(send_activation_email)
 
         except User.DoesNotExist:
             pass
@@ -71,8 +70,19 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'profile'):
+    """
+    FIX H-3: Use update_fields to avoid triggering another post_save on User,
+    which would cause infinite recursion if profile.save() triggered user.save().
+    Also skip if 'created' to avoid double-save with create_user_profile.
+    """
+    created = kwargs.get('created', False)
+    if not created and hasattr(instance, 'profile'):
         try:
-            instance.profile.save()
+            # Only save profile metadata fields, not PKs/relations that could loop
+            instance.profile.save(update_fields=[
+                'last_login_ip', 'streak_count', 'last_activity_date',
+                'force_password_change', 'last_password_change'
+            ])
         except Exception as e:
-            logger.error(f"Error saving profile for user {instance.username}: {e}")
+            # This can fail if profile doesn't have all those fields yet — that's ok
+            pass

@@ -541,7 +541,9 @@ class OnlineExamInteractionView(APIView):
                         'marked_answer': marked_answer,
                         'is_correct': is_correct,
                         'points_awarded': points,
-                        'ai_feedback': ai_feedback if 'ai_feedback' in locals() else '',
+                        # FIX H-2: ai_feedback only available for SA/LA questions
+                        # For MCQ/TF it is empty, for SA/LA it comes from AI grading
+                        'ai_feedback': locals().get('ai_feedback', ''),
                         'ai_accuracy_score': int((points / float(question.marks)) * 100) if float(question.marks) > 0 else 0
                     }
                 )
@@ -603,8 +605,7 @@ class OnlineExamCertificateDownloadView(APIView):
         if not attempt.is_submitted:
             return Response({"error": "Exam not yet submitted"}, status=400)
             
-        # Mock certificate generation
-        # Real implementation would use ReportLab or WeasyPrint to generate PDF
+        # FIX M-4: Honest response — PDF generation not implemented yet
         certificate_data = {
             "student_name": attempt.student.user.get_full_name(),
             "exam_title": attempt.exam.title,
@@ -615,9 +616,9 @@ class OnlineExamCertificateDownloadView(APIView):
         
         return Response({
             "success": True,
-            "message": "Certificate data ready for rendering",
+            "message": "Certificate data ready. PDF generation coming soon.",
             "data": certificate_data,
-            "download_url": f"/api/media/certificates/{attempt.id}.pdf" # Placeholder
+            "status": "PDF_GENERATION_PENDING"
         })
 
 class PublicResultVerificationView(APIView):
