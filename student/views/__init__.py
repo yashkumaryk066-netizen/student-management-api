@@ -633,7 +633,7 @@ class VerifyAndResetPasswordView(APIView):
          return Response({
              "message": "Security Protocol Overwritten Successfully.",
              "username": user.username,
-             "password": new_password
+             "hint": "Please use your new password to log in."
          }, status=200)
 
 class CheckUsernameView(APIView):

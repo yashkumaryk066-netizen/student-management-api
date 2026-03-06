@@ -3,7 +3,6 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.db import transaction
 from .models import UserProfile
-from student.services.email_service import send_approval_email
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,20 +18,23 @@ def check_activation(sender, instance, **kwargs):
             old_instance = User.objects.get(pk=instance.pk)
             # Check if toggling from Inactive -> Active
             if not old_instance.is_active and instance.is_active:
-                # Check if it is an AI USER or other role requiring notification
+                # Notify user they have been activated
                 if hasattr(instance, 'profile'):
                     # Use Premium Email Service with Robust Error Handling
                     def send_activation_email():
                         try:
+                            from student.services.email_service import send_approval_email
                             # Re-fetch minimal required data to avoid stale objects
                             user_refresh = User.objects.get(pk=instance.pk)
-                            if hasattr(user_refresh, 'profile'):
+                            if hasattr(user_refresh, 'profile') and user_refresh.email:
                                 send_approval_email(
                                     email=user_refresh.email,
                                     username=user_refresh.username,
-                                    password=None, # Indicates existing credentials
-                                    plan_type=user_refresh.profile.role, 
-                                    institution_type=user_refresh.profile.institution_type
+                                    password=None,  # Indicates existing credentials (no new pass)
+                                    plan_type=user_refresh.profile.institution_type or 'COACHING',
+                                    amount='0',
+                                    payment_id=None,
+                                    institution_type=user_refresh.profile.institution_type,
                                 )
                         except Exception as e:
                             logger.error(f"Failed to send activation email for {instance.username}: {e}")

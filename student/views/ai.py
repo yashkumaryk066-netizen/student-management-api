@@ -89,6 +89,10 @@ class AIChatView(APIView):
         return render(request, 'student/ai_chat.html', context)
 
     def post(self, request):
+        # Require authentication for AI chat API calls to prevent abuse
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required. Please login to use AI chat."}, status=401)
+
         question = request.data.get('message')
         if not question:
             return Response({"error": "Message is required"}, status=400)

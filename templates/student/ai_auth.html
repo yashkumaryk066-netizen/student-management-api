@@ -234,6 +234,16 @@
             transform: scale(1.05) translateY(-2px);
             box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
         }
+
+        @keyframes floatMagic {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(60px, 40px) rotate(30deg);
+            }
+        }
     </style>
 </head>
 
@@ -406,17 +416,6 @@
             return cookieValue;
         }
     </script>
-    <style>
-        @keyframes floatMagic {
-            0% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            100% {
-                transform: translate(60px, 40px) rotate(30deg);
-            }
-        }
-    </style>
 </body>
 
 </html>

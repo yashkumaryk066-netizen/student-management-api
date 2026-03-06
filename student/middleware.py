@@ -60,9 +60,7 @@ class SubscriptionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # DEBUG LOGGING - ACTIVE for troubleshooting
         user = getattr(request, 'user', None)
-        print(f"🔍 MIDDLEWARE: User={user}, Auth={user.is_authenticated if user else False}, Superuser={user.is_superuser if user else False}, Path={request.path}")
 
         # --------------------------------------------------
         # 1. FAST EXIT – unauthenticated / superuser
@@ -167,14 +165,16 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         # Referrer policy
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         
-        # Content Security Policy (adjust based on your needs)
+        # Content Security Policy (UI-safe with external CDNs)
         response['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data: https:; "
-            "font-src 'self' data:; "
-            "connect-src 'self';"
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+            "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+            "img-src 'self' data: https: blob:; "
+            "connect-src 'self' https://api.openai.com https://generativelanguage.googleapis.com https://api.anthropic.com https://api.groq.com https://api.deepseek.com https://api.mistral.ai; "
+            "frame-src 'none'; "
+            "object-src 'none';"
         )
         
         # Permissions Policy (formerly Feature-Policy)

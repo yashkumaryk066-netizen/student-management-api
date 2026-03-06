@@ -546,11 +546,11 @@ class EazypayCallbackView(APIView):
 
         if callback_secret:
             import hashlib
-            import hmac
+            import hmac as hmac_lib
             if not signature:
                 return False
-            expected = hmac.new(callback_secret.encode(), request.body, hashlib.sha256).hexdigest()
-            return hmac.compare_digest(signature, expected)
+            expected = hmac_lib.new(callback_secret.encode(), request.body, hashlib.sha256).hexdigest()
+            return hmac_lib.compare_digest(signature, expected)
 
         # Hard fail in production-like mode if callback secret is missing.
         if mode == 'LIVE':

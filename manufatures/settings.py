@@ -126,6 +126,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'student.middleware.DisableCacheMiddleware',
     'student.middleware.SubscriptionMiddleware', # Custom SaaS Middleware
+    'student.middleware.SecurityHeadersMiddleware',  # OWASP Security Headers
+    'student.middleware.RequestValidationMiddleware',  # Request Payload Validation
 ]
 
 ROOT_URLCONF = 'manufatures.urls'

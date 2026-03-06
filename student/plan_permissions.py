@@ -171,6 +171,14 @@ PLAN_PRICING = {
     'SUPER_ADMIN': 0
 }
 
+# Maps institution type -> default subscription tier (used in ClientSubscription.activate())
+DEFAULT_PLAN_BY_INSTITUTION = {
+    'COACHING': 'BASIC',
+    'SCHOOL': 'PRO',
+    'INSTITUTE': 'ENTERPRISE',
+    'EDUCATION SYSTEM': 'ENTERPRISE',
+}
+
 def get_upgrade_options(user):
     """
     Returns list of available upgrade plans based on pricing.

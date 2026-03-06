@@ -111,7 +111,7 @@ class DataBackupView(APIView):
                     'designation__title', 'contract_type', 'joining_date', 'basic_salary'
                 )),
                 "payments": list(Payment.objects.filter(**{'student__created_by': user} if not user.is_superuser else {}).values(
-                    'amount', 'payment_date', 'status', 'description', 'transaction_id'
+                    'amount', 'paid_date', 'status', 'description', 'transaction_id'
                 )),
                 "attendance_summary": {
                     "total_records": Attendence.objects.filter(student__created_by=user).count()
