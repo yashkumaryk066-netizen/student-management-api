@@ -156,6 +156,7 @@ const StudentAPI = {
 const AttendanceAPI = {
     getAll: () => apiCall('/attendence/'),
     mark: data => apiCall('/attendence/', { method: 'POST', body: JSON.stringify(data) }),
+    scan: qr => apiCall('/attendance/scan/', { method: 'POST', body: JSON.stringify({ student_id: qr }) }),
     getByStudent: id => apiCall(`/attendence/?student=${id}`)
 };
 
@@ -206,18 +207,24 @@ const ExamAPI = {
     getResults: (id) => apiCall(`/exams/${id}/results/`)
 };
 
+const SubjectAPI = {
+    getAll: () => apiCall('/subjects/'),
+    create: (data) => apiCall('/subjects/', { method: 'POST', body: JSON.stringify(data) })
+};
+
 const AcademicAPI = {
     getCourses: () => apiCall('/courses/'),
     getBatches: () => apiCall('/batches/'),
-    getEnrollments: () => apiCall('/enrollments/')
+    getEnrollments: () => apiCall('/enrollments/'),
+    getSubjects: () => apiCall('/subjects/')
 };
-// EOF marker removed - End of standard module API definitions
 
 window.HostelAPI = HostelAPI;
 window.TransportAPI = TransportAPI;
 window.HRAPI = HRAPI;
 window.ExamAPI = ExamAPI;
 window.AcademicAPI = AcademicAPI;
+window.SubjectAPI = SubjectAPI;
 
 const DashboardAPI = {
     getStats: () => apiCall('/dashboard/stats/'),

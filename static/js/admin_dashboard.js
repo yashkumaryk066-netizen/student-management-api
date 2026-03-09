@@ -1,25 +1,20 @@
 /**
  * ======================================================================
- * Y.S.M ENTERPRISE DASHBOARD CONTROLLER - FINAL PRODUCTION BUILD
- * Handles: Live Sync, Multi-Module Routing, and Premium UI Components
+ * Y.S.M ENTERPRISE DASHBOARD CONTROLLER - PRODUCTION V6 (FULL FIX)
+ * Handles: Live Sync, Functional QR Attendance, Flexible Exams, and Premium UI
  * ======================================================================
  */
 
 const DashboardController = (() => {
     let currentModule = 'dashboard';
-    let charts = {};
 
     function init() {
-        console.log("🚀 Initializing Y.S.M Enterprise Engine...");
-        
-        // Router System
+        console.log("🚀 Initializing Y.S.M Enterprise Engine V6...");
         const hash = window.location.hash.substring(1);
         loadModule(hash || 'dashboard');
-        
         window.addEventListener('hashchange', () => {
             loadModule(window.location.hash.substring(1) || 'dashboard');
         });
-
         bindEvents();
     }
 
@@ -29,12 +24,8 @@ const DashboardController = (() => {
         if (menuBtn && sidebar) {
             menuBtn.onclick = () => sidebar.classList.toggle('collapsed');
         }
-
-        // Global Module Menu
         const modulesBtn = document.getElementById('modules-menu-btn');
-        if (modulesBtn) {
-            modulesBtn.onclick = showAllModulesModal;
-        }
+        if (modulesBtn) modulesBtn.onclick = showAllModulesModal;
     }
 
     async function loadModule(moduleName) {
@@ -42,16 +33,14 @@ const DashboardController = (() => {
         const mainView = document.getElementById('dashboardView');
         if (!mainView) return;
 
-        // Active State UI
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         const activeLink = document.querySelector(`.nav-item[href='#${moduleName}']`);
         if (activeLink) activeLink.classList.add('active');
 
-        // Loading State
         mainView.innerHTML = `
             <div style="height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b;">
                 <div class="loader-spinner" style="font-size: 2.5rem; margin-bottom: 24px; color: #3b82f6;"><i class="fas fa-circle-notch fa-spin"></i></div>
-                <div style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px; font-weight: 600; text-transform: uppercase; font-size: 0.8rem;">Syncing ${moduleName.replace('-', ' ')}...</div>
+                <div style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px; font-weight: 600; text-transform: uppercase;">Syncing ${moduleName}...</div>
             </div>
         `;
 
@@ -64,134 +53,67 @@ const DashboardController = (() => {
                 case 'hr': await renderHRModule(mainView); break;
                 case 'exams': await renderExamsModule(mainView); break;
                 case 'hostel': await renderHostelModule(mainView); break;
-                case 'transport': await renderTransportModule(mainView); break;
                 case 'courses': await renderCoursesModule(mainView); break;
-                case 'library': await renderLibraryModule(mainView); break;
-                case 'settings': await renderSettingsModule(mainView); break;
                 default: await renderDashboardHome(mainView);
             }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) {
-            console.error(`[${moduleName}] Load Failed:`, e);
-            mainView.innerHTML = `
-                <div class="erp-card" style="margin: 40px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.3);">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
-                    <h2 style="color: #ef4444;">Module Offline</h2>
-                    <p style="color: #94a3b8; max-width: 400px; margin: 10px auto;">Failed to synchronize with ${moduleName} engine. Please check your connectivity or permissions.</p>
-                    <button class="magnetic-btn" onclick="location.reload()" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; margin-top: 20px;">Retry Connect</button>
-                </div>
-            `;
+            console.error(e);
+            mainView.innerHTML = `<div class="erp-card" style="margin:40px; color:#ef4444; text-align:center;">
+                <i class="fas fa-wifi-slash" style="font-size:3rem; margin-bottom:15px;"></i>
+                <h2>Sync Failure</h2>
+                <p>${e.message}</p>
+                <button class="magnetic-btn" onclick="location.reload()" style="margin-top:15px;">Retry Connection</button>
+            </div>`;
         }
     }
 
-    /* ============================================================
-       MODULE 1: DASHBOARD HOME
-       ============================================================ */
     async function renderDashboardHome(container) {
         container.innerHTML = `
-            <div class="page-header" style="margin-bottom: 40px;">
+            <div class="page-header">
                 <div>
                     <h1 class="page-title">Operational Intel</h1>
-                    <p class="page-subtitle">Sovereign overview of institution health and real-time metrics.</p>
+                    <p class="page-subtitle">Unified institution health and real-time metrics.</p>
                 </div>
-                <div style="display:flex; gap:12px;">
-                    <button class="magnetic-btn" onclick="DashboardController.forceSync()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white;">
-                        <i class="fas fa-sync-alt"></i> Force Sync
-                    </button>
-                </div>
+                <button class="magnetic-btn" onclick="DashboardController.init()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white;">
+                    <i class="fas fa-sync-alt"></i> Force Sync
+                </button>
             </div>
-
             <div class="metric-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px;">
-                <div class="erp-card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div>
-                            <span class="metric-label">Live Enrollment</span>
-                            <div id="stat-students" class="metric-value">---</div>
-                            <div style="color: #10b981; font-size: 0.75rem; margin-top: 5px;"><i class="fas fa-trending-up"></i> +12% growth</div>
-                        </div>
-                        <i class="fas fa-user-graduate" style="opacity:0.2; font-size:1.5rem; color:#3b82f6;"></i>
-                    </div>
-                </div>
-                <div class="erp-card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div>
-                            <span class="metric-label">Academic Reach</span>
-                            <div id="stat-programs" class="metric-value">---</div>
-                            <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 5px;">Active Programs</div>
-                        </div>
-                        <i class="fas fa-book-open" style="opacity:0.2; font-size:1.5rem; color:#8b5cf6;"></i>
-                    </div>
-                </div>
-                <div class="erp-card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div>
-                            <span class="metric-label">Total Liquidity</span>
-                            <div id="stat-revenue" class="metric-value">---</div>
-                            <div style="color: #f59e0b; font-size: 0.75rem; margin-top: 5px;">Current Year</div>
-                        </div>
-                        <i class="fas fa-wallet" style="opacity:0.2; font-size:1.5rem; color:#f59e0b;"></i>
-                    </div>
-                </div>
-                <div class="erp-card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div>
-                            <span class="metric-label">Command Logic</span>
-                            <div id="stat-approvals" class="metric-value" style="color:#ef4444;">---</div>
-                            <div style="color: #64748b; font-size: 0.75rem; margin-top: 5px;">Pending Action</div>
-                        </div>
-                        <i class="fas fa-shield-alt" style="opacity:0.2; font-size:1.5rem; color:#ef4444;"></i>
-                    </div>
-                </div>
+                <div class="erp-card"><span class="metric-label">Live Enrollment</span><div id="stat-students" class="metric-value">---</div></div>
+                <div class="erp-card"><span class="metric-label">Academic Reach</span><div id="stat-programs" class="metric-value">---</div></div>
+                <div class="erp-card"><span class="metric-label">Total Liquidity</span><div id="stat-revenue" class="metric-value">---</div></div>
+                <div class="erp-card"><span class="metric-label">Command Logic</span><div id="stat-approvals" class="metric-value" style="color:#ef4444;">---</div></div>
             </div>
-
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
-                <div class="erp-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3 style="font-size:1.1rem; font-weight:700;">Operational Pulse</h3>
-                        <div style="font-size: 0.8rem; color: #64748b;">Financial Year 2026</div>
-                    </div>
-                    <div style="height: 350px;">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
-                <div class="erp-card">
-                    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:20px;">Workforce Ratio</h3>
-                    <div style="height: 350px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                        <canvas id="attendanceChart"></canvas>
-                        <div style="margin-top: 20px; text-align: center;">
-                            <div style="font-size: 0.85rem; color: #94a3b8;">Average System Engagement</div>
-                            <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">92.4%</div>
-                        </div>
-                    </div>
-                </div>
+                <div class="erp-card" style="min-height:300px;"><canvas id="revenueChart"></canvas></div>
+                <div class="erp-card" style="display:flex; align-items:center; justify-content:center; min-height:300px;"><canvas id="attendanceChart"></canvas></div>
             </div>
-
-            <div class="erp-card" style="padding: 0; overflow: hidden;">
-                <div style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="font-size: 1.1rem; font-weight: 700;">Recent Operational Log</h3>
-                    <button class="glass-button" onclick="location.hash='#finance'">View Full Ledger</button>
-                </div>
-                <div id="recent-activity-table"></div>
-            </div>
+            <div id="recent-activity-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
         `;
-
         refreshStats();
     }
 
     async function refreshStats() {
         try {
-            const [stats, payments, courses] = await Promise.all([
+            const [statsRes, paymentsRes, coursesRes] = await Promise.all([
                 DashboardAPI.getStats(),
                 PaymentAPI.getAll(),
                 AcademicAPI.getCourses()
             ]);
+            let stats = statsRes;
+            const payments = paymentsRes.results || paymentsRes || [];
+            const courses = coursesRes.results || coursesRes || [];
 
-            document.getElementById('stat-students').textContent = stats.stats.students.toLocaleString();
-            document.getElementById('stat-revenue').textContent = `₹${(stats.stats.revenue / 100000).toFixed(1)}L`;
-            document.getElementById('stat-programs').textContent = courses.length;
+            if (stats && stats.stats) {
+                document.getElementById('stat-students').textContent = (stats.stats.students || 0).toLocaleString();
+                document.getElementById('stat-revenue').textContent = `₹${((stats.stats.revenue || 0) / 100000).toFixed(1)}L`;
+            } else {
+                document.getElementById('stat-students').textContent = 'N/A';
+                document.getElementById('stat-revenue').textContent = 'N/A';
+            }
+            document.getElementById('stat-programs').textContent = courses.length || 0;
             document.getElementById('stat-approvals').textContent = '0';
 
-            // Activity Log Sync
             new PremiumDataTable({
                 container: '#recent-activity-table',
                 columns: [
@@ -200,491 +122,368 @@ const DashboardController = (() => {
                     { label: 'Amount', field: 'amount', format: 'currency' },
                     { label: 'Status', field: 'status', format: 'badge' }
                 ],
-                data: payments.slice(0, 5).map(p => ({
-                    txn: `#TXN-${p.id}`,
-                    name: p.student_name || 'System Account',
-                    amount: p.amount,
-                    status: p.status || 'APPROVED'
-                })),
-                pagination: false,
-                searchable: false,
-                exportable: false
+                data: payments.slice(0, 5).map(p => ({ txn: `#TXN-${p.id}`, name: p.student_name || 'System', amount: p.amount, status: p.status || 'PAID' })),
+                pagination: false
             }).render();
 
-            renderCharts(stats.charts);
-
-        } catch (e) {
-            console.warn("Operational Intel Error:", e);
-        }
+            if (stats && stats.charts) renderCharts(stats.charts);
+        } catch (e) { console.warn(e); }
     }
 
     function renderCharts(data) {
-        const ctx1 = document.getElementById('revenueChart');
-        if (ctx1) {
-            new Chart(ctx1, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: 'Revenue Growth',
-                        data: data.revenue,
-                        borderColor: '#3b82f6',
-                        backgroundColor: (c) => {
-                            const ctx = c.chart.ctx;
-                            const g = ctx.createLinearGradient(0, 0, 0, 300);
-                            g.addColorStop(0, "rgba(59, 130, 246, 0.4)");
-                            g.addColorStop(1, "rgba(59, 130, 246, 0)");
-                            return g;
-                        },
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
-                    }
-                }
-            });
-        }
-
-        const ctx2 = document.getElementById('attendanceChart');
-        if (ctx2) {
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Active', 'Idle'],
-                    datasets: [{
-                        data: data.attendance || [92, 8],
-                        backgroundColor: ['#10b981', '#1e293b'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    cutout: '80%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
+        const c1 = document.getElementById('revenueChart');
+        if (c1) new Chart(c1, { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], datasets: [{ label: 'Revenue', data: data.revenue || [], borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59,130,246,0.1)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+        const c2 = document.getElementById('attendanceChart');
+        if (c2) new Chart(c2, { type: 'doughnut', data: { labels: ['Present', 'Absent'], datasets: [{ data: data.attendance || [90, 10], backgroundColor: ['#10b981', '#1e293b'], borderWidth: 0 }] }, options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
     }
 
-    /* ============================================================
-       MODULE 2: IDENTITY REGISTRY (STUDENTS)
-       ============================================================ */
-    async function renderStudentsModule(container) {
-        container.innerHTML = `
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Identity Registry</h1>
-                    <p class="page-subtitle">Governance of all registered student digital records.</p>
-                </div>
-                <div style="display:flex; gap:12px;">
-                    <button class="glass-button" onclick="DashboardApp.importStudents()">
-                        <i class="fas fa-cloud-upload-alt"></i> Import
-                    </button>
-                    <button class="magnetic-btn" onclick="DashboardApp.openAddStudentModal()" style="background:var(--erp-primary); color:white; border:none;">
-                        <i class="fas fa-plus"></i> Enroll Student
-                    </button>
-                </div>
-            </div>
-            <div id="student-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
-        `;
-
-        const students = await StudentAPI.getAll();
-        new PremiumDataTable({
-            container: '#student-table',
-            columns: [
-                { label: 'Reference', field: 'adm' },
-                { label: 'Full Name', field: 'name' },
-                { label: 'Program/Class', field: 'class' },
-                { label: 'Guardians Phone', field: 'phone' }
-            ],
-            data: students.map(s => ({
-                id: s.id,
-                adm: s.admission_number || `ADM-${s.id}`,
-                name: s.name,
-                class: s.student_class || '-',
-                phone: s.parents_phone || 'N/A'
-            })),
-            actions: [
-                { label: 'Profile', icon: '👤', onClick: 'viewStudent' },
-                { label: 'Edit', icon: '✏️', onClick: 'editStudent', color: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)', textColor: '#f59e0b' }
-            ],
-            searchable: true
-        }).render();
-    }
-
-    /* ============================================================
-       MODULE 3: FINANCE ENGINE
-       ============================================================ */
-    async function renderFinanceModule(container) {
-        container.innerHTML = `
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Finance Engine</h1>
-                    <p class="page-subtitle">Automated fee reconciliation and institution liquidity tracking.</p>
-                </div>
-                <div style="display:flex; gap:12px;">
-                    <button class="magnetic-btn" onclick="DashboardApp.openAddPaymentModal()" style="background:var(--erp-success); color:white; border:none;">
-                        <i class="fas fa-plus"></i> Manual Payment
-                    </button>
-                </div>
-            </div>
-            
-            <div id="finance-stats" class="metric-grid" style="margin-bottom:24px;">
-                <div class="erp-card metric-loader"></div>
-                <div class="erp-card metric-loader"></div>
-                <div class="erp-card metric-loader"></div>
-            </div>
-
-            <div id="finance-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
-        `;
-
-        const payments = await PaymentAPI.getAll();
-        const total = payments.filter(p => p.status === 'APPROVED').reduce((s, p) => s + parseFloat(p.amount), 0);
-        const pending = payments.filter(p => p.status === 'PENDING').reduce((s, p) => s + parseFloat(p.amount), 0);
-
-        document.getElementById('finance-stats').innerHTML = `
-            <div class="erp-card">
-                <span class="metric-label">Gross Collection</span>
-                <div class="metric-value">₹${total.toLocaleString('en-IN')}</div>
-            </div>
-            <div class="erp-card">
-                <span class="metric-label">Pipeline Dues</span>
-                <div class="metric-value" style="color:#ef4444;">₹${pending.toLocaleString('en-IN')}</div>
-            </div>
-            <div class="erp-card">
-                <span class="metric-label">Reconciliation Rate</span>
-                <div class="metric-value" style="color:#10b981;">${((total / (total + pending + 1)) * 100).toFixed(1)}%</div>
-            </div>
-        `;
-
-        new PremiumDataTable({
-            container: '#finance-table',
-            columns: [
-                { label: 'TXN ID', field: 'id' },
-                { label: 'Candidate', field: 'name' },
-                { label: 'Amount', field: 'amount', format: 'currency' },
-                { label: 'Status', field: 'status', format: 'badge' }
-            ],
-            data: payments.map(p => ({
-                id: `#TXN-${p.id}`,
-                name: p.student_name || 'System Generated',
-                amount: p.amount,
-                status: p.status || 'PENDING'
-            })),
-            actions: [
-                { label: 'Receipt', icon: '📄', onClick: 'downloadInvoice' }
-            ],
-            searchable: true
-        }).render();
-    }
-
-    /* ============================================================
-       MODULE 4: HR & WORKFORCE
-       ============================================================ */
-    async function renderHRModule(container) {
-        container.innerHTML = `
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Workforce Intel</h1>
-                    <p class="page-subtitle">Unified human resource tracking and professional profiles.</p>
-                </div>
-                <button class="magnetic-btn" onclick="DashboardApp.openAddStaffModal()" style="background:var(--erp-primary); color:white; border:none;">
-                    <i class="fas fa-user-plus"></i> Recruit Staff
-                </button>
-            </div>
-            <div id="hr-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
-        `;
-
-        const staff = await HRAPI.getAllStaff();
-        new PremiumDataTable({
-            container: '#hr-table',
-            columns: [
-                { label: 'Staff ID', field: 'sid' },
-                { label: 'Full Name', field: 'name' },
-                { label: 'Designation', field: 'role' },
-                { label: 'Department', field: 'dept' }
-            ],
-            data: staff.map(s => ({
-                id: s.id,
-                sid: s.employee_id || `EMP-${s.id}`,
-                name: s.name || s.user_name,
-                role: s.designation || 'Staff',
-                dept: s.department || 'General'
-            })),
-            actions: [
-                { label: 'Payroll', icon: '💰', onClick: 'processPayroll' }
-            ],
-            searchable: true
-        }).render();
-    }
-
-    /* ============================================================
-       STUBS FOR OTHER MODULES
-       ============================================================ */
-    async function renderHostelModule(c) {
+    async function renderStudentsModule(c) {
         c.innerHTML = `
             <div class="page-header">
                 <div>
-                     <h1 class="page-title">Hostel Command</h1>
-                     <p class="page-subtitle">Real-time room allocation and resource management.</p>
+                     <h1 class="page-title">Identity Registry</h1>
+                     <p class="page-subtitle">Manager of all enrolled identities.</p>
                 </div>
-                <button class="magnetic-btn" onclick="DashboardApp.openHostelAllocationModal()" style="background:var(--erp-primary); color:white; border:none;">
-                    <i class="fas fa-bed"></i> Seat Allocation
+                <button class="magnetic-btn" onclick="DashboardApp.openAddStudentModal()" style="background:var(--erp-primary); color:white; border:none;"><i class="fas fa-plus"></i> Enroll Student</button>
+            </div>
+            <div id="student-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
+        `;
+        const res = await StudentAPI.getAll();
+        const students = res.results || res || [];
+        new PremiumDataTable({
+            container: '#student-table',
+            columns: [{ label: 'Adm #', field: 'adm' }, { label: 'Name', field: 'name' }, { label: 'Class', field: 'class' }],
+            data: students.map(s => ({ adm: s.admission_number || s.id, name: s.name, class: s.student_class || '-' })),
+            actions: [{ label: 'Profile', icon: '👤', onClick: 'viewStudent' }],
+            searchable: true
+        }).render();
+    }
+
+    async function renderFinanceModule(c) {
+        c.innerHTML = `
+            <div class="page-header">
+                <div>
+                     <h1 class="page-title">Finance Engine</h1>
+                     <p class="page-subtitle">Unified transaction and fee management.</p>
+                </div>
+                <button class="magnetic-btn" onclick="DashboardApp.openAddPaymentModal()" style="background:var(--erp-success); color:white; border:none;"><i class="fas fa-plus"></i> Record Payment</button>
+            </div>
+            <div id="finance-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
+        `;
+        const res = await PaymentAPI.getAll();
+        const payments = res.results || res || [];
+        new PremiumDataTable({
+            container: '#finance-table',
+            columns: [{ label: 'TXN', field: 'id' }, { label: 'Student', field: 'name' }, { label: 'Amount', field: 'amount', format: 'currency' }, { label: 'Status', field: 'status', format: 'badge' }],
+            data: payments.map(p => ({ id: p.id, name: p.student_name, amount: p.amount, status: p.status })),
+            searchable: true
+        }).render();
+    }
+
+    async function renderAttendanceModule(c) {
+        c.innerHTML = `
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Attendance Pulse</h1>
+                    <p class="page-subtitle">Real-time presence tracking via Smart Scanning.</p>
+                </div>
+                <button class="magnetic-btn" onclick="DashboardApp.openScannerModal()" style="background:var(--erp-primary); color:white; border:none; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);">
+                    <i class="fas fa-qrcode"></i> Launch Smart Scanner
                 </button>
             </div>
-            <div class="erp-card" style="padding:40px; text-align:center;">
-                <i class="fas fa-hotel" style="font-size:3rem; color:var(--erp-primary); opacity:0.3; margin-bottom:20px;"></i>
-                <h2>Hostel Engine Active</h2>
-                <p style="color:#64748b;">All room assignments are synchronized with the central repository.</p>
-            </div>
+            <div id="attendance-log" class="erp-card" style="padding:0; overflow:hidden;"></div>
         `;
+        const res = await AttendanceAPI.getAll();
+        const att = res.results || res || [];
+        new PremiumDataTable({
+            container: '#attendance-log',
+            columns: [{ label: 'Identity', field: 'name' }, { label: 'Date', field: 'date', format: 'date' }, { label: 'Verification', field: 'status', format: 'badge' }],
+            data: att.map(a => ({ name: a.student_name || \`Candidate #${a.student}\`, date: a.date, status: a.status || 'PRESENT' })),
+            searchable: true
+        }).render();
     }
 
     async function renderExamsModule(c) {
         c.innerHTML = `
-            <div class="page-header">
+                < div class= "page-header" >
                 <div>
-                     <h1 class="page-title">Examination Engine</h1>
-                     <p class="page-subtitle">Grading logic and assessment lifecycle management.</p>
+                    <h1 class="page-title">Examination Engine</h1>
+                    <p class="page-subtitle">Governing assessment lifecycle for Schools, Coaching, or Institutes.</p>
                 </div>
-                <button class="magnetic-btn" onclick="DashboardApp.showAlert('Alpha Access', 'Exam Scheduling coming in V2.5', 'info')" style="background:var(--erp-primary); color:white; border:none;">
-                    <i class="fas fa-calendar-plus"></i> Schedule Exam
+                <button class="magnetic-btn" onclick="DashboardApp.openCreateExamModal()" style="background:var(--erp-primary); color:white; border:none; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);">
+                    <i class="fas fa-award"></i> Schedule Exam
                 </button>
-            </div>
-            <div id="exams-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
-        `;
-        const exams = await ExamAPI.getAll();
+            </div >
+    <div id="exams-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
+`;
+        const res = await ExamAPI.getAll();
+        const exams = res.results || res || [];
         new PremiumDataTable({
             container: '#exams-table',
-            columns: [
-                { label: 'Title', field: 'title' },
-                { label: 'Class', field: 'class' },
-                { label: 'Date', field: 'date', format: 'date' },
-                { label: 'Status', field: 'status', format: 'badge' }
-            ],
-            data: exams.map(e => ({
-                id: e.id,
-                title: e.title || e.name,
-                class: e.class_name || 'All',
-                date: e.exam_date || e.date,
-                status: e.status || 'SCHEDULED'
-            })),
+            columns: [{ label: 'Exam Title', field: 'title' }, { label: 'Type', field: 'type' }, { label: 'Target Audience', field: 'audience' }, { label: 'Date', field: 'date' }, { label: 'Status', field: 'status', format: 'badge' }],
+            data: exams.map(e => ({ title: e.name || e.title, type: e.exam_type, audience: e.batch_name || e.grade_class || 'General', date: e.exam_date || e.date, status: 'SCHEDULED' })),
             searchable: true
         }).render();
     }
 
-    async function renderAttendanceModule(c) { c.innerHTML = '<div class="page-header"><h1 class="page-title">Attendance Pulse</h1></div><div class="erp-card">Geo-fenced attendance engine active.</div>'; }
-    async function renderTransportModule(c) { c.innerHTML = '<div class="page-header"><h1 class="page-title">Fleet Command</h1></div><div class="erp-card">GPS Fleet Management System Online.</div>'; }
-    async function renderCoursesModule(c) { c.innerHTML = '<div class="page-header"><h1 class="page-title">Academic Architecture</h1></div><div class="erp-card">Course builder engine active.</div>'; }
-    async function renderLibraryModule(c) { c.innerHTML = '<div class="page-header"><h1 class="page-title">Digital Library</h1></div><div class="erp-card">Digital catalog synchronized.</div>'; }
-    async function renderSettingsModule(c) { c.innerHTML = '<div class="page-header"><h1 class="page-title">System Settings</h1></div><div class="erp-card">Institution configurations portal active.</div>'; }
+    async function renderCoursesModule(c) {
+        c.innerHTML = `
+    < div class="page-header" >
+                <div>
+                    <h1 class="page-title">Academic Framework</h1>
+                    <p class="page-subtitle">Subjects, Courses, and Curriculum Management.</p>
+                </div>
+                <button class="magnetic-btn" onclick="DashboardApp.openAddSubjectModal()" style="background:var(--erp-primary); color:white; border:none;">
+                    <i class="fas fa-book"></i> Register Subject
+                </button>
+            </div >
+    <div id="subjects-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
+`;
+        try {
+            const res = await AcademicAPI.getSubjects();
+            const subjects = res.results || res || [];
+            new PremiumDataTable({
+                container: '#subjects-table',
+                columns: [{ label: 'Subj Code', field: 'code' }, { label: 'Subject Name', field: 'name' }, { label: 'Credits', field: 'credits' }],
+                data: subjects.map(s => ({ code: s.code || s.id, name: s.name, credits: s.credits || '3' })),
+                searchable: true
+            }).render();
+        } catch (e) {
+             document.getElementById('subjects-table').innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Failed to sync Academic Framework</div>';
+        }
+    }
 
-    // Helper: Show All Modules
+    async function renderHRModule(c) {
+        c.innerHTML = `
+    < div class="page-header" ><h1 class="page-title">Workforce Intel</h1><button class="magnetic-btn" onclick="DashboardApp.openAddStaffModal()" style="background:var(--erp-primary); color:white; border:none;">Recruit Staff</button></div >
+        <div id="hr-table" class="erp-card" style="padding:0; overflow:hidden;"></div>
+`;
+        const res = await HRAPI.getAllStaff();
+        const staff = res.results || res || [];
+        new PremiumDataTable({
+            container: '#hr-table',
+            columns: [{ label: 'ID', field: 'sid' }, { label: 'Name', field: 'name' }, { label: 'Role', field: 'role' }],
+            data: staff.map(s => ({ sid: s.employee_id || s.id, name: s.name || s.user_name, role: s.designation || 'Staff' })),
+            searchable: true
+        }).render();
+    }
+
+    async function renderHostelModule(c) {
+        c.innerHTML = `
+    < div class="page-header" ><h1 class="page-title">Hostel Command</h1><button class="magnetic-btn" onclick="DashboardApp.openHostelAllocationModal()">Seat Allocation</button></div >
+        <div class="erp-card" style="padding:40px; text-align:center;"><h2>Hostel Management Active</h2><p>Resource tracking in progress.</p></div>
+`;
+    }
+
     function showAllModulesModal() {
-        const modules = [
+        const mods = [
             { id: 'dashboard', icon: 'fa-chart-pie', name: 'Intelligence' },
-            { id: 'students', icon: 'fa-user-graduate', name: 'Residents/Students' },
+            { id: 'students', icon: 'fa-user-graduate', name: 'Identity' },
             { id: 'finance', icon: 'fa-file-invoice-dollar', name: 'Treasury' },
             { id: 'attendance', icon: 'fa-calendar-check', name: 'Presence' },
-            { id: 'hr', icon: 'fa-users-gear', name: 'Staff Command' },
+            { id: 'hr', icon: 'fa-users-gear', name: 'Workforce' },
             { id: 'exams', icon: 'fa-award', name: 'Assessments' },
-            { id: 'hostel', icon: 'fa-hotel', name: 'Hostel' },
-            { id: 'transport', icon: 'fa-bus', name: 'Logistics' },
             { id: 'courses', icon: 'fa-book-open', name: 'Academics' },
-            { id: 'library', icon: 'fa-book', name: 'Archives' },
-            { id: 'settings', icon: 'fa-sliders', name: 'Controls' }
+            { id: 'hostel', icon: 'fa-hotel', name: 'Hostel' }
         ];
-
         new PremiumModal({
-            id: 'modulesModal',
-            title: 'Unified Command Center',
-            content: `
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                    ${modules.map(m => `
-                        <div onclick="location.hash='#${m.id}'; closeModal('modulesModal')" 
-                             style="text-align: center; padding: 24px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius: 16px; cursor: pointer; transition: 0.3s;"
-                             onmouseenter="this.style.background='rgba(59,130,246,0.1)'; this.style.borderColor='rgba(59,130,246,0.3)'"
-                             onmouseleave="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.05)'">
-                            <i class="fas ${m.icon}" style="font-size: 1.8rem; color: #3b82f6; margin-bottom: 12px;"></i>
-                            <div style="font-size: 0.85rem; font-weight: 600;">${m.name}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `,
+            id: 'modsModal',
+            title: 'Unified ERP Command',
+            content: `< div style = "display:grid; grid-template-columns:repeat(3,1fr); gap:15px;" > ${ mods.map(m => `<div onclick="location.hash='#${m.id}'; closeModal('modsModal')" style="text-align:center; padding:20px; background:rgba(255,255,255,0.03); border-radius:12px; cursor:pointer;"><i class="fas ${m.icon}" style="font-size:1.5rem; color:#3b82f6; margin-bottom:10px;"></i><div style="font-size:0.8rem;">${m.name}</div></div>`).join('') }</div > `,
             size: 'medium'
         }).show();
     }
 
-    return { init, forceSync: refreshStats };
+    return { init, forceSync: init };
 })();
 
-/* ============================================================
-   GLOBAL DASHBOARD APP - UI INTERACTIONS & MODALS
-   ============================================================ */
 const DashboardApp = {
-    showAlert(title, message, type = 'info') {
-        const colors = { info: '#3b82f6', error: '#ef4444', success: '#10b981' };
-        new PremiumModal({
-            title: title,
-            content: `<div style="padding: 10px; text-align:center;">
-                <i class="fas fa-info-circle" style="font-size:3rem; color:${colors[type]}; margin-bottom:20px;"></i>
-                <p>${message}</p>
-            </div>`,
-            size: 'small'
-        }).show();
+    async openCreateExamModal() {
+        new PremiumModal({ title: 'Schedule New Exam Protocol', content: '<div id="examForm"><div style="padding:20px; text-align:center;"><i class="fas fa-circle-notch fa-spin"></i> Loading Configuration...</div></div>', size: 'medium' }).show();
+        try {
+            let subjects = [];
+            let batches = [];
+            try { 
+                 const subjRes = await AcademicAPI.getSubjects(); 
+                 subjects = subjRes.results || subjRes || [];
+                 const batchRes = await AcademicAPI.getBatches();
+                 batches = batchRes.results || batchRes || [];
+            } catch (e) {
+                 console.warn("Could not fetch auxiliary API, continuing with manual fields:", e);
+            }
+
+            const subjectOpts = subjects.length > 0 ? subjects.map(s => ({ value: s.id, label: s.name })) : [{value: '', label: '-- No Subjects Found in DB --'}];
+            
+            // Flexible Exam Creation
+            new PremiumForm({
+                container: '#examForm',
+                fields: [
+                    { name: 'name', label: 'Exam Name (e.g. UPSC Mock Test 1)', type: 'text', required: true },
+                    { name: 'exam_type', label: 'Assessment Paradigm', type: 'select', options: [
+                        { value: 'UNIT', label: 'Unit Test' },
+                        { value: 'MIDTERM', label: 'Mid-Term Evaluation' },
+                        { value: 'FINAL', label: 'Final Examination' },
+                        { value: 'PRACTICAL', label: 'Practical Assessment' },
+                        { value: 'ASSIGNMENT', label: 'Assignment / Quiz' }
+                    ] },
+                    { name: 'subject', label: 'Tag Subject (Optional)', type: 'select', options: subjectOpts },
+                    { name: 'grade_class', label: 'Target Audience (e.g. Class 10, Batch A)', type: 'text', required: true, placeholder: "Who is this exam for?" },
+                    { name: 'exam_date', label: 'Scheduled Date', type: 'text', defaultValue: new Date().toISOString().split('T')[0] },
+                    { name: 'total_marks', label: 'Total Points/Marks', type: 'text', defaultValue: '100' },
+                    { name: 'passing_marks', label: 'Minimum Passing Threshold', type: 'text', defaultValue: '33' }
+                ],
+                submitLabel: 'Initiate Assessment',
+                onSubmit: async (d) => { 
+                    d.subject = d.subject || null; 
+                    d.academic_year = '2024-25';
+                    try {
+                        await ExamAPI.create(d); 
+                        showToast('Exam Protocols Sealed Successfully', 'success'); 
+                        closeModal('premiumModal'); 
+                        DashboardController.init(); 
+                    } catch (err) {
+                        showToast("API Validation: " + err.message, 'error');
+                    }
+                }
+            }).render();
+        } catch (e) { showToast(e.message, 'error'); }
+    },
+
+    async openAddSubjectModal() {
+        new PremiumModal({ title: 'Register Subject Domain', content: '<div id="subjForm"></div>', size: 'small' }).show();
+        new PremiumForm({
+            container: '#subjForm',
+            fields: [
+                { name: 'name', label: 'Subject Name', type: 'text', required: true },
+                { name: 'code', label: 'Subject Code (Unique)', type: 'text', required: true, defaultValue: 'SUB-' + Math.floor(Math.random() * 9999) },
+                { name: 'credits', label: 'Credit Points', type: 'text', defaultValue: '3' }
+            ],
+            submitLabel: 'Add Domain',
+            onSubmit: async (d) => { await SubjectAPI.create(d); showToast('Subject Domain Secured'); closeModal('premiumModal'); location.hash='#courses'; DashboardController.init(); }
+        }).render();
     },
 
     openAddStudentModal() {
-        new PremiumModal({
-            title: 'Digital Identity Creation',
-            content: '<div id="enrollForm"></div>',
-            size: 'medium'
-        }).show();
-        
+        new PremiumModal({ title: 'Enroll Student', content: '<div id="sForm"></div>', size: 'medium' }).show();
         new PremiumForm({
-            container: '#enrollForm',
-            fields: [
-                { name: 'name', label: 'Full Legal Name', type: 'text', required: true },
-                { name: 'student_class', label: 'Assigned Program', type: 'text', required: true },
-                { name: 'admission_number', label: 'Identity ID', type: 'text', defaultValue: `ADM-${Date.now().toString().slice(-6)}` },
-                { name: 'parents_phone', label: 'Emergency Contact', type: 'text' }
-            ],
-            submitLabel: 'Seal Record',
-            onSubmit: async (data) => {
-                try {
-                    await StudentAPI.create(data);
-                    showToast('Identity record created successfully');
-                    location.hash = '#students';
-                    DashboardController.init();
-                    closeModal('premiumModal');
-                } catch (e) { showToast(e.message, 'error'); }
-            }
+            container: '#sForm',
+            fields: [{ name: 'name', label: 'Name', type: 'text', required: true }, { name: 'student_class', label: 'Class/Grade', type: 'text' }],
+            onSubmit: async (d) => { await StudentAPI.create(d); showToast('Enrolled'); closeModal('premiumModal'); DashboardController.init(); }
         }).render();
     },
-
+    
     openAddPaymentModal() {
-        new PremiumModal({
-            title: 'Sovereign Transaction Entry',
-            content: '<div id="payForm"></div>',
-            size: 'medium'
-        }).show();
-        
+        new PremiumModal({ title: 'Register Fiat Payment', content: '<div id="payForm"></div>', size: 'medium' }).show();
         new PremiumForm({
             container: '#payForm',
             fields: [
-                { name: 'student_id', label: 'Candidate Reference', type: 'text', required: true },
-                { name: 'amount', label: 'Transaction Value (₹)', type: 'text', required: true },
-                { name: 'status', label: 'Verification State', type: 'select', options: [
-                    { value: 'APPROVED', label: 'Verified/Paid' },
-                    { value: 'PENDING', label: 'Pending Verification' }
-                ]}
+                { name: 'student_id', label: 'Candidate ID', type: 'text', required: true },
+                { name: 'amount', label: 'Transaction Value', type: 'text', required: true }
             ],
-            submitLabel: 'Confirm Ledger Entry',
             onSubmit: async (data) => {
-                try {
-                    await PaymentAPI.create(data);
-                    showToast('Transaction confirmed in ledger');
-                    DashboardController.forceSync();
-                    closeModal('premiumModal');
-                } catch (e) { showToast(e.message, 'error'); }
+                await PaymentAPI.create(data);
+                showToast('Transaction confirmed in ledger');
+                closeModal('premiumModal');
+                DashboardController.init();
             }
         }).render();
     },
 
-    openAddStaffModal() {
-        new PremiumModal({
-            title: 'Workforce Recruitment',
-            content: '<div id="staffForm"></div>',
-            size: 'medium'
-        }).show();
+    openScannerModal() {
+        const modalId = 'scannerModalv6';
+        const modalHtml = `
+    < div id = "${modalId}" class="modal-overlay" style = "display:flex; justify-content:center; align-items:center; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px);" >
+        <div class="erp-card" style="width:90%; max-width:500px; padding:25px; border-top: 4px solid #3b82f6;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-family:'Orbitron'; font-size:1.1rem; color:#3b82f6; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-qrcode"></i> SMART GATEKEEPER
+                </h2>
+                <button onclick="document.getElementById('${modalId}').remove(); if(window.qrScanner) window.qrScanner.stop()" style="background:transparent; border:none; color:#64748b; font-size:1.8rem; cursor:pointer; transition:0.3s;" onmouseenter="this.style.color='#ef4444'" onmouseleave="this.style.color='#64748b'">&times;</button>
+            </div>
+            <div id="reader" style="width:100%; border-radius:12px; overflow:hidden; background:#1e293b; min-height:300px; position:relative;">
+                <div style="position:absolute; inset:50px; border: 2px dashed rgba(59, 130, 246, 0.4); pointer-events:none; z-index:1;"></div>
+            </div>
+            <div id="scanResult" style="margin-top:20px; text-align:center; padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; min-height:60px; display:flex; flex-direction:column; justify-content:center;">
+                <span style="color:#64748b; font-size:0.9rem;">Present Candidate QR Code...</span>
+            </div>
+            <div id="manualAction" style="margin-top:15px; display:none; text-align:center;">
+                <button id="confirmAttend" class="magnetic-btn" style="width:100%; border:none; background:#10b981; color:white; font-size:1.1rem; padding:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <i class="fas fa-check-circle"></i> MARK PRESENCE
+                </button>
+            </div>
+        </div>
+            </div >
+    `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const html5QrCode = new Html5Qrcode("reader");
+        window.qrScanner = html5QrCode;
         
-        new PremiumForm({
-            container: '#staffForm',
-            fields: [
-                { name: 'name', label: 'Candidate Name', type: 'text', required: true },
-                { name: 'designation', label: 'Strategic Role', type: 'text', required: true },
-                { name: 'department', label: 'Target Department', type: 'text' }
-            ],
-            submitLabel: 'Recruit Candidate',
-            onSubmit: async (data) => {
-                try {
-                    await HRAPI.addStaff(data);
-                    showToast('Workforce expanded successfully');
-                    location.hash = '#hr';
-                    DashboardController.init();
-                    closeModal('premiumModal');
-                } catch (e) { showToast(e.message, 'error'); }
-            }
-        }).render();
-    },
+        let scanningLock = false;
 
-    importStudents() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.csv, .xlsx';
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                try {
-                    showToast('Uploading archive...', 'info');
-                    await BulkAPI.importStudents(file);
-                    showToast('Bulk identity sync complete');
-                    DashboardController.init();
-                } catch (err) { showToast(err.message, 'error'); }
-            }
-        };
-        input.click();
-    },
+        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: {width: 250, height: 250} }, (decodedText) => {
+             if(scanningLock) return;
+             scanningLock = true;
+             
+             // Temporarily visually pause scanner reading (optional visual feedback)
+             const resDiv = document.getElementById('scanResult');
+             resDiv.innerHTML = `< div style = "color:#3b82f6; font-size:1.1rem;" > <i class="fas fa-fingerprint fa-pulse"></i> Analyzing Identity: <b>${decodedText}</b></div > `;
+             
+             const manualDiv = document.getElementById('manualAction');
+             manualDiv.style.display = 'block';
+             
+             // Force UI scroll
+             document.getElementById('confirmAttend').focus();
+             
+             document.getElementById('confirmAttend').onclick = async () => {
+                 resDiv.innerHTML = '<div style="color:#3b82f6;"><i class="fas fa-circle-notch fa-spin"></i> Writing to Core Ledger...</div>';
+                 manualDiv.style.display = 'none';
+                 try {
+                     const data = await AttendanceAPI.scan(decodedText);
+                     resDiv.innerHTML = `
+    < div style = "display:flex; flex-direction:column; align-items:center;" >
+                             <i class="fas fa-check-circle" style="color:#10b981; font-size:2rem; margin-bottom:10px;"></i>
+                             <div style="color:white; font-weight:700; font-size:1.2rem;">${data.student_name}</div>
+                             <div style="color:#10b981; font-size:0.9rem; margin-top:5px;">✅ PRESENCE VERIFIED!</div>
+                        </div >
+    `;
+                     showToast(`${ data.student_name } Marked Present`, 'success');
+                     
+                     // Refresh Attendance Table automatically behind the modal if it's the active tab
+                     if (location.hash === '#attendance') {
+                         DashboardController.init();
+                     }
 
-    async openHostelAllocationModal() {
-        // Shared hostel logic from previous iteration, but modernized
-        new PremiumModal({
-            title: 'Hostel Seat Allocation',
-            content: `
-                <div id="hostelForm">
-                    <div style="padding:40px; text-align:center;"><i class="fas fa-circle-notch fa-spin"></i> Initializing Portal...</div>
-                </div>
-            `,
-            size: 'medium'
-        }).show();
-
-        try {
-            const [students, rooms] = await Promise.all([StudentAPI.getAll(), HostelAPI.getRooms()]);
-            new PremiumForm({
-                container: '#hostelForm',
-                fields: [
-                    { name: 'student', label: 'Candidate', type: 'select', options: students.map(s => ({ value: s.id, label: `${s.name} [${s.admission_number || 'N/A'}]` })) },
-                    { name: 'room', label: 'Target Room', type: 'select', options: rooms.filter(r => !r.is_full).map(r => ({ value: r.id, label: `Room ${r.room_number || r.id} (${r.available_beds} free)` })) },
-                    { name: 'check_in_date', label: 'Activation Date', type: 'text', defaultValue: new Date().toISOString().split('T')[0] }
-                ],
-                submitLabel: 'Allocate Seat',
-                onSubmit: async (data) => {
-                    try {
-                        await HostelAPI.allocateRoom(data);
-                        showToast('Room high-security allocation locked');
-                        closeModal('premiumModal');
-                    } catch (e) { showToast(e.message, 'error'); }
-                }
-            }).render();
-        } catch (e) { showToast('Sync Failure: ' + e.message, 'error'); }
+                     setTimeout(() => { 
+                         if(document.getElementById('scanResult')) {
+                            document.getElementById('scanResult').innerHTML = '<span style="color:#64748b; font-size:0.9rem;">Present Candidate QR Code...</span>'; 
+                         }
+                         scanningLock = false;
+                     }, 3000);
+                 } catch (e) {
+                     resDiv.innerHTML = `
+    < div style = "display:flex; flex-direction:column; align-items:center;" >
+                             <i class="fas fa-times-circle" style="color:#ef4444; font-size:2rem; margin-bottom:10px;"></i>
+                             <div style="color:#ef4444; font-weight:700; font-size:1rem;">RESTRICTED / ERROR</div>
+                             <div style="color:#94a3b8; font-size:0.8rem; margin-top:5px;">${e.message}</div>
+                        </div >
+    `;
+                     setTimeout(() => { 
+                         if(document.getElementById('scanResult')) {
+                            document.getElementById('scanResult').innerHTML = '<span style="color:#64748b; font-size:0.9rem;">Present Candidate QR Code...</span>'; 
+                         }
+                         scanningLock = false;
+                     }, 3000);
+                 }
+             };
+        }).catch(e => { 
+            document.getElementById('scanResult').innerHTML = `< div style = "color:#ef4444;" > <i class="fas fa-video-slash"></i> Camera Core Offline</div > `; 
+        });
     }
 };
 
-// Global Exports
 window.DashboardApp = DashboardApp;
 window.DashboardController = DashboardController;
-window.viewStudent = (id) => showToast(`Viewing high-security profile for Candidate #${id}`, 'info');
-window.editStudent = (id) => showToast(`Identity mod-perms required for ID #${id}`, 'warning');
-window.downloadInvoice = (id) => showToast(`Generating Encrypted PDF Receipt for ${id}...`, 'success');
-window.processPayroll = (sid) => showToast(`Automated Payroll Sequence for ${sid} Executed`, 'success');
+window.viewStudent = (id) => showToast('Profile Secure Access: ' + id, 'info');
 
 document.addEventListener('DOMContentLoaded', DashboardController.init);
