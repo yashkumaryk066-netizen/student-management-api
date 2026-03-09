@@ -498,6 +498,115 @@ const DashboardApp = {
         });
     },
 
+    openScannerModal() {
+        const modalId = 'scannerModalv6';
+        const modalHtml = `
+            <div id="${modalId}" class="modal-overlay" style="display:flex; justify-content:center; align-items:center; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px);">
+                <div class="erp-card" style="width:90%; max-width:500px; padding:25px; border-top: 4px solid #3b82f6;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2 style="font-family:'Orbitron'; font-size:1.1rem; color:#3b82f6; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-qrcode"></i> SMART GATEKEEPER
+                        </h2>
+                        <button onclick="document.getElementById('${modalId}').remove(); if(window.qrScanner) window.qrScanner.stop()" style="background:transparent; border:none; color:#64748b; font-size:1.8rem; cursor:pointer; transition:0.3s;" onmouseenter="this.style.color='#ef4444'" onmouseleave="this.style.color='#64748b'">&times;</button>
+                    </div>
+                    <div id="reader" style="width:100%; border-radius:12px; overflow:hidden; background:#1e293b; min-height:300px; position:relative;">
+                        <div style="position:absolute; inset:50px; border: 2px dashed rgba(59, 130, 246, 0.4); pointer-events:none; z-index:1;"></div>
+                    </div>
+                    <div id="scanResult" style="margin-top:20px; text-align:center; padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; min-height:60px; display:flex; flex-direction:column; justify-content:center;">
+                         <span style="color:#64748b; font-size:0.9rem;">Present Candidate QR Code...</span>
+                    </div>
+                    <div id="manualAction" style="margin-top:15px; display:none; text-align:center;">
+                         <button id="confirmAttend" class="btn-primary" style="width:100%; border:none; background:#10b981; color:white; font-size:1.1rem; padding:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            <i class="fas fa-check-circle"></i> MARK PRESENCE
+                         </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        if (typeof Html5Qrcode === 'undefined') {
+            document.getElementById('scanResult').innerHTML = '<span style="color:#ef4444;">Scanner library missing.</span>';
+            return;
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        window.qrScanner = html5QrCode;
+
+        let scanningLock = false;
+
+        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 250 } }, (decodedText) => {
+            if (scanningLock) return;
+            scanningLock = true;
+
+            const resDiv = document.getElementById('scanResult');
+            resDiv.innerHTML = `<div style="color:#3b82f6; font-size:1.1rem;"><i class="fas fa-spinner fa-spin"></i> Analyzing Identity: <b>${decodedText}</b></div>`;
+
+            const manualDiv = document.getElementById('manualAction');
+            manualDiv.style.display = 'block';
+
+            document.getElementById('confirmAttend').focus();
+
+            document.getElementById('confirmAttend').onclick = async () => {
+                resDiv.innerHTML = '<div style="color:#3b82f6;"><i class="fas fa-circle-notch fa-spin"></i> Writing to Core Ledger...</div>';
+                manualDiv.style.display = 'none';
+                try {
+                    const response = await fetch(`${DashboardApp.apiBaseUrl}/attendance/scan/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                            'X-CSRFToken': DashboardApp.getCsrfToken()
+                        },
+                        body: JSON.stringify({ student_id: decodedText })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error || errData.detail || 'Failed to mark attendance');
+                    }
+                    const data = await response.json();
+
+                    resDiv.innerHTML = `
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                             <i class="fas fa-check-circle" style="color:#10b981; font-size:2rem; margin-bottom:10px;"></i>
+                             <div style="color:white; font-weight:700; font-size:1.2rem;">${data.student_name || 'Student'}</div>
+                             <div style="color:#10b981; font-size:0.9rem; margin-top:5px;">✅ PRESENCE VERIFIED!</div>
+                        </div>
+                     `;
+                    DashboardApp.showAlert("Success", `${data.student_name || ''} Marked Present`, "success");
+
+                    if (location.hash === '#attendance') {
+                        DashboardApp.loadAttendanceSystem();
+                    }
+
+                    setTimeout(() => {
+                        if (document.getElementById('scanResult')) {
+                            document.getElementById('scanResult').innerHTML = '<span style="color:#64748b; font-size:0.9rem;">Present Candidate QR Code...</span>';
+                        }
+                        scanningLock = false;
+                    }, 3000);
+                } catch (e) {
+                    resDiv.innerHTML = `
+                         <div style="display:flex; flex-direction:column; align-items:center;">
+                             <i class="fas fa-times-circle" style="color:#ef4444; font-size:2rem; margin-bottom:10px;"></i>
+                             <div style="color:#ef4444; font-weight:700; font-size:1rem;">RESTRICTED / ERROR</div>
+                             <div style="color:#94a3b8; font-size:0.8rem; margin-top:5px;">${e.message}</div>
+                        </div>
+                     `;
+                    setTimeout(() => {
+                        if (document.getElementById('scanResult')) {
+                            document.getElementById('scanResult').innerHTML = '<span style="color:#64748b; font-size:0.9rem;">Present Candidate QR Code...</span>';
+                        }
+                        scanningLock = false;
+                    }, 3000);
+                }
+            };
+        }).catch(e => {
+            document.getElementById('scanResult').innerHTML = `<div style="color:#ef4444;"><i class="fas fa-video-slash"></i> Camera Core Offline</div>`;
+        });
+    },
+
     closeAlert() {
         const overlay = document.getElementById('alertOverlay');
         if (overlay) {
@@ -1256,8 +1365,10 @@ const DashboardApp = {
                 <button class="filter-tab" onclick="DashboardApp.loadAttendanceView('COACHING', this)">Coaching (Batches)</button>
                 <button class="filter-tab" onclick="DashboardApp.loadAttendanceView('INSTITUTE', this)">Institute (Dept)</button>
             </div>
-            
-            <div style="margin-left:auto;">
+            <div style="margin-left:auto; display:flex; gap:10px;">
+                <button class="btn-primary" onclick="DashboardApp.openScannerModal()" style="background:#3b82f6; border:1px solid #2563eb; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);">
+                    <i class="fas fa-qrcode"></i> Smart Scanner
+                </button>
                 <button id="markAttBtn" class="btn-primary" onclick="DashboardApp.markGeoAttendance()" style="background:#059669; border:1px solid #10b981; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
                     📍 Mark My Attendance (Geo)
                 </button>
@@ -2693,13 +2804,40 @@ const DashboardApp = {
     },
 
     openCreateExamModal(preselectedBatchId = null, preselectedGrade = null) {
-        const modalHtml = `
-    < div class="modal-overlay" id = "createExamModal" >
-        <div class="modal-card">
-            <h2>Schedule New Exam</h2>
-            <form id="createExamForm" onsubmit="event.preventDefault(); DashboardApp.submitCreateExam();">
-                <input type="hidden" name="batchId" value="${preselectedBatchId || ''}">
-                    <input type="hidden" name="grade" value="${preselectedGrade || ''}">
+        // Show loading state first
+        const loadingHtml = `
+            <div class="modal-overlay" id="createExamModal">
+                <div class="modal-card" style="text-align:center;">
+                    <h2><i class="fas fa-spinner fa-spin"></i> Loading...</h2>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', loadingHtml);
+
+        (async () => {
+            let subjects = [];
+            try {
+                const res = await fetch(`${this.apiBaseUrl}/subjects/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } });
+                if (res.ok) {
+                    const data = await res.json();
+                    subjects = data.results || data || [];
+                }
+            } catch (e) { console.warn("Could not load subjects", e); }
+
+            const el = document.getElementById('createExamModal');
+            if (el) el.remove();
+
+            const subjectOptions = subjects.length > 0
+                ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('')
+                : '<option value="">-- No Subjects Available --</option>';
+
+            const modalHtml = `
+            <div class="modal-overlay" id="createExamModal" style="z-index: 99999;">
+                <div class="modal-card">
+                    <h2>Schedule New Exam</h2>
+                    <form id="createExamForm" onsubmit="event.preventDefault(); DashboardApp.submitCreateExam();">
+                        <input type="hidden" name="batchId" value="${preselectedBatchId || ''}">
+                        <input type="hidden" name="grade" value="${preselectedGrade || ''}">
 
                         <div class="form-group">
                             <label>Exam Name</label>
@@ -2714,19 +2852,28 @@ const DashboardApp = {
                         </div>
 
                         <div class="form-group">
+                            <label>Subject Scope (Optional)</label>
+                            <select name="subject" class="form-input">
+                                <option value="">-- General / No Subject --</option>
+                                ${subjectOptions}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label>Exam Type</label>
                             <select name="exam_type" class="form-input" required>
                                 <option value="UNIT">Unit Test</option>
                                 <option value="MIDTERM">Mid-Term</option>
                                 <option value="FINAL">Final Exam</option>
                                 <option value="PRACTICAL">Practical</option>
+                                <option value="ASSIGNMENT">Assignment</option>
                             </select>
                         </div>
 
                         <div class="row" style="display:flex; gap:15px;">
                             <div class="form-group" style="flex:1;">
                                 <label>Date</label>
-                                <input type="date" name="exam_date" class="form-input" required>
+                                <input type="date" name="exam_date" class="form-input" required value="${new Date().toISOString().split('T')[0]}">
                             </div>
                             <div class="form-group" style="flex:1;">
                                 <label>Total Marks</label>
@@ -2740,9 +2887,10 @@ const DashboardApp = {
                         </div>
                     </form>
                 </div>
-        </div>
-`;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+            </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        })();
     },
 
     async submitCreateExam() {
@@ -2756,8 +2904,8 @@ const DashboardApp = {
             total_marks: parseInt(formData.get('total_marks')),
             passing_marks: Math.floor(parseInt(formData.get('total_marks')) * 0.35), // Auto 35%
             batch: formData.get('batchId') ? parseInt(formData.get('batchId')) : null,
-            grade_class: formData.get('grade') ? `Class ${formData.get('grade')} ` : null,
-            subject: null // For simplicity now
+            grade_class: formData.get('grade') ? `Class ${formData.get('grade')}` : null,
+            subject: formData.get('subject') ? parseInt(formData.get('subject')) : null
         };
 
         if (!data.batch && !data.grade_class) {
@@ -5064,6 +5212,39 @@ onclick = "DashboardApp.showAddHolidayModal('${dateStr}')" >
 
     async handleBatchSubmit(event) {
         this.submitForm(event, '/batches/', 'addBatchModal', 'Batch launched successfully!');
+    },
+
+    addSubject() {
+        const modalHtml = `
+            <div class="modal-overlay" id="addSubjectModal">
+                <div class="modal-card">
+                    <h2>Register New Subject</h2>
+                    <form onsubmit="event.preventDefault(); DashboardApp.handleSubjectSubmit(event);">
+                        <div class="form-group">
+                            <label>Subject Name</label>
+                            <input type="text" name="name" class="form-input" required placeholder="e.g. Advanced Physics">
+                        </div>
+                        <div class="form-group">
+                            <label>Subject Code</label>
+                            <input type="text" name="code" class="form-input" required placeholder="e.g. PHY-401">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Credits</label>
+                            <input type="number" name="credits" class="form-input" value="100">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('addSubjectModal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary" style="background:#8b5cf6;">Register Subject</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleSubjectSubmit(event) {
+        this.submitForm(event, '/subjects/', 'addSubjectModal', 'Subject registered successfully!');
     },
 
 
