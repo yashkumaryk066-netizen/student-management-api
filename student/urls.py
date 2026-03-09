@@ -19,7 +19,7 @@ from .views import (
     
     # Academic & Modules
     DepartmentListCreateView, LibraryBookListCreateView, LibraryBookDetailView, BookIssueListCreateView,
-    HostelListCreateView, RoomListCreateView, HostelAllocationListCreateView,
+    HostelListCreateView, RoomListCreateView, HostelAllocationListCreateView, HostelAnalyticsView,
     VehicleListCreateView, RouteListCreateView, TransportAllocationListCreateView,
     EmployeeListCreateView, LeaveRequestListCreateView,
     ExamListCreateView, GradeListCreateView, EventListCreateView,
@@ -160,6 +160,7 @@ urlpatterns = [
     path('hostel/', HostelListCreateView.as_view(), name='hostel-list'),
     path('hostel/rooms/', RoomListCreateView.as_view(), name='room-list'),
     path('hostel/allocations/', HostelAllocationListCreateView.as_view(), name='hostel-allocations'),
+    path('hostel/analytics/', HostelAnalyticsView.as_view(), name='hostel-analytics'),
     
     path('transport/vehicles/', VehicleListCreateView.as_view(), name='transport-vehicles'),
     path('transport/routes/', RouteListCreateView.as_view(), name='transport-routes'),

@@ -80,6 +80,34 @@ class HostelAllocationListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(created_by=get_owner_user(self.request.user))
 
+class HostelAnalyticsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        owner = get_owner_user(request.user)
+        hostels = Hostel.objects.filter(created_by=owner)
+        rooms = Room.objects.filter(hostel__in=hostels)
+        
+        total_beds = rooms.aggregate(Sum('capacity'))['capacity__sum'] or 0
+        
+        # Count active allocations
+        occupied_beds = HostelAllocation.objects.filter(
+            room__hostel__in=hostels,
+            status='ACTIVE'
+        ).count()
+        
+        vacant_beds = max(0, total_beds - occupied_beds)
+        
+        # Room Status Breakdown
+        return Response({
+            "total_hostels": hostels.count(),
+            "total_rooms": rooms.count(),
+            "total_beds": total_beds,
+            "occupied_beds": occupied_beds,
+            "vacant_beds": vacant_beds,
+            "occupancy_rate": round((occupied_beds / total_beds * 100), 1) if total_beds > 0 else 0
+        })
+
 # --- TRANSPORT ---
 
 class VehicleListCreateView(generics.ListCreateAPIView):

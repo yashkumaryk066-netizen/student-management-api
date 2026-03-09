@@ -181,9 +181,11 @@ const LibraryAPI = {
 };
 
 const HostelAPI = {
-    getAll: () => apiCall('/hostel/rooms/'),
-    getResidents: () => apiCall('/hostel/residents/'),
-    assignRoom: (data) => apiCall('/hostel/assign/', { method: 'POST', body: JSON.stringify(data) })
+    getHostels: () => apiCall('/hostel/'),
+    getRooms: () => apiCall('/hostel/rooms/'),
+    getAllocations: () => apiCall('/hostel/allocations/'),
+    getAnalytics: () => apiCall('/hostel/analytics/'),
+    allocateRoom: (data) => apiCall('/hostel/allocations/', { method: 'POST', body: JSON.stringify(data) })
 };
 
 const TransportAPI = {
@@ -203,12 +205,19 @@ const ExamAPI = {
     create: (data) => apiCall('/exams/', { method: 'POST', body: JSON.stringify(data) }),
     getResults: (id) => apiCall(`/exams/${id}/results/`)
 };
+
+const AcademicAPI = {
+    getCourses: () => apiCall('/courses/'),
+    getBatches: () => apiCall('/batches/'),
+    getEnrollments: () => apiCall('/enrollments/')
+};
 // EOF marker removed - End of standard module API definitions
 
 window.HostelAPI = HostelAPI;
 window.TransportAPI = TransportAPI;
 window.HRAPI = HRAPI;
 window.ExamAPI = ExamAPI;
+window.AcademicAPI = AcademicAPI;
 
 const DashboardAPI = {
     getStats: () => apiCall('/dashboard/stats/'),

@@ -254,6 +254,8 @@ class HostelSerializer(serializers.ModelSerializer):
 
 class RoomSerializer(serializers.ModelSerializer):
     hostel_name = serializers.CharField(source='hostel.name', read_only=True)
+    available_beds = serializers.ReadOnlyField()
+    is_full = serializers.ReadOnlyField()
 
     class Meta:
         model = Room

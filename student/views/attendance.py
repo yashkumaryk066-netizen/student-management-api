@@ -168,14 +168,23 @@ class AttendanceScanView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        student_id = request.data.get('student_id')
+        # Support both 'student_id' and 'qr_code' for flexibility
+        student_id = request.data.get('student_id') or request.data.get('qr_code')
+        
         if not student_id:
             return Response({"error": "Student ID required"}, status=400)
             
         student = get_object_or_404(Student, id=student_id)
         
+        # Security: Only Staff members or Institution Admins (CLIENT) can mark attendance
+        # Students shouldn't be able to mark their own or others' attendance via scan
+        user_profile = getattr(request.user, 'profile', None)
+        if user_profile and user_profile.role == 'STUDENT':
+             return Response({"error": "Only staff members can mark attendance."}, status=403)
+             
         # Verify ownership
-        if not request.user.is_superuser and student.created_by != get_owner_user(request.user):
+        owner = get_owner_user(request.user)
+        if not request.user.is_superuser and student.created_by != owner:
             return Response({"error": "Access Denied"}, status=403)
 
         today = timezone.now().date()
@@ -191,13 +200,23 @@ class AttendanceScanView(APIView):
             }
         )
         
+        # Prep response data
+        response_data = {
+            "success": True,
+            "student_name": student.name,
+            "status_msg": "Attendance Marked" if created else "Already Marked",
+            "time": timezone.now().strftime("%I:%M %p"),
+            "photo": student.photo.url if student.photo else None
+        }
+
         if not created:
-             return Response({"message": "Already marked present"}, status=200)
+             response_data["success"] = True # Still a success from UI perspective
+             return Response(response_data, status=200)
              
         # Invalidate cache
         invalidate_cache('attendance_list*')
         
-        return Response({"message": f"Attendance marked for {student.name}"}, status=201)
+        return Response(response_data, status=201)
 
 class GeoFencedAttendanceView(APIView):
     """

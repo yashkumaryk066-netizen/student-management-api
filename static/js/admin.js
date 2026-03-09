@@ -10406,3 +10406,165 @@ async function refreshROI() {
 document.addEventListener('DOMContentLoaded', function () {
     console.log('%c Sovereign AI Report Engine Loaded ', 'background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; padding: 8px; border-radius: 4px; font-weight: bold;');
 });
+
+// =====================================================
+// SOVEREIGN SMART GATEKEEPER (QR SCANNER)
+// =====================================================
+
+DashboardApp.openScannerModal = function () {
+    // 1. Create Modal HTML on fly with Premium Dark Design
+    const modalHtml = `
+        <div id="scannerModal" class="modal-overlay" style="display:flex; justify-content:center; align-items:center; position:fixed; inset:0; z-index:100002; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px);">
+            <div class="modal-content erp-card" style="background:linear-gradient(145deg, #0f172a, #1e293b); color:white; max-width:500px; width:95%; border:1px solid rgba(59, 130, 246, 0.3); border-radius:24px; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);">
+                <div class="modal-header" style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0; font-family:'Orbitron', sans-serif; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
+                        <span style="color:#3b82f6;">📸</span> Smart Scanner
+                    </h2>
+                    <button class="close-btn" onclick="DashboardApp.closeScannerModal()" style="background:transparent; border:none; color:#94a3b8; font-size:1.8rem; cursor:pointer; line-height:1;">×</button>
+                </div>
+                <div class="modal-body" style="padding:24px; text-align:center;">
+                    <div style="position:relative; border-radius:16px; overflow:hidden; border:2px solid rgba(59, 130, 246, 0.2); background:#000; min-height:300px;">
+                        <div id="reader" style="width:100%;"></div>
+                        <div id="scanner-overlay" style="position:absolute; inset:0; pointer-events:none; border:2px solid #3b82f6; opacity:0.3; animation: scannerPulse 2s infinite;"></div>
+                    </div>
+                    
+                    <p style="margin-top:20px; color:#94a3b8; font-size:0.9rem;">Point camera at student ID card QR code to mark presence.</p>
+                    
+                    <div id="scanResult" style="margin-top:20px; min-height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <div style="color:rgba(59, 130, 246, 0.5); font-style:italic;">Awaiting valid scan...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes scannerPulse {
+                0% { opacity: 0.1; box-shadow: inset 0 0 20px #3b82f6; }
+                50% { opacity: 0.4; box-shadow: inset 0 0 40px #3b82f6; }
+                100% { opacity: 0.1; box-shadow: inset 0 0 20px #3b82f6; }
+            }
+            .loader-spinner {
+                width: 30px;
+                height: 30px;
+                border: 3px solid rgba(59, 130, 246, 0.2);
+                border-top-color: #3b82f6;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+
+    // Remove existing if any
+    const existing = document.getElementById('scannerModal');
+    if (existing) existing.remove();
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Initialize Scanner
+    if (typeof Html5Qrcode === 'undefined') {
+        if (this.showToast) this.showToast('Scanner engine not loaded. Please refresh.', 'error');
+        else alert('Scanner engine not loaded. Please refresh.');
+        return;
+    }
+
+    // Use Html5Qrcode for better control
+    const html5QrCode = new Html5Qrcode("reader");
+    this.currentScanner = html5QrCode;
+
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+        // Success handler
+        console.log(`Scan result: ${decodedText}`);
+        this.verifyAttendance(decodedText);
+    }).catch(err => {
+        console.error("Scanner Error:", err);
+        const resultDiv = document.getElementById('scanResult');
+        if (resultDiv) resultDiv.innerHTML = `<div style="color:#ef4444;">❌ Camera access denied or not found.</div>`;
+    });
+};
+
+DashboardApp.closeScannerModal = function () {
+    const modal = document.getElementById('scannerModal');
+    if (modal) {
+        if (this.currentScanner) {
+            this.currentScanner.stop().catch(() => {}).finally(() => {
+                modal.remove();
+                this.currentScanner = null;
+            });
+        } else {
+            modal.remove();
+        }
+    }
+};
+
+DashboardApp.verifyAttendance = async function (qrCode) {
+    const resultDiv = document.getElementById('scanResult');
+    if (!resultDiv) return;
+    
+    resultDiv.innerHTML = '<div class="loader-spinner"></div><div style="color:#3b82f6; margin-top:10px;">Verifying Identity...</div>';
+
+    try {
+        const res = await fetch(`${this.apiBaseUrl}/attendance/scan/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                'X-CSRFToken': this.getCsrfToken()
+            },
+            body: JSON.stringify({ student_id: qrCode })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            // Success Feedback
+            resultDiv.innerHTML = `
+                <div style="background:rgba(16, 185, 129, 0.1); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3); width:100%;">
+                    <div style="color:#10b981; font-weight:700; font-size:1.1rem;">✅ ${data.status_msg}</div>
+                    <div style="display:flex; gap:15px; margin-top:15px; align-items:center; text-align:left;">
+                        ${data.photo ? `<img src="${data.photo}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #10b981;">` : `<div style="width:60px; height:60px; border-radius:50%; background:#1e293b; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">👤</div>`}
+                        <div>
+                            <div style="font-weight:700; color:white;">${data.student_name}</div>
+                            <div style="color:#94a3b8; font-size:0.8rem;">Marked at: ${data.time}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (this.showToast) this.showToast(`Attendance marked for ${data.student_name}`, 'success');
+
+            // Brief pause before next scan
+            if (this.currentScanner) {
+                // You might want to pause scanner here if library supports it, 
+                // but Html5Qrcode doesn't have a simple pause. 
+                // We'll just ignore results for a few seconds or let it be.
+            }
+
+            setTimeout(() => {
+                const r = document.getElementById('scanResult');
+                if (r) r.innerHTML = '<div style="color:rgba(59, 130, 246, 0.5); font-style:italic;">Awaiting next scan...</div>';
+            }, 3000);
+
+        } else {
+            resultDiv.innerHTML = `
+                <div style="background:rgba(239, 68, 68, 0.1); padding:15px; border-radius:12px; border:1px solid rgba(239, 68, 68, 0.3); width:100%;">
+                    <div style="color:#ef4444; font-weight:700;">❌ Scan Failed</div>
+                    <div style="color:#94a3b8; font-size:0.9rem; margin-top:5px;">${data.error || 'Unknown Error'}</div>
+                </div>
+            `;
+            if (this.showToast) this.showToast(data.error || 'Scan Failed', 'error');
+            
+            setTimeout(() => {
+                const r = document.getElementById('scanResult');
+                if (r) r.innerHTML = '<div style="color:rgba(59, 130, 246, 0.5); font-style:italic;">Try again...</div>';
+            }, 3000);
+        }
+    } catch (e) {
+        console.error(e);
+        const r = document.getElementById('scanResult');
+        if (r) r.innerHTML = `<div style="color:#ef4444;">❌ Connection Error</div>`;
+    }
+};
