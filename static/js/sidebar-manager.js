@@ -157,7 +157,7 @@ class PremiumSidebarManager {
                 if (lockIcon) lockIcon.remove();
             });
             document.querySelectorAll('.nav-category').forEach(cat => cat.style.display = 'block');
-            document.querySelectorAll('.module-card').forEach(card => card.style.display = 'flex');
+            document.querySelectorAll('.module-card').forEach(card => card.style.display = '');
             return;
         }
 
