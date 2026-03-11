@@ -147,6 +147,20 @@ class PremiumSidebarManager {
             return;
         }
 
+        // GOD MODE: Super Admin Bypass
+        if (this.currentPlan === 'super_admin') {
+            console.log('👑 Super Admin Bypass: Showing all modules');
+            this.navLinks.forEach(link => {
+                if (link.parentElement) link.parentElement.style.display = 'block';
+                link.classList.remove('locked');
+                const lockIcon = link.querySelector('.lock-icon');
+                if (lockIcon) lockIcon.remove();
+            });
+            document.querySelectorAll('.nav-category').forEach(cat => cat.style.display = 'block');
+            document.querySelectorAll('.module-card').forEach(card => card.style.display = 'flex');
+            return;
+        }
+
         const allowedModules = PLAN_ACCESS[this.currentPlan].modules;
 
         // Toggle Super Admin Specific Items

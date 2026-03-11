@@ -1042,30 +1042,8 @@ const DashboardApp = {
                 link.style.pointerEvents = 'auto';
                 const lockIcon = link.querySelector('.lock-icon');
                 if (lockIcon) lockIcon.remove();
-            } else if (isRelevant) {
-                // PREMIUM LOCK UI
-                item.style.display = 'block';
-                link.classList.add('locked');
-                link.style.opacity = '0.6';
-                link.style.pointerEvents = 'none'; // Prevent default navigation
-
-                // Add Lock Icon if missing
-                if (!link.querySelector('.lock-icon')) {
-                    const lock = document.createElement('span');
-                    lock.className = 'lock-icon';
-                    lock.innerHTML = '🔒';
-                    lock.style.marginLeft = 'auto';
-                    lock.style.fontSize = '0.8rem';
-                    link.appendChild(lock);
-                }
-
-                // Add Click Handler to Item (Upgrade Prompt)
-                item.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.showUpgradeModal(plan);
-                };
             } else {
+                // If not available, hide completely (No Locks)
                 item.style.display = 'none';
             }
         });
@@ -1104,8 +1082,7 @@ const DashboardApp = {
             });
 
             if (!isFeatureAvailable) {
-                // Check relevance for Lock UI on Cards
-                // Simplified: If not available, just hide to avoid clutter on Dashboard
+                // If not available, hide completely (No Locks)
                 card.style.display = 'none';
             } else {
                 card.style.display = 'flex';
@@ -10490,7 +10467,7 @@ DashboardApp.closeScannerModal = function () {
     const modal = document.getElementById('scannerModal');
     if (modal) {
         if (this.currentScanner) {
-            this.currentScanner.stop().catch(() => {}).finally(() => {
+            this.currentScanner.stop().catch(() => { }).finally(() => {
                 modal.remove();
                 this.currentScanner = null;
             });
@@ -10503,7 +10480,7 @@ DashboardApp.closeScannerModal = function () {
 DashboardApp.verifyAttendance = async function (qrCode) {
     const resultDiv = document.getElementById('scanResult');
     if (!resultDiv) return;
-    
+
     resultDiv.innerHTML = '<div class="loader-spinner"></div><div style="color:#3b82f6; margin-top:10px;">Verifying Identity...</div>';
 
     try {
@@ -10533,7 +10510,7 @@ DashboardApp.verifyAttendance = async function (qrCode) {
                     </div>
                 </div>
             `;
-            
+
             if (this.showToast) this.showToast(`Attendance marked for ${data.student_name}`, 'success');
 
             // Brief pause before next scan
@@ -10556,7 +10533,7 @@ DashboardApp.verifyAttendance = async function (qrCode) {
                 </div>
             `;
             if (this.showToast) this.showToast(data.error || 'Scan Failed', 'error');
-            
+
             setTimeout(() => {
                 const r = document.getElementById('scanResult');
                 if (r) r.innerHTML = '<div style="color:rgba(59, 130, 246, 0.5); font-style:italic;">Try again...</div>';

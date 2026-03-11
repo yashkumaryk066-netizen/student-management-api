@@ -721,19 +721,7 @@ const DashboardApp = {
             if (el) {
                 const listItem = el.closest('li');
                 if (listItem) {
-                    // Don't hide, show as locked for upsell
-                    // listItem.style.display = 'none'; 
-                    el.classList.add('locked');
-                    el.style.opacity = '0.6';
-
-                    if (!el.querySelector('.lock-icon')) {
-                        const lock = document.createElement('span');
-                        lock.textContent = '🔒';
-                        lock.className = 'lock-icon';
-                        lock.style.marginLeft = 'auto';
-                        el.appendChild(lock);
-                    }
-                    listItem.setAttribute('data-locked', 'true');
+                    listItem.style.display = 'none'; // Hide completely (No Locks)
                 }
             }
         };
@@ -780,13 +768,37 @@ const DashboardApp = {
             }
         });
 
-        // Add upgrade prompts for locked features
-        document.querySelectorAll('[data-locked="true"]').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.showUpgradeModal(plan);
-            });
+        // Hide Empty Categories
+        document.querySelectorAll('.nav-category').forEach(cat => {
+            let next = cat.nextElementSibling;
+            let hasVisible = false;
+            while (next && !next.classList.contains('nav-category')) {
+                if (next.style.display !== 'none') {
+                    hasVisible = true;
+                    break;
+                }
+                next = next.nextElementSibling;
+            }
+            cat.style.display = hasVisible ? 'block' : 'none';
+        });
+
+        // Hide Dashboard Cards too
+        document.querySelectorAll('.module-card').forEach(card => {
+            const onclick = card.getAttribute('onclick');
+            if (onclick && onclick.includes('navigateTo(')) {
+                const match = onclick.match(/navigateTo\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    const module = match[1];
+                    // Map module to feature if necessary
+                    let featureKey = module;
+                    // Check if module is in available features
+                    if (!availableFeatures.includes(featureKey)) {
+                        card.style.display = 'none';
+                    } else {
+                        card.style.display = 'flex';
+                    }
+                }
+            }
         });
 
         console.log(`✅ Permissions Applied | Visible Features: ${availableFeatures.length}`);
