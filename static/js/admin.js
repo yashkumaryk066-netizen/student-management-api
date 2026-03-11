@@ -10452,6 +10452,15 @@ DashboardApp.openScannerModal = function () {
 
     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
+    // Check if secure context (Required for cameras)
+    if (!window.isSecureContext) {
+        const resultDiv = document.getElementById('scanResult');
+        if (resultDiv) resultDiv.innerHTML = `<div style="color:#ef4444; padding:10px; background:rgba(239, 68, 68, 0.1); border-radius:12px;">
+            ⚠️ <b>Insecure Connection:</b> Camera requires HTTPS. Please ensure your site is running on <b>https://</b>.
+        </div>`;
+        return;
+    }
+
     html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
         // Success handler
         console.log(`Scan result: ${decodedText}`);
@@ -10459,7 +10468,20 @@ DashboardApp.openScannerModal = function () {
     }).catch(err => {
         console.error("Scanner Error:", err);
         const resultDiv = document.getElementById('scanResult');
-        if (resultDiv) resultDiv.innerHTML = `<div style="color:#ef4444;">❌ Camera access denied or not found.</div>`;
+        if (resultDiv) resultDiv.innerHTML = `
+            <div style="color:#ef4444; margin-bottom:15px; background:rgba(239, 68, 68, 0.1); padding:10px; border-radius:12px;">
+                ❌ <b>Camera Access Problem:</b><br>
+                ${err.message || 'Permission denied or not found.'}
+            </div>
+            <div style="text-align:left; font-size:0.85rem; color:#94a3b8; background:rgba(30,41,59,0.5); padding:12px; border-radius:8px;">
+                <b>How to fix:</b><br>
+                1. Click the 🔒 icon in browser address bar.<br>
+                2. Ensure "Camera" permission is <b>Allowed</b>.<br>
+                3. Refresh the page and try again.<br>
+                4. Ensure no other app is using the camera.
+            </div>
+            <button onclick="DashboardApp.openScannerModal()" style="margin-top:15px; background:#3b82f6; border:none; color:white; padding:8px 20px; border-radius:8px; cursor:pointer;">🔄 Retry Permission</button>
+        `;
     });
 };
 
