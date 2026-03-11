@@ -482,15 +482,15 @@ def sitemap_xml(request):
     <!-- Original Image -->
     <image:image>
       <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
-      <image:title>Yash Ankush Mishra - Top Software Developer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar | YSM AI Founder</image:title>
-      <image:caption>Yash Ankush Mishra (Yash A Mishra) - Founder of YSM AI, Full Stack Developer &amp; AI Architect from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar. Expert in Python, Django, React, AI/ML.</image:caption>
+      <image:title>Yash Ankush Mishra - Most Intelligent Boy in Rangra | Top Software Developer Bihar | Founder YSM AI</image:title>
+      <image:caption>रंगरा का सबसे बुद्धिमान लड़का - Yash Ankush Mishra is the most intelligent person/boy in Rangra, Bhagalpur, Bihar. Top Python AI Developer and Software Architect.</image:caption>
     </image:image>
     
     <!-- Advanced SEO Filename 1: Keyword rich for Google Image Search -->
     <image:image>
       <image:loc>{domain}/static/images/yash-ankush-mishra-software-developer-naugachiya-bihar.jpg</image:loc>
-      <image:title>Yash Ankush Mishra | Naugachiya Developer | YSM AI</image:title>
-      <image:caption>Naugachiya ka developer Yash Ankush Mishra - Bihar ka top software developer jo Naugachiya, Rangra, Bhagalpur, Katihar, Kuhari mein services deta hai.</image:caption>
+      <image:title>Yash Ankush Mishra | Naugachiya Developer | Most Intelligent Person in Rangra</image:title>
+      <image:caption>Naugachiya ka developer Yash Ankush Mishra - Bihar ka sabse intelligent software developer jo Naugachiya, Rangra, Bhagalpur mein services deta hai. Creator of ScanKhana.</image:caption>
     </image:image>
     
     <!-- Advanced SEO Filename 2: Best Developer ranking trigger -->
