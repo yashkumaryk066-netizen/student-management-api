@@ -1422,12 +1422,12 @@ const DashboardApp = {
         container.innerHTML = `
             <div class="module-header">
                 <div>
-                     <h1 class="page-title">🚀 Super Admin Command Center</h1>
-                     <p class="page-subtitle">Sovereign Protocol: Global Oversight & Control.</p>
+                     <h1 class="page-title">🛸 Super Admin Console</h1>
+                     <p class="page-subtitle">Real-time platform oversight and growth analytics.</p>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-primary" onclick="DashboardApp.loadSuperAdminDashboard()">🔄 Live Refresh</button>
-                    <button class="btn-secondary" onclick="DashboardApp.loadSystemLogs()">📜 Security Logs</button>
+                    <button class="btn-primary" onclick="DashboardApp.loadSuperAdminDashboard()">🔄 Refresh Console</button>
+                    <button class="btn-secondary" onclick="DashboardApp.loadSystemLogs()">📜 Logs</button>
                 </div>
             </div>
 
@@ -1455,53 +1455,33 @@ const DashboardApp = {
                  </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-1 gap-8">
-                <!-- PENDING REQUESTS SECTION -->
-                <div id="pendingRequestsContainer" style="display:none; margin-bottom: 20px;">
-                    <div style="padding: 20px; background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 16px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <h3 style="color: #fbbf24; margin-bottom: 15px; font-size: 1.2rem;">⚠️ Pending Payment Approvals</h3>
-                            <span class="badge" style="background: #fbbf24; color: black; font-weight: bold;">Action Required</span>
-                        </div>
-                        <div class="data-table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Client Name</th>
-                                        <th>Institute</th>
-                                        <th>Plan</th>
-                                        <th>Amount</th>
-                                        <th>Ref ID</th>
-                                        <th>Date</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="saPendingTable"></tbody>
-                            </table>
-                        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- REVENUE CHART -->
+                <div id="revenueChartContainer" class="premium-card" style="min-height: 400px; background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.4) 100%)">
+                    <h3 style="color:white; margin-bottom:15px;">📊 Monthly Revenue Growth</h3>
+                    <div id="chartCanvas" style="height: 300px; width: 100%;">
+                        <div class="loader"></div>
                     </div>
                 </div>
 
-                <!-- CLIENT REGISTRY -->
+                <!-- RECENT CLIENTS QUICK VIEW -->
                 <div class="premium-card" style="min-height: 400px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                         <h3 class="text-xl font-bold text-white">🌍 Global Client Registry</h3>
-                         <input type="text" id="saClientSearch" placeholder="🔍 Search Clients..." class="search-input" onkeyup="DashboardApp.filterSAClients()" style="width:250px;">
+                         <h3 class="text-xl font-bold text-white">🆕 Recent Onboardings</h3>
+                         <button class="btn-secondary btn-sm" onclick="DashboardApp.loadSubscriptionManagement()">View All →</button>
                     </div>
                     <div class="data-table-container">
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Client / Email</th>
+                                    <th>Client</th>
                                     <th>Institution</th>
-                                    <th>Plan & Validity</th>
-                                    <th>Status</th>
-                                    <th>Revenue</th>
-                                    <th>Control</th>
+                                    <th>Plan</th>
+                                    <th>Since</th>
                                 </tr>
                             </thead>
-                            <tbody id="saClientsTable">
-                                <tr><td colspan="6" class="text-center"><div class="loader"></div> Fetching Global Data...</td></tr>
+                            <tbody id="saRecentClientsTable">
+                                <tr><td colspan="4" class="text-center">Fetching Data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1528,12 +1508,24 @@ const DashboardApp = {
                 this.renderRevenueChart(stats.monthly_growth);
             }
 
-            // 2. Fetch Clients & Pending
+            // 2. Fetch Clients Summary
             const clientsRes = await fetch(this.apiBaseUrl + '/super-admin/clients/', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
-            this.allGlobalClients = await clientsRes.json();
-            this.renderSATables();
+            const clients = await clientsRes.json();
+
+            // Render Recent 5 (Quick View)
+            const recentTbody = document.getElementById('saRecentClientsTable');
+            if (recentTbody) {
+                recentTbody.innerHTML = clients.slice(0, 5).map(c => `
+                    <tr>
+                        <td style="color:#6366f1; font-weight:bold;">${c.username}</td>
+                        <td>${c.institution_name}</td>
+                        <td><span class="badge" style="background:rgba(99,102,241,0.1); color:#818cf8;">${c.plan}</span></td>
+                        <td>${c.created_at}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="4" class="text-center">No recent clients.</td></tr>';
+            }
 
         } catch (e) {
             console.error("Super Admin Load Failed", e);
@@ -8116,8 +8108,8 @@ const DashboardApp = {
                 <div class="superadmin-overview">
                     <div class="module-header" style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
                         <div>
-                            <h1 class="page-title" style="font-family: 'Rajdhani', sans-serif; font-size: 2.8rem; margin-bottom: 5px;">COMMAND CENTER</h1>
-                            <p class="page-subtitle">Global Subscription Management System</p>
+                            <h1 class="page-title" style="font-family: 'Rajdhani', sans-serif; font-size: 2.8rem; margin-bottom: 5px;">SUBSCRIPTION MANAGEMENT</h1>
+                            <p class="page-subtitle">Detailed financial registry and client activation vault.</p>
                         </div>
                         <div style="font-family: 'Rajdhani', monospace; font-size: 1.2rem; color: var(--neon-accent);">
                             SYSTEM STATUS: ONLINE
