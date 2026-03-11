@@ -1305,16 +1305,22 @@
 
             <!-- Navigation -->
             <nav class="navbar">
-                <a href="#" class="logo">
-                    <span>🎓</span>
-                    <div>
-                        <div>NEXTGEN ERP</div>
+                <div class="logo" style="display: flex; align-items: center; gap: 12px;">
+                    <a href="/"
+                        style="text-decoration: none; display: flex; align-items: center; gap: 12px; color: inherit;">
+                        <span>🎓</span>
+                        <div>
+                            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.4rem;">
+                                NEXTGEN ERP</div>
+                        </div>
+                    </a>
+                    <div style="margin-left: -5px;">
                         <a href="{% url 'developer-profile-root' %}"
                             style="font-size: 0.75rem; color: var(--primary); font-weight: 700; text-decoration: none; letter-spacing: 1px; display: block; margin-top: 2px;">
                             BY YASH A MISHRA <span style="font-size: 0.8em;">↗</span>
                         </a>
                     </div>
-                </a>
+                </div>
 
                 <div class="nav-links">
                     <a href="#modules" class="nav-link">Modules</a>
@@ -1340,6 +1346,9 @@
                         <p class="hero-description">
                             The Ultimate <strong>YSM AI (Ankush AI)</strong> Platform. Created by <strong
                                 style="color:white;">Yash A Mishra</strong> (Rangra Developer).
+                            Founder of <strong>YSM AI</strong> & <strong><a href="https://scan-khana.vercel.app/"
+                                    target="_blank"
+                                    style="color: var(--primary); text-decoration: none;">ScanKhana</a></strong>.
                             Experience the power of advanced Artificial Intelligence designed to revolutionize
                             education.
                         </p>
@@ -1421,7 +1430,8 @@
 
                 <div class="bento-grid">
                     <div class="bento-card large magical-card reveal-section"
-                        style="background: linear-gradient(to right, rgba(2, 4, 10, 0.9), rgba(2, 4, 10, 0.5)), url('{% static 'images/landing/ai_robot.png' %}'); background-size: cover; background-position: center;">
+                        style="background: linear-gradient(to right, rgba(2, 4, 10, 0.9), rgba(2, 4, 10, 0.5)), url('{% static "
+                        images/landing/ai_robot.png" %}'); background-size: cover; background-position: center;">
                         <div class="card-icon" style="background: rgba(99, 102, 241, 0.2); border-color: #6366f1;">🤖
                         </div>
                         <h3 style="text-shadow: 0 0 20px rgba(99, 102, 241, 0.8);">AI-Powered Academics</h3>
@@ -1430,7 +1440,9 @@
                             robot teacher engine.</p>
                     </div>
                     <div class="bento-card magical-card reveal-section"
-                        style="background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85)), url('{% static 'images/finance_management_banner.png' %}'); background-size: cover; background-position: center;">
+                        style="background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85)), url('{% static "
+                        images/finance_management_banner.png" %}'); background-size: cover; background-position:
+                        center;">
                         <div class="card-icon" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b;">💰
                         </div>
                         <h3 style="text-shadow: 0 0 20px rgba(245, 158, 11, 0.6);">Finance & Payroll</h3>
@@ -1440,7 +1452,9 @@
                             auditing reports.</p>
                     </div>
                     <div class="bento-card magical-card reveal-section"
-                        style="background: linear-gradient(to bottom, rgba(5, 46, 22, 0.8), rgba(6, 78, 59, 0.6)), url('{% static 'images/library_management_banner.png' %}'); background-size: cover; background-position: center bottom;">
+                        style="background: linear-gradient(to bottom, rgba(5, 46, 22, 0.8), rgba(6, 78, 59, 0.6)), url('{% static "
+                        images/library_management_banner.png" %}'); background-size: cover; background-position: center
+                        bottom;">
                         <div class="card-icon" style="background: rgba(34, 197, 94, 0.2); border-color: #22c55e;">📖
                         </div>
                         <h3 style="text-shadow: 0 0 20px rgba(34, 197, 94, 0.6);">Digital Library</h3>
@@ -1450,7 +1464,8 @@
                         </p>
                     </div>
                     <div class="bento-card tall magical-card reveal-section"
-                        style="background: linear-gradient(to bottom, rgba(2, 4, 10, 0.4), rgba(2, 4, 10, 0.2)), url('{% static 'images/hr_management_banner.png' %}'); background-size: cover; background-position: center;">
+                        style="background: linear-gradient(to bottom, rgba(2, 4, 10, 0.4), rgba(2, 4, 10, 0.2)), url('{% static "
+                        images/hr_management_banner.png" %}'); background-size: cover; background-position: center;">
                         <div class="card-icon" style="background: rgba(236, 72, 153, 0.2); border-color: #ec4899;">👥
                         </div>
                         <h3 style="text-shadow: 0 0 20px rgba(236, 72, 153, 0.8);">HR Management</h3>
@@ -1460,7 +1475,8 @@
                             Track every employee's lifecycle.</p>
                     </div>
                     <div class="bento-card large magical-card reveal-section"
-                        style="background: linear-gradient(to right, rgba(2, 4, 10, 0.9), rgba(2, 4, 10, 0.5)), url('{% static 'images/landing/smart_classroom.png' %}'); background-size: cover; background-position: center;">
+                        style="background: linear-gradient(to right, rgba(2, 4, 10, 0.9), rgba(2, 4, 10, 0.5)), url('{% static "
+                        images/landing/smart_classroom.png" %}'); background-size: cover; background-position: center;">
                         <div class="card-icon" style="background: rgba(6, 182, 212, 0.2); border-color: #06b6d4;">🧬
                         </div>
                         <h3 style="text-shadow: 0 0 20px rgba(6, 182, 212, 0.8);">Future Classrooms</h3>
@@ -1470,7 +1486,9 @@
                         </p>
                     </div>
                     <div class="bento-card magical-card reveal-section"
-                        style="background: linear-gradient(to bottom, rgba(55, 65, 81, 0.9), rgba(17, 24, 39, 0.95)), url('{% static 'images/hostel_management_banner.png' %}'); background-size: cover; background-position: center;">
+                        style="background: linear-gradient(to bottom, rgba(55, 65, 81, 0.9), rgba(17, 24, 39, 0.95)), url('{% static "
+                        images/hostel_management_banner.png" %}'); background-size: cover; background-position:
+                        center;">
                         <div class="card-icon" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7;">🏨
                         </div>
                         <h3 style="text-shadow: 0 0 20px rgba(168, 85, 247, 0.6);">Smart Hostel</h3>
@@ -1612,7 +1630,8 @@
                             Yash Ankush Mishra</h3>
                         <div
                             style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">
-                            Chief Architect</div>
+                            Founder, YSM AI & <a href="https://scan-khana.vercel.app/" target="_blank"
+                                style="color: inherit; text-decoration: none;">ScanKhana</a></div>
                     </div>
                     <div>
                         <div class="badge"><span class="pulse-dot"></span> THE ARCHITECT</div>
@@ -1879,6 +1898,8 @@
                             <li><a href="/#features">Features</a></li>
                             <li><a href="/ai-chat/">AI Assistant</a></li>
                             <li><a href="/developer/">About Developer</a></li>
+                            <li><a href="https://scan-khana.vercel.app/" target="_blank"
+                                    style="color: var(--primary); font-weight: 700;">ScanKhana App ✨</a></li>
                         </ul>
                     </div>
 
