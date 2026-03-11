@@ -460,15 +460,26 @@ def sitemap_xml(request):
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="hi" href="{domain}/developer/"/>
     <xhtml:link rel="alternate" hreflang="en" href="{domain}/developer/"/>
+    
+    <!-- Original Image -->
     <image:image>
       <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
       <image:title>Yash Ankush Mishra - Top Software Developer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar | YSM AI Founder</image:title>
       <image:caption>Yash Ankush Mishra (Yash A Mishra) - Founder of YSM AI, Full Stack Developer &amp; AI Architect from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar. Expert in Python, Django, React, AI/ML.</image:caption>
     </image:image>
+    
+    <!-- Advanced SEO Filename 1: Keyword rich for Google Image Search -->
     <image:image>
-      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
-      <image:title>Naugachiya Developer - Yash Ankush Mishra | Best Developer Bihar | YSM AI</image:title>
+      <image:loc>{domain}/static/images/yash-ankush-mishra-software-developer-naugachiya-bihar.jpg</image:loc>
+      <image:title>Yash Ankush Mishra | Naugachiya Developer | YSM AI</image:title>
       <image:caption>Naugachiya ka developer Yash Ankush Mishra - Bihar ka top software developer jo Naugachiya, Rangra, Bhagalpur, Katihar, Kuhari mein services deta hai.</image:caption>
+    </image:image>
+    
+    <!-- Advanced SEO Filename 2: Best Developer ranking trigger -->
+    <image:image>
+      <image:loc>{domain}/static/images/best-developer-rangra-bhagalpur-india.jpg</image:loc>
+      <image:title>Best Software Developer in Rangra and Bhagalpur - Yash Kumar Mishra</image:title>
+      <image:caption>Ranked Best Software Developer from Rangra, Bhagalpur, Bihar. Yash Ankush Mishra develops high end Python AI and Django web softwares globally.</image:caption>
     </image:image>
   </url>
 
