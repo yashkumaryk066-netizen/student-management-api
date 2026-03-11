@@ -416,13 +416,31 @@ def robots_txt(request):
     from django.conf import settings
     site_url = getattr(settings, 'SITE_URL', 'https://yashamishra.pythonanywhere.com').rstrip('/')
     lines = [
+        "# robots.txt - Yash Ankush Mishra",
+        f"# Website: {site_url}",
+        "",
         "User-agent: *",
+        "Allow: /",
+        "Allow: /developer/",
+        "Allow: /resume/",
+        "Allow: /ai-chat/",
+        "Allow: /static/",
+        "Allow: /static/images/",
+        "Allow: /static/css/",
+        "Allow: /static/js/",
         "Disallow: /admin/",
         "Disallow: /api/",
         "Disallow: /schema/",
         "Disallow: /swagger/",
         "Disallow: /media/",
+        "",
+        "# Allow Google Image Bot full access to images",
+        "User-agent: Googlebot-Image",
         "Allow: /",
+        "Allow: /static/images/",
+        "Allow: /static/img/",
+        "Allow: /static/",
+        "Allow: /media/",
         "",
         f"Sitemap: {site_url}/sitemap.xml"
     ]
@@ -478,7 +496,7 @@ def sitemap_xml(request):
     <!-- Advanced SEO Filename 2: Best Developer ranking trigger -->
     <image:image>
       <image:loc>{domain}/static/images/best-developer-rangra-bhagalpur-india.jpg</image:loc>
-      <image:title>Best Software Developer in Rangra and Bhagalpur - Yash Kumar Mishra</image:title>
+      <image:title>Best Software Developer in Rangra and Bhagalpur - Yash Ankush Mishra</image:title>
       <image:caption>Ranked Best Software Developer from Rangra, Bhagalpur, Bihar. Yash Ankush Mishra develops high end Python AI and Django web softwares globally.</image:caption>
     </image:image>
   </url>
@@ -557,7 +575,15 @@ def google_verification(request):
     return HttpResponse("google-site-verification: google7ec15807e3134773.html", content_type="text/plain")
 
 def service_worker(request):
-    return HttpResponse("console.log('SW Loaded');", content_type="application/javascript")
+    from django.conf import settings
+    import os
+    sw_path = os.path.join(settings.BASE_DIR, 'static', 'sw.js')
+    try:
+        with open(sw_path, 'r') as f:
+            content = f.read()
+        return HttpResponse(content, content_type="application/javascript")
+    except:
+        return HttpResponse("console.log('SW Logic Missing');", content_type="application/javascript")
 
 # Verification Views
 class VerifyIdentityView(APIView):
