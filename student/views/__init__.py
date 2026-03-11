@@ -423,12 +423,12 @@ def robots_txt(request):
         "Allow: /",
         "Allow: /developer/",
         "Allow: /resume/",
-        "Allow: /ai-chat/",
         "Allow: /static/",
         "Allow: /static/images/",
         "Allow: /static/css/",
         "Allow: /static/js/",
         "Disallow: /admin/",
+        "Disallow: /ai-chat/",
         "Disallow: /api/",
         "Disallow: /schema/",
         "Disallow: /swagger/",
@@ -511,27 +511,6 @@ def sitemap_xml(request):
       <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
       <image:title>Yash Ankush Mishra Resume 2026 - Software Architect CV | Developer from Naugachiya, Rangra, Bihar</image:title>
       <image:caption>Resume and CV of Yash Ankush Mishra, Chief Software Architect from Naugachiya, Rangra, Bhagalpur, Bihar. Founder of YSM AI. MCA from Bengaluru University. Serving Katihar, Patna, Mumbai, Jaipur.</image:caption>
-    </image:image>
-  </url>
-
-  <!-- ==================== AI CHAT ==================== -->
-  <url>
-    <loc>{domain}/ai-chat/</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- ==================== RANGRAGO ==================== -->
-  <url>
-    <loc>{domain}/rangrago/</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-    <image:image>
-      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
-      <image:title>RangraGo - App by Yash Ankush Mishra from Rangra, Naugachiya, Bhagalpur, Bihar</image:title>
-      <image:caption>RangraGo application created by Yash Ankush Mishra - developer from Rangra, near Naugachiya, Bhagalpur, Bihar, India.</image:caption>
     </image:image>
   </url>
 
