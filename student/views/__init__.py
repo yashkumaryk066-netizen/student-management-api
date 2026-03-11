@@ -434,32 +434,111 @@ def sitemap_xml(request):
     today = date.today().isoformat()
     domain = getattr(settings, 'SITE_URL', 'https://yashamishra.pythonanywhere.com').rstrip('/')
 
-    pages = [
-        {'loc': f'{domain}/',             'priority': '1.0', 'changefreq': 'weekly'},
-        {'loc': f'{domain}/demo',          'priority': '0.9', 'changefreq': 'monthly'},
-        {'loc': f'{domain}/developer',     'priority': '0.8', 'changefreq': 'monthly'},
-        {'loc': f'{domain}/login',         'priority': '0.3', 'changefreq': 'yearly'},
-        {'loc': f'{domain}/privacy-policy','priority': '0.5', 'changefreq': 'yearly'},
-        {'loc': f'{domain}/terms',         'priority': '0.5', 'changefreq': 'yearly'},
-        {'loc': f'{domain}/refund-policy', 'priority': '0.4', 'changefreq': 'yearly'},
-    ]
-
-    url_entries = ''.join([
-        f"""   <url>
-      <loc>{p['loc']}</loc>
-      <lastmod>{today}</lastmod>
-      <changefreq>{p['changefreq']}</changefreq>
-      <priority>{p['priority']}</priority>
-   </url>
-""" for p in pages
-    ])
-
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-{url_entries}</urlset>"""
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- ==================== HOME PAGE ==================== -->
+  <url>
+    <loc>{domain}/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
+      <image:title>Y.S.M AI - Best School Management System by Yash Ankush Mishra, Naugachiya, Rangra, Bhagalpur, Bihar</image:title>
+      <image:caption>Y.S.M AI Education ERP by Yash Ankush Mishra - Developer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar. Serving Patna, Mumbai, Jaipur. India's #1 School, Coaching &amp; Institute Management System.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ==================== DEVELOPER PROFILE (MOST IMPORTANT FOR RANKING) ==================== -->
+  <url>
+    <loc>{domain}/developer/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="hi" href="{domain}/developer/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="{domain}/developer/"/>
+    <image:image>
+      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
+      <image:title>Yash Ankush Mishra - Top Software Developer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar | YSM AI Founder</image:title>
+      <image:caption>Yash Ankush Mishra (Yash A Mishra) - Founder of YSM AI, Full Stack Developer &amp; AI Architect from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar. Expert in Python, Django, React, AI/ML.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
+      <image:title>Naugachiya Developer - Yash Ankush Mishra | Best Developer Bihar | YSM AI</image:title>
+      <image:caption>Naugachiya ka developer Yash Ankush Mishra - Bihar ka top software developer jo Naugachiya, Rangra, Bhagalpur, Katihar, Kuhari mein services deta hai.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ==================== RESUME ==================== -->
+  <url>
+    <loc>{domain}/resume/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
+      <image:title>Yash Ankush Mishra Resume 2026 - Software Architect CV | Developer from Naugachiya, Rangra, Bihar</image:title>
+      <image:caption>Resume and CV of Yash Ankush Mishra, Chief Software Architect from Naugachiya, Rangra, Bhagalpur, Bihar. Founder of YSM AI. MCA from Bengaluru University. Serving Katihar, Patna, Mumbai, Jaipur.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ==================== AI CHAT ==================== -->
+  <url>
+    <loc>{domain}/ai-chat/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ==================== RANGRAGO ==================== -->
+  <url>
+    <loc>{domain}/rangrago/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
+      <image:title>RangraGo - App by Yash Ankush Mishra from Rangra, Naugachiya, Bhagalpur, Bihar</image:title>
+      <image:caption>RangraGo application created by Yash Ankush Mishra - developer from Rangra, near Naugachiya, Bhagalpur, Bihar, India.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ==================== GENERAL PAGES ==================== -->
+  <url>
+    <loc>{domain}/demo/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{domain}/login/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>{domain}/privacy-policy/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>{domain}/terms-of-service/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>{domain}/refund-policy/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>"""
     return HttpResponse(xml_content, content_type='application/xml')
 
 
