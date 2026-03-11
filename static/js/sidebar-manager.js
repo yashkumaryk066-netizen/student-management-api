@@ -91,9 +91,10 @@ class PremiumSidebarManager {
                 data = await res.json();
             }
 
-            if (data && data.plan_type) {
+            const planValue = data.plan || data.plan_type;
+            if (planValue) {
                 // normalize plan type
-                let remotePlan = data.plan_type.toLowerCase();
+                let remotePlan = planValue.toLowerCase();
 
                 // Map SUPER_ADMIN to valid key
                 if (remotePlan === 'super_admin' || remotePlan === 'super_admin') remotePlan = 'super_admin';
@@ -163,23 +164,52 @@ class PremiumSidebarManager {
 
             if (!module) return; // Skip category headers
 
+            // Remove legacy lock icons if they exist
+            const lockIcon = link.querySelector('.lock-icon');
+            if (lockIcon) lockIcon.remove();
+
             if (allowedModules.includes(module)) {
                 // Module is accessible
                 link.classList.remove('locked');
                 link.style.pointerEvents = 'auto';
+                if (link.parentElement) link.parentElement.style.display = ''; // Show
             } else {
-                // Module is locked
+                // Module is locked - hide it completely for clients
                 link.classList.add('locked');
-                link.style.pointerEvents = 'auto'; // Allow click to show upgrade modal
+                if (link.parentElement) link.parentElement.style.display = 'none'; // Hide
+            }
+        });
 
-                // Add lock icon if not present
-                if (!link.querySelector('.lock-icon')) {
-                    const lockIcon = document.createElement('span');
-                    lockIcon.className = 'lock-icon';
-                    lockIcon.textContent = '🔒';
-                    lockIcon.style.marginLeft = 'auto';
-                    lockIcon.style.opacity = '0.6';
-                    link.appendChild(lockIcon);
+        // Hide empty category headers
+        const navMenu = document.getElementById('navMenu');
+        if (navMenu) {
+            const categories = navMenu.querySelectorAll('.nav-category');
+            categories.forEach(cat => {
+                let next = cat.nextElementSibling;
+                let hasVisible = false;
+                while (next && !next.classList.contains('nav-category')) {
+                    if (next.style.display !== 'none') {
+                        hasVisible = true;
+                        break;
+                    }
+                    next = next.nextElementSibling;
+                }
+                cat.style.display = hasVisible ? '' : 'none';
+            });
+        }
+
+        // Also hide dashboard cards for locked modules
+        document.querySelectorAll('.module-card').forEach(card => {
+            const onclickAttr = card.getAttribute('onclick');
+            if (onclickAttr && onclickAttr.includes('navigateTo(')) {
+                const match = onclickAttr.match(/navigateTo\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    const module = match[1];
+                    if (allowedModules.includes(module)) {
+                        card.style.display = ''; // Show
+                    } else {
+                        card.style.display = 'none'; // Hide completely instead of locking
+                    }
                 }
             }
         });
