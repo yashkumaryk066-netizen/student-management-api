@@ -14,9 +14,6 @@ from pathlib import Path
 from datetime import timedelta
 import os
 import sys
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 # Initialize Config (python-decouple fallback)
 try:
     from decouple import config
@@ -28,15 +25,21 @@ except ImportError:
              return val.lower() in ('true', '1', 'yes')
         return cast(val) if cast and val is not None else val
 
-# Initialize Sentry for Error Tracking
-sentry_dsn = config('SENTRY_DSN', default=None)
-if sentry_dsn:
-    sentry_sdk.init(
-        dsn=sentry_dsn,
-        integrations=[DjangoIntegration()],
-        traces_sample_rate=1.0,
-        send_default_pii=True
-    )
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    
+    # Initialize Sentry for Error Tracking
+    sentry_dsn = config('SENTRY_DSN', default=None)
+    if sentry_dsn:
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=1.0,
+            send_default_pii=True
+        )
+except ImportError:
+    sentry_sdk = None
 try:
     import dj_database_url
 except ImportError:
