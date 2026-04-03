@@ -34,3 +34,4 @@ qrcode
 openpyxl
 pypdf
 pillow
+sentry-sdk

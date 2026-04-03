@@ -50,6 +50,31 @@ class APIView(DRFAPIView):
     """
     serializer_class = SpectacularFallbackSerializer
 
+
+class TenantMixin:
+    """
+    Ensures that all querysets are automatically filtered by the current institution owner.
+    Prevents cross-tenant data leakage.
+    """
+    def get_queryset(self):
+        owner = get_owner_user(self.request.user)
+        
+        # 1. Start with the default queryset (GenericAPIView / ViewSet)
+        try:
+            queryset = super().get_queryset()
+        except (AttributeError, TypeError):
+            # Fallback for pure APIView or if model/queryset is defined on view
+            model = getattr(self, 'model', None)
+            if model:
+                queryset = model.objects.all()
+            elif hasattr(self, 'queryset') and self.queryset is not None:
+                queryset = self.queryset.all()
+            else:
+                return None
+        
+        # 2. Filter by owner
+        return queryset.filter(created_by=owner)
+
 # --- CONSTANTS ---
 SUB_ACTIVE = 'ACTIVE'
 PAYMENT_APPROVED = 'APPROVED'

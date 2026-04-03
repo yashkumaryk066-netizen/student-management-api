@@ -4214,12 +4214,14 @@ onclick = "DashboardApp.showAddHolidayModal('${dateStr}')" >
 
     renewSubscription(planType) {
         const plans = {
-            'COACHING': { price: 1000, name: 'Coaching Plan' },
-            'SCHOOL': { price: 1500, name: 'School Plan' },
-            'INSTITUTE': { price: 3000, name: 'Institute/University Plan' }
+            'COACHING': { price: 500, name: 'Coaching Plan' },
+            'SCHOOL': { price: 2000, name: 'School Plan' },
+            'INSTITUTE': { price: 5000, name: 'Institute/University Plan' }
         };
 
         const plan = plans[planType] || plans['INSTITUTE'];
+        const upiLink = `upi://pay?pa=yash-k05@ptyes&pn=Y.S.M%20Education&am=${plan.price}&cu=INR&tn=Plan%20Renewal`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
 
         const modal = `
             <div class="modal-overlay" id="renewModal" style="z-index: 10001; background: rgba(0,0,0,0.95);">
@@ -4233,7 +4235,7 @@ onclick = "DashboardApp.showAddHolidayModal('${dateStr}')" >
                         <div style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 20px;">₹${plan.price} <span style="font-size: 1rem; color: #94a3b8;">/ month</span></div>
                         
                         <div style="background: white; padding: 10px; display: inline-block; border-radius: 12px; margin-bottom: 20px;">
-                            <img src="/static/img/upi_qr.jpg" alt="UPI QR" style="width: 200px; height: 200px; object-fit: contain;">
+                            <img src="${qrUrl}" alt="UPI QR" style="width: 200px; height: 200px; object-fit: contain;">
                         </div>
                         
                         <p style="color: #cbd5e1; margin-bottom: 20px;">Scan & Pay <strong>₹${plan.price}</strong> using any UPI App</p>

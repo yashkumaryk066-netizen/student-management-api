@@ -1,8 +1,10 @@
 import paramiko
+from decouple import config
+import os
 
 host = 'ssh.pythonanywhere.com'
-user = 'yashamishra'
-password = 'Ysonm@12'
+user = config('PYTHONANYWHERE_SSH_USERNAME', default='yashamishra')
+password = config('PYTHONANYWHERE_SSH_PASSWORD', default='')
 
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

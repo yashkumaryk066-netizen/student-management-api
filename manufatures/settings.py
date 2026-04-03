@@ -14,10 +14,10 @@ from pathlib import Path
 from datetime import timedelta
 import os
 import sys
-try:
-    import dj_database_url
-except ImportError:
-    dj_database_url = None
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+# Initialize Config (python-decouple fallback)
 try:
     from decouple import config
 except ImportError:
@@ -27,6 +27,20 @@ except ImportError:
         if cast == bool and isinstance(val, str):
              return val.lower() in ('true', '1', 'yes')
         return cast(val) if cast and val is not None else val
+
+# Initialize Sentry for Error Tracking
+sentry_dsn = config('SENTRY_DSN', default=None)
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -374,7 +388,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'yashkumaryk066@gmail.com'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='yashkumaryk066@gmail.com')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
