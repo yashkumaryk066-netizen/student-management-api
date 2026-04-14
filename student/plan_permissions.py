@@ -73,6 +73,18 @@ FEATURE_META = {
 
 # Backward Compatibility Alias
 PLAN_FEATURES = INSTITUTION_FEATURES 
+FEATURE_ALIASES = {
+    'payments': 'finance',
+}
+
+
+def _normalize_feature_name(feature_name):
+    normalized = (feature_name or '').strip().lower()
+    return FEATURE_ALIASES.get(normalized, normalized)
+
+
+def _normalize_feature_set(features):
+    return {_normalize_feature_name(feature) for feature in (features or []) if feature}
 
 def get_feature_meta(feature_key):
     return FEATURE_META.get(feature_key, {'name': feature_key.replace('_', ' ').title(), 'icon': '🔹'})
@@ -91,12 +103,11 @@ def get_effective_permissions(user):
     profile = user.profile
     
     # A. Base Context Permissions (Institution)
-    inst_type = profile.institution_type or 'SCHOOL'
+    inst_type = (profile.institution_type or 'SCHOOL').upper()
     base_features = set(INSTITUTION_FEATURES.get(inst_type, INSTITUTION_FEATURES['SCHOOL']))
     
     # B. Tier Permissions (Subscription)
-    # Default to 'BASIC' if not specified
-    plan_tier = profile.subscription_plan or 'BASIC' 
+    plan_tier = (profile.subscription_plan or DEFAULT_PLAN_BY_INSTITUTION.get(inst_type, 'BASIC')).upper()
     tier_features = TIER_FEATURES.get(plan_tier, set())
     
     # Combine (Union)
@@ -108,13 +119,16 @@ def get_effective_permissions(user):
     
     # C. Custom User/Role Overrides (Granular Control)
     if profile.permissions:
-        # 'features' key in JSON field serves as an explicit Override/Allowlist
-        # If present, it takes precedence IF strict mode is desired.
-        # But for 'Add-on' logic, we just merge.
-        custom_allowed = set(profile.permissions.get('allow_features', []))
-        custom_denied = set(profile.permissions.get('deny_features', []))
-        
+        custom_allowed = (
+            _normalize_feature_set(profile.permissions.get('allow_features', [])) |
+            _normalize_feature_set(profile.permissions.get('custom_features', []))
+        )
+        custom_denied = _normalize_feature_set(profile.permissions.get('deny_features', []))
+        strict_allowlist = _normalize_feature_set(profile.permissions.get('features', []))
+
         effective_features = (effective_features | custom_allowed) - custom_denied
+        if strict_allowlist:
+            effective_features &= (strict_allowlist | custom_allowed)
 
     return effective_features
 
@@ -128,16 +142,17 @@ def has_feature_access(user, feature_name):
         return True
 
     # 2. Expiry Check (Hard Stop)
+    normalized_feature = _normalize_feature_name(feature_name)
     if hasattr(user, 'profile') and user.profile.is_plan_expired():
         # Minimal Access Mode
-        SAFE_FEATURES = {'dashboard', 'payment_renewal', 'profile', 'settings'}
-        if feature_name not in SAFE_FEATURES:
+        SAFE_FEATURES = {'dashboard', 'finance', 'payments', 'payment_renewal', 'profile', 'settings'}
+        if normalized_feature not in SAFE_FEATURES:
             return False
 
     # 3. Check Computed Permissions
     allowed_features = get_effective_permissions(user)
     
-    return feature_name in allowed_features
+    return normalized_feature in allowed_features
 
 def get_user_plan(user):
     """

@@ -399,8 +399,123 @@ class SuperAdminDashboardView(APIView):
 
 class SuperAdminAdvancedDashboardView(APIView):
      permission_classes = [permissions.IsAdminUser]
+
      def get(self, request):
-         return Response({"message": "Advanced Stats Placeholder"})
+         if not request.user.is_superuser:
+             return Response({"error": "Access Denied"}, status=403)
+
+         from django.conf import settings
+         from django.db import connection
+         from django.db.models import Sum
+         from django.utils.timesince import timesince
+         import shutil
+         import time
+
+         db_status = 'HEALTHY'
+         latency_ms = 0
+         try:
+             start = time.perf_counter()
+             with connection.cursor() as cursor:
+                 cursor.execute("SELECT 1")
+                 cursor.fetchone()
+             latency_ms = max(int((time.perf_counter() - start) * 1000), 1)
+         except Exception:
+             db_status = 'UNHEALTHY'
+
+         try:
+             disk_usage = shutil.disk_usage(settings.BASE_DIR)
+             storage_pct = round((disk_usage.used / disk_usage.total) * 100, 1) if disk_usage.total else 0
+             storage_usage = f"{storage_pct}%"
+         except Exception:
+             storage_usage = "N/A"
+
+         total_revenue = Payment.objects.filter(
+             payment_type='SUBSCRIPTION',
+             status='APPROVED'
+         ).aggregate(total=Sum('amount'))['total'] or 0
+         if not total_revenue:
+             total_revenue = ClientSubscription.objects.aggregate(total=Sum('amount_paid'))['total'] or 0
+
+         active_institutes = ClientSubscription.objects.filter(
+             status='ACTIVE',
+             user__is_superuser=False
+         ).count()
+
+         approvals = []
+         pending_subscription_payments = Payment.objects.filter(
+             payment_type='SUBSCRIPTION',
+             status__in=['PENDING', 'PENDING_VERIFICATION', 'OVERDUE']
+         ).select_related('user', 'user__profile').order_by('-created_at')[:20]
+
+         for payment in pending_subscription_payments:
+             profile = getattr(payment.user, 'profile', None) if payment.user else None
+             entity_name = (
+                 (profile.institution_name if profile and profile.institution_name else None)
+                 or (payment.user.username if payment.user else None)
+                 or 'Subscription Request'
+             )
+             approvals.append({
+                 "id": payment.id,
+                 "type": "SUBSCRIPTION",
+                 "entity_name": entity_name,
+                 "sub_text": payment.user.email if payment.user and payment.user.email else "Pending client activation",
+                 "icon": "💳",
+                 "amount": float(payment.amount),
+                 "transaction_id": payment.transaction_id or f"PAY-{payment.id}",
+                 "created_at": payment.created_at,
+                 "time_ago": timesince(payment.created_at) + " ago",
+             })
+
+         pending_students = Student.objects.filter(is_approved=False).select_related('created_by').order_by('-created_at')[:20]
+         for student in pending_students:
+             approvals.append({
+                 "id": student.id,
+                 "type": "STUDENT",
+                 "entity_name": student.name,
+                 "sub_text": (
+                     f"Requested by @{student.created_by.username}"
+                     if student.created_by else "Pending student admission"
+                 ),
+                 "icon": "🎓",
+                 "amount": 0,
+                 "transaction_id": student.roll_number or f"STU-{student.id}",
+                 "created_at": student.created_at,
+                 "time_ago": timesince(student.created_at) + " ago",
+             })
+
+         approvals.sort(key=lambda item: item["created_at"], reverse=True)
+
+         institutes = []
+         recent_subscriptions = ClientSubscription.objects.select_related('user', 'user__profile').filter(
+             user__is_superuser=False
+         ).order_by('-created_at')[:12]
+         for sub in recent_subscriptions:
+             profile = getattr(sub.user, 'profile', None)
+             institutes.append({
+                 "name": (
+                     (profile.institution_name if profile and profile.institution_name else None)
+                     or sub.user.username
+                 ),
+                 "type": (profile.institution_type if profile and profile.institution_type else sub.plan_type),
+                 "plan": sub.plan_type,
+                 "status": sub.status,
+                 "joined": sub.created_at.strftime('%Y-%m-%d'),
+             })
+
+         return Response({
+             "stats": {
+                 "active_institutes": active_institutes,
+                 "students": Student.objects.count(),
+                 "revenue": float(total_revenue),
+             },
+             "approvals": approvals,
+             "institutes": institutes,
+             "health": {
+                 "db_status": db_status,
+                 "storage_usage": storage_usage,
+                 "latency": f"{latency_ms}ms" if latency_ms else "N/A",
+             },
+         })
 
 
 # ==========================================
@@ -416,8 +531,8 @@ def robots_txt(request):
     from django.conf import settings
     site_url = getattr(settings, 'SITE_URL', 'https://yashamishra.pythonanywhere.com').rstrip('/')
     lines = [
-        "# robots.txt - Yash Ankush Mishra",
-        f"# Website: {site_url}",
+        "# robots.txt - Yash Ankush Mishra (Ankush Mishra)",
+        f"# Website: {site_url} (ankushmishra.com redirect)",
         "",
         "User-agent: *",
         "Allow: /",
@@ -427,6 +542,7 @@ def robots_txt(request):
         "Allow: /static/images/",
         "Allow: /static/css/",
         "Allow: /static/js/",
+        "Allow: /login/  # Ensure ysm login and ysm login key ranking",
         "Disallow: /admin/",
         "Disallow: /ai-chat/",
         "Disallow: /api/",
@@ -434,7 +550,7 @@ def robots_txt(request):
         "Disallow: /swagger/",
         "Disallow: /media/",
         "",
-        "# Allow Google Image Bot full access to images",
+        "# Allow Google Image Bot full access to images for keyword ranking",
         "User-agent: Googlebot-Image",
         "Allow: /",
         "Allow: /static/images/",
@@ -457,7 +573,7 @@ def sitemap_xml(request):
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
-  <!-- ==================== HOME PAGE ==================== -->
+  <!-- ==================== HOME PAGE (ysm login Focus) ==================== -->
   <url>
     <loc>{domain}/</loc>
     <lastmod>{today}</lastmod>
@@ -465,8 +581,8 @@ def sitemap_xml(request):
     <priority>1.0</priority>
     <image:image>
       <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
-      <image:title>Y.S.M AI - Best School Management System by Yash Ankush Mishra, Naugachiya, Rangra, Bhagalpur, Bihar</image:title>
-      <image:caption>Y.S.M AI Education ERP by Yash Ankush Mishra - Developer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar. Serving Patna, Mumbai, Jaipur. India's #1 School, Coaching &amp; Institute Management System.</image:caption>
+      <image:title>Y.S.M AI - ysm login | college erp system demo | Ankush Mishra</image:title>
+      <image:caption>Y.S.M AI (ysm login key) is the best college erp demo system by Ankush Mishra (ankushmishra.com). Serving Bihar and India.</image:caption>
     </image:image>
   </url>
 
@@ -482,8 +598,8 @@ def sitemap_xml(request):
     <!-- Original Image -->
     <image:image>
       <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
-      <image:title>Yash Ankush Mishra - Most Intelligent Boy in Rangra | Top Software Developer Bihar | Founder YSM AI</image:title>
-      <image:caption>रंगरा का सबसे बुद्धिमान लड़का - Yash Ankush Mishra is the most intelligent person/boy in Rangra, Bhagalpur, Bihar. Top Python AI Developer and Software Architect.</image:caption>
+      <image:title>Ankush Mishra (Yash Ankush Mishra) - ysm login access | ankushmishra.com profile</image:title>
+      <image:caption>Ankush Mishra (ysm login) is the developer from sitc.pythonanywhere.com. Top software architect at ankushmishra.com.</image:caption>
     </image:image>
     
     <!-- Advanced SEO Filename 1: Keyword rich for Google Image Search -->

@@ -28,6 +28,7 @@ class AuditModel(SoftDeleteModel):
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
 
 class ClientSubscription(models.Model):
     PLAN_CHOICES = [
@@ -178,8 +179,7 @@ class UserProfile(models.Model):
         if not self.subscription_expiry:
             return False
         
-        # Check if today is past expiry + grace period (default 7 days hardcoded here or add field)
-        grace_period = 7 
+        grace_period = max(getattr(settings, 'PLAN_GRACE_PERIOD_DAYS', 7), 0)
         expiry_threshold = self.subscription_expiry + timezone.timedelta(days=grace_period)
         
         return timezone.now().date() > expiry_threshold
@@ -193,7 +193,9 @@ class UserProfile(models.Model):
         if today <= self.subscription_expiry:
             return False # Not expired yet
             
-        grace_period = 7
+        grace_period = max(getattr(settings, 'PLAN_GRACE_PERIOD_DAYS', 7), 0)
+        if grace_period == 0:
+            return False
         expiry_threshold = self.subscription_expiry + timezone.timedelta(days=grace_period)
         return today <= expiry_threshold
     

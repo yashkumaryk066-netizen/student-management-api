@@ -27,7 +27,7 @@ try:
         print(err)
         
     print("Running deployment script...")
-    deploy_cmd = "cd ~/student-management-api && source venv/bin/activate && pip install -r requirements.txt && python manage.py collectstatic --noinput && touch /var/www/yashamishra_pythonanywhere_com_wsgi.py"
+    deploy_cmd = "cd ~/student-management-api && git pull origin main && source venv/bin/activate && pip install -r requirements.txt && python manage.py collectstatic --noinput && touch /var/www/yashamishra_pythonanywhere_com_wsgi.py"
     stdin, stdout, stderr = client.exec_command(deploy_cmd)
     
     print("\n--- DEPLOY OUTPUT ---")

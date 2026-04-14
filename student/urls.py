@@ -11,7 +11,7 @@ from .views import (
     AdminApprovalActionView, InstitutionROIView,
     
     # Students
-    StudentListCreateView, StudentDetailsView, StudentTodayView, StudentPerformanceView, StudentAnalyticsView,
+    StudentListCreateView, StudentDetailsView, StudentApprovalView, StudentTodayView, StudentPerformanceView, StudentAnalyticsView,
     GenerateBulkAdmitCardView, GenerateBulkIDCardView,
     
     # Attendance
@@ -141,6 +141,7 @@ urlpatterns = [
     # Student Management
     path('students/', StudentListCreateView.as_view(), name='student-list'),
     path('students/<int:id>/', StudentDetailsView.as_view(), name='student-detail'),
+    path('students/<int:id>/approve/', StudentApprovalView.as_view(), name='student-approve'),
     path('students/today/', StudentTodayView.as_view(), name='student-today'),
     path('students/analytics/', StudentAnalyticsView.as_view(), name='student-analytics'), # Premium Stats
     path('students/<int:student_id>/performance/', StudentPerformanceView.as_view(), name='student-performance'),

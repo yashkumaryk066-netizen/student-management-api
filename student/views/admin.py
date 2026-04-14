@@ -161,8 +161,105 @@ class GlobalSearchView(APIView):
 
 class AdminApprovalActionView(APIView):
     permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+
     def post(self, request, action_type, item_id):
-        return Response({"message": f"{action_type} performed on {item_id}"})
+        action = (request.data.get('action') or 'APPROVE').upper()
+        action_type = (action_type or '').upper()
+
+        if action_type == 'SUBSCRIPTION':
+            from student.models import Payment
+            from student.views.finance import approve_subscription_payment
+
+            payment = get_object_or_404(Payment, id=item_id, payment_type='SUBSCRIPTION')
+            if not request.user.is_superuser:
+                return Response({"error": "Only Super Admin can manage subscription approvals"}, status=403)
+
+            pending_states = {'PENDING', 'PENDING_VERIFICATION', 'OVERDUE'}
+
+            if action == 'APPROVE':
+                if payment.status == 'APPROVED':
+                    return Response({"message": "Subscription payment already approved", "already_processed": True})
+                if payment.status == 'REJECTED':
+                    return Response({"error": "Rejected payment cannot be approved"}, status=400)
+                if payment.status not in pending_states:
+                    return Response({"error": f"Cannot approve payment in status '{payment.status}'"}, status=400)
+
+                with transaction.atomic():
+                    payment.status = 'APPROVED'
+                    payment.paid_date = timezone.now().date()
+                    payment.save(update_fields=['status', 'paid_date', 'updated_at'])
+                    email_dispatched, email_reason = approve_subscription_payment(payment)
+
+                AuditLog.objects.create(
+                    created_by=request.user,
+                    action='SUBSCRIPTION_APPROVED',
+                    description=f"Approved subscription payment #{payment.id}",
+                    ip_address=request.META.get('REMOTE_ADDR')
+                )
+                return Response({
+                    "message": "Subscription approved successfully",
+                    "email_dispatched": bool(email_dispatched),
+                    "email_dispatched_reason": email_reason,
+                })
+
+            if action == 'REJECT':
+                if payment.status == 'REJECTED':
+                    return Response({"message": "Subscription payment already rejected", "already_processed": True})
+                if payment.status == 'APPROVED':
+                    return Response({"error": "Approved payment cannot be rejected"}, status=400)
+
+                payment.status = 'REJECTED'
+                payment.save(update_fields=['status', 'updated_at'])
+                AuditLog.objects.create(
+                    created_by=request.user,
+                    action='SUBSCRIPTION_REJECTED',
+                    description=f"Rejected subscription payment #{payment.id}",
+                    ip_address=request.META.get('REMOTE_ADDR')
+                )
+                return Response({"message": "Subscription rejected successfully"})
+
+            return Response({"error": "Invalid action. Use APPROVE or REJECT"}, status=400)
+
+        if action_type in {'STUDENT', 'STUDENT_REQUEST'}:
+            from student.models import Student
+
+            qs = Student.objects.filter(id=item_id)
+            student = qs.first() if request.user.is_superuser else filter_by_owner(qs, request.user).first()
+            if not student:
+                return Response({"error": "Student request not found or access denied"}, status=404)
+
+            if action == 'APPROVE':
+                if student.is_approved:
+                    return Response({"message": "Student already approved", "already_processed": True})
+
+                student.is_approved = True
+                student.save(update_fields=['is_approved'])
+                invalidate_cache('students_list*')
+                invalidate_cache('dashboard_stats*')
+                AuditLog.objects.create(
+                    created_by=request.user,
+                    action='STUDENT_APPROVED',
+                    description=f"Approved pending student: {student.name}",
+                    ip_address=request.META.get('REMOTE_ADDR')
+                )
+                return Response({"message": "Student approved successfully"})
+
+            if action == 'REJECT':
+                student_name = student.name
+                student.delete()
+                invalidate_cache('students_list*')
+                invalidate_cache('dashboard_stats*')
+                AuditLog.objects.create(
+                    created_by=request.user,
+                    action='STUDENT_REJECTED',
+                    description=f"Rejected pending student request: {student_name}",
+                    ip_address=request.META.get('REMOTE_ADDR')
+                )
+                return Response({"message": "Student request rejected successfully"})
+
+            return Response({"error": "Invalid action. Use APPROVE or REJECT"}, status=400)
+
+        return Response({"error": f"Unsupported action type '{action_type}'"}, status=400)
 
 class SupportTicketViewSet(viewsets.ModelViewSet):
     serializer_class = SupportTicketSerializer

@@ -114,37 +114,25 @@ class PremiumSidebarManager {
 
     initializeNavigation() {
         this.navLinks = document.querySelectorAll('.nav-link');
-
-        // Add smooth scroll behavior
-        this.navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const module = link.getAttribute('data-module');
-
-                // Check if module is locked
-                if (link.classList.contains('locked')) {
-                    this.showUpgradeModal(module);
-                    return;
-                }
-
-                // Navigate to module
-                this.navigateToModule(module);
-
-                // Update active state
-                this.setActiveLink(link);
-
-                // Close sidebar on mobile
-                if (window.innerWidth <= 1024) {
-                    this.closeSidebar();
-                }
-            });
-        });
+        // Navigation clicks are now handled centrally in static/js/admin.js 
+        // to prevent duplicate listeners and ensure smooth SPA routing.
     }
 
     applyPlanAccess() {
         if (!this.currentPlan || !PLAN_ACCESS[this.currentPlan]) {
             console.warn('Invalid plan, showing all modules');
             return;
+        }
+
+        // --- DYNAMIC TERMINOLOGY UPDATE ---
+        if (window.DashboardApp && window.DashboardApp.getTerm) {
+            this.navLinks.forEach(link => {
+                const module = link.getAttribute('data-module');
+                if (module === 'courses') {
+                    const label = link.querySelector('span:not(.nav-icon)');
+                    if (label) label.textContent = DashboardApp.getTerm('academic_unit');
+                }
+            });
         }
 
         // GOD MODE: Super Admin Bypass

@@ -24,6 +24,7 @@ class StudentListCreateView(APIView):
             grade = request.query_params.get("grade")
             department_id = request.query_params.get("department_id")
             institution_type = request.query_params.get("institution_type")
+            is_approved = request.query_params.get("is_approved")
 
             if institution_type:
                 students = students.filter(institution_type=institution_type)
@@ -36,6 +37,13 @@ class StudentListCreateView(APIView):
 
             if batch_id:
                 students = students.filter(enrollments__batch_id=batch_id)
+
+            if is_approved is not None:
+                normalized_is_approved = str(is_approved).strip().lower()
+                if normalized_is_approved in {'true', '1', 'yes'}:
+                    students = students.filter(is_approved=True)
+                elif normalized_is_approved in {'false', '0', 'no'}:
+                    students = students.filter(is_approved=False)
 
 
             if search:
@@ -299,6 +307,39 @@ class StudentDetailsView(APIView):
             return Response({"error": "Student not found"}, status=404)
         student.delete()
         return Response(status=204)
+
+
+class StudentApprovalView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
+
+    def post(self, request, id):
+        qs = Student.objects.filter(id=id)
+        student = qs.first() if request.user.is_superuser else filter_by_owner(qs, request.user).first()
+        if not student:
+            return Response({"error": "Student not found or access denied"}, status=404)
+
+        if student.is_approved:
+            return Response({"message": "Student already approved", "is_approved": True})
+
+        student.is_approved = True
+        student.save(update_fields=['is_approved'])
+
+        AuditLog.objects.create(
+            created_by=request.user,
+            action='STUDENT_APPROVED',
+            description=f"Approved pending student: {student.name}",
+            ip_address=request.META.get('REMOTE_ADDR')
+        )
+
+        invalidate_cache('students_list*')
+        invalidate_cache('dashboard_stats*')
+        invalidate_cache(f'student_detail_{id}*')
+
+        return Response({
+            "message": "Student approved successfully",
+            "is_approved": True,
+            "student": StudentSerializer(student, context={'request': request}).data
+        })
 
 class StudentPerformanceView(APIView):
     authentication_classes = [JWTAuthentication]

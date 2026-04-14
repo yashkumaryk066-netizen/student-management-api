@@ -527,15 +527,16 @@
                             style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Gender</label>
                         <select id="saEditGender"
                             style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
                         </select>
                     </div>
                     <div>
-                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Age</label>
+                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Age (Auto)</label>
                         <input type="number" id="saEditAge"
-                            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                            readonly
+                            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; opacity: 0.75;">
                     </div>
                 </div>
 
@@ -763,7 +764,7 @@
                         </td>
                         <td><span class="status-tag" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">${s.institution_type || 'N/A'}</span></td>
                         <td>${s.grade || '-'}</td>
-                        <td><span style="color: #10b981;">● Active</span></td>
+                        <td><span style="color: ${s.is_approved ? '#10b981' : '#f59e0b'};">● ${s.is_approved ? 'Active' : 'Pending Approval'}</span></td>
                         <td style="text-align: right;">
                             <button onclick='openSaEditModal(${JSON.stringify(s).replace(/'/g, "&apos;")})' 
                                 style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
@@ -796,12 +797,12 @@
 
         async function submitSaEditStudent() {
             const id = document.getElementById('saEditId').value;
+            const parsedGrade = parseInt(document.getElementById('saEditGrade').value, 10);
             const data = {
                 name: document.getElementById('saEditName').value,
                 institution_type: document.getElementById('saEditType').value,
-                grade: document.getElementById('saEditGrade').value,
+                grade: Number.isNaN(parsedGrade) ? undefined : parsedGrade,
                 gender: document.getElementById('saEditGender').value,
-                age: document.getElementById('saEditAge').value,
             };
 
             const csrfMatch = document.cookie.match(/csrftoken=([\w-]+)/);
@@ -823,7 +824,9 @@
                     fetchSaStudents(); // Refresh
                     showPremiumAlert('Student Updated Successfully! ✅', 'success');
                 } else {
-                    showPremiumAlert('Update Failed ❌', 'error');
+                    const errorData = await res.json().catch(() => ({}));
+                    const errorMessage = errorData.error || errorData.detail || JSON.stringify(errorData) || 'Update failed';
+                    showPremiumAlert(`Update Failed ❌ ${errorMessage}`, 'error');
                 }
             } catch (e) {
                 console.error(e);

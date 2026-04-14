@@ -22,6 +22,8 @@ const DashboardApp = {
     },
 
     init() {
+        if (this._initialized) return;
+        this._initialized = true;
         console.log("%c NextGen ERP v3.8 Loaded ", "background: #3b82f6; color: white; padding: 4px; border-radius: 4px;");
 
         // --- 1. Immediate Session Check ---
@@ -6543,12 +6545,9 @@ DashboardApp.showStudentAttendance = function (studentId, studentName) {
     document.body.insertAdjacentHTML('beforeend', modal);
 };
 
-// Initialize on DOM load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => DashboardApp.init());
-} else {
-    DashboardApp.init();
-}
+// DashboardApp is initialized by the host template.
+// Initializing here should only happen if DashboardApp is not yet ready.
+// if (!DashboardApp._initialized) DashboardApp.init();
 
 /* ---------- SOVEREIGN INTELLIGENCE: ROI & AI RADAR ---------- */
 async function refreshROI() {

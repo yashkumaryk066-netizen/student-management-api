@@ -25,6 +25,40 @@ except ImportError:
              return val.lower() in ('true', '1', 'yes')
         return cast(val) if cast and val is not None else val
 
+
+TRUE_ENV_VALUES = {'1', 'true', 'yes', 'on', 'y', 't', 'debug', 'development', 'dev'}
+FALSE_ENV_VALUES = {'0', 'false', 'no', 'off', 'n', 'f', 'release', 'production', 'prod', ''}
+
+
+def get_config_value(key, default=None):
+    return config(key, default=default)
+
+
+def get_bool_config(key, default=False):
+    value = get_config_value(key, default=None)
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    normalized = str(value).strip().lower()
+    if normalized in TRUE_ENV_VALUES:
+        return True
+    if normalized in FALSE_ENV_VALUES:
+        return False
+    return default
+
+
+def get_int_config(key, default=0):
+    value = get_config_value(key, default=None)
+    if value in (None, ''):
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
 try:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
@@ -66,10 +100,11 @@ SECRET_KEY = raw_secret_key if not is_weak_secret else config(
 
 # Detect deploy check execution to validate production settings cleanly
 RUNNING_DEPLOY_CHECK = 'check' in sys.argv and '--deploy' in sys.argv
+RUNNING_TESTS = 'test' in sys.argv or 'pytest' in sys.modules
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Set DEBUG=False in production .env file
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = get_bool_config('DEBUG', default=False)
 if RUNNING_DEPLOY_CHECK:
     DEBUG = False
 
@@ -83,16 +118,25 @@ FRONTEND_URL = SITE_URL
 # PRODUCTION SECURITY SETTINGS
 # Only enable HTTPS settings if using custom domain with SSL certificate
 # PythonAnywhere FREE tier doesn't support custom HTTPS, so keep this False
-HTTPS_ENABLED = config('HTTPS_ENABLED', default=not DEBUG, cast=bool)
+HTTPS_ENABLED = get_bool_config('HTTPS_ENABLED', default=not DEBUG and not RUNNING_TESTS)
 
 # Force HTTPS for all connections (only if HTTPS is available)
-SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=HTTPS_ENABLED, cast=bool)
-SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=HTTPS_ENABLED, cast=bool)
-CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=HTTPS_ENABLED, cast=bool)
-SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000 if HTTPS_ENABLED else 0, cast=int)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=HTTPS_ENABLED, cast=bool)
-SECURE_HSTS_PRELOAD = config('SECURE_HSTS_PRELOAD', default=HTTPS_ENABLED, cast=bool)
+SECURE_SSL_REDIRECT = get_bool_config('SECURE_SSL_REDIRECT', default=HTTPS_ENABLED)
+SESSION_COOKIE_SECURE = get_bool_config('SESSION_COOKIE_SECURE', default=HTTPS_ENABLED)
+CSRF_COOKIE_SECURE = get_bool_config('CSRF_COOKIE_SECURE', default=HTTPS_ENABLED)
+SECURE_HSTS_SECONDS = get_int_config('SECURE_HSTS_SECONDS', default=31536000 if HTTPS_ENABLED else 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = get_bool_config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=HTTPS_ENABLED)
+SECURE_HSTS_PRELOAD = get_bool_config('SECURE_HSTS_PRELOAD', default=HTTPS_ENABLED)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if RUNNING_TESTS:
+    HTTPS_ENABLED = False
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
 
 if RUNNING_DEPLOY_CHECK:
     SECURE_SSL_REDIRECT = True
@@ -358,6 +402,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
+
+PLAN_GRACE_PERIOD_DAYS = 0 if RUNNING_TESTS else get_int_config('PLAN_GRACE_PERIOD_DAYS', default=7)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',

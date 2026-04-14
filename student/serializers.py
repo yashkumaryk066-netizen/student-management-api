@@ -118,6 +118,7 @@ from django.db import IntegrityError
 
 class StudentSerializer(serializers.ModelSerializer):
     parent_name = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
     roll_number = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     email = serializers.EmailField(required=True)
     parent_email = serializers.EmailField(required=False, allow_null=True)
@@ -127,6 +128,7 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = "__all__"
+        validators = []
         extra_kwargs = {
             'roll_number': {'required': False, 'allow_null': True}
         }
@@ -169,6 +171,11 @@ class StudentSerializer(serializers.ModelSerializer):
 
     def get_parent_name(self, obj) -> str | None:
         return obj.parent.username if obj.parent else None
+
+    def get_created_by_name(self, obj) -> str | None:
+        if not obj.created_by:
+            return None
+        return obj.created_by.get_full_name() or obj.created_by.username
 
 
 
