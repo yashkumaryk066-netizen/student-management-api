@@ -296,7 +296,7 @@ class RazorpayWebhookView(APIView):
     def post(self, request):
         payload = request.body
         signature = request.headers.get('X-Razorpay-Signature')
-        webhook_secret = settings.config('RAZORPAY_WEBHOOK_SECRET', default='')
+        webhook_secret = getattr(settings, 'RAZORPAY_WEBHOOK_SECRET', '')
 
         # 1. Verify Signature if Secret is provided
         if webhook_secret and signature:

@@ -2721,6 +2721,13 @@
                     });
                     
                     const orderData = await res.json();
+
+                    if (!res.ok) {
+                        alert("Gateway Error: " + (orderData.error || "Internal Server Error"));
+                        btn.innerHTML = '<span>PROCEED TO PAYMENT</span>';
+                        btn.disabled = false;
+                        return;
+                    }
                     
                     const options = {
                         "key": "{{ RAZORPAY_KEY_ID }}" || orderData.key_id, 
