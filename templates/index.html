@@ -1502,6 +1502,41 @@
                 font-size: 2.5rem !important;
             }
         }
+
+        /* PREMIUM NOTIFICATION STYLES */
+        .neural-toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 18px 25px;
+            border-radius: 18px;
+            color: white;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(99, 102, 241, 0.1);
+            transform: translateX(120%);
+            max-width: 350px;
+        }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .toast-error .toast-icon { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .toast-info .toast-icon { background: rgba(99, 102, 241, 0.2); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3); }
     </style>
 
 </head>
@@ -1513,6 +1548,9 @@
     <!-- 3D Background Container -->
     <div id="scene-container"
         style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none;"></div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notification-area"></div>
 
     <div id="smooth-wrapper">
         <div id="smooth-content">
@@ -2446,11 +2484,27 @@
                     </button>
                 </div>
 
-                <div id="step2" style="display:none; text-align:center; animation: slideUp 0.4s ease-out;">
-                    <div style="background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); border-radius:16px; padding:25px; margin-bottom:25px; text-align:center;">
+                    <div style="background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); border-radius:16px; padding:25px; margin-bottom:20px; text-align:center;">
                         <span style="font-size:40px; display:block; margin-bottom:15px;">💳</span>
                         <h4 style="color:white; margin-bottom:10px;">Safe & Secure Payment</h4>
-                        <p style="color:rgba(255,255,255,0.6); font-size:0.85rem;">Pay using UPI, Cards, Netbanking or Wallet via Razorpay Secure Gateway.</p>
+                        
+                        <!-- PRICE BREAKDOWN SECTION -->
+                        <div style="margin: 20px 0; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); text-align: left;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Base Plan Price</span>
+                                <span style="color: white; font-weight: 600;" id="breakdownBase">₹0.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Platform & Gateway Fee (2%)</span>
+                                <span style="color: white; font-weight: 600;" id="breakdownFee">₹0.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                                <span style="color: white; font-weight: 800; font-size: 1.1rem;">Grand Total</span>
+                                <span style="color: var(--primary); font-weight: 800; font-size: 1.25rem;" id="breakdownTotal">₹0.00</span>
+                            </div>
+                        </div>
+
+                        <p style="color:rgba(255,255,255,0.4); font-size:0.75rem;">Instant activation upon verification.</p>
                     </div>
 
                     <button id="payNowBtn" onclick="initiateRazorpay()"
@@ -2530,8 +2584,43 @@
             let currentAmount = 0;
             let voiceMuted = localStorage.getItem('voice_muted') === 'true';
 
-            // Initialize voice toggle
-            document.addEventListener('DOMContentLoaded', () => {
+            function showNotification(message, type = "info") {
+                const area = document.getElementById('notification-area');
+                const toast = document.createElement('div');
+                toast.className = `neural-toast toast-${type}`;
+                
+                let icon = "⚡";
+                if(type === "success") icon = "✅";
+                if(type === "error") icon = "✕";
+
+                toast.innerHTML = `
+                    <div class="toast-icon">${icon}</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:800; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">${type === 'info' ? 'System' : type}</div>
+                        <div style="color:rgba(255,255,255,0.8); font-size:0.9rem;">${message}</div>
+                    </div>
+                `;
+
+                area.appendChild(toast);
+
+                gsap.to(toast, {
+                    x: 0,
+                    duration: 0.6,
+                    ease: "back.out(1.7)"
+                });
+
+                setTimeout(() => {
+                    gsap.to(toast, {
+                        x: "120%",
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => toast.remove()
+                    });
+                }, 5000);
+            }
+
+            // Sync with existing GSAP animations
+            window.addEventListener('load', () => {
                 const toggle = document.getElementById('voiceMuteToggle');
                 if (toggle) toggle.checked = !voiceMuted;
             });
@@ -2564,8 +2653,16 @@
 
             function openPaymentModal(plan, amount) {
                 currentPlan = plan;
-                currentAmount = amount;
+                const basePrice = parseFloat(amount);
+                const platformFee = basePrice * 0.02; // 2% Fee
+                currentAmount = (basePrice + platformFee).toFixed(2);
+
                 document.getElementById('selectedPlanLabel').innerText = plan;
+                
+                // Update Breakdown UI
+                document.getElementById('breakdownBase').innerText = '₹' + basePrice.toLocaleString();
+                document.getElementById('breakdownFee').innerText = '₹' + platformFee.toFixed(2);
+                document.getElementById('breakdownTotal').innerText = '₹' + currentAmount;
                 document.getElementById('paymentModalOverlay').style.display = 'flex';
 
                 // Reset UI
@@ -2723,7 +2820,7 @@
                     const orderData = await res.json();
 
                     if (!res.ok) {
-                        alert("Gateway Error: " + (orderData.error || "Internal Server Error"));
+                        showNotification(orderData.error || "Neural Link Failed", "error");
                         btn.innerHTML = '<span>PROCEED TO PAYMENT</span>';
                         btn.disabled = false;
                         return;
@@ -2754,7 +2851,7 @@
                     btn.disabled = false;
                     
                 } catch (e) {
-                    alert("Failed to initialize payment: " + e.message);
+                    showNotification("Neural Gateway Failed: " + e.message, "error");
                     btn.disabled = false;
                     btn.innerHTML = '<span>PROCEED TO PAYMENT</span>';
                 }
@@ -2789,17 +2886,17 @@
                         })
                     });
 
-                    const data = await res.json();
                     if (res.ok) {
                         document.getElementById('processingState').style.display = 'none';
                         document.getElementById('successState').style.display = 'block';
                         speak("System activated. Welcome to the future.");
+                        showNotification("Protocol Verified Successfully!", "success");
                     } else {
-                        alert("Verification failed: " + data.error);
-                        location.reload();
+                        showNotification("Verification Failed: " + data.error, "error");
+                        setTimeout(() => location.reload(), 3000);
                     }
                 } catch (e) {
-                    alert("Error during verification: " + e.message);
+                    showNotification("Critical Neural Error: " + e.message, "error");
                 }
             }
 
@@ -2927,7 +3024,8 @@
 
                     } else {
                         // 4. FAILURE
-                        throw new Error(data.error || "Institution not found.");
+                        showNotification(data.error || "Entity not recognized", "error");
+                        throw new Error(data.error);
                     }
 
                 } catch (err) {

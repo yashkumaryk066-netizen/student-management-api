@@ -194,7 +194,12 @@ class RazorpayVerifyView(APIView):
         from django.contrib.auth.models import User
         from django.db import transaction
         
+        # 0. Avoid Duplicate Processing (Idempotency)
+        if Payment.objects.filter(transaction_id=transaction_id).exists():
+            return Response({"success": True, "message": "Already processed", "transaction_id": transaction_id})
+
         try:
+            is_new_user = False
             with transaction.atomic():
                 # 1. Registration Flow (No User)
                 if not user:
@@ -215,6 +220,7 @@ class RazorpayVerifyView(APIView):
                         user = User.objects.create_user(username=username, email=email)
                         user.set_unusable_password()
                         user.save()
+                        is_new_user = True
 
                 # 2. Profile Setup
                 from student.models import UserProfile
@@ -245,9 +251,67 @@ class RazorpayVerifyView(APIView):
                 # 4. Activate Subscription
                 approve_subscription_payment(payment)
 
+                # 5. GENERATE CREDENTIALS & SEND EMAIL (PREMIUM ONBOARDING)
+                if is_new_user and email:
+                    try:
+                        import secrets
+                        import string
+                        from django.core.mail import send_mail
+                        from django.template.loader import render_to_string
+                        from django.utils.html import strip_tags
+
+                        # Generate Secure Random Password
+                        chars = string.ascii_letters + string.digits + "@#$%"
+                        new_password = ''.join(secrets.choice(chars) for _ in range(10))
+                        user.set_password(new_password)
+                        user.save()
+
+                        # Prepare Premium Email
+                        subject = f"🚀 Y.S.M Universal AI ERP Activated: {institution_name or 'Institution Profile'}"
+                        html_message = f"""
+                        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; padding: 40px; color: white; border-radius: 20px;">
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <h1 style="color: #6366f1; margin: 0;">Y.S.M UNIVERSAL AI ERP</h1>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">The Ultimate AI-Powered Institutional Infrastructure</p>
+                            </div>
+                            
+                            <h2 style="color: white;">Welcome to the Future of Management, {institution_name or 'Partner'}!</h2>
+                            <p>Your <strong>{plan_type} ERP Protocol</strong> has been successfully initialized. You now have full access to our enterprise management suite, integrated with the <strong>Y.S.M AI Intelligence Cluster</strong>.</p>
+                            
+                            <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+                                <h3 style="color: #6366f1; margin-top: 0;">🔒 Secure ERP Access Credentials</h3>
+                                <p style="margin: 5px 0;"><strong>User ID / Username:</strong> <code style="background: #1e293b; padding: 4px 8px; border-radius: 4px;">{user.username}</code></p>
+                                <p style="margin: 5px 0;"><strong>Master Password:</strong> <code style="background: #1e293b; padding: 4px 8px; border-radius: 4px;">{new_password}</code></p>
+                                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">⚠️ For security, please change your password upon first neural login.</p>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 40px;">
+                                <a href="https://yashamishra.pythonanywhere.com/login/" style="background: #6366f1; color: white; padding: 15px 35px; border-radius: 12px; text-decoration: none; font-weight: 800; display: inline-block;">LOG INTO CENTRAL COMMAND</a>
+                            </div>
+                            
+                            <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                                <strong>System:</strong> Y.S.M Universal AI ERP | <strong>Plan:</strong> {plan_type}<br>
+                                Verification Ref: {transaction_id} | Neural Engine Protocol 2026
+                            </p>
+                        </div>
+                        """
+                        plain_message = strip_tags(html_message)
+                        
+                        send_mail(
+                            subject,
+                            plain_message,
+                            settings.EMAIL_HOST_USER,
+                            [email],
+                            html_message=html_message,
+                            fail_silently=True
+                        )
+                        logger.info(f"Onboarding email sent successfully to {email}")
+                    except Exception as email_err:
+                        logger.error(f"Failed to send onboarding email: {str(email_err)}")
+
             return Response({
                 "success": True,
-                "message": "Subscription activated successfully",
+                "message": "Subscription activated and credentials dispatched via email",
                 "transaction_id": transaction_id
             })
         except Exception as e:
