@@ -402,6 +402,58 @@
             text-align: center;
             display: none;
         }
+
+        /* ONLINE EXAM RESPONSIVENESS */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .main-container {
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+            #questions-sidebar {
+                width: 100% !important;
+                height: auto !important;
+                order: 2;
+            }
+            .exam-area {
+                order: 1;
+                min-height: 400px;
+            }
+            .question-palette {
+                grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)) !important;
+            }
+            header {
+                padding: 1rem !important;
+            }
+            .system-title {
+                font-size: 0.9rem !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .premium-card {
+                padding: 1rem !important;
+            }
+            .result-item {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px !important;
+            }
+            .btn {
+                width: 100% !important;
+                margin-bottom: 5px;
+            }
+            footer {
+                padding: 1rem !important;
+                flex-wrap: wrap !important;
+                gap: 10px !important;
+            }
+            #timer-display {
+                font-size: 1.1rem !important;
+            }
+        }
     </style>
 </head>
 

@@ -60,38 +60,6 @@
     </div>
 
     <style>
-        .magic-cursor {
-            width: 15px;
-            height: 15px;
-            background: white;
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            mix-blend-mode: difference;
-            transition: transform 0.1s ease;
-        }
-
-        .magic-cursor-follower {
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(226, 176, 54, 0.15) 0%, transparent 70%);
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .float-shape {
-            position: fixed;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.4;
-            filter: blur(60px);
-        }
-
         @keyframes floatMagic {
             0% {
                 transform: translate(0, 0) rotate(0deg);
@@ -125,6 +93,29 @@
         .portal-inner>* {
             position: relative;
             z-index: 2;
+        }
+
+        /* LOGIN MOBILE RESPONSIVENESS */
+        @media (max-width: 640px) {
+            .portal-stage {
+                padding: 15px !important;
+            }
+            .tilt-box {
+                transform: none !important;
+                width: 100% !important;
+            }
+            .brand-header h1, .brand-header .brand-ysm {
+                font-size: 1.8rem !important;
+            }
+            .portal-flipper {
+                perspective: none !important;
+            }
+            .magic-cursor, .magic-cursor-follower {
+                display: none !important;
+            }
+            body {
+                cursor: auto !important;
+            }
         }
     </style>
     <!-- Visual Core Layer -->

@@ -472,6 +472,20 @@
             visibility: visible !important;
         }
 
+        .violation-warning {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--accent-danger);
+            color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            z-index: 2000;
+            text-align: center;
+            display: none;
+        }
+
         /* ==== NAVBAR ==== */
         .navbar {
             position: fixed;
@@ -1034,16 +1048,22 @@
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            grid-template-columns: 1.1fr 0.9fr;
             gap: 24px;
             align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .entity-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .entity-panel {
             background: rgba(15, 23, 42, 0.72);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 28px;
-            padding: 32px;
+            border-radius: clamp(16px, 3vw, 28px);
+            padding: clamp(20px, 4vw, 32px);
             backdrop-filter: blur(18px);
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
         }
@@ -1141,8 +1161,14 @@
             max-width: 1400px;
             margin: 28px auto 0;
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .answer-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .answer-card h3 {
@@ -1487,7 +1513,67 @@
             right: -50px;
         }
 
-        /* ROI Calculator Responsive */
+        /* Global Responsiveness Fixes */
+        .navbar {
+            padding: clamp(15px, 2vw, 25px) clamp(20px, 5vw, 60px);
+            flex-wrap: wrap;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(2, 4, 10, 0.8);
+            backdrop-filter: blur(15px);
+        }
+
+        @media (max-width: 900px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 40px !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .footer-grid {
+                grid-template-columns: 1fr !important;
+                text-align: center !important;
+            }
+            .footer-brand {
+                align-items: center !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none !important; /* Will hide for now, could be mobile menu later */
+            }
+            .navbar {
+                justify-content: center;
+            }
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 40px;
+            }
+            .hero-left {
+                width: 100% !important;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
+            .hero-right {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem) !important;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.2rem) !important;
+        }
         @media (max-width: 768px) {
             .roi-container {
                 grid-template-columns: 1fr !important;
@@ -1917,8 +2003,7 @@
                     <div class="badge">PROCESS Flow</div>
                     <h2 style="font-size: 3rem; color: white;">Simple 3-Step Integration</h2>
                 </div>
-                <div
-                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto;">
+                <div class="integration-steps">
                     <div style="text-align: center;">
                         <div
                             style="font-size: 4rem; margin-bottom: 20px; color: var(--primary); font-weight: 800; opacity: 0.3;">
@@ -2128,7 +2213,7 @@
                         your institution. Instant activation upon secure payment.</p>
                 </div>
 
-                <div class="pricing-grid" style="max-width: 1400px; margin: 0 auto; gap: 30px;">
+                <div class="pricing-grid">
                     <!-- Coaching -->
                     <div class="pricing-card">
                         <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Coaching Center</h3>
@@ -2484,6 +2569,7 @@
                     </button>
                 </div>
 
+                <div id="step2" style="display:none;">
                     <div style="background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); border-radius:16px; padding:25px; margin-bottom:20px; text-align:center;">
                         <span style="font-size:40px; display:block; margin-bottom:15px;">💳</span>
                         <h4 style="color:white; margin-bottom:10px;">Safe & Secure Payment</h4>
@@ -2511,6 +2597,7 @@
                         style="width:100%; padding:18px; background:linear-gradient(135deg, #6366f1, #4f46e5); color:white; border:none; border-radius:14px; font-weight:800; font-size:1.1rem; cursor:pointer; transition:0.3s; box-shadow:0 10px 20px rgba(99, 102, 241, 0.3);">
                         PAY & ACTIVATE NOW
                     </button>
+                </div>
                 </div>
 
                 <!-- STEP 3: HOLOGRAPHIC SUCCESS / PROCESSING -->

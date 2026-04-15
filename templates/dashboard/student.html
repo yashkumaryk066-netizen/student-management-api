@@ -57,6 +57,65 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
+
+        .responsive-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+
+        /* RESPONSIVENESS OVERHAUL */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                flex-direction: column !important;
+            }
+            .dash-sidebar {
+                width: 100% !important;
+                height: auto !important;
+                padding: 15px !important;
+                position: relative !important;
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }
+            .dash-nav {
+                display: flex !important;
+                flex-direction: row !important;
+                overflow-x: auto !important;
+                gap: 12px !important;
+                margin-top: 15px !important;
+                padding-bottom: 10px !important;
+                scrollbar-width: none;
+            }
+            .dash-nav::-webkit-scrollbar { display: none; }
+            .dash-item {
+                white-space: nowrap !important;
+                padding: 10px 20px !important;
+                flex-shrink: 0 !important;
+            }
+            .dash-main {
+                padding: 15px !important;
+                margin-left: 0 !important;
+            }
+            .responsive-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid, .routine-grid, .hub-grid, .payment-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .dash-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px !important;
+            }
+            .data-table-wrapper {
+                overflow-x: auto !important;
+            }
+        }
+
     </style>
 </head>
 
@@ -104,7 +163,8 @@
                     </header>
 
                     <div class="dash-content">
-                        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px;">
+                        <div class="main-grid-layout responsive-grid" style="display: grid; grid-template-columns: 320px 1fr; gap: 20px;">
+
 
                             <!-- Left: Profile -->
                             <div style="display: flex; flex-direction: column; gap: 20px;">
@@ -150,7 +210,8 @@
                     <div style="display: flex; flex-direction: column; gap: 20px;">
 
                         <!-- Notifications & Routine Row -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="main-grid-layout responsive-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
                             <div id="notificationsContainer"
                                 style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
                                 <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">📢 Notice
@@ -172,7 +233,7 @@
                         </div>
 
                         <!-- Homework & Diary Row -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="main-grid-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <!-- Homework / Assignments Section -->
                             <div
                                 style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
@@ -229,7 +290,7 @@
                                     style="background: #8b5cf6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
                                     UPCOMING</div>
                             </div>
-                            <div id="liveClassesList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div id="liveClassesList" class="routine-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <p class="text-muted">No live classes scheduled.</p>
                             </div>
                         </div>
@@ -242,7 +303,8 @@
                                 <h3 style="color: white; font-size: 1.1rem;">💰 Fee Status</h3>
                                 <div id="totalDueBadge" class="status-badge status-success">No Dues</div>
                             </div>
-                            <table class="data-table">
+                            <div class="data-table-wrapper">
+                                <table class="data-table">
                                 <thead>
                                     <tr>
                                         <th>Description</th>
@@ -264,7 +326,7 @@
                                 style="color: #00f3ff; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                                 <span>🎓</span> Academic Hub
                             </h3>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="hub-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                                 <button id="markGeoBtn" onclick="markPresenceGPS()" class="hub-btn"
                                     style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05);">
                                     <span style="font-size: 1.5rem;">📍</span>
@@ -358,7 +420,8 @@
     </button>
 
     <!-- Payment Options Row -->
-    <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="payment-grid responsive-grid" style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+
         <!-- Bank Details Manual Option -->
         <div style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
             <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">🏦 Bank Transfer
