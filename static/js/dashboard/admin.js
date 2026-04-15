@@ -6467,12 +6467,7 @@ DashboardApp.submitRenewal = async function (planType, amount) {
         return;
     }
 
-    const choice = confirm(`Directly scan QR for ₹${amount}?\n\nOK for "Show QR Code"\nCancel for "Other Payment Methods"`);
-    if (choice) {
-        this.showRazorpayQR(planType, amount);
-    } else {
-        this.openRazorpayModal(planType, amount);
-    }
+    this.openRazorpayModal(planType, amount);
 };
 
 DashboardApp.showRazorpayQR = async function (planType, amount) {
@@ -6549,7 +6544,7 @@ DashboardApp.openRazorpayModal = async function (planType, amount) {
 
         // 2. Open Razorpay
         const options = {
-            "key": window.RAZORPAY_KEY_ID,
+            "key": (window.RAZORPAY_KEY_ID && window.RAZORPAY_KEY_ID !== "None") ? window.RAZORPAY_KEY_ID : orderData.key_id,
             "amount": orderData.amount,
             "currency": orderData.currency,
             "name": "Y.S.M ERP Renewal",

@@ -147,13 +147,7 @@ async function payFee(amount, description) {
         return submitManualPayment(amount, description);
     }
 
-    const choice = confirm(`How would you like to pay ${window.CURRENCY_SYMBOL || '₹'}${amount}?\n\nOK for "Direct QR Scan"\nCancel for "Other Payment Methods"`);
-    
-    if (choice) {
-        showRazorpayQR(amount, description);
-    } else {
-        openRazorpayModal(amount, description);
-    }
+    openRazorpayModal(amount, description);
 }
 
 async function showRazorpayQR(amount, description) {
@@ -225,7 +219,7 @@ async function openRazorpayModal(amount, description) {
 
         // 2. Open Razorpay Checkout
         const options = {
-            "key": window.RAZORPAY_KEY_ID,
+            "key": (window.RAZORPAY_KEY_ID && window.RAZORPAY_KEY_ID !== "None") ? window.RAZORPAY_KEY_ID : orderData.key_id,
             "amount": orderData.amount,
             "currency": orderData.currency,
             "name": "Y.S.M AI Education",
