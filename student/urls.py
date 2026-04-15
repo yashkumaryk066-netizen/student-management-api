@@ -89,13 +89,14 @@ from .subscription_apis import (
     ClientDeleteAPI,
     ClientCredentialsAPI,
 )
-from .views.payment_gateway import RazorpayOrderCreateView, RazorpayVerifyView, RazorpayQRCodeView
+from .views.payment_gateway import RazorpayOrderCreateView, RazorpayVerifyView, RazorpayQRCodeView, RazorpayWebhookView
 
 urlpatterns = [
     # Razorpay Integration
     path('payments/razorpay/create-order/', RazorpayOrderCreateView.as_view(), name='razorpay-create-order'),
     path('payments/razorpay/verify/', RazorpayVerifyView.as_view(), name='razorpay-verify'),
     path('payments/razorpay/qr/', RazorpayQRCodeView.as_view(), name='razorpay-qr'),
+    path('payments/razorpay/webhook/', RazorpayWebhookView.as_view(), name='razorpay-webhook'),
 
     # Frontend Pages (Legacy/Compatibility)
     path('', LandingPageView.as_view(), name='landing'),

@@ -1,5 +1,8 @@
 import logging
 import razorpay
+import hmac
+import hashlib
+import json
 from decimal import Decimal
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -39,17 +42,31 @@ class RazorpayOrderCreateView(APIView):
             return Response({"error": "Invalid amount format"}, status=400)
 
         try:
+            # Debug logging (Masked)
+            kid = settings.RAZORPAY_KEY_ID
+            print(f"DEBUG: Initializing Razorpay with ID: {kid[:6] if kid else 'NONE'}...")
+
+            if not kid or not settings.RAZORPAY_KEY_SECRET:
+                return Response({"error": "Razorpay keys are not configured in your .env file or server needs a reload."}, status=500)
+
             # Initialize Client locally
             client = razorpay.Client(auth=(
                 settings.RAZORPAY_KEY_ID,
                 settings.RAZORPAY_KEY_SECRET
             ))
             
-            # Create Razorpay Order
+            # Create Razorpay Order with Metadata
             order_params = {
                 'amount': amount_paise,
                 'currency': 'INR',
-                'payment_capture': 1  # Auto-capture
+                'payment_capture': 1,  # Auto-capture
+                'notes': {
+                    'plan_type': plan_type,
+                    'payment_type': payment_type,
+                    'email': request.data.get('email'),
+                    'institution_name': request.data.get('institution_name'),
+                    'phone': request.data.get('phone')
+                }
             }
             razorpay_order = client.order.create(data=order_params)
             
@@ -268,3 +285,76 @@ class RazorpayVerifyView(APIView):
         except Exception as e:
             logger.error(f"Fee Payment Success Processing Failed: {str(e)}")
             return Response({"error": "Payment was successful but record update failed. Contact support."}, status=500)
+
+class RazorpayWebhookView(APIView):
+    """
+    Handles Razorpay Webhooks (Server-to-Server notifications)
+    """
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = [] # No auth for webhooks
+
+    def post(self, request):
+        payload = request.body
+        signature = request.headers.get('X-Razorpay-Signature')
+        webhook_secret = settings.config('RAZORPAY_WEBHOOK_SECRET', default='')
+
+        # 1. Verify Signature if Secret is provided
+        if webhook_secret and signature:
+            try:
+                expected_signature = hmac.new(
+                    webhook_secret.encode(),
+                    payload,
+                    hashlib.sha256
+                ).hexdigest()
+                
+                if not hmac.compare_digest(expected_signature, signature):
+                    return Response({"error": "Invalid signature"}, status=400)
+            except Exception as e:
+                logger.error(f"Webhook Signature Verification Failed: {str(e)}")
+                return Response({"error": "Verification error"}, status=400)
+
+        # 2. Parse Event
+        try:
+            data = json.loads(payload)
+            event = data.get('event')
+            
+            if event == 'payment.captured' or event == 'order.paid':
+                payment_data = data['payload']['payment']['entity']
+                transaction_id = payment_data['id']
+                amount = Decimal(str(payment_data['amount'] / 100)) # Convert paise to rupees
+                notes = payment_data.get('notes', {})
+                
+                payment_type = notes.get('payment_type', 'SUBSCRIPTION')
+                email = notes.get('email') or payment_data.get('email')
+                phone = notes.get('phone') or payment_data.get('contact')
+                institution_name = notes.get('institution_name') or notes.get('name')
+                plan_type = notes.get('plan_type')
+
+                # Avoid duplicate processing
+                if Payment.objects.filter(transaction_id=transaction_id).exists():
+                    return Response({"status": "already processed"})
+
+                # Handle based on type
+                if payment_type == 'SUBSCRIPTION':
+                    view = RazorpayVerifyView()
+                    view._handle_subscription_payment(None, amount, transaction_id, plan_type, email, institution_name, phone)
+                else:
+                    student_id = notes.get('student_id')
+                    if student_id:
+                        student = Student.objects.filter(id=student_id).first()
+                        if student:
+                            Payment.objects.create(
+                                student=student,
+                                amount=amount,
+                                payment_type='FEE',
+                                payment_mode='RAZORPAY',
+                                status='PAID',
+                                transaction_id=transaction_id,
+                                paid_date=timezone.now().date(),
+                                description=f"Razorpay Webhook: {event}"
+                            )
+
+            return Response({"status": "success"})
+        except Exception as e:
+            logger.error(f"Webhook Processing Failed: {str(e)}")
+            return Response({"error": str(e)}, status=500)

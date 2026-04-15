@@ -2447,58 +2447,16 @@
                 </div>
 
                 <div id="step2" style="display:none; text-align:center; animation: slideUp 0.4s ease-out;">
-                    <h3 style="margin-bottom: 25px; color: white; font-family:'Space Grotesk'; font-size:1.8rem;">Scan &
-                        Pay
-                        Securely</h3>
-                    <div
-                        style="background:white; padding:15px; border-radius:24px; display:inline-block; margin-bottom:20px; box-shadow:0 0 40px rgba(255,255,255,0.1); position: relative; overflow: hidden;">
-                        <img src="{% static 'images/payment_qr.jpg' %}" alt="Payment QR" id="paymentQrImage"
-                            style="width: 200px; height: 200px; display:block; filter: grayscale(1) opacity(0.8); transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);">
-
-                        <!-- Holographic Sync Line -->
-                        <div id="qrScanLine"
-                            style="position:absolute; top:0; left:0; width:100%; height:2px; background:var(--primary); box-shadow:0 0 15px var(--primary); display:none; animation: qrScan 2s infinite linear; z-index: 5;">
-                        </div>
-
-                        <div id="qrOverlayText"
-                            style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.95); border-radius:24px; color:#0f172a; font-weight:800; font-size:0.95rem; padding:20px; transition: 0.5s;">
-                            <div style="text-align:center;">
-                                <span class="pulse-dot" style="background:#6366f1; margin-bottom:10px;"></span>
-                                <div style="letter-spacing:1px;">GENERATING SECURE QR...</div>
-                            </div>
-                        </div>
+                    <div style="background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); border-radius:16px; padding:25px; margin-bottom:25px; text-align:center;">
+                        <span style="font-size:40px; display:block; margin-bottom:15px;">💳</span>
+                        <h4 style="color:white; margin-bottom:10px;">Safe & Secure Payment</h4>
+                        <p style="color:rgba(255,255,255,0.6); font-size:0.85rem;">Pay using UPI, Cards, Netbanking or Wallet via Razorpay Secure Gateway.</p>
                     </div>
 
-                    <div style="margin-bottom: 25px;">
-                        <button onclick="copyUpiId()"
-                            style="background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); color:white; padding:10px 20px; border-radius:12px; font-size:0.85rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; margin:0 auto;">
-                            <span id="upiIdText">yash-k05@ptyes</span>
-                            <span id="copyFeedback"
-                                style="color:var(--primary); font-size:0.7rem; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">COPY</span>
-                        </button>
-                    </div>
-
-                    <div
-                        style="background:rgba(52, 211, 153, 0.1); border:1px solid rgba(52, 211, 153, 0.2); border-radius:16px; padding:15px; margin-bottom:25px;">
-                        <p style="color:#34d399; font-weight:700; font-size:1.4rem; margin:0;">Pay <span
-                                id="planAmountDisplay"></span></p>
-                        <p style="color:rgba(52, 211, 153, 0.7); font-size:0.8rem; margin-top:4px;">Secure UPI Gateway
-                            Active</p>
-                    </div>
-
-                    <div style="text-align: left; margin-bottom:30px;">
-                        <label
-                            style="color: #94a3b8; display:block; margin-bottom:8px; font-weight:600; font-size:0.9rem;">Transaction
-                            ID / UTR (12 Digits)</label>
-                        <input type="text" id="txnUtrInput" placeholder="Enter Ref Number"
-                            style="width:100%; padding:16px 20px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:14px; color:white; font-size:1.1rem; outline:none; text-align:center; letter-spacing:2px;">
-                    </div>
-
-                    <button id="verifyBtn" onclick="confirmPayment(event)"
-                        style="width:100%; padding:14px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer; transition:0.3s; margin-bottom:10px;">ACTIVATE MY ACCOUNT</button>
-                    
-                    <button onclick="initiateRazorpay()"
-                        style="width:100%; padding:10px; background:none; border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); border-radius:12px; font-size:0.8rem; cursor:pointer;">Use Cards / Netbanking / Other Methods</button>
+                    <button id="payNowBtn" onclick="initiateRazorpay()"
+                        style="width:100%; padding:18px; background:linear-gradient(135deg, #6366f1, #4f46e5); color:white; border:none; border-radius:14px; font-weight:800; font-size:1.1rem; cursor:pointer; transition:0.3s; box-shadow:0 10px 20px rgba(99, 102, 241, 0.3);">
+                        PAY & ACTIVATE NOW
+                    </button>
                 </div>
 
                 <!-- STEP 3: HOLOGRAPHIC SUCCESS / PROCESSING -->
@@ -2604,30 +2562,10 @@
                 }
             }
 
-            async function copyUpiId() {
-                const upiId = document.getElementById('upiIdText').innerText;
-                try {
-                    await navigator.clipboard.writeText(upiId);
-                    const feedback = document.getElementById('copyFeedback');
-                    feedback.innerText = 'COPIED!';
-                    feedback.style.background = 'var(--primary)';
-                    feedback.style.color = 'white';
-                    speak("U.P.I. I.D. copied to clipboard.");
-                    setTimeout(() => {
-                        feedback.innerText = 'COPY';
-                        feedback.style.background = 'rgba(255,255,255,0.1)';
-                        feedback.style.color = 'var(--primary)';
-                    }, 2000);
-                } catch (err) {
-                    console.error('Failed to copy!', err);
-                }
-            }
-
             function openPaymentModal(plan, amount) {
                 currentPlan = plan;
                 currentAmount = amount;
                 document.getElementById('selectedPlanLabel').innerText = plan;
-                document.getElementById('planAmountDisplay').innerText = '₹' + amount.toLocaleString();
                 document.getElementById('paymentModalOverlay').style.display = 'flex';
 
                 // Reset UI
@@ -2679,14 +2617,12 @@
                 if (!name || !email || !phone) {
                     error.innerText = 'Please complete all identification protocols.';
                     error.style.display = 'block';
-                    speak("Mandatory fields are missing. Please complete the identification protocol.");
                     return;
                 }
 
                 btn.disabled = true;
                 btn.innerHTML = '<span class="pulse-dot" style="background:white; margin:0; display:inline-block; width:8px; height:8px; border-radius:50%; animation:pulse 1s infinite;"></span> VERIFYING CREDENTIALS...';
                 error.style.display = 'none';
-                speak("Verifying institution credentials.");
 
                 try {
                     const response = await fetch('/api/auth/check-availability/', {
@@ -2701,13 +2637,14 @@
                     const data = await response.json();
 
                     if (data.available) {
-                        initiateRazorpay();
+                        updateModalProgress(2);
+                        document.getElementById('step1').style.display = 'none';
+                        document.getElementById('step2').style.display = 'block';
                     } else {
                         error.innerText = data.error || 'Identity already registered.';
                         error.style.display = 'block';
                         btn.disabled = false;
                         btn.innerHTML = '<span>PROCEED TO PAYMENT</span><span style="font-size:1.2rem;">→</span>';
-                        speak("Access denied. Identity already exists.");
                     }
                 } catch (err) {
                     console.error(err);
@@ -2855,69 +2792,6 @@
                     }
                 } catch (e) {
                     alert("Error during verification: " + e.message);
-                }
-            }
-
-            async function confirmPayment(event) {
-                event.preventDefault();
-                const utr = document.getElementById('txnUtrInput').value.trim();
-                const userName = document.getElementById('userName').value.trim();
-                const userEmail = document.getElementById('userEmail').value.trim();
-                const userPhone = document.getElementById('userPhone').value.trim();
-                const logo = document.getElementById('instLogo').files[0];
-                const sig = document.getElementById('instSig').files[0];
-
-                if (!utr || utr.length < 10) {
-                    alert("Please enter a valid 12-digit UTR or Transaction ID.");
-                    return;
-                }
-
-                // Show processing
-                updateModalProgress(3);
-                document.getElementById('step1').style.display = 'none';
-                document.getElementById('step2').style.display = 'none';
-                document.getElementById('step3').style.display = 'block';
-                document.getElementById('processingState').style.display = 'block';
-                document.getElementById('successState').style.display = 'none';
-
-                speak("Verifying U.T.R. and synchronizing institution assets.");
-
-                const formData = new FormData();
-                formData.append('transaction_id', utr);
-                formData.append('amount', currentAmount);
-                formData.append('payment_type', 'SUBSCRIPTION');
-                formData.append('plan_type', currentPlan);
-                formData.append('description', `Subscription for ${userName} (${userEmail})`);
-                formData.append('email', userEmail);
-                formData.append('phone', userPhone);
-                formData.append('name', userName);
-                if (logo) formData.append('logo', logo);
-                if (sig) formData.append('signature', sig);
-
-                try {
-                    const response = await fetch('/api/subscription/submit/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: formData
-                    });
-
-                    const data = await response.json();
-                    if (response.ok) {
-                        document.getElementById('processingState').style.display = 'none';
-                        document.getElementById('successState').style.display = 'block';
-                        speak("Transaction recorded. Our neural network will verify your payment within 2 to 4 hours.");
-                    } else {
-                        alert(data.error || "Submission failed. Please check your network.");
-                        // Revert UI
-                        updateModalProgress(2);
-                        document.getElementById('step2').style.display = 'block';
-                        document.getElementById('step3').style.display = 'none';
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert("Neural link failure. Connection interrupted.");
                 }
             }
 

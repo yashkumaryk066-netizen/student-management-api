@@ -94,6 +94,8 @@ urlpatterns = [
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
 ]
 
+handler404 = 'student.views.handler404'
+
 # Serve media files (works in both dev and production on PythonAnywhere)
 
 if settings.DEBUG:

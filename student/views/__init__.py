@@ -23,6 +23,7 @@ from .resume_views import DownloadResumeView
 # DASHBOARD TEMPLATE VIEWS (For Frontend)
 # ==========================================
 
+from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -902,3 +903,6 @@ class CheckInstitutionView(APIView):
 class SubscriptionStatusView(ClientSubscriptionView):
     """Alias for ClientSubscriptionView required by api.js"""
     pass
+
+def handler404(request, exception=None):
+    return render(request, '404.html', status=404)
