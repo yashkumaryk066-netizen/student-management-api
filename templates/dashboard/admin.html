@@ -1071,41 +1071,20 @@
     </div>
     </div>
     <!-- Branding Fetch Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const token = localStorage.getItem('authToken');
-            if (!token) return;
+                    // --- CRITICAL: SUBSCRIPTION EXPIRY LOCK (Neural Protocol) ---
+                    const expiryDateStr = profile.subscription_expiry;
+                    if (expiryDateStr) {
+                        const expiryDate = new Date(expiryDateStr);
+                        const today = new Date();
+                        // Reset hours for accurate date-only comparison
+                        today.setHours(0,0,0,0);
+                        expiryDate.setHours(0,0,0,0);
 
-            try {
-                // Fetch Profile Data for Branding
-                const res = await fetch('/api/profile/', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-
-                if (res.ok) {
-                    const profile = await res.json();
-
-                    // Update Institution Name
-                    if (profile.institution_name) {
-                        const nameEl = document.getElementById('instName');
-                        if (nameEl) nameEl.textContent = profile.institution_name.toUpperCase();
-                    }
-
-                    // Update Type/Subtitle
-                    if (profile.institution_type) {
-                        const typeEl = document.getElementById('instType');
-                        if (typeEl) {
-                            // Format: "COACHING SYSTEM" or "SCHOOL SYSTEM"
-                            const typeText = profile.institution_type + (profile.institution_type.toLowerCase().includes('system') ? '' : ' SYSTEM');
-                            typeEl.textContent = typeText.toUpperCase();
-                        }
-                    }
-
-                    // Update Logo
-                    if (profile.institution_logo) {
-                        const logoEl = document.getElementById('sidebarLogo');
-                        if (logoEl) {
-                            logoEl.src = profile.institution_logo;
+                        if (expiryDate < today) {
+                            console.error("🛑 PROTOCOL TERMINATED: Subscription Expired");
+                            window.currentProfile = profile; 
+                            showTerminationModal(profile);
+                            return; // Stop further initialization
                         }
                     }
 
@@ -1118,7 +1097,143 @@
                 console.warn("Branding fetch failed", err);
             }
         });
+
+        function showTerminationModal(profile) {
+            // Create Neural Lock UI
+            const lockHTML = `
+                <div id="neuralLock" style="position:fixed; inset:0; z-index:999999; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(25px); background:rgba(2, 6, 23, 0.85); animation: fadeIn 0.8s ease-out;">
+                    <div id="lockCabinet" style="max-width:550px; width:90%; background:linear-gradient(135deg, #0f172a, #1e293b); border:1px solid #f59e0b; border-radius:32px; padding:50px; text-align:center; box-shadow: 0 0 100px rgba(245, 158, 11, 0.2); position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:-50px; right:-50px; width:150px; height:150px; background:rgba(245, 158, 11, 0.1); filter:blur(50px); border-radius:50%;"></div>
+                        
+                        <div style="font-size:70px; margin-bottom:25px; animation: pulse 2s infinite;">⚠️</div>
+                        <h1 style="color:white; font-family:'Space Grotesk'; font-size:2.4rem; font-weight:800; margin-bottom:15px; letter-spacing:-1px;">PROTOCOL TERMINATED</h1>
+                        <p style="color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin-bottom:30px;">Subscription Cycle Ended</p>
+                        
+                        <div id="lockStatusBox" style="background:rgba(245, 158, 11, 0.05); border:1px solid rgba(245, 158, 11, 0.1); border-radius:24px; padding:30px; margin-bottom:40px; text-align:left;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                                <span style="color:#64748b;">Expired On:</span>
+                                <span style="color:white; font-weight:600;">${profile.subscription_expiry}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                                <span style="color:#64748b;">Plan:</span>
+                                <span style="color:white; font-weight:600;">${profile.institution_type || 'INSTITUTE'}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="color:#64748b;">State:</span>
+                                <span id="lockStateText" style="color:#ef4444; font-weight:800;">LOCKED</span>
+                            </div>
+                        </div>
+
+                        <p style="color:#94a3b8; font-size:0.95rem; line-height:1.6; margin-bottom:40px;">Data access has been restricted. Initiate high-priority renewal protocol to restore full grid management capabilities.</p>
+                        
+                        <button id="renewBtn" onclick="initiateInstantRenewal('${profile.institution_type}')" style="width:100%; padding:22px; background:linear-gradient(135deg, #f59e0b, #d97706); color:black; border:none; border-radius:20px; font-weight:900; font-size:1.2rem; cursor:pointer; transition:0.3s; text-transform:uppercase; letter-spacing:1px; box-shadow: 0 15px 35px rgba(245, 158, 11, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            ACTIVATE 30-DAY RENEWAL →
+                        </button>
+
+                        <div style="margin-top:25px;">
+                            <a href="/login/" style="color:#64748b; text-decoration:none; font-size:0.9rem; font-weight:600;">Logout and Exit Protocol</a>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); opacity: 0.8; } }
+                    body { overflow: hidden !important; }
+                    .main-wrapper, .sidebar, #topHeader { filter: blur(20px); pointer-events: none; transition: 0.8s; }
+                </style>
+            `;
+            document.body.insertAdjacentHTML('beforeend', lockHTML);
+        }
+
+        async function initiateInstantRenewal(plan) {
+            const btn = document.getElementById('renewBtn');
+            const stateText = document.getElementById('lockStateText');
+            btn.disabled = true;
+            btn.textContent = "INITIALIZING GATEWAY...";
+            
+            try {
+                // 1. Create Order
+                const res = await fetch('/api/payments/razorpay/create-order/', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                        'X-CSRFToken': DashboardUtils.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ 
+                        plan_type: plan,
+                        transaction_type: 'RENEWAL'
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Gateway Error");
+
+                // 2. Open Razorpay
+                const options = {
+                    "key": data.key_id,
+                    "amount": data.amount,
+                    "currency": "INR",
+                    "name": "Y.S.M Universal AI",
+                    "description": "30-Day Subscription Renewal",
+                    "order_id": data.order_id,
+                    "handler": async function (response) {
+                        btn.textContent = "VERIFYING PROTOCOL...";
+                        await verifyRenewal(response, plan);
+                    },
+                    "modal": { "ondismiss": () => { btn.disabled = false; btn.textContent = "RETRY RENEWAL →"; } },
+                    "theme": { "color": "#f59e0b" }
+                };
+                
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (err) {
+                alert("Renewal Protocol Failed: " + err.message);
+                btn.disabled = false;
+                btn.textContent = "RETRY RENEWAL →";
+            }
+        }
+
+        async function verifyRenewal(rzpResponse, plan) {
+            try {
+                const res = await fetch('/api/payments/razorpay/verify/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                        'X-CSRFToken': DashboardUtils.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        razorpay_order_id: rzpResponse.razorpay_order_id,
+                        razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                        razorpay_signature: rzpResponse.razorpay_signature,
+                        plan_type: plan,
+                        email: window.currentProfile?.user_email || '', 
+                        institution_name: window.currentProfile?.institution_name || ''
+                    })
+                });
+
+                if (res.ok) {
+                    const cabinet = document.getElementById('lockCabinet');
+                    cabinet.innerHTML = `
+                        <div style="font-size:70px; margin-bottom:25px;">✅</div>
+                        <h1 style="color:#10b981; font-family:'Space Grotesk'; font-size:2.4rem; font-weight:800; margin-bottom:15px;">PROTOCOL ACTIVE</h1>
+                        <p style="color:white; line-height:1.6; margin-bottom:30px;">Subscription successfully extended for 30 Days. Full grid access has been restored.</p>
+                        <button onclick="location.reload()" style="width:100%; padding:22px; background:#10b981; color:white; border:none; border-radius:20px; font-weight:800; cursor:pointer;">REENTER GRID PORTAL</button>
+                    `;
+                } else {
+                    const data = await res.json();
+                    alert("Verification Failed: " + (data.error || "Signature invalid"));
+                    location.reload();
+                }
+            } catch (err) {
+                alert("Network Error during verification");
+                location.reload();
+            }
+        }
     </script>
+
     <!-- Sovereign Motion Engine JS -->
     <script>
         document.addEventListener('mousemove', (e) => {
@@ -1194,6 +1309,7 @@
                 }
 
                 listContainer.innerHTML = notifications.map(n => {
+                    const planPrice = subData.price;
                     const iconColor = n.type === 'ALERT' ? '#ef4444' : (n.type === 'SUCCESS' ? '#10b981' : '#3b82f6');
                     const bg = n.type === 'ALERT' ? 'rgba(239, 68, 68, 0.1)' : (n.type === 'SUCCESS' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)');
 

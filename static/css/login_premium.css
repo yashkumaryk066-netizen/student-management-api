@@ -32,9 +32,12 @@ body.ysm-advance-theme {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   color: var(--ysm-text);
+  padding: 20px 0;
 }
+
 
 /* --- WORLD CLASS BG --- */
 .hero-visual-layer {

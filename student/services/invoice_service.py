@@ -415,6 +415,15 @@ def generate_subscription_invoice_pdf(user, subscription, payment):
         'INSTITUTE': "UNIVERSITY ARCHITECTURE (Ultimate Tier)"
     }.get(subscription.plan_type, subscription.plan_type)
 
+    # AUDIT: Calculate Breakdown for Professional Receipt
+    total_amount = float(payment.amount)
+    # Reverse calculate base from 1.20 multiplier (Approx 2% PF + 18% GST)
+    # Total = Base + 0.02*Base + 0.18*(Base + 0.02*Base) = Base*1.02 * 1.18 = Base * 1.2036
+    # But we used rounded totals (600 for 500, 1800 for 1500, etc) which is exactly 1.2x
+    base_price = total_amount / 1.20
+    platform_fee = base_price * 0.02
+    gst_amount = total_amount - base_price - platform_fee
+
     # Table Content
     data = [
         ["DESCRIPTION / SERVICE", "QTY", "RATE", "AMOUNT"],
@@ -428,13 +437,14 @@ def generate_subscription_invoice_pdf(user, subscription, payment):
                       "• Y.S.M Intelligence Dashboard License<br/>"
                       "• Priority Developer Support", style_data),
             "1",
-            f"{CURRENCY_SYMBOL} {payment.amount:,.2f}",
-            f"{CURRENCY_SYMBOL} {payment.amount:,.2f}"
+            f"{CURRENCY_SYMBOL} {base_price:,.2f}",
+            f"{CURRENCY_SYMBOL} {base_price:,.2f}"
         ],
         ["", "", "", ""], # Spacer Row
-        ["", "", "Subtotal", f"{CURRENCY_SYMBOL} {payment.amount:,.2f}"],
-        ["", "", "Processing Fee", "0.00"],
-        ["", "", "GRAND TOTAL", f"{CURRENCY_SYMBOL} {payment.amount:,.2f}"]
+        ["", "", "Final Base Rate", f"{CURRENCY_SYMBOL} {base_price:,.2f}"],
+        ["", "", "Platform & Gateway Fee (2%)", f"{CURRENCY_SYMBOL} {platform_fee:,.2f}"],
+        ["", "", "GST (18%)", f"{CURRENCY_SYMBOL} {gst_amount:,.2f}"],
+        ["", "", "GRAND TOTAL", f"{CURRENCY_SYMBOL} {total_amount:,.2f}"]
     ]
 
     t = Table(data, colWidths=[3.5*inch, 0.8*inch, 1.2*inch, 1.5*inch])

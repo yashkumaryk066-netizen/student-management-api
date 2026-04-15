@@ -80,10 +80,6 @@ SUB_ACTIVE = 'ACTIVE'
 PAYMENT_APPROVED = 'APPROVED'
 PAYMENT_PENDING = 'PENDING_VERIFICATION'
 
-PLAN_PRICING = {
-    'COACHING': Decimal('500.00'),
-    'SCHOOL': Decimal('2000.00'),
-    'INSTITUTE': Decimal('5000.00'),
-}
+from student.plan_permissions import PLAN_PRICING
 
 SUBSCRIPTION_DAYS = 30

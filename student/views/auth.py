@@ -3,6 +3,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from student.serializers import CustomTokenObtainPairSerializer, UserProfileSerializer
 from student.models import ClientSubscription, UserProfile, Payment
 from datetime import date, timedelta
+from decimal import Decimal
+from student.plan_permissions import PLAN_PRICING
 
 class SecuredTokenObtainPairView(TokenObtainPairView):
     """
@@ -233,17 +235,21 @@ class ClientSubscriptionView(APIView):
 
         if hasattr(request.user, 'subscription'):
              sub = request.user.subscription
+             plan_type = sub.plan_type
+             current_price = PLAN_PRICING.get(plan_type, Decimal('0.00'))
+             
              return Response({
-                 "plan_type": sub.plan_type,
+                 "plan_type": plan_type,
                  "status": sub.status,
                  "valid_until": sub.end_date,
                  "days_left": sub.days_remaining,
-                 "plan": sub.plan_type, # Backward compat
+                 "plan": plan_type, # Backward compat
                  "amount_paid": sub.amount_paid,
                  "start_date": sub.start_date,
                  "end_date": sub.end_date,
+                 "price": current_price,
              })
-        return Response({"status": "NO_SUBSCRIPTION", "days_left": 0})
+        return Response({"status": "NO_SUBSCRIPTION", "days_left": 0, "price": 0})
 
 class SubscriptionRenewalView(APIView):
     permission_classes = [IsAuthenticated]

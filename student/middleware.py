@@ -91,28 +91,22 @@ class SubscriptionMiddleware:
         is_exempt_url = any(url in path for url in self.EXEMPT_URLS)
 
         if expiry_date and expiry_date < timezone.now().date():
-            # Expired → write blocked (Read-Only)
-            if not is_safe_method and not is_exempt_url:
-                return JsonResponse({
-                    "code": "SUBSCRIPTION_EXPIRED",
-                    "message": "Your subscription has expired. Read-Only access only.",
-                    "action": "RENEW_PLAN"
-                }, status=403)
-
-            # Read-only allowed, skip plan restrictions (allow them to see what they had)
+            # Expired Protocol: Block everything except exempt URLs (Renewal/Auth)
             if not is_exempt_url:
-                 # Should we enforce plan restrictions? user says "sirf read kr sake apne data ko"
-                 # It's better to allow full Read Only access to THEIR data.
-                 # But plan restrictions prevent accessing features they didn't pay for.
-                 # If they are expired, they technically have NO plan. 
-                 # But preserving "their data" implies sticking to their old plan scope?
-                 # Actually, usually Expired = Read Only view of existing data.
-                 # If they had "Transport" in School plan, they should see it.
-                 # If they didn't, they shouldn't.
-                 # So we SHOULD continue to enforce plan restrictions?
-                 # Or just skip it because they can't Add anyway.
-                 # Middleware currently skips restrictions if expired. I'll leave it as is (Permissive Read Only).
-                 pass
+                if request.headers.get('Accept') == 'application/json' or path.startswith('/api/'):
+                    return JsonResponse({
+                        "code": "SUBSCRIPTION_EXPIRED",
+                        "status": "locked",
+                        "message": "Protocol Terminated. Renewal Required for Data Access.",
+                        "expiry_date": str(expiry_date),
+                        "action_url": "/api/student/payments/razorpay/create-order/"
+                    }, status=403)
+                
+                # For non-exempt HTML pages, we could redirect, but showing the dash with a popup is better.
+                # We'll just flag it in the response for the frontend to handle.
+                response = self.get_response(request)
+                response['X-Subscription-Status'] = 'EXPIRED'
+                return response
             
             return self.get_response(request)
 

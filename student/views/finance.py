@@ -9,6 +9,11 @@ from django.http import HttpResponse
 from django.conf import settings
 import uuid
 from datetime import date
+from decimal import Decimal
+import logging
+
+logger = logging.getLogger(__name__)
+from student.plan_permissions import PLAN_PRICING
 
 class PaymentListCreateView(generics.ListCreateAPIView):
     """
@@ -105,7 +110,8 @@ def approve_subscription_payment(payment):
                 amount=str(payment.amount),
                 payment_id=payment.transaction_id or str(payment.id),
                 institution_type=getattr(profile, 'institution_type', None),
-                invoice_pdf=invoice_pdf
+                invoice_pdf=invoice_pdf,
+                user=user
             )
             email_reason = "sent" if email_dispatched else "dispatch_failed"
             

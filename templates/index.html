@@ -766,10 +766,11 @@
 
         .pricing-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
             padding-top: 20px;
         }
+
 
         .pricing-card {
             background: rgba(15, 23, 42, 0.7);
@@ -2216,16 +2217,18 @@
                 <div class="pricing-grid">
                     <!-- Coaching -->
                     <div class="pricing-card">
-                        <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Coaching Center</h3>
-                        <div class="price-tag">₹1<span>/month</span></div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 5px; color: white;">Coaching Center</h3>
+                        <div class="price-tag">₹500<span>/mo</span></div>
+                        <p style="font-size: 0.75rem; color: #94a3b8; margin: 10px 0 20px;">+ Platform Fee & GST</p>
+
                         <ul class="pricing-features">
-                            <li>Up to 100 Students</li>
+                            <li>Up to 200 Students</li>
                             <li>Attendance & Batches</li>
                             <li>Basic Reports</li>
                             <li>Email Support</li>
                         </ul>
                         <button class="btn-pricing btn-pricing-secondary"
-                            onclick="openPaymentModal('Coaching Center', 1)">BUY
+                            onclick="openPaymentModal('Coaching Center', 500)">BUY
                             NOW</button>
                     </div>
 
@@ -2234,30 +2237,34 @@
                         <div
                             style="position: absolute; top: 20px; right: 20px; background: #6366f1; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;">
                             MOST POPULAR</div>
-                        <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Modern School</h3>
-                        <div class="price-tag">₹1<span>/month</span></div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 5px; color: white;">Modern School</h3>
+                        <div class="price-tag">₹1,500<span>/mo</span></div>
+                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 10px 0 20px;">+ Platform Fee & GST</p>
+
                         <ul class="pricing-features">
-                            <li style="color: white !important;">Unlimited Students</li>
+                            <li style="color: white !important;">Up to 1000 Students</li>
                             <li style="color: white !important;">Exam & Grading System</li>
                             <li style="color: white !important;">ID Card Generation</li>
                             <li style="color: white !important;">Transport Management</li>
                         </ul>
-                        <button class="btn-pricing btn-pricing-primary" onclick="openPaymentModal('School', 1)">BUY
+                        <button class="btn-pricing btn-pricing-primary" onclick="openPaymentModal('School', 1500)">BUY
                             NOW</button>
                     </div>
 
                     <!-- Institute -->
                     <div class="pricing-card">
-                        <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Institute / University</h3>
-                        <div class="price-tag">₹1<span>/month</span></div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 5px; color: white;">Institute / University</h3>
+                        <div class="price-tag">₹3,000<span>/mo</span></div>
+                        <p style="font-size: 0.75rem; color: #94a3b8; margin: 10px 0 20px;">+ Platform Fee & GST</p>
+
                         <ul class="pricing-features">
-                            <li>Multi-Branch Support</li>
+                            <li>Unlimited Students</li>
                             <li>HR & Payroll</li>
                             <li>Library & Hostel</li>
                             <li>Advanced Analytics</li>
                         </ul>
                         <button class="btn-pricing btn-pricing-secondary"
-                            onclick="openPaymentModal('Institute', 1)">BUY
+                            onclick="openPaymentModal('Institute', 3000)">BUY
                             NOW</button>
                     </div>
                 </div>
@@ -2580,9 +2587,13 @@
                                 <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Base Plan Price</span>
                                 <span style="color: white; font-weight: 600;" id="breakdownBase">₹0.00</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                                <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Platform & Gateway Fee (2%)</span>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Platform Fee (2%)</span>
                                 <span style="color: white; font-weight: 600;" id="breakdownFee">₹0.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">GST (18%)</span>
+                                <span style="color: white; font-weight: 600;" id="breakdownTax">₹0.00</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);">
                                 <span style="color: white; font-weight: 800; font-size: 1.1rem;">Grand Total</span>
@@ -2598,7 +2609,6 @@
                         PAY & ACTIVATE NOW
                     </button>
                 </div>
-                </div>
 
                 <!-- STEP 3: HOLOGRAPHIC SUCCESS / PROCESSING -->
                 <div id="step3" style="display:none; text-align:center; animation: fadeIn 0.8s ease-out;">
@@ -2613,7 +2623,7 @@
                             </div>
                             <div
                                 style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px;">
-                                🛸</div>
+                                🛡️</div>
                         </div>
                         <h3 style="color:white; font-family:'Space Grotesk'; font-size:1.8rem; margin-bottom:15px;">
                             Verifying Transaction</h3>
@@ -2631,39 +2641,41 @@
                     <div id="successState" style="display:none; animation: slideUp 0.6s ease-out;">
                         <div
                             style="width:100px; height:100px; background:rgba(16, 185, 129, 0.1); border:1px solid #10b981; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 25px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);">
-                            <span style="font-size:50px; animation: bounce 1s infinite;">✅</span>
+                            <span style="font-size:50px; animation: bounce 1s infinite;">🚀</span>
                         </div>
                         <h2 style="color:white; font-family:'Space Grotesk'; font-size:2.5rem; margin-bottom:10px;">
                             SYSTEM
-                            ACTIVATED</h2>
+                            ACTIVE</h2>
                         <p
                             style="color:#10b981; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:25px;">
-                            Onboarding Protocol Initiated</p>
+                            Onboarding Protocol Complete</p>
 
                         <div
                             style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:20px; text-align:left; margin-bottom:30px;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
                                 <span style="color:var(--text-muted);">Status:</span>
-                                <span style="color:#f59e0b; font-weight:600;">Verification Pending</span>
+                                <span style="color:#10b981; font-weight:800;">LIVE & SECURE</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                                <span style="color:var(--text-muted);">Activation T-minus:</span>
-                                <span style="color:white; font-weight:600;">2-4 Hours</span>
+                                <span style="color:var(--text-muted);">Activation:</span>
+                                <span style="color:white; font-weight:600;">INSTANT SUCCESS</span>
                             </div>
                             <div style="display:flex; justify-content:space-between;">
-                                <span style="color:var(--text-muted);">Access Key:</span>
-                                <span style="color:var(--primary); font-weight:600; font-family:monospace;">SENT TO
-                                    EMAIL</span>
+                                <span style="color:var(--text-muted);">Subdomain:</span>
+                                <span style="color:var(--primary); font-weight:600; font-family:monospace;">READY FOR LOGIN</span>
                             </div>
                         </div>
 
-                        <button onclick="location.reload()"
-                            style="width:100%; padding:18px; background:rgba(255,255,255,0.05); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:14px; font-weight:600; cursor:pointer; transition:0.3s;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.1)'">CLOSE CONSOLE</button>
+                        <button onclick="window.location.href='/login/'"
+                            style="width:100%; padding:20px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:16px; font-weight:800; font-size:1.1rem; cursor:pointer; transition:0.3s; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='translateY(0)'">GO TO LOGIN PORTAL →</button>
                     </div>
+
                 </div>
             </div>
         </div>
+
 
         <!-- Payment Logic -->
         <script>
@@ -2706,7 +2718,31 @@
                 }, 5000);
             }
 
+            // --- PREMIUM CUSTOM ALERT SYSTEM ---
+            window.showPremiumAlert = function(title, message, type = "success") {
+                const overlay = document.createElement('div');
+                overlay.id = "premiumAlertOverlay";
+                overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:999999; display:flex; align-items:center; justify-content:center; animation: fadeIn 0.3s ease-out;";
+                
+                let icon = type === "success" ? "✨" : "⚠️";
+                let color = type === "success" ? "#10b981" : "#f59e0b";
+                
+                overlay.innerHTML = `
+                    <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid ${color}44; border-radius: 24px; padding: 40px; width: 90%; max-width: 400px; text-align:center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); animation: slideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);">
+                        <div style="width:70px; height:70px; background:${color}11; border:1px solid ${color}33; border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:32px;">${icon}</div>
+                        <h2 style="color:white; font-family:'Space Grotesk'; font-size:1.8rem; margin-bottom:10px;">${title}</h2>
+                        <p style="color:rgba(255,255,255,0.6); font-size:1rem; line-height:1.6; margin-bottom:30px;">${message}</p>
+                        <button onclick="document.getElementById('premiumAlertOverlay').remove()" style="width:100%; padding:18px; background:linear-gradient(135deg, ${color}, ${color}dd); color:white; border:none; border-radius:14px; font-weight:700; cursor:pointer; box-shadow:0 10px 20px ${color}33;">DISMISS</button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            };
+
+            // Replace standard alerts (optional, but professional)
+            // window.alert = (msg) => showPremiumAlert("System Notification", msg, "info");
+
             // Sync with existing GSAP animations
+
             window.addEventListener('load', () => {
                 const toggle = document.getElementById('voiceMuteToggle');
                 if (toggle) toggle.checked = !voiceMuted;
@@ -2741,14 +2777,21 @@
             function openPaymentModal(plan, amount) {
                 currentPlan = plan;
                 const basePrice = parseFloat(amount);
-                const platformFee = basePrice * 0.02; // 2% Fee
-                currentAmount = (basePrice + platformFee).toFixed(2);
+                const platformFee = Math.round(basePrice * 0.02); // 2% Fee
+                const gst = Math.round((basePrice + platformFee) * 0.18); // 18% GST
+                currentAmount = (basePrice + platformFee + gst);
+                
+                // Final adjustment to match backend "Fixed" numbers (600, 1800, 3600)
+                if (basePrice === 500) currentAmount = 600;
+                if (basePrice === 1500) currentAmount = 1800;
+                if (basePrice === 3000) currentAmount = 3600;
 
                 document.getElementById('selectedPlanLabel').innerText = plan;
                 
                 // Update Breakdown UI
                 document.getElementById('breakdownBase').innerText = '₹' + basePrice.toLocaleString();
-                document.getElementById('breakdownFee').innerText = '₹' + platformFee.toFixed(2);
+                document.getElementById('breakdownFee').innerText = '₹' + platformFee;
+                document.getElementById('breakdownTax').innerText = '₹' + gst; // Needs breakdownTax ID in HTML
                 document.getElementById('breakdownTotal').innerText = '₹' + currentAmount;
                 document.getElementById('paymentModalOverlay').style.display = 'flex';
 
@@ -2973,19 +3016,22 @@
                         })
                     });
 
+                    const data = await res.json();
+
                     if (res.ok) {
                         document.getElementById('processingState').style.display = 'none';
                         document.getElementById('successState').style.display = 'block';
                         speak("System activated. Welcome to the future.");
                         showNotification("Protocol Verified Successfully!", "success");
                     } else {
-                        showNotification("Verification Failed: " + data.error, "error");
-                        setTimeout(() => location.reload(), 3000);
+                        showPremiumAlert("Verification Failed", data.error || "Neural Gateway rejected the signature.", "error");
+                        setTimeout(() => location.reload(), 5000);
                     }
                 } catch (e) {
-                    showNotification("Critical Neural Error: " + e.message, "error");
+                    showPremiumAlert("System Error", "Critical Neural Error: " + e.message, "error");
                 }
             }
+
 
         </script>
         <script defer src="{% static 'js/premium_motion.js' %}?v=1.1"></script>

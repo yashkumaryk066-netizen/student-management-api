@@ -129,7 +129,7 @@ Telepathy Infotech Intelligence
         logger.error(f"❌ Failed to send invoice email: {str(e)}")
         return False
 
-def send_approval_email(email, username, password=None, plan_type='COACHING', amount='0', payment_id=None, institution_type=None, invoice_pdf=None):
+def send_approval_email(email, username, password=None, plan_type='COACHING', amount='0', payment_id=None, institution_type=None, invoice_pdf=None, user=None):
     """
     Elite Level Approval Email with HTML Template and Invoice Attachment
     """
@@ -167,45 +167,28 @@ def send_approval_email(email, username, password=None, plan_type='COACHING', am
                 <strong>Note:</strong> If you forgot your password, use the password reset option on the login page.
             """
         
+        from django.template.loader import render_to_string
+        from django.utils.html import strip_tags
+        from datetime import datetime
+
+        # Context for the new premium template
+        context = {
+            'institution_name': getattr(getattr(user, 'profile', None), 'institution_name', None) or username.title(),
+            'plan_type': plan_type,
+            'email': email,
+            'amount': amount,
+            'transaction_id': payment_id or "TXN-INIT",
+            'date': datetime.now().strftime('%d %b, %Y %I:%M %p'),
+            'is_new_user': bool(password),
+            'username': username,
+            'password': password,
+            'login_url': f"{settings.SITE_URL}/login/"
+        }
+
         subject = "✅ Access Authorized: Your Y.S.M Intelligence Node is Live"
-        
-        html_content = f"""
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #1e293b;">
-            <div style="padding: 40px; background: linear-gradient(135deg, #1e293b, #0f172a); text-align: center; border-bottom: 2px solid #f59e0b;">
-                <h1 style="color: #f59e0b; margin: 0; letter-spacing: 2px;">PROTOCOL ACTIVATED</h1>
-                <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 10px;">Enterprise Management Node Connectivity Established</p>
-            </div>
-            <div style="padding: 40px;">
-                <p>Greetings Agent <strong>{display_name}</strong>,</p>
-                <p>Your subscription request for the <strong>{plan_type}</strong> protocol has been verified and authorized by the Root Administration.</p>
-                
-                {access_block}
+        html_content = render_to_string('emails/invoice_subscription.html', context)
+        plain_message = strip_tags(html_content)
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 25px 0;">
-                    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
-                        <span style="color: #64748b; font-size: 0.75rem; display: block; text-transform: uppercase;">Amount Paid</span>
-                        <strong style="color: #10b981; font-size: 1.1rem;">{currency}{amount}</strong>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
-                        <span style="color: #64748b; font-size: 0.75rem; display: block; text-transform: uppercase;">Ref ID</span>
-                        <strong style="color: #3b82f6; font-size: 1.1rem;">{payment_id}</strong>
-                    </div>
-                </div>
-
-                <p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.6;">
-                    Your node is now synchronized with the Global ERP Grid. You can proceed to configure your institution's profile, students, and financial protocols. 
-                    {guidance_note}
-                </p>
-                
-                <div style="text-align: center; margin-top: 40px;">
-                    <a href="{login_url}" style="background: #f59e0b; color: #000; padding: 12px 35px; text-decoration: none; border-radius: 8px; font-weight: 800; text-transform: uppercase;">Enter Console</a>
-                </div>
-            </div>
-            <div style="padding: 20px; background: rgba(0,0,0,0.2); text-align: center; font-size: 0.75rem; color: #475569;">
-                &copy; 2026 Y.S.M Intelligence | Advanced Agentic Coding Architecture | Telepathy Infotech
-            </div>
-        </div>
-        """
 
         email_obj = EmailMessage(
             subject=subject,

@@ -177,14 +177,17 @@ def get_user_features(user):
         
     return features_dict
 
+from decimal import Decimal
 # Pricing Configuration (Centralized)
-# SYNC: These must match frontend index.html pricing cards exactly
+# Base Rates: Coaching=500, School=1500, Institute=3000
+# Formula: Base + 2% Platform Fee + 18% GST (Approx Total: 1.2036x Base)
 PLAN_PRICING = {
-    'COACHING': 500,
-    'SCHOOL': 2000,
-    'INSTITUTE': 5000,
-    'EDUCATION SYSTEM': 99999, # Enterprise/Internal
-    'SUPER_ADMIN': 0
+    'COACHING': Decimal('600.00'),   # 500 Base + Taxes/Fees
+    'SCHOOL': Decimal('1800.00'),     # 1500 Base + Taxes/Fees
+    'INSTITUTE': Decimal('3600.00'),  # 3000 Base + Taxes/Fees
+    'UNIVERSITY': Decimal('3600.00'), # Alias for Institute
+    'EDUCATION SYSTEM': Decimal('99999.00'), 
+    'SUPER_ADMIN': Decimal('0.00')
 }
 
 # Per-plan student/staff limits

@@ -3,7 +3,7 @@ import razorpay
 import hmac
 import hashlib
 import json
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -25,9 +25,17 @@ class RazorpayOrderCreateView(APIView):
 
     def post(self, request):
         amount = request.data.get('amount')
-        payment_type = request.data.get('payment_type', 'FEE') # FEE or SUBSCRIPTION
+        payment_type = request.data.get('payment_type', 'FEE') # FEE, SUBSCRIPTION, or RENEWAL
         student_id = request.data.get('student_id')
-        plan_type = request.data.get('plan_type')
+        plan_type = (request.data.get('plan_type') or '').upper()
+
+        # AUDIT FIX: Enforce centralized pricing for subscription/renewal
+        if (payment_type in ['SUBSCRIPTION', 'RENEWAL']) and plan_type:
+            from student.plan_permissions import PLAN_PRICING
+            expected_price = PLAN_PRICING.get(plan_type)
+            if expected_price:
+                 amount = expected_price
+                 logger.info(f"💰 FORCED PRICING: Setting amount to {amount} for {plan_type} {payment_type}")
 
         if not amount:
             return Response({"error": "Amount is required"}, status=400)
@@ -37,8 +45,8 @@ class RazorpayOrderCreateView(APIView):
             return Response({"error": "Authentication required for fee payments"}, status=401)
 
         try:
-            amount_paise = int(float(amount) * 100)
-        except (ValueError, TypeError):
+            amount_paise = int(Decimal(str(amount)) * 100)
+        except (ValueError, TypeError, InvalidOperation):
             return Response({"error": "Invalid amount format"}, status=400)
 
         try:
@@ -235,88 +243,47 @@ class RazorpayVerifyView(APIView):
                     profile.institution_type = plan_type
                 profile.save()
 
-                # 3. Create/Update Payment record
-                payment = Payment.objects.create(
-                    user=user,
-                    amount=Decimal(str(amount or 0)),
-                    payment_type='SUBSCRIPTION',
-                    payment_mode='ONLINE',
-                    status='PAID',
-                    transaction_id=transaction_id,
-                    paid_date=timezone.now().date(),
-                    description=f"Razorpay Subscription: {plan_type}",
-                    metadata={'plan_type': plan_type, 'email': email, 'phone': phone}
-                )
+                # 3. Create/Update Payment record (IDEMPOTENCY CHECK)
+                payment = Payment.objects.filter(transaction_id=transaction_id).first()
+                if not payment:
+                    payment = Payment.objects.create(
+                        user=user,
+                        amount=Decimal(str(amount or 0)),
+                        payment_type='SUBSCRIPTION',
+                        payment_mode='ONLINE',
+                        status='PAID',
+                        transaction_id=transaction_id,
+                        due_date=timezone.now().date(), # CRITICAL: Missing Due Date fixed
+                        paid_date=timezone.now().date(),
+                        description=f"Razorpay Subscription: {plan_type}",
+                        metadata={'plan_type': plan_type, 'email': email, 'phone': phone}
+                    )
+                    logger.info(f"New subscription payment record created: {transaction_id}")
+                else:
+                    logger.info(f"Subscription payment already exists: {transaction_id}")
 
-                # 4. Activate Subscription
+                # 4. Activate Subscription (Autonomous Protocol)
+                # Metadata must be present for approve_subscription_payment
+                payment.metadata.update({
+                    'plan_type': plan_type,
+                    'email': email,
+                    'phone': phone,
+                    'institution_name': institution_name
+                })
+                payment.save(update_fields=['metadata'])
+                
+                # Check if already active to avoid double activation if needed
+                # But here we call it to ensure all success hooks (emails/creds) run
                 approve_subscription_payment(payment)
 
-                # 5. GENERATE CREDENTIALS & SEND EMAIL (PREMIUM ONBOARDING)
-                if is_new_user and email:
-                    try:
-                        import secrets
-                        import string
-                        from django.core.mail import send_mail
-                        from django.template.loader import render_to_string
-                        from django.utils.html import strip_tags
-
-                        # Generate Secure Random Password
-                        chars = string.ascii_letters + string.digits + "@#$%"
-                        new_password = ''.join(secrets.choice(chars) for _ in range(10))
-                        user.set_password(new_password)
-                        user.save()
-
-                        # Prepare Premium Email
-                        subject = f"🚀 Y.S.M Universal AI ERP Activated: {institution_name or 'Institution Profile'}"
-                        html_message = f"""
-                        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; padding: 40px; color: white; border-radius: 20px;">
-                            <div style="text-align: center; margin-bottom: 30px;">
-                                <h1 style="color: #6366f1; margin: 0;">Y.S.M UNIVERSAL AI ERP</h1>
-                                <p style="color: #94a3b8; font-size: 0.9rem;">The Ultimate AI-Powered Institutional Infrastructure</p>
-                            </div>
-                            
-                            <h2 style="color: white;">Welcome to the Future of Management, {institution_name or 'Partner'}!</h2>
-                            <p>Your <strong>{plan_type} ERP Protocol</strong> has been successfully initialized. You now have full access to our enterprise management suite, integrated with the <strong>Y.S.M AI Intelligence Cluster</strong>.</p>
-                            
-                            <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
-                                <h3 style="color: #6366f1; margin-top: 0;">🔒 Secure ERP Access Credentials</h3>
-                                <p style="margin: 5px 0;"><strong>User ID / Username:</strong> <code style="background: #1e293b; padding: 4px 8px; border-radius: 4px;">{user.username}</code></p>
-                                <p style="margin: 5px 0;"><strong>Master Password:</strong> <code style="background: #1e293b; padding: 4px 8px; border-radius: 4px;">{new_password}</code></p>
-                                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">⚠️ For security, please change your password upon first neural login.</p>
-                            </div>
-                            
-                            <div style="text-align: center; margin-top: 40px;">
-                                <a href="https://yashamishra.pythonanywhere.com/login/" style="background: #6366f1; color: white; padding: 15px 35px; border-radius: 12px; text-decoration: none; font-weight: 800; display: inline-block;">LOG INTO CENTRAL COMMAND</a>
-                            </div>
-                            
-                            <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                                <strong>System:</strong> Y.S.M Universal AI ERP | <strong>Plan:</strong> {plan_type}<br>
-                                Verification Ref: {transaction_id} | Neural Engine Protocol 2026
-                            </p>
-                        </div>
-                        """
-                        plain_message = strip_tags(html_message)
-                        
-                        send_mail(
-                            subject,
-                            plain_message,
-                            settings.EMAIL_HOST_USER,
-                            [email],
-                            html_message=html_message,
-                            fail_silently=True
-                        )
-                        logger.info(f"Onboarding email sent successfully to {email}")
-                    except Exception as email_err:
-                        logger.error(f"Failed to send onboarding email: {str(email_err)}")
-
             return Response({
-                "success": True,
-                "message": "Subscription activated and credentials dispatched via email",
-                "transaction_id": transaction_id
+                "status": "success",
+                "message": "Subscription activated successfully",
+                "is_new_user": is_new_user
             })
         except Exception as e:
-            logger.error(f"Subscription Payment Success Processing Failed: {str(e)}")
-            return Response({"error": f"Payment successful but activation failed: {str(e)}"}, status=500)
+            logger.error(f"Subscription Gateway Processing Failed: {str(e)}")
+            return Response({"error": "System failure during activation. Payment verified but record update crashed. Please contact support."}, status=500)
 
     def _handle_fee_payment(self, user, amount, transaction_id, student_id):
         try:
