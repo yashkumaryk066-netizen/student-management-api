@@ -26,6 +26,7 @@ from .resume_views import DownloadResumeView
 from django.views.generic import TemplateView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.conf import settings
 
 class LandingPageView(TemplateView):
     """Landing page with CSRF cookie enabled for payment forms"""
@@ -35,23 +36,58 @@ class LandingPageView(TemplateView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        return context
+
 class LoginPageView(TemplateView):
     template_name = "login.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        return context
 
 class AdminDashboardTemplateView(TemplateView):
     template_name = "dashboard/admin.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        return context
+
 class SuperAdminDashboardTemplateView(TemplateView):
     template_name = "dashboard/super_admin.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        return context
 
 class SuperAdminSubscriptionView(TemplateView):
     template_name = "dashboard/super_admin_subscription.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        return context
+
 class TeacherDashboardTemplateView(TemplateView):
     template_name = "dashboard/teacher.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        return context
+
 class StudentDashboardTemplateView(TemplateView):
     template_name = "dashboard/student.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        return context
 
 class ParentDashboardTemplateView(TemplateView):
     template_name = "dashboard/parent.html"

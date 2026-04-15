@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="/static/css/responsive.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         /* Overrides specific to Student Profile Layout */
         .profile-card {
@@ -449,6 +450,9 @@
     </div>
 
     <script src="/static/js/api.js"></script>
+    <script>
+        window.RAZORPAY_KEY_ID = "{{ RAZORPAY_KEY_ID }}";
+    </script>
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/dashboard/student.js"></script>
     <script>

@@ -9447,13 +9447,35 @@ DashboardApp.showRenewalModal = function (subData) {
                 </div>
             </div>
 
-            <div style="margin-bottom:20px;text-align:left;">
-                <label style="color:#94a3b8;font-size:0.9rem;">Payment Reference (UTR/UPI ID)</label>
-                <input type="text" id="renewUtr" placeholder="Enter Transaction ID" style="width:100%;padding:14px;background:#1e293b;border:1px solid #334155;color:white;border-radius:12px;margin-top:8px;font-size:1rem;">
+        <div class="renewal-card" style="background:#0f172a;border:1px solid #6366f1;border-radius:24px;padding:50px;width:95%;max-width:550px;text-align:center;position:relative;box-shadow:0 0 80px rgba(99,102,241,0.3);">
+            <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:#6366f1;color:white;padding:8px 24px;border-radius:20px;font-weight:bold;box-shadow:0 10px 20px rgba(99,102,241,0.4);">
+                PLAN EXPIRED
+            </div>
+            <h1 style="color:white;font-family:'Space Grotesk';margin-bottom:15px;font-size:2.5rem;">Renew Your Access</h1>
+            <p style="color:#94a3b8;margin-bottom:30px;line-height:1.6;">
+                Your <strong>${subData.plan_type}</strong> plan availability has ended. <br>
+                To continue editing and managing your data, please renew now.
+                <br><span style="font-size:0.9rem;color:#64748b;">(You can still view your existing data in Read-Only mode)</span>
+            </p>
+            
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px;margin-bottom:30px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#cbd5e1;">
+                    <span>Plan Type</span>
+                    <span style="font-weight:bold;color:white;">${subData.plan_type}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#cbd5e1;">
+                    <span>Duration</span>
+                    <span style="font-weight:bold;color:white;">30 Days</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:1.2rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;margin-top:10px;">
+                    <span style="color:white;">Total</span>
+                    <span style="font-weight:bold;color:#a855f7;">₹${planPrice}</span>
+                </div>
             </div>
 
             <button onclick="DashboardApp.submitRenewal('${subData.plan_type}', ${planPrice})" style="width:100%;padding:16px;background:linear-gradient(135deg,#6366f1,#a855f7);border:none;border-radius:12px;color:white;font-weight:bold;font-size:1.1rem;cursor:pointer;transition:transform 0.2s;box-shadow:0 10px 30px rgba(99,102,241,0.4);">
-                RENEW SUBSCRIPTION 🚀
+                SECURE RENEWAL ROCKET 🚀
+                <div style="font-size:0.7rem;opacity:0.8;font-weight:normal;">via Razorpay Gateway</div>
             </button>
             
             <button onclick="document.getElementById('renewalOverlay').remove()" style="margin-top:15px;background:none;border:none;color:#64748b;cursor:pointer;">
@@ -9466,31 +9488,86 @@ DashboardApp.showRenewalModal = function (subData) {
 };
 
 DashboardApp.submitRenewal = async function (planType, amount) {
-    const utr = document.getElementById('renewUtr').value;
-    if (!utr) {
-        this.showAlert('Required', 'Please enter payment UTR/Transaction ID', 'error');
+    if (!window.RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID === "None") {
+        const utr = prompt("Razorpay error. Please enter manual Transaction ID / UTR:");
+        if (!utr) return;
+        
+        try {
+            const data = await DashboardUtils.apiCall('/payment/manual/submit/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    amount: amount,
+                    transaction_id: utr,
+                    payment_type: 'SUBSCRIPTION',
+                    description: 'Plan Renewal: ' + planType
+                })
+            });
+            if (data.status === 'SUBMITTED') {
+                if (document.getElementById('renewalOverlay')) document.getElementById('renewalOverlay').remove();
+                this.showAlert('Submitted', 'Manual renewal pending approval.', 'success');
+            }
+        } catch (e) {
+            this.showAlert('Error', e.message, 'error');
+        }
         return;
     }
 
     try {
-        const data = await DashboardUtils.apiCall('/payment/manual/submit/', {
+        this.showAlert('Processing', 'Connecting to secure payment gateway...', 'success');
+
+        // 1. Create Order
+        const orderData = await DashboardUtils.apiCall('/payment/razorpay/order/', {
             method: 'POST',
             body: JSON.stringify({
                 amount: amount,
-                transaction_id: utr,
                 payment_type: 'SUBSCRIPTION',
-                description: 'Plan Renewal: ' + planType
+                description: 'Renewal: ' + planType
             })
         });
 
-        if (data.status === 'SUBMITTED') {
-            document.getElementById('renewalOverlay').remove();
-            this.showAlert('Renewal Submitted', 'Your renewal request is pending approval. You will be notified via email/telegram.', 'success');
-        } else {
-            this.showAlert('Error', data.error || 'Submission failed', 'error');
-        }
+        // 2. Open Razorpay
+        const options = {
+            "key": window.RAZORPAY_KEY_ID,
+            "amount": orderData.amount,
+            "currency": orderData.currency,
+            "name": "Y.S.M ERP Renewal",
+            "description": "Subscription for " + planType,
+            "order_id": orderData.order_id,
+            "handler": async function (response) {
+                try {
+                   const result = await DashboardUtils.apiCall('/payment/razorpay/verify/', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            amount: amount,
+                            payment_type: 'SUBSCRIPTION'
+                        })
+                    });
+                    if (result.success) {
+                        if (document.getElementById('renewalOverlay')) document.getElementById('renewalOverlay').remove();
+                        DashboardApp.showAlert('Success', 'Plan renewed successfully! Enjoy full access.', 'success');
+                        window.location.reload();
+                    } else {
+                        DashboardApp.showAlert('Error', result.error || 'Verification failed', 'error');
+                    }
+                } catch (e) {
+                    DashboardApp.showAlert('Error', 'Verification failed: ' + e.message, 'error');
+                }
+            },
+            "prefill": {
+                "name": DashboardApp.currentUser.user_full_name,
+                "email": DashboardApp.currentUser.email,
+                "contact": DashboardApp.currentUser.phone
+            },
+            "theme": { "color": "#6366f1" }
+        };
+        const rzp = new Razorpay(options);
+        rzp.open();
     } catch (e) {
-        this.showAlert('Error', e.message || 'Submission failed', 'error');
+        console.error(e);
+        this.showAlert('Error', 'Payment failed to initialize: ' + e.message, 'error');
     }
 };
 

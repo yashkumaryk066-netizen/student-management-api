@@ -406,6 +406,9 @@
     <link rel="stylesheet" href="{% static 'css/premium_motion.css' %}?v=5.4.5">
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}?v=5.4.5">
 
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <!-- Scripts -->
     <script defer src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script defer src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
@@ -2492,8 +2495,10 @@
                     </div>
 
                     <button id="verifyBtn" onclick="confirmPayment(event)"
-                        style="width:100%; padding:20px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:16px; font-weight:800; font-size:1.1rem; cursor:pointer; transition:0.3s; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);">ACTIVATE
-                        MY ACCOUNT</button>
+                        style="width:100%; padding:14px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer; transition:0.3s; margin-bottom:10px;">ACTIVATE MY ACCOUNT</button>
+                    
+                    <button onclick="initiateRazorpay()"
+                        style="width:100%; padding:10px; background:none; border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); border-radius:12px; font-size:0.8rem; cursor:pointer;">Use Cards / Netbanking / Other Methods</button>
                 </div>
 
                 <!-- STEP 3: HOLOGRAPHIC SUCCESS / PROCESSING -->
@@ -2678,11 +2683,10 @@
                     return;
                 }
 
-                // PREMIUM LOADING
                 btn.disabled = true;
                 btn.innerHTML = '<span class="pulse-dot" style="background:white; margin:0; display:inline-block; width:8px; height:8px; border-radius:50%; animation:pulse 1s infinite;"></span> VERIFYING CREDENTIALS...';
                 error.style.display = 'none';
-                speak("Verifying institution credentials against the holographic registry.");
+                speak("Verifying institution credentials.");
 
                 try {
                     const response = await fetch('/api/auth/check-availability/', {
@@ -2697,45 +2701,19 @@
                     const data = await response.json();
 
                     if (data.available) {
-                        setTimeout(() => {
-                            updateModalProgress(2);
-                            document.getElementById('step1').style.display = 'none';
-                            document.getElementById('step2').style.display = 'block';
-
-                            // Dynamic QR Generation
-                            const upiLink = `upi://pay?pa=yash-k05@ptyes&pn=Y.S.M%20Education&am=${currentAmount}&cu=INR&tn=Plan%20Upgrade`;
-                            const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}`;
-                            const qrImg = document.getElementById('paymentQrImage');
-                            
-                            // Set dynamic QR source
-                            qrImg.src = qrDataUrl;
-
-                            // QR Reveal Animation
-                            setTimeout(() => {
-                                const qrText = document.getElementById('qrOverlayText');
-                                const qrLine = document.getElementById('qrScanLine');
-
-                                if (qrText) {
-                                    qrText.style.opacity = '0';
-                                    setTimeout(() => qrText.style.display = 'none', 500);
-                                }
-                                if (qrImg) {
-                                    qrImg.style.filter = 'none';
-                                    qrImg.style.opacity = '1';
-                                    qrImg.style.transform = 'scale(1.05)';
-                                    setTimeout(() => qrImg.style.transform = 'scale(1)', 400);
-                                }
-                                if (qrLine) qrLine.style.display = 'block';
-                            }, 1200);
-
-                            speak("Identity confirmed. Secure gateway for payment is now active.");
-                        }, 1000);
+                         // Move to Step 2 (QR Step)
+                        updateModalProgress(2);
+                        document.getElementById('step1').style.display = 'none';
+                        document.getElementById('step2').style.display = 'block';
+                        
+                        // Generate Razorpay QR
+                        generateRazorpayQR();
                     } else {
                         error.innerText = data.error || 'Identity already registered.';
                         error.style.display = 'block';
                         btn.disabled = false;
                         btn.innerHTML = '<span>PROCEED TO PAYMENT</span><span style="font-size:1.2rem;">→</span>';
-                        speak("Access denied. This identification already exists in our neural network.");
+                        speak("Access denied. Identity already exists.");
                     }
                 } catch (err) {
                     console.error(err);
@@ -2746,100 +2724,146 @@
                 }
             }
 
-            async function confirmPayment(event) {
-                if (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
+            async function generateRazorpayQR() {
+                const qrImage = document.getElementById('paymentQrImage');
+                const qrOverlay = document.getElementById('qrOverlayText');
+                const qrScanLine = document.getElementById('qrScanLine');
+                
+                try {
+                    const response = await fetch('/api/payments/razorpay/qr/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            amount: currentAmount,
+                            payment_type: 'SUBSCRIPTION',
+                            email: document.getElementById('userEmail').value,
+                            name: 'Y.S.M AI Activation',
+                            description: `${currentPlan} Plan for ${document.getElementById('userName').value}`
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.image_url) {
+                        qrImage.src = data.image_url;
+                        qrImage.style.filter = 'none';
+                        qrImage.style.opacity = '1';
+                        qrOverlay.style.display = 'none';
+                        qrScanLine.style.display = 'block';
+                        
+                        // Set UPI ID display
+                        if (data.upi_id) {
+                            document.getElementById('upiIdText').innerText = data.upi_id;
+                        }
 
-                const utr = document.getElementById('txnUtrInput').value.trim();
-                const email = document.getElementById('userEmail').value.trim();
-                const name = document.getElementById('userName').value.trim();
-                const phone = document.getElementById('userPhone').value.trim();
-                const logoFile = document.getElementById('instLogo').files[0];
-                const sigFile = document.getElementById('instSig').files[0];
-                const btn = document.getElementById('verifyBtn');
-
-                if (utr.length < 10) {
-                    const step2Title = document.querySelector('#step2 h3');
-                    if (step2Title) {
-                        step2Title.style.color = '#ef4444';
-                        step2Title.innerText = 'Invalid UTR ID';
-                        setTimeout(() => {
-                            step2Title.style.color = 'white';
-                            step2Title.innerText = 'Scan & Pay Securely';
-                        }, 2000);
+                        speak(`QR Code generated for ${currentAmount} rupees. Please scan and pay to activate instantly.`);
+                    } else {
+                        qrOverlay.innerHTML = '<div style="color:#ef4444; font-size: 0.8rem;">QR CORE OFFLINE. USE MODAL BELOW.</div>';
                     }
-                    speak("The reference number provided is invalid. Please check your transaction details.");
-                    return;
+                } catch (e) {
+                    console.error(e);
+                    qrOverlay.innerHTML = '<div style="color:#ef4444;">CONNECTION ERROR</div>';
                 }
+            }
 
-                // Switch to Processing State (Step 3)
+            async function initiateRazorpay() {
+                const btn = document.getElementById('proceedToPayBtn');
+                btn.innerHTML = '<span>INITIALIZING GATEWAY...</span>';
+                
+                try {
+                    const res = await fetch('/api/payments/razorpay/create-order/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            plan_type: currentPlan,
+                            amount: currentAmount,
+                            email: document.getElementById('userEmail').value,
+                            phone: document.getElementById('userPhone').value
+                        })
+                    });
+                    
+                    const orderData = await res.json();
+                    
+                    const options = {
+                        "key": "{{ RAZORPAY_KEY_ID }}", // We'll pass this from view
+                        "amount": orderData.amount,
+                        "currency": "INR",
+                        "name": "Y.S.M AI",
+                        "description": currentPlan + " Plan Activation",
+                        "order_id": orderData.order_id,
+                        "handler": function (response) {
+                            verifyRazorpayPayment(response);
+                        },
+                        "prefill": {
+                            "name": document.getElementById('userName').value,
+                            "email": document.getElementById('userEmail').value,
+                            "contact": document.getElementById('userPhone').value
+                        },
+                        "theme": { "color": "#6366f1" }
+                    };
+                    
+                    const rzp1 = new Razorpay(options);
+                    rzp1.open();
+                    
+                    btn.innerHTML = '<span>PROCEED TO PAYMENT</span>';
+                    btn.disabled = false;
+                    
+                } catch (e) {
+                    alert("Failed to initialize payment: " + e.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>PROCEED TO PAYMENT</span>';
+                }
+            }
+
+            async function verifyRazorpayPayment(rzpResponse) {
+                // Show Step 3 (Processing)
+                updateModalProgress(3);
+                document.getElementById('step1').style.display = 'none';
                 document.getElementById('step2').style.display = 'none';
                 document.getElementById('step3').style.display = 'block';
                 document.getElementById('processingState').style.display = 'block';
                 document.getElementById('successState').style.display = 'none';
-
-                // Start Voice Guidance
-                speak("Subscription request received. Our A.I. neural engine is now verifying your payment transaction. Please do not close this window.");
-
-                // Animation for progress bar
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += Math.random() * 15;
-                    if (progress > 95) progress = 95;
-                    const pBar = document.getElementById('processingBar');
-                    if (pBar) pBar.style.width = progress + '%';
-                }, 500);
+                
+                speak("Payment received. Finalizing your activation protocol.");
 
                 try {
-                    const formData = new FormData();
-                    formData.append('email', email);
-                    formData.append('institution_name', name);
-                    formData.append('amount', currentAmount);
-                    formData.append('plan_type', currentPlan);
-                    formData.append('utr', utr);
-                    formData.append('phone', phone);
-                    if (logoFile) formData.append('institution_logo', logoFile);
-                    if (sigFile) formData.append('digital_signature', sigFile);
-
-                    const response = await fetch('/api/subscription/submit/', {
+                    const res = await fetch('/api/payments/razorpay/verify/', {
                         method: 'POST',
                         headers: {
+                            'Content-Type': 'application/json',
                             'X-CSRFToken': getCookie('csrftoken')
                         },
-                        body: formData
+                        body: JSON.stringify({
+                            razorpay_order_id: rzpResponse.razorpay_order_id,
+                            razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                            razorpay_signature: rzpResponse.razorpay_signature,
+                            email: document.getElementById('userEmail').value,
+                            institution_name: document.getElementById('userName').value,
+                            phone: document.getElementById('userPhone').value,
+                            plan_type: currentPlan
+                        })
                     });
 
-                    const data = await response.json();
-
-                    clearInterval(progressInterval);
-                    const pBar = document.getElementById('processingBar');
-                    if (pBar) pBar.style.width = '100%';
-
-                    if (response.ok) {
-                        // Success State
-                        updateModalProgress(3);
-                        setTimeout(() => {
-                            document.getElementById('processingState').style.display = 'none';
-                            document.getElementById('successState').style.display = 'block';
-                            speak("Verification successful. Your institution account onboarding has been initiated. You will receive access credentials within two to four hours. Welcome to the future of education.");
-                        }, 1000);
+                    const data = await res.json();
+                    if (res.ok) {
+                        document.getElementById('processingState').style.display = 'none';
+                        document.getElementById('successState').style.display = 'block';
+                        speak("System activated. Welcome to the future.");
                     } else {
-                        // Go back to step 2 on error
-                        document.getElementById('step3').style.display = 'none';
-                        document.getElementById('step2').style.display = 'block';
-                        speak("Transaction verification failed. Please check your U.T.R. number and try again.");
-                        await SovereignModal.alert(data.error || 'Submission failed.', 'Error', 'error');
+                        alert("Verification failed: " + data.error);
+                        location.reload();
                     }
                 } catch (e) {
-                    console.error("Payment Error:", e);
-                    clearInterval(progressInterval);
-                    document.getElementById('step3').style.display = 'none';
-                    document.getElementById('step2').style.display = 'block';
-                    await SovereignModal.alert('Fatal Error during activation request. If your payment was deducted, please contact support@ysm.education with your UTR.', 'Submission Error', 'error');
+                    alert("Error during verification: " + e.message);
                 }
             }
+
         </script>
         <script defer src="{% static 'js/premium_motion.js' %}?v=1.1"></script>
         <script defer src="{% static 'js/3d-scene.js' %}?v=1.1"></script>

@@ -38,6 +38,10 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <!-- Core API & Engine -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        window.RAZORPAY_KEY_ID = "{{ RAZORPAY_KEY_ID }}";
+    </script>
     <script src="/static/js/api.js?v=5.2" defer></script>
     <!-- Version 5.2: Removed Approvals menu items -->
 

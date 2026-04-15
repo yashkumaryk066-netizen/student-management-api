@@ -143,17 +143,142 @@ function renderPayments(payments) {
 
 /* ---------- PAYMENT FLOW ---------- */
 async function payFee(amount, description) {
-    ModalSystem.show(
-        `Proceed to pay ${window.CURRENCY_SYMBOL || '₹'}${amount}?\nAfter payment, enter transaction ID.`,
-        'Fee Payment',
-        'info'
-    );
+    if (!window.RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID === "None") {
+        return submitManualPayment(amount, description);
+    }
 
-    setTimeout(() => submitManualPayment(amount, description), 400);
+    const choice = confirm(`How would you like to pay ${window.CURRENCY_SYMBOL || '₹'}${amount}?\n\nOK for "Direct QR Scan"\nCancel for "Other Payment Methods"`);
+    
+    if (choice) {
+        showRazorpayQR(amount, description);
+    } else {
+        openRazorpayModal(amount, description);
+    }
+}
+
+async function showRazorpayQR(amount, description) {
+    try {
+        showToast('Generating Dynamic QR...', 'info');
+        
+        const response = await apiCall('/payment/razorpay/qr/', {
+            method: 'POST',
+            body: JSON.stringify({
+                amount: amount,
+                payment_type: 'FEE',
+                student_id: currentStudentId,
+                description: description,
+                name: 'Y.S.M ERP Fee Payment'
+            })
+        });
+        
+        if (response.success && response.image_url) {
+            // Show QR in a custom centered overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'qrOverlay';
+            overlay.style = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);';
+            overlay.innerHTML = `
+                <div style="background:#1e293b;padding:30px;border-radius:24px;text-align:center;max-width:400px;border:1px solid #334155;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+                    <h2 style="color:white;margin-bottom:10px;">Scan to Pay</h2>
+                    <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:20px;">Amount: <strong style="color:#3b82f6;font-size:1.2rem;">${window.CURRENCY_SYMBOL || '₹'}${amount}</strong></p>
+                    
+                    <div style="background:white;padding:15px;border-radius:16px;margin-bottom:20px;">
+                        <img src="${response.image_url}" style="width:250px;height:250px;display:block;">
+                    </div>
+                    
+                    <div style="color:#64748b;font-size:0.8rem;margin-bottom:25px;">
+                        Securely powered by Razorpay.<br>
+                        Funds will be credited instantly upon success.
+                    </div>
+                    
+                    <button onclick="document.getElementById('qrOverlay').remove()" style="width:100%;padding:12px;background:rgba(255,255,255,0.05);color:white;border:1px solid #334155;border-radius:12px;cursor:pointer;">CLOSE</button>
+                    
+                    <div style="margin-top:15px;">
+                         <button onclick="document.getElementById('qrOverlay').remove(); openRazorpayModal(${amount}, '${description}')" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:0.8rem;text-decoration:underline;">Use Other Payment Methods</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        } else {
+            showToast('QR generation failed. Opening standard modal.', 'warning');
+            openRazorpayModal(amount, description);
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Error generating QR', 'error');
+    }
+}
+
+async function openRazorpayModal(amount, description) {
+    try {
+        showToast('Opening secure gateway...', 'info');
+        
+        // 1. Create Order
+        const orderData = await apiCall('/payment/razorpay/order/', {
+            method: 'POST',
+            body: JSON.stringify({
+                amount: amount,
+                payment_type: 'FEE',
+                student_id: currentStudentId,
+                description: description
+            })
+        });
+
+        // 2. Open Razorpay Checkout
+        const options = {
+            "key": window.RAZORPAY_KEY_ID,
+            "amount": orderData.amount,
+            "currency": orderData.currency,
+            "name": "Y.S.M AI Education",
+            "description": description,
+            "order_id": orderData.order_id,
+            "handler": function (response) {
+                verifyRazorpayPayment(response, amount, description);
+            },
+            "prefill": {
+                "name": document.getElementById('studentName').textContent,
+                "email": AuthEngine.currentUser().email,
+                "contact": document.getElementById('contact').textContent
+            },
+            "theme": { "color": "#3b82f6" }
+        };
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+
+    } catch (err) {
+        console.error(err);
+        showToast('Failed to initialize Razorpay. Switching to manual mode.', 'warning');
+        submitManualPayment(amount, description);
+    }
+}
+
+async function verifyRazorpayPayment(rzpResponse, amount, description) {
+    try {
+        showToast('Verifying payment...', 'info');
+        const result = await apiCall('/payment/razorpay/verify/', {
+            method: 'POST',
+            body: JSON.stringify({
+                razorpay_order_id: rzpResponse.razorpay_order_id,
+                razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                razorpay_signature: rzpResponse.razorpay_signature,
+                amount: amount,
+                payment_type: 'FEE',
+                student_id: currentStudentId
+            })
+        });
+
+        if (result.success) {
+            showToast('Payment successful! Fee updated.', 'success');
+            loadStudentData();
+        } else {
+            showToast(result.error || 'Verification failed.', 'error');
+        }
+    } catch (err) {
+        showToast('Verification failed. Please contact support.', 'error');
+    }
 }
 
 async function submitManualPayment(amount, description) {
-    const txnId = prompt(`Enter Transaction / UTR ID for ${window.CURRENCY_SYMBOL || '₹'}${amount}`);
+    const txnId = prompt(`Manual Payment: Enter Transaction / UTR ID for ${window.CURRENCY_SYMBOL || '₹'}${amount}`);
     if (!txnId) return;
 
     try {
@@ -162,13 +287,13 @@ async function submitManualPayment(amount, description) {
             body: JSON.stringify({
                 amount,
                 description,
-                transaction_id: txnId
+                transaction_id: txnId,
+                student_id: currentStudentId
             })
         });
 
         showToast('Payment submitted. Verification pending.', 'success');
         loadStudentData();
-
     } catch {
         showToast('Payment submission failed', 'error');
     }
