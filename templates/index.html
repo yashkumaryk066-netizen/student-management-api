@@ -2777,21 +2777,30 @@
             function openPaymentModal(plan, amount) {
                 currentPlan = plan;
                 const basePrice = parseFloat(amount);
-                const platformFee = Math.round(basePrice * 0.02); // 2% Fee
-                const gst = Math.round((basePrice + platformFee) * 0.18); // 18% GST
+                const platformFee = Math.round(basePrice * 0.02); // 2% Fee on Base
+                const gst = Math.round(basePrice * 0.18); // 18% GST on Base
                 currentAmount = (basePrice + platformFee + gst);
                 
-                // Final adjustment to match backend "Fixed" numbers (600, 1800, 3600)
-                if (basePrice === 500) currentAmount = 600;
-                if (basePrice === 1500) currentAmount = 1800;
-                if (basePrice === 3000) currentAmount = 3600;
+                // Final adjustment to match backend "Fixed" numbers exactly
+                if (basePrice === 500) {
+                    currentAmount = 600;
+                    // Ensure breakdown adds up: 500 + 10 + 90 = 600
+                }
+                if (basePrice === 1500) {
+                    currentAmount = 1800;
+                    // Ensure breakdown adds up: 1500 + 30 + 270 = 1800
+                }
+                if (basePrice === 3000) {
+                    currentAmount = 3600;
+                    // Ensure breakdown adds up: 3000 + 60 + 540 = 3600
+                }
 
                 document.getElementById('selectedPlanLabel').innerText = plan;
                 
                 // Update Breakdown UI
                 document.getElementById('breakdownBase').innerText = '₹' + basePrice.toLocaleString();
                 document.getElementById('breakdownFee').innerText = '₹' + platformFee;
-                document.getElementById('breakdownTax').innerText = '₹' + gst; // Needs breakdownTax ID in HTML
+                document.getElementById('breakdownTax').innerText = '₹' + (currentAmount - basePrice - platformFee); 
                 document.getElementById('breakdownTotal').innerText = '₹' + currentAmount;
                 document.getElementById('paymentModalOverlay').style.display = 'flex';
 
