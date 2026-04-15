@@ -2858,6 +2858,69 @@
                 }
             }
 
+            async function confirmPayment(event) {
+                event.preventDefault();
+                const utr = document.getElementById('txnUtrInput').value.trim();
+                const userName = document.getElementById('userName').value.trim();
+                const userEmail = document.getElementById('userEmail').value.trim();
+                const userPhone = document.getElementById('userPhone').value.trim();
+                const logo = document.getElementById('instLogo').files[0];
+                const sig = document.getElementById('instSig').files[0];
+
+                if (!utr || utr.length < 10) {
+                    alert("Please enter a valid 12-digit UTR or Transaction ID.");
+                    return;
+                }
+
+                // Show processing
+                updateModalProgress(3);
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('step3').style.display = 'block';
+                document.getElementById('processingState').style.display = 'block';
+                document.getElementById('successState').style.display = 'none';
+
+                speak("Verifying U.T.R. and synchronizing institution assets.");
+
+                const formData = new FormData();
+                formData.append('transaction_id', utr);
+                formData.append('amount', currentAmount);
+                formData.append('payment_type', 'SUBSCRIPTION');
+                formData.append('plan_type', currentPlan);
+                formData.append('description', `Subscription for ${userName} (${userEmail})`);
+                formData.append('email', userEmail);
+                formData.append('phone', userPhone);
+                formData.append('name', userName);
+                if (logo) formData.append('logo', logo);
+                if (sig) formData.append('signature', sig);
+
+                try {
+                    const response = await fetch('/api/subscription/submit/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        document.getElementById('processingState').style.display = 'none';
+                        document.getElementById('successState').style.display = 'block';
+                        speak("Transaction recorded. Our neural network will verify your payment within 2 to 4 hours.");
+                    } else {
+                        alert(data.error || "Submission failed. Please check your network.");
+                        // Revert UI
+                        updateModalProgress(2);
+                        document.getElementById('step2').style.display = 'block';
+                        document.getElementById('step3').style.display = 'none';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Neural link failure. Connection interrupted.");
+                }
+            }
+
         </script>
         <script defer src="{% static 'js/premium_motion.js' %}?v=1.1"></script>
         <script defer src="{% static 'js/3d-scene.js' %}?v=1.1"></script>
