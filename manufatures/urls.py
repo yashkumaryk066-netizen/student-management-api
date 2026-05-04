@@ -63,6 +63,7 @@ urlpatterns = [
     
     # Frontend Pages
     path('', LandingPageView.as_view(), name='landing-page'),
+    path('blog/', include('blog.urls')),
     path('demo/', DemoPageView.as_view(), name='demo-page'),
     path('login/', LoginPageView.as_view(), name='login-page'),
     path('developer/', DeveloperProfileView.as_view(), name='developer-profile-root'),

@@ -174,6 +174,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'notifications',
     'ai', # AI Restored
+    'blog',
     # 'rangrago', # RangraGo Ride Module - Disabled
 ]
 

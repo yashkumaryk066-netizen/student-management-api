@@ -573,6 +573,7 @@ def robots_txt(request):
         "",
         "User-agent: *",
         "Allow: /",
+        "Allow: /blog/",
         "Allow: /developer/",
         "Allow: /resume/",
         "Allow: /static/",
@@ -590,6 +591,7 @@ def robots_txt(request):
         "# Allow Google Image Bot full access to images for keyword ranking",
         "User-agent: Googlebot-Image",
         "Allow: /",
+        "Allow: /blog/",
         "Allow: /static/images/",
         "Allow: /static/img/",
         "Allow: /static/",
@@ -602,9 +604,11 @@ def robots_txt(request):
 def sitemap_xml(request):
     from datetime import date
     from django.conf import settings
+    from blog.models import Post  # Import Post model
     today = date.today().isoformat()
     domain = getattr(settings, 'SITE_URL', 'https://yashamishra.pythonanywhere.com').rstrip('/')
 
+    # Static Pages
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
@@ -622,6 +626,34 @@ def sitemap_xml(request):
       <image:caption>Y.S.M AI (ysm login key) is the best college erp demo system by Ankush Mishra (ankushmishra.com). Serving Bihar and India.</image:caption>
     </image:image>
   </url>
+
+  <!-- ==================== BLOG INDEX ==================== -->
+  <url>
+    <loc>{domain}/blog/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+"""
+
+    # Dynamic Blog Posts
+    posts = Post.objects.filter(status='published')
+    for post in posts:
+        post_url = f"{domain}/blog/{post.slug}/"
+        post_date = post.updated_date.date().isoformat()
+        xml_content += f"""
+  <url>
+    <loc>{post_url}</loc>
+    <lastmod>{post_date}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>{domain}/static/images/yash_profile.jpg</image:loc>
+      <image:title>{post.title}</image:title>
+    </image:image>
+  </url>"""
+
+    xml_content += f"""
 
   <!-- ==================== DEVELOPER PROFILE (MOST IMPORTANT FOR RANKING) ==================== -->
   <url>

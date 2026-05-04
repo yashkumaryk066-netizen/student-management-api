@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y.S.M Blog – Education Insights, AI & School Management Tips</title>
+    <meta name="description" content="Explore the latest trends in school management, coaching institute growth, and AI in education. Y.S.M AI Blog provides expert insights for educators.">
+    <meta name="keywords" content="School Management Blog, Coaching Growth Tips, AI in Education, EdTech Trends India, Yash Ankush Mishra Blog">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #06b6d4;
+            --bg-dark: #02040a;
+            --bg-surface: #0a0e27;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 0;
+            background: rgba(2, 4, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Hero */
+        .blog-hero {
+            padding: 180px 40px 100px;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        }
+
+        .blog-hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .blog-hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Grid */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px 100px;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .blog-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .blog-card-image {
+            width: 100%;
+            height: 220px;
+            background: #1a1c2e;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blog-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .blog-card:hover .blog-card-image img {
+            transform: scale(1.1);
+        }
+
+        .blog-card-content {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card-meta {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .blog-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: white;
+            line-height: 1.3;
+        }
+
+        .blog-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .blog-card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .read-more {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: gap 0.3s;
+        }
+
+        .read-more:hover {
+            gap: 12px;
+            color: var(--primary);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 60px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 12px 20px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .pagination .active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .pagination a:hover {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 40px;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+            background: var(--bg-surface);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .blog-hero h1 { font-size: 2.5rem; }
+            .nav-container { padding: 0 20px; }
+            .container { padding: 0 20px 60px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"><span>Y.S.M</span> AI</a>
+            <div style="display: flex; gap: 30px;">
+                <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600;">Home</a>
+                <a href="/blog/" style="color: white; text-decoration: none; font-size: 0.9rem; font-weight: 600;">Blog</a>
+                <a href="/demo/" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600;">Demo</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="blog-hero">
+        <h1>Educational Intelligence</h1>
+        <p>Expert insights on school management, student success, and the future of AI-driven education technology.</p>
+    </header>
+
+    <div class="container">
+        <div class="blog-grid">
+            {% for post in posts %}
+            <article class="blog-card">
+                <div class="blog-card-image">
+                    {% if post.featured_image %}
+                        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+                    {% else %}
+                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 3rem; opacity: 0.2;">Y.S.M</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="blog-card-content">
+                    <div class="blog-card-meta">{{ post.published_date|date:"M d, Y" }}</div>
+                    <h3>{{ post.title }}</h3>
+                    <p>{{ post.excerpt|truncatewords:25 }}</p>
+                    <div class="blog-card-footer">
+                        <a href="{{ post.get_absolute_url }}" class="read-more">Read Full Insight →</a>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <div style="grid-column: span 3; text-align: center; padding: 100px 0;">
+                <h2 style="color: var(--text-muted);">No insights published yet. Check back soon!</h2>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if posts.has_other_pages %}
+        <div class="pagination">
+            {% if posts.has_previous %}
+                <a href="?page={{ posts.previous_page_number }}">Previous</a>
+            {% endif %}
+            
+            <span class="active">{{ posts.number }}</span>
+            
+            {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Y.S.M AI Education System. All rights reserved. Designed for Excellence.</p>
+    </footer>
+
+</body>
+</html>
