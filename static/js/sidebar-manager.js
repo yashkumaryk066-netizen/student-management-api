@@ -54,14 +54,15 @@ class PremiumSidebarManager {
         const storedPlan = localStorage.getItem('userPlan');
 
         if (storedPlan) {
-            this.currentPlan = storedPlan;
+            this.currentPlan = storedPlan.toLowerCase();
         } else {
             // Default to 'coaching' for limited access (Security First)
             this.currentPlan = 'coaching';
             localStorage.setItem('userPlan', this.currentPlan);
         }
 
-        console.log(`🎯 Current Plan: ${this.currentPlan} (${PLAN_ACCESS[this.currentPlan].name})`);
+        const planInfo = PLAN_ACCESS[this.currentPlan] || PLAN_ACCESS['coaching'];
+        console.log(`🎯 Current Plan: ${this.currentPlan} (${planInfo.name})`);
 
         // API endpoint not implemented yet - using localStorage/default
         // Uncomment below when /api/user/plan/ endpoint is ready

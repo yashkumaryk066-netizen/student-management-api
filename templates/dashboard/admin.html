@@ -388,12 +388,14 @@
                     </a>
                 </li>
 
+                {% if not user.is_superuser %}
                 <li class="nav-item">
                     <a href="#subscription" class="nav-link" data-module="subscription">
                         <span class="nav-icon">💳</span>
                         <span class="nav-text">Plan & Subscription</span>
                     </a>
                 </li>
+                {% endif %}
 
                 <li class="nav-item">
                     <a href="#settings" class="nav-link" data-module="settings">
@@ -1026,9 +1028,11 @@
 
     <!-- Initialize Dashboard App -->
     <script>
-        // admin.js self-initializes; keep this as a load guard only.
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof DashboardApp === 'undefined') {
+            if (typeof DashboardApp !== 'undefined') {
+                console.log('🚀 Initializing Dashboard Engine...');
+                DashboardApp.init();
+            } else {
                 console.error('❌ DashboardApp not found! Check admin.js loading.');
             }
         });
@@ -1067,24 +1071,61 @@
                 localStorage.setItem('SOVEREIGN_ENGINE_SYNC', CURRENT_VERSION);
             }
         })();
-    </script>
-    </div>
-    </div>
-    <!-- Branding Fetch Script -->
-                    // --- CRITICAL: SUBSCRIPTION EXPIRY LOCK (Neural Protocol) ---
-                    const expiryDateStr = profile.subscription_expiry;
-                    if (expiryDateStr) {
-                        const expiryDate = new Date(expiryDateStr);
-                        const today = new Date();
-                        // Reset hours for accurate date-only comparison
-                        today.setHours(0,0,0,0);
-                        expiryDate.setHours(0,0,0,0);
 
-                        if (expiryDate < today) {
-                            console.error("🛑 PROTOCOL TERMINATED: Subscription Expired");
-                            window.currentProfile = profile; 
-                            showTerminationModal(profile);
-                            return; // Stop further initialization
+        // --- SILENCE GHOST NOTIFICATION WEBSOCKETS (404 FIX) ---
+        (function() {
+            if (window.WebSocket) {
+                const OriginalWebSocket = window.WebSocket;
+                window.WebSocket = function(url, protocols) {
+                    if (typeof url === 'string' && url.includes('/ws/notifications/')) {
+                        console.warn("🛡️ Sovereign Security: Blocking ghost WebSocket request to:", url);
+                        // Return a minimal mock that doesn't break external listeners
+                        const mock = Object.create(OriginalWebSocket.prototype);
+                        Object.assign(mock, {
+                            close: () => {},
+                            send: () => {},
+                            addEventListener: () => {},
+                            removeEventListener: () => {},
+                            readyState: 3 // CLOSED
+                        });
+                        return mock;
+                    }
+                    return new OriginalWebSocket(url, protocols);
+                };
+                window.WebSocket.prototype = OriginalWebSocket.prototype;
+            }
+        })();
+    </script>
+    <script>
+        // --- AUTHENTICATION & PRIVILEGE ENGINE ---
+        window.userIsSuperuser = {% if user.is_superuser %}true{% else %}false{% endif %};
+
+        // Branding Fetch Script
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/branding/current/', {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('authToken') }
+                });
+                if (res.ok) {
+                    const profile = await res.json();
+                    window.currentProfile = profile;
+
+                    // --- CRITICAL: SUBSCRIPTION EXPIRY LOCK (Neural Protocol) ---
+                    if (window.userIsSuperuser) {
+                        console.log("🛡️ SuperUser bypass: Subscription lock ignored.");
+                    } else {
+                        const expiryDateStr = profile.subscription_expiry;
+                        if (expiryDateStr) {
+                            const expiryDate = new Date(expiryDateStr);
+                            const today = new Date();
+                            today.setHours(0,0,0,0);
+                            expiryDate.setHours(0,0,0,0);
+
+                            if (expiryDate < today) {
+                                console.error("🛑 PROTOCOL TERMINATED: Subscription Expired");
+                                showTerminationModal(profile);
+                                return; 
+                            }
                         }
                     }
 
@@ -1112,7 +1153,7 @@
                         <div id="lockStatusBox" style="background:rgba(245, 158, 11, 0.05); border:1px solid rgba(245, 158, 11, 0.1); border-radius:24px; padding:30px; margin-bottom:40px; text-align:left;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
                                 <span style="color:#64748b;">Expired On:</span>
-                                <span style="color:white; font-weight:600;">${profile.subscription_expiry}</span>
+                                <span style="color:white; font-weight:600;">${profile.subscription_expiry || 'NEVER'}</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
                                 <span style="color:#64748b;">Plan:</span>
@@ -1309,7 +1350,7 @@
                 }
 
                 listContainer.innerHTML = notifications.map(n => {
-                    const planPrice = subData.price;
+                    const planPrice = (window.currentProfile && window.currentProfile.plan_price) || '0';
                     const iconColor = n.type === 'ALERT' ? '#ef4444' : (n.type === 'SUCCESS' ? '#10b981' : '#3b82f6');
                     const bg = n.type === 'ALERT' ? 'rgba(239, 68, 68, 0.1)' : (n.type === 'SUCCESS' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)');
 

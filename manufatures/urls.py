@@ -45,6 +45,7 @@ from student.views import (
     TermsOfServiceView,
     RefundPolicyView,
     AIChatView,
+    silent_ws_fallback,
 )
 
 urlpatterns = [
@@ -93,6 +94,9 @@ urlpatterns = [
     # API Documentation
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
+    
+    # WebSocket Silent Fallback (404 FIX)
+    path('ws/notifications/', silent_ws_fallback),
 ]
 
 handler404 = 'student.views.handler404'

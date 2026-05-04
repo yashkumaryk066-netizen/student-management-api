@@ -937,4 +937,13 @@ class SubscriptionStatusView(ClientSubscriptionView):
     pass
 
 def handler404(request, exception=None):
+    # If it's a ghost WebSocket request, silence it
+    if request.path.startswith('/ws/'):
+        return HttpResponse(status=204)
+        
+    # Standard 404 response
     return render(request, '404.html', status=404)
+
+def silent_ws_fallback(request):
+    """Silences ghost WebSocket requests to prevent log pollution."""
+    return HttpResponse(status=204)

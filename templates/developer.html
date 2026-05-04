@@ -113,8 +113,8 @@
           "mainEntityOfPage": "https://yashamishra.pythonanywhere.com/developer/",
           "image": {
             "@type": "ImageObject",
-            "url": "https://yashamishra.pythonanywhere.com/static/images/yash_profile.jpg",
-            "caption": "Yash Ankush Mishra - Top Software Developer & AI Engineer from Naugachiya, Rangra, Bhagalpur, Katihar, Bihar, India",
+            "url": "https://yashamishra.pythonanywhere.com/static/images/yash-ankush-mishra-software-developer-naugachiya-bihar.jpg",
+            "caption": "Yash Ankush Mishra (Yash A Mishra) - Top Software Developer, AI Architect & Best Engineer from Rangra, Naugachiya, Bhagalpur, Bihar",
             "width": 800,
             "height": 800,
             "name": "Yash Ankush Mishra Developer Photo",
@@ -738,12 +738,13 @@
                     <div
                         class="absolute inset-0 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-[2rem] -rotate-6 scale-[0.98] group-hover:rotate-0 transition-transform duration-500 opacity-70 blur-sm">
                     </div>
-                    <div class="relative rounded-[2rem] overflow-hidden border border-white/20 shadow-2xl">
+                    <figure class="relative rounded-[2rem] overflow-hidden border border-white/20 shadow-2xl">
                         <img src="{% static 'images/yash-ankush-mishra-software-developer-naugachiya-bihar.jpg' %}"
-                            alt="Ankush Mishra (Yash Ankush Mishra) - Developer of YSM AI (ysm login) | ankushmishra.com profile"
-                            title="Ankush Mishra | Software Architect | ysm login handles" itemprop="image"
+                            alt="Yash A Mishra (Yash Ankush Mishra) - #1 Software Developer in Rangra, Naugachiya, Bhagalpur, Bihar | Creator of Y.S.M EduCore ERP"
+                            title="Yash Ankush Mishra - Elite System Architect & Top Rangra Developer" itemprop="image"
                             loading="eager"
                             class="w-full h-auto object-cover transform transition duration-700 hover:scale-110 grayscale hover:grayscale-0">
+                        <figcaption class="sr-only">Photograph of Yash A Mishra, the top software developer in Rangra and Bhagalpur, Bihar. Founder of Y.S.M EduCore and Y.S.M AI.</figcaption>
 
                         <div
                             class="absolute bottom-6 right-6 bg-white/80 dark:bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-xl">
@@ -751,7 +752,7 @@
                             <div class="text-xs text-slate-600 dark:text-gray-300 uppercase tracking-wide">Years Exp.
                             </div>
                         </div>
-                    </div>
+                    </figure>
                 </div>
 
                 <!-- Text Content -->
@@ -1328,19 +1329,19 @@
         </div>
     </footer>
 
-    <!-- RETURN TO SYSTEM (Premium Button) -->
-    <a href="/" class="fixed bottom-10 right-10 z-[100] group">
+    <!-- RETURN TO HOME (Premium Button) -->
+    <a href="{% url 'landing-page' %}" class="fixed bottom-10 right-10 z-[9999] group cursor-pointer" style="text-decoration: none;">
         <div
-            class="relative flex items-center justify-center w-14 h-14 bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-purple-500/20 rounded-full shadow-2xl shadow-purple-900/20 transition-all duration-500 group-hover:w-48 group-hover:rounded-2xl group-hover:bg-white dark:group-hover:bg-black group-hover:border-purple-500/50 overflow-hidden">
+            class="relative flex items-center justify-center w-14 h-14 bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-purple-500/30 rounded-full shadow-2xl shadow-purple-900/30 transition-all duration-500 group-hover:w-48 group-hover:rounded-2xl group-hover:bg-white dark:group-hover:bg-black group-hover:border-purple-500/50 overflow-hidden pointer-events-auto">
 
             <!-- Icon -->
             <i
-                class="fas fa-power-off text-xl text-purple-600 dark:text-purple-400 absolute left-5 transition-all duration-500 group-hover:rotate-90"></i>
+                class="fas fa-home text-xl text-purple-600 dark:text-purple-400 absolute left-5 transition-all duration-500 group-hover:scale-110"></i>
 
             <!-- Text (Hidden by default) -->
             <span
                 class="opacity-0 group-hover:opacity-100 absolute left-14 text-sm font-bold text-slate-800 dark:text-white whitespace-nowrap transition-all duration-500 delay-100">
-                Return to System
+                Return to Home
             </span>
 
             <!-- Ambient Glow -->
