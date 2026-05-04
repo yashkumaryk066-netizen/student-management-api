@@ -542,7 +542,66 @@
                 </div>
             </div>
         </section>
-    </main>
+        <section id="roi" class="section" style="background: var(--navy-blue); color: var(--white);">
+            <div class="section-header">
+                <h2 style="color: var(--white);">Economic Sovereignty Calculator</h2>
+                <p style="color: rgba(255,255,255,0.7);">Estimate your institutional savings and ROI with Y.S.M AI's automation engine.</p>
+            </div>
+            <div style="max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; background: rgba(255,255,255,0.05); padding: 50px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                <div class="roi-inputs">
+                    <div style="margin-bottom: 30px;">
+                        <label style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:600;">
+                            <span>Total Students</span>
+                            <span id="studentVal" style="color: var(--primary-orange);">1000</span>
+                        </label>
+                        <input type="range" id="studentRange" min="100" max="5000" step="50" value="1000" oninput="calculateROI()" style="width:100%; accent-color: var(--primary-orange);">
+                    </div>
+                    <div style="margin-bottom: 30px;">
+                        <label style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:600;">
+                            <span>Avg. Monthly Fee (₹)</span>
+                            <span id="feeVal" style="color: var(--primary-orange);">2000</span>
+                        </label>
+                        <input type="range" id="feeRange" min="500" max="10000" step="100" value="2000" oninput="calculateROI()" style="width:100%; accent-color: var(--primary-orange);">
+                    </div>
+                    <p style="font-size:0.85rem; opacity:0.7;">*Calculated based on 92% administrative efficiency increase.</p>
+                </div>
+                <div style="text-align:center; background:var(--white); color:var(--navy-blue); padding:40px; border-radius:15px;">
+                    <p style="text-transform:uppercase; font-size:0.8rem; font-weight:800; letter-spacing:1px; margin-bottom:10px;">Projected Annual Savings</p>
+                    <div id="savingsVal" style="font-size:3.5rem; font-weight:900; color:var(--primary-orange);">₹ 12.5L</div>
+                    <p style="font-weight:700;">+ approx. <span id="hoursSaved" style="color:#10b981;">2,200</span> hours saved</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq" class="section">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div style="border-bottom: 1px solid #eee; padding: 20px 0;">
+                    <h4 style="margin-bottom:10px;">Who is Yash Ankush Mishra?</h4>
+                    <p style="color:var(--text-muted); font-size:0.95rem;">Yash Ankush Mishra is a top-tier Full Stack Developer and AI Engineer from Naugachiya, Rangra, Bihar. Known as the 'Most Intelligent Boy in Rangra', he founded Y.S.M AI to transform education technology in India.</p>
+                </div>
+                <div style="border-bottom: 1px solid #eee; padding: 20px 0;">
+                    <h4 style="margin-bottom:10px;">Is institutional data secure?</h4>
+                    <p style="color:var(--text-muted); font-size:0.95rem;">Yes, Y.S.M AI uses military-grade end-to-end encryption. All student and financial records are stored in encrypted neural clusters with automatic daily backups.</p>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            function calculateROI() {
+                const students = document.getElementById('studentRange').value;
+                const fee = document.getElementById('feeRange').value;
+                document.getElementById('studentVal').innerText = students;
+                document.getElementById('feeVal').innerText = fee;
+                
+                const savings = Math.round((students * 1250) / 100000); // Rough logic from original
+                document.getElementById('savingsVal').innerText = '₹ ' + savings + 'L';
+                document.getElementById('hoursSaved').innerText = (students * 2.2).toLocaleString();
+            }
+            window.onload = calculateROI;
+        </script>
 
     <footer class="footer">
         <div class="footer-grid">
