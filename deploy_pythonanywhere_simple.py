@@ -27,14 +27,16 @@ try:
         print(err)
         
     print("Running deployment script...")
-    deploy_cmd = "cd ~/student-management-api && git pull origin main && source venv/bin/activate && pip install -r requirements.txt && python manage.py collectstatic --noinput && touch /var/www/yashamishra_pythonanywhere_com_wsgi.py"
+    deploy_cmd = "cd ~/student-management-api && git pull origin main && source venv/bin/activate && pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py populate_blog && python manage.py collectstatic --noinput && touch /var/www/yashamishra_pythonanywhere_com_wsgi.py && echo 'Deployment Finished Successfully'"
     stdin, stdout, stderr = client.exec_command(deploy_cmd)
     
     print("\n--- DEPLOY OUTPUT ---")
-    print(stdout.read().decode('utf-8'))
-    if stderr.read():
+    out = stdout.read().decode('utf-8')
+    err_out = stderr.read().decode('utf-8')
+    print(out)
+    if err_out:
         print("\n--- DEPLOY ERROR ---")
-        print(stderr.read().decode('utf-8'))
+        print(err_out)
         
 except Exception as e:
     print("Failed.", e)
