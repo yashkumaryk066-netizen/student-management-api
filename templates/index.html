@@ -161,12 +161,11 @@
         /* --- Hero --- */
         .hero {
             position: relative;
-            height: 100vh;
+            min-height: 100vh;
             overflow: hidden;
             display: flex;
             align-items: center;
-            padding: 0 8%;
-            margin-top: 60px;
+            padding: 100px 8% 60px;
         }
 
         #hero-video {
@@ -180,15 +179,84 @@
             z-index: -1;
             transform: translateX(-50%) translateY(-50%);
             object-fit: cover;
-            opacity: 0.4;
+            opacity: 0.3;
             pointer-events: none;
         }
 
-        .hero-content { position: relative; z-index: 1; max-width: 850px; }
+        .hero-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 50px;
+        }
+
+        .hero-content { max-width: 650px; flex-shrink: 0; }
         .hero-sub { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .hero-content h1 { font-size: 50px; font-weight: 700; color: var(--primary-blue); margin-bottom: 25px; }
+        .hero-content h1 { font-size: 48px; font-weight: 800; color: var(--primary-blue); margin-bottom: 25px; line-height: 1.1; }
         .hero-content h1 span { color: var(--primary-orange); }
-        .hero-content p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px; line-height: 1.6; }
+        .hero-content p { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 40px; line-height: 1.6; }
+
+        /* Hero Image Container */
+        .hero-image-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: flex-end;
+            position: relative;
+            max-width: 600px;
+        }
+        .hero-image-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15);
+            border: 8px solid rgba(255, 255, 255, 0.8);
+            transform: perspective(1000px) rotateY(-8deg) translateY(-10px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            object-fit: cover;
+            backdrop-filter: blur(10px);
+        }
+        .hero-image-wrapper img:hover {
+            transform: perspective(1000px) rotateY(0deg) translateY(0) scale(1.02);
+            box-shadow: 0 40px 80px rgba(15, 23, 42, 0.25);
+            border-color: rgba(255, 255, 255, 1);
+        }
+        
+        /* Floating Badge on Image */
+        .hero-image-badge {
+            position: absolute;
+            bottom: -20px;
+            left: -30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2;
+            animation: float 4s ease-in-out infinite;
+        }
+        .hero-image-badge i { color: var(--contact-green); font-size: 2rem; }
+        .hero-image-badge div { display: flex; flex-direction: column; }
+        .hero-image-badge strong { color: var(--primary-blue); font-size: 1.1rem; }
+        .hero-image-badge span { color: var(--text-muted); font-size: 0.85rem; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-container { flex-direction: column; text-align: center; justify-content: center; padding-top: 50px; }
+            .hero-content { max-width: 100%; }
+            .hero-btns { justify-content: center; }
+            .hero-tags { justify-content: center; }
+            .hero-image-wrapper { margin-top: 40px; display: none; /* Hide on mobile to keep it clean */ }
+        }
 
         .hero-tags { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
         .hero-tag { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px); border: 1px solid var(--glass-border); padding: 8px 20px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; color: var(--text-dark); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
@@ -384,22 +452,36 @@
             <video autoplay muted loop playsinline id="hero-video" style="opacity: 1;">
                 <source src="https://www.vidyalayaschoolsoftware.com/assets/images/vidyalaya-banner-video.mp4" type="video/mp4">
             </video>
-            
-            <div class="hero-content" data-aos="fade-up">
-                <div class="hero-text">
-                    <span style="display:inline-block; padding:8px 16px; background:rgba(243, 146, 35, 0.1); color:var(--primary-orange); font-weight:700; border-radius:50px; margin-bottom:20px; border: 1px solid rgba(243, 146, 35, 0.2);"><i class="fa-solid fa-bolt"></i> India's #1 School, College & Coaching Software</span>
-                    <h1><span>Y.S.M EduCore</span> - Empower, Engage, Evolve: Redefining Education.</h1>
-                    <p>The ultimate management software built for visionary Schools, Degree Colleges, Universities, and Coaching Institutes to completely automate their daily operations.</p>
-                
-                    <div class="hero-tags">
-                        <div class="hero-tag">15,00,000+ Students</div>
-                        <div class="hero-tag">40+ Premium Modules</div>
-                        <div class="hero-tag">Personalized AI App</div>
-                    </div>
+            <div class="hero-container">
+                <div class="hero-content" data-aos="fade-right">
+                    <div class="hero-text">
+                        <span style="display:inline-block; padding:8px 16px; background:rgba(243, 146, 35, 0.1); color:var(--primary-orange); font-weight:700; border-radius:50px; margin-bottom:20px; border: 1px solid rgba(243, 146, 35, 0.2);"><i class="fa-solid fa-bolt"></i> India's #1 School, College & Coaching Software</span>
+                        <h1><span>Y.S.M EduCore</span> - Empower, Engage, Evolve: Redefining Education.</h1>
+                        <p>The ultimate management software built for visionary Schools, Degree Colleges, Universities, and Coaching Institutes to completely automate their daily operations.</p>
+                    
+                        <div class="hero-tags">
+                            <div class="hero-tag">15,00,000+ Students</div>
+                            <div class="hero-tag">40+ Premium Modules</div>
+                            <div class="hero-tag">Personalized AI App</div>
+                        </div>
 
-                    <div class="hero-btns">
-                        <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-main">Book A Free Demo</a>
-                        <a href="#roi" class="btn-outline"><i class="fa-solid fa-circle-play"></i> Product Video</a>
+                        <div class="hero-btns">
+                            <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-main">Book A Free Demo</a>
+                            <a href="#roi" class="btn-outline"><i class="fa-solid fa-circle-play"></i> Product Video</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side Image Section -->
+                <div class="hero-image-wrapper" data-aos="fade-left" data-aos-delay="200">
+                    <img src="{% static 'images/hero_lecture.jpg' %}" alt="Y.S.M EduCore Software in Action at a University" onerror="this.src='https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop';">
+                    
+                    <div class="hero-image-badge">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <div>
+                            <strong>Trusted by 1000+</strong>
+                            <span>Institutions Pan-India</span>
+                        </div>
                     </div>
                 </div>
             </div>
