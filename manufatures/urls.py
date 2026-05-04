@@ -46,6 +46,7 @@ from student.views import (
     RefundPolicyView,
     AIChatView,
     silent_ws_fallback,
+    github_webhook,
 )
 
 urlpatterns = [
@@ -97,6 +98,9 @@ urlpatterns = [
     
     # WebSocket Silent Fallback (404 FIX)
     path('ws/notifications/', silent_ws_fallback),
+
+    # GitHub Auto-Deploy Webhook
+    path('github-webhook/', github_webhook, name='github-webhook'),
 ]
 
 handler404 = 'student.views.handler404'

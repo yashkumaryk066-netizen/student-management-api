@@ -947,3 +947,96 @@ def handler404(request, exception=None):
 def silent_ws_fallback(request):
     """Silences ghost WebSocket requests to prevent log pollution."""
     return HttpResponse(status=204)
+
+
+# ==========================================
+# GITHUB AUTO-DEPLOY WEBHOOK
+# ==========================================
+
+import hmac
+import hashlib
+import subprocess
+import logging
+import requests as http_requests
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def github_webhook(request):
+    """
+    Auto-deploys on every GitHub push to main branch.
+    GitHub sends a POST request with HMAC-SHA256 signature.
+    We verify it, git pull, and reload the PythonAnywhere web app.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    # --- 1. Verify GitHub Signature ---
+    webhook_secret = getattr(settings, 'GITHUB_WEBHOOK_SECRET', '').encode('utf-8')
+    signature_header = request.headers.get('X-Hub-Signature-256', '')
+
+    if webhook_secret:
+        mac = hmac.new(webhook_secret, request.body, hashlib.sha256)
+        expected_sig = 'sha256=' + mac.hexdigest()
+        if not hmac.compare_digest(expected_sig, signature_header):
+            logger.warning("GitHub webhook: Invalid signature received.")
+            return JsonResponse({'error': 'Invalid signature'}, status=403)
+
+    # --- 2. Only deploy on push to main branch ---
+    import json as json_lib
+    try:
+        payload = json_lib.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    ref = payload.get('ref', '')
+    if ref not in ('refs/heads/main', 'refs/heads/master'):
+        return JsonResponse({'status': 'Skipped - not main branch'}, status=200)
+
+    # --- 3. Git Pull ---
+    project_dir = getattr(settings, 'BASE_DIR', '/home/tele/manufatures')
+    try:
+        result = subprocess.run(
+            ['git', 'pull', 'origin', 'main'],
+            cwd=str(project_dir),
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        git_output = result.stdout + result.stderr
+        logger.info(f"Git pull output: {git_output}")
+    except subprocess.TimeoutExpired:
+        logger.error("Git pull timed out.")
+        return JsonResponse({'error': 'Git pull timed out'}, status=500)
+    except Exception as e:
+        logger.error(f"Git pull failed: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+    # --- 4. Reload PythonAnywhere Web App ---
+    pa_username = getattr(settings, 'PYTHONANYWHERE_USERNAME', '')
+    pa_token = getattr(settings, 'PYTHONANYWHERE_API_TOKEN', '')
+    pa_domain = getattr(settings, 'PYTHONANYWHERE_DOMAIN', '')
+
+    reload_status = 'skipped'
+    if pa_username and pa_token and pa_domain:
+        try:
+            reload_url = f'https://www.pythonanywhere.com/api/v0/user/{pa_username}/webapps/{pa_domain}/reload/'
+            resp = http_requests.post(
+                reload_url,
+                headers={'Authorization': f'Token {pa_token}'},
+                timeout=30
+            )
+            reload_status = f'HTTP {resp.status_code}'
+            logger.info(f"PythonAnywhere reload: {reload_status}")
+        except Exception as e:
+            logger.error(f"PythonAnywhere reload failed: {e}")
+            reload_status = f'error: {e}'
+
+    return JsonResponse({
+        'status': 'deployed',
+        'git': git_output.strip(),
+        'reload': reload_status
+    }, status=200)
+
