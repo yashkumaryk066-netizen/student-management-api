@@ -1,4 +1,5 @@
 from django.conf import settings
+from decimal import Decimal
 
 # ==============================================================================
 # 🔐 CENTRAL PERMISSION MATRIX (PREMIUM ARCHITECTURE)
@@ -9,7 +10,7 @@ from django.conf import settings
 
 # 1. FEATURE GROUPS (Modular & Reusable)
 CORE_FEATURES = {
-    'dashboard', 'students', 'attendance', 'finance', 'calendar', 'profile', 'settings', 'logs'
+    'dashboard', 'students', 'attendance', 'finance', 'calendar', 'profile', 'settings', 'logs', 'users'
 }
 
 ACADEMIC_FEATURES = {
@@ -177,19 +178,6 @@ def get_user_features(user):
         
     return features_dict
 
-from decimal import Decimal
-# Pricing Configuration (Centralized)
-# Base Rates: Coaching=500, School=1500, Institute=3000
-# Formula: Base + 2% Platform Fee + 18% GST (Approx Total: 1.2036x Base)
-PLAN_PRICING = {
-    'COACHING': Decimal('600.00'),   # 500 Base + Taxes/Fees
-    'SCHOOL': Decimal('1800.00'),     # 1500 Base + Taxes/Fees
-    'INSTITUTE': Decimal('3600.00'),  # 3000 Base + Taxes/Fees
-    'UNIVERSITY': Decimal('3600.00'), # Alias for Institute
-    'EDUCATION SYSTEM': Decimal('99999.00'), 
-    'SUPER_ADMIN': Decimal('0.00')
-}
-
 # Per-plan student/staff limits
 PLAN_STUDENT_LIMITS = {
     'COACHING': 200,   # Up to 200 students
@@ -199,11 +187,37 @@ PLAN_STUDENT_LIMITS = {
     'SUPER_ADMIN': 99999,
 }
 
+# 💰 PRICING CALCULATOR
+PLATFORM_FEE = Decimal('3.00')
+GST_RATE = Decimal('0.05')
+
+BASE_PLAN_PRICING = {
+    'COACHING': Decimal('500.00'),
+    'SCHOOL': Decimal('1500.00'),
+    'INSTITUTE': Decimal('5000.00'),
+    'UNIVERSITY': Decimal('5000.00'),
+    'EDUCATION SYSTEM': Decimal('99999.00'),
+    'SUPER_ADMIN': Decimal('0.00')
+}
+
+def calculate_total_price(plan_type):
+    base = BASE_PLAN_PRICING.get(plan_type.upper(), Decimal('0.00'))
+    if base == 0: return base
+    
+    subtotal = base + PLATFORM_FEE
+    gst = subtotal * GST_RATE
+    total = subtotal + gst
+    return total.quantize(Decimal('0.01'))
+
+# Centralized pricing for reference
+PLAN_PRICING = {k: calculate_total_price(k) for k in BASE_PLAN_PRICING.keys()}
+
 # Per-plan features label (used in emails/UI)
 PLAN_LABELS = {
-    'COACHING': 'Coaching Center Plan - ₹500/month',
-    'SCHOOL': 'School Management Plan - ₹2,000/month',
-    'INSTITUTE': 'Institute / University Plan - ₹5,000/month',
+    'COACHING': 'Coaching Center Plan - ₹500/month (+GST)',
+    'SCHOOL': 'School Management Plan - ₹1,500/month (+GST)',
+    'INSTITUTE': 'Institute / University Plan - ₹5,000/month (+GST)',
+    'UNIVERSITY': 'Institute / University Plan - ₹5,000/month (+GST)',
     'EDUCATION SYSTEM': 'Enterprise Education System',
     'SUPER_ADMIN': 'Super Admin Access',
 }

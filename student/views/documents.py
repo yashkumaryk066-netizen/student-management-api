@@ -143,7 +143,7 @@ class GenerateBulkAdmitCardView(APIView):
                     exams = Exam.objects.filter(batch=student.batch, created_by=owner).order_by('exam_date')
                     
                 pdf_buffer = generate_admit_card_pdf(student, exams)
-                zf.writestr(f"AdmitCard_{student.roll_number}_{student.name.replace(' ', '_')}.pdf", pdf_buffer)
+                zf.writestr(f"AdmitCard_{student.roll_number}_{student.name.replace(' ', '_')}.pdf", pdf_buffer.getvalue())
                 
         response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename="Bulk_Admit_Cards.zip"'
@@ -173,7 +173,7 @@ class GenerateBulkIDCardView(APIView):
         with zipfile.ZipFile(zip_buffer, "w") as zf:
             for student in students:
                 pdf_buffer = generate_id_card_pdf(student)
-                zf.writestr(f"IDCard_{student.roll_number}_{student.name.replace(' ', '_')}.pdf", pdf_buffer)
+                zf.writestr(f"IDCard_{student.roll_number}_{student.name.replace(' ', '_')}.pdf", pdf_buffer.getvalue())
                 
         response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename="Bulk_ID_Cards.zip"'

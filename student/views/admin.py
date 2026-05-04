@@ -60,12 +60,14 @@ class TeamManagementView(APIView):
                  # Should not happen for valid clients, but safety check
                  raise ValueError("Owner profile not found")
 
-            UserProfile.objects.create(
+            UserProfile.objects.update_or_create(
                 user=user,
-                role=data.get('role', 'STAFF'),
-                institution_type=owner_profile.institution_type,
-                permissions=data.get('permissions', {}), # Store granular permissions
-                subscription_expiry=owner_profile.subscription_expiry 
+                defaults={
+                    'role': data.get('role', 'STAFF'),
+                    'institution_type': owner_profile.institution_type,
+                    'permissions': data.get('permissions', {}),
+                    'subscription_expiry': owner_profile.subscription_expiry 
+                }
             )
             
             # 3. Create Employee Record

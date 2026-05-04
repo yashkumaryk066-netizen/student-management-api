@@ -53,13 +53,48 @@
 
     <!-- Background Shapes -->
     <div class="float-shape"
-        style="top: 10%; left: 5%; width: 400px; height: 400px; background: rgba(226, 176, 54, 0.1); animation: floatMagic 20s infinite alternate;">
+        style="top: 10%; left: 5%; width: 400px; height: 400px; background: rgba(226, 176, 54, 0.08); animation: rotateInfinite 40s linear infinite;">
     </div>
     <div class="float-shape"
-        style="bottom: 10%; right: 5%; width: 500px; height: 500px; background: rgba(14, 165, 233, 0.1); animation: floatMagic 25s infinite alternate-reverse;">
+        style="bottom: 10%; right: 5%; width: 600px; height: 600px; background: rgba(14, 165, 233, 0.05); animation: rotateInfinite 60s linear infinite reverse;">
     </div>
 
+    <!-- Quantum Orb (Non-stop Rotating) -->
+    <div class="quantum-orb"></div>
+
     <style>
+        @keyframes rotateInfinite {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quantum-orb {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            margin-top: -400px;
+            margin-left: -400px;
+            border: 1px solid rgba(226, 176, 54, 0.1);
+            border-radius: 50%;
+            z-index: -5;
+            animation: rotateInfinite 30s linear infinite;
+            pointer-events: none;
+        }
+
+        .quantum-orb::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: var(--ysm-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--ysm-gold);
+        }
+
         @keyframes floatMagic {
             0% {
                 transform: translate(0, 0) rotate(0deg);

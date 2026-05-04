@@ -1355,7 +1355,7 @@ const DashboardApp = {
         btn.disabled = true;
 
         setTimeout(() => {
-            alert('✅ Successfully imported 24 students!');
+            SovereignModal.alert('✅ Successfully imported 24 students!', 'Enrollment Success', 'success');
             document.getElementById('bulkImportModal').remove();
             this.fetchStudents(); // Refresh list
         }, 1500);

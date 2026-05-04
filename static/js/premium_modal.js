@@ -25,6 +25,45 @@ const SovereignModal = (() => {
                 70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
                 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
             }
+
+            /* --- Toast Engine Styles --- */
+            #sovereign-toast-container {
+                position: fixed; top: 20px; right: 20px; z-index: 2147483647;
+                display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+            }
+            .sovereign-toast {
+                min-width: 300px; max-width: 450px; padding: 16px 20px;
+                background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+                color: white; font-family: 'Inter', sans-serif;
+                display: flex; align-items: center; gap: 15px;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+                transform: translateX(120%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                pointer-events: auto; cursor: pointer;
+            }
+            .sovereign-toast.active { transform: translateX(0); }
+            .sovereign-toast .toast-icon { font-size: 1.5rem; flex-shrink: 0; }
+            .sovereign-toast .toast-content { flex-grow: 1; }
+            .sovereign-toast .toast-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+            .sovereign-toast .toast-msg { font-size: 0.85rem; opacity: 0.9; line-height: 1.4; }
+            
+            .sovereign-toast.success { border-left: 4px solid #10b981; }
+            .sovereign-toast.error { border-left: 4px solid #ef4444; }
+            .sovereign-toast.warning { border-left: 4px solid #f59e0b; }
+            .sovereign-toast.info { border-left: 4px solid #3b82f6; }
+
+            /* --- Loading Engine --- */
+            .sovereign-loading-overlay {
+                position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px);
+                z-index: 2147483646; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            }
+            .sovereign-loading-overlay.active { opacity: 1; pointer-events: auto; }
+            .loading-spinner {
+                width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #6366f1;
+                border-radius: 50%; animation: spin 1s infinite linear; margin-bottom: 20px;
+            }
+            @keyframes spin { to { transform: rotate(360deg); } }
         `;
         document.head.appendChild(style);
     }
@@ -34,6 +73,7 @@ const SovereignModal = (() => {
         initialized = true;
         injectStyles();
 
+        // Modal HTML
         const modalHTML = `
         <div id="premium-modal-overlay" class="premium-modal-overlay">
             <div id="premium-modal-box" class="premium-modal-box">
@@ -49,19 +89,49 @@ const SovereignModal = (() => {
                     <button id="premium-modal-confirm" class="premium-modal-btn">Confirm</button>
                 </div>
             </div>
-        </div>`;
+        </div>
+        <div id="sovereign-toast-container"></div>
+        <div id="sovereign-loading-overlay" class="sovereign-loading-overlay">
+            <div class="loading-spinner"></div>
+            <div id="loading-text" style="color:white; font-weight:600; font-family:Inter;">Processing...</div>
+        </div>
+        `;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
 
         // Standard Close
         document.getElementById('premium-modal-btn').onclick = () => close(null);
-
-        // Confirm Actions
         document.getElementById('premium-modal-confirm').onclick = () => close(true);
         document.getElementById('premium-modal-cancel').onclick = () => close(false);
+    }
 
-        document.getElementById('premium-modal-overlay').onclick = (e) => {
-            if (e.target.id === 'premium-modal-overlay') close(null);
+    function toast(msg, type = 'info', duration = 4000) {
+        injectHTML();
+        const container = document.getElementById('sovereign-toast-container');
+        const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+        const icon = configIcon(type);
+        const title = type.toUpperCase();
+
+        const toastHTML = `
+            <div id="${id}" class="sovereign-toast ${type}">
+                <div class="toast-icon">${icon}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-msg">${msg}</div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', toastHTML);
+        
+        const el = document.getElementById(id);
+        setTimeout(() => el.classList.add('active'), 10);
+
+        const remove = () => {
+            el.classList.remove('active');
+            setTimeout(() => el.remove(), 400);
         };
+
+        el.onclick = remove;
+        if (duration > 0) setTimeout(remove, duration);
     }
 
     function show(config) {
@@ -74,7 +144,6 @@ const SovereignModal = (() => {
 
     function processQueue() {
         if (queue.length === 0) return;
-
         isOpen = true;
         const current = queue.shift();
         const { message, title, type, isConfirm, resolve } = current;
@@ -91,14 +160,13 @@ const SovereignModal = (() => {
         const confirmBtn = document.getElementById('premium-modal-confirm');
 
         box.className = `premium-modal-box ${type}`;
-        titleEl.textContent = title || 'Notification';
+        titleEl.textContent = title || (type ? type.toUpperCase() : 'NOTIFICATION');
         msgEl.textContent = message;
 
-        // UI Adjustments
         if (isConfirm) {
             standardFooter.style.display = 'none';
             confirmFooter.style.display = 'flex';
-            confirmBtn.textContent = configConfirmText(type);
+            confirmBtn.textContent = 'Yes, Proceed';
             confirmBtn.className = `premium-modal-btn ${type === 'error' ? 'error' : ''}`;
         } else {
             standardFooter.style.display = 'block';
@@ -108,12 +176,7 @@ const SovereignModal = (() => {
 
         icon.textContent = configIcon(type);
         overlay.classList.add('active');
-
-        // Store resolve on window for close function
         window._currentModalResolve = resolve;
-
-        // Visual Effects
-        if (type === 'success') confettiEffect();
     }
 
     function configIcon(type) {
@@ -121,7 +184,6 @@ const SovereignModal = (() => {
             case 'success': return '✅';
             case 'error': return '❌';
             case 'warning': return '⚠️';
-            case 'welcome': return '👋';
             default: return '✨';
         }
     }
@@ -130,19 +192,13 @@ const SovereignModal = (() => {
         switch (type) {
             case 'success': return 'Excellent';
             case 'error': return 'Understood';
-            case 'warning': return 'Got it';
             default: return 'Continue';
         }
-    }
-
-    function configConfirmText(type) {
-        return type === 'error' ? 'Proceed Anyway' : 'Yes, Proceed';
     }
 
     function close(value) {
         const overlay = document.getElementById('premium-modal-overlay');
         overlay.classList.remove('active');
-
         setTimeout(() => {
             isOpen = false;
             if (window._currentModalResolve) {
@@ -153,19 +209,24 @@ const SovereignModal = (() => {
         }, 400);
     }
 
-    function confettiEffect() {
-        // Subtle CSS confetti could be added here
-    }
-
     return {
         alert: (msg, title, type) => show({ message: msg, title, type: type || 'info' }),
-        confirm: (msg, title, type) => show({ message: msg, title, type: type || 'warning', isConfirm: true })
+        confirm: (msg, title, type) => show({ message: msg, title, type: type || 'warning', isConfirm: true }),
+        toast: (msg, type, duration) => toast(msg, type, duration),
+        showLoading: (msg) => {
+            injectHTML();
+            document.getElementById('loading-text').textContent = msg || 'Processing...';
+            document.getElementById('sovereign-loading-overlay').classList.add('active');
+        },
+        hideLoading: () => {
+            const el = document.getElementById('sovereign-loading-overlay');
+            if (el) el.classList.remove('active');
+        }
     };
 })();
 
-/* ---------------- OVERRIDE CORE JS ---------------- */
+// Global Native Override
+window.alert = (msg) => SovereignModal.toast(msg, 'info');
+window.showToast = (msg, type) => SovereignModal.toast(msg, type || 'info');
 
-// Overrides removed to prevent async/sync conflicts. 
-// Use SovereignModal.alert() and await SovereignModal.confirm() explicitely.
-
-console.log('✅ Sovereign Premium Modal System V3 Active');
+console.log('🛡️ Sovereign Premium Notification Engine Online');

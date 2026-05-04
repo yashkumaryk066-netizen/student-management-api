@@ -95,7 +95,16 @@ class RazorpayQRCodeView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        amount = request.data.get('amount')
+        payment_type = request.data.get('payment_type', 'FEE')
+        plan_type = (request.data.get('plan_type') or '').upper()
+
+        # AUDIT FIX: Enforce centralized pricing for QR too
+        if (payment_type in ['SUBSCRIPTION', 'RENEWAL']) and plan_type:
+            from student.plan_permissions import PLAN_PRICING
+            expected_price = PLAN_PRICING.get(plan_type)
+            if expected_price:
+                 amount = expected_price
+
         name = request.data.get('name', 'Y.S.M AI ERP')
         description = request.data.get('description', 'Payment to Y.S.M')
 
@@ -178,8 +187,8 @@ class RazorpayVerifyView(APIView):
             client.utility.verify_payment_signature(params_dict)
 
             # Payment verified, now update DB
-            if payment_type == 'SUBSCRIPTION':
-                # Handle Registration/Subscription
+            if payment_type in ['SUBSCRIPTION', 'RENEWAL', 'UPGRADE']:
+                # Handle Registration/Subscription/Renewal/Upgrade
                 email = request.data.get('email')
                 institution_name = request.data.get('institution_name')
                 phone = request.data.get('phone')
@@ -188,6 +197,7 @@ class RazorpayVerifyView(APIView):
                 user = request.user if request.user.is_authenticated else None
                 return self._handle_subscription_payment(user, amount, razorpay_payment_id, plan_type, email, institution_name, phone)
             else:
+                # Regular student fee payments
                 if not request.user.is_authenticated:
                     return Response({"error": "Authentication required for fee payments"}, status=401)
                 return self._handle_fee_payment(request.user, amount, razorpay_payment_id, student_id)
@@ -250,6 +260,7 @@ class RazorpayVerifyView(APIView):
                 if is_new_user:
                     profile.force_password_change = True
                 profile.save()
+                user.profile = profile # Prevent stale signal overwrite
 
                 # 3. Create/Update Payment record (IDEMPOTENCY CHECK)
                 payment = Payment.objects.filter(transaction_id=transaction_id).first()
