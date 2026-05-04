@@ -174,23 +174,65 @@
         /* --- Hero Section --- */
         .hero {
             position: relative;
-            height: 90vh;
-            background: linear-gradient(rgba(29, 43, 79, 0.85), rgba(29, 43, 79, 0.85)), url('https://images.unsplash.com/photo-1523050853064-db816a133df1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             align-items: center;
             padding: 0 8%;
-            color: var(--white);
+            color: var(--navy-blue);
         }
 
-        .hero-content { max-width: 700px; }
-        .hero-content h1 { font-size: clamp(2.5rem, 5vw, 4rem); color: var(--white); margin-bottom: 20px; line-height: 1.2; }
-        .hero-content p { font-size: 1.2rem; margin-bottom: 40px; opacity: 0.9; }
+        #hero-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            transform: translateX(-50%) translateY(-50%);
+            object-fit: cover;
+            opacity: 0.3;
+        }
 
-        .hero-btns { display: flex; gap: 20px; }
-        .btn-hero-main { background: var(--primary-orange); color: var(--white); padding: 18px 35px; border-radius: 5px; font-weight: 700; text-decoration: none; font-size: 1.1rem; }
-        .btn-hero-outline { border: 2px solid var(--white); color: var(--white); padding: 18px 35px; border-radius: 5px; font-weight: 700; text-decoration: none; font-size: 1.1rem; }
+        .hero-content { position: relative; z-index: 1; max-width: 800px; }
+        .hero-sub { font-size: 1.1rem; font-weight: 700; color: var(--navy-blue); margin-bottom: 15px; }
+        .hero-content h1 { font-size: clamp(2.5rem, 5vw, 3.8rem); color: var(--navy-blue); margin-bottom: 25px; line-height: 1.1; }
+        .hero-content h1 span { color: var(--primary-orange); }
+        .hero-content p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 35px; max-width: 600px; }
+
+        .hero-tags { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .hero-tag { border: 1px solid var(--navy-blue); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: var(--navy-blue); }
+
+        .hero-btns { display: flex; gap: 20px; align-items: center; }
+        .btn-hero-main { background: var(--primary-orange); color: var(--white); padding: 15px 30px; border-radius: 50px; font-weight: 700; text-decoration: none; box-shadow: 0 10px 20px rgba(241, 103, 34, 0.3); }
+        .btn-hero-outline { border: 2px solid var(--navy-blue); color: var(--navy-blue); padding: 13px 30px; border-radius: 50px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+
+        .award-seals {
+            position: absolute;
+            bottom: 40px;
+            right: 8%;
+            display: flex;
+            gap: 20px;
+            z-index: 2;
+        }
+        .award-seal {
+            width: 90px;
+            height: 90px;
+            border: 2px dashed var(--primary-orange);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 5px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(5px);
+        }
+        .award-seal i { color: var(--primary-orange); font-size: 1.2rem; margin-bottom: 3px; }
+        .award-seal span { font-size: 0.55rem; font-weight: 800; color: var(--navy-blue); line-height: 1; text-transform: uppercase; }
 
         .hero-stats {
             position: absolute;
@@ -355,14 +397,46 @@
 
     <main>
         <section class="hero">
+            <video autoplay muted loop id="hero-video">
+                <source src="https://player.vimeo.com/external/403487042.hd.mp4?s=40428169992569e5d6d3d496c051286c8f615f79&profile_id=175" type="video/mp4">
+            </video>
+            
             <div class="hero-content">
-                <h1>Education Is Our Priority.</h1>
-                <p>Empowering 2000+ institutions across India with the most advanced AI-powered ERP ecosystem. Manage admissions, fees, exams, and operations with absolute precision.</p>
+                <div class="hero-sub">Manage School On The Go</div>
+                <h1>Empower, Engage, Evolve: <span>Redefining Education</span> With Y.S.M AI.</h1>
+                <p>Our user-friendly School App is designed with great features and interactive UI to streamline every aspect of your institution.</p>
+                
+                <div class="hero-tags">
+                    <div class="hero-tag">15,00,000+ Students/Parents</div>
+                    <div class="hero-tag">40+ Unique features</div>
+                    <div class="hero-tag">Personalized App</div>
+                </div>
+
                 <div class="hero-btns">
-                    <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-hero-main">BOOK A FREE DEMO</a>
-                    <a href="#modules" class="btn-hero-outline">EXPLORE MODULES <i class="fa-solid fa-circle-play" style="margin-left:10px;"></i></a>
+                    <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-hero-main">Book A Free Demo</a>
+                    <a href="#roi" class="btn-hero-outline"><i class="fa-solid fa-circle-play"></i> Product Video</a>
                 </div>
             </div>
+
+            <div class="award-seals">
+                <div class="award-seal">
+                    <i class="fa-solid fa-award"></i>
+                    <span>Atmanirbhar Bharat Award</span>
+                </div>
+                <div class="award-seal">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Best Digital Transformation</span>
+                </div>
+                <div class="award-seal">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Education Excellence Award</span>
+                </div>
+                <div class="award-seal">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Most Innovative ERP</span>
+                </div>
+            </div>
+
             <div class="hero-stats">
                 <div class="stat-box">
                     <h3>20+</h3>
