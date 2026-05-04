@@ -14,28 +14,7 @@
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <link rel="icon" type="image/jpeg" href="{% static 'images/yash_profile.jpg' %}">
 
-    <!-- ===================== HREFLANG – Multi Language SEO ===================== -->
-    <link rel="alternate" hreflang="en-in" href="https://yashamishra.pythonanywhere.com/">
-    <link rel="alternate" hreflang="hi" href="https://yashamishra.pythonanywhere.com/">
-    <link rel="alternate" hreflang="x-default" href="https://yashamishra.pythonanywhere.com/">
-
-    <!-- ===================== PERFORMANCE PRECONNECT ===================== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="https://unpkg.com">
-
-    <!-- ===================== PWA & MOBILE META ===================== -->
-    <meta name="theme-color" content="#F16722">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- Geo Targeting -->
-    <meta name="geo.region" content="IN-BR">
-    <meta name="geo.placename" content="Naugachiya, Rangra, Bhagalpur, Katihar, Bihar, India">
-
-    <!-- JSON-LD Structured Data (FULL RESTORE) -->
+    <!-- JSON-LD Structured Data (FULL RESTORED) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -96,7 +75,7 @@
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Razorpay SDK -->
@@ -104,8 +83,9 @@
 
     <style>
         :root {
-            --primary-orange: #F16722;
-            --navy-blue: #1D2B4F;
+            --primary-orange: #f39223;
+            --primary-blue: #223d8f;
+            --contact-green: #32c770;
             --text-dark: #333333;
             --text-muted: #666666;
             --bg-light: #F8F9FA;
@@ -116,19 +96,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
-        body {
-            color: var(--text-dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        h1, h2, h3, h4 {
-            font-weight: 700;
-            color: var(--navy-blue);
-        }
+        body { color: var(--text-dark); line-height: 1.6; overflow-x: hidden; }
+        h1, h2, h3, h4 { color: var(--primary-blue); line-height: 1.2; }
 
         /* --- Navbar --- */
         .navbar {
@@ -136,42 +108,27 @@
             top: 0;
             width: 100%;
             background: var(--white);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 15px 5%;
+            padding: 10px 5%;
             z-index: 1000;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--navy-blue);
-            text-decoration: none;
-        }
-
+        .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 1.6rem; font-weight: 800; color: var(--primary-blue); }
         .logo span { color: var(--primary-orange); }
 
-        .nav-links { display: flex; gap: 30px; align-items: center; }
-        .nav-links a { text-decoration: none; color: var(--navy-blue); font-weight: 600; font-size: 0.95rem; transition: 0.3s; }
+        .nav-links { display: flex; gap: 25px; align-items: center; }
+        .nav-links a { text-decoration: none; color: #444; font-weight: 500; font-size: 0.95rem; transition: 0.3s; }
         .nav-links a:hover { color: var(--primary-orange); }
 
-        .btn-demo {
-            background: var(--primary-orange);
-            color: var(--white);
-            padding: 12px 25px;
-            border-radius: 5px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-        .btn-demo:hover { background: #d95a1d; }
+        .nav-btns { display: flex; gap: 15px; align-items: center; }
+        .btn-talk-ai { background: var(--primary-orange); color: white; padding: 10px 22px; border-radius: 50px; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-talk-ai:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(243, 146, 35, 0.3); }
+        .btn-contact-us { background: var(--primary-blue); color: white; padding: 10px 22px; border-radius: 5px; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
 
-        /* --- Hero Section --- */
+        /* --- Hero --- */
         .hero {
             position: relative;
             height: 100vh;
@@ -179,7 +136,7 @@
             display: flex;
             align-items: center;
             padding: 0 8%;
-            color: var(--navy-blue);
+            margin-top: 60px;
         }
 
         #hero-video {
@@ -193,182 +150,99 @@
             z-index: -1;
             transform: translateX(-50%) translateY(-50%);
             object-fit: cover;
-            opacity: 0.3;
+            opacity: 0.25;
         }
 
-        .hero-content { position: relative; z-index: 1; max-width: 800px; }
-        .hero-sub { font-size: 1.1rem; font-weight: 700; color: var(--navy-blue); margin-bottom: 15px; }
-        .hero-content h1 { font-size: clamp(2.5rem, 5vw, 3.8rem); color: var(--navy-blue); margin-bottom: 25px; line-height: 1.1; }
+        .hero-content { position: relative; z-index: 1; max-width: 850px; }
+        .hero-sub { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .hero-content h1 { font-size: 50px; font-weight: 700; color: var(--primary-blue); margin-bottom: 25px; }
         .hero-content h1 span { color: var(--primary-orange); }
-        .hero-content p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 35px; max-width: 600px; }
+        .hero-content p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px; line-height: 1.6; }
 
-        .hero-tags { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
-        .hero-tag { border: 1px solid var(--navy-blue); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: var(--navy-blue); }
+        .hero-tags { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+        .hero-tag { background: #fff; border: 1px solid #ddd; padding: 8px 20px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; color: var(--text-dark); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
         .hero-btns { display: flex; gap: 20px; align-items: center; }
-        .btn-hero-main { background: var(--primary-orange); color: var(--white); padding: 15px 30px; border-radius: 50px; font-weight: 700; text-decoration: none; box-shadow: 0 10px 20px rgba(241, 103, 34, 0.3); }
-        .btn-hero-outline { border: 2px solid var(--navy-blue); color: var(--navy-blue); padding: 13px 30px; border-radius: 50px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .btn-main { background: var(--primary-orange); color: white; padding: 16px 35px; border-radius: 50px; font-weight: 700; text-decoration: none; box-shadow: 0 10px 20px rgba(243, 146, 35, 0.2); transition: 0.3s; }
+        .btn-outline { border: 2px solid var(--primary-blue); color: var(--primary-blue); padding: 14px 35px; border-radius: 50px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
 
-        .award-seals {
-            position: absolute;
-            bottom: 40px;
-            right: 8%;
-            display: flex;
-            gap: 20px;
-            z-index: 2;
-        }
-        .award-seal {
-            width: 90px;
-            height: 90px;
-            border: 2px dashed var(--primary-orange);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 5px;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(5px);
-        }
-        .award-seal i { color: var(--primary-orange); font-size: 1.2rem; margin-bottom: 3px; }
-        .award-seal span { font-size: 0.55rem; font-weight: 800; color: var(--navy-blue); line-height: 1; text-transform: uppercase; }
+        .award-seals { position: absolute; bottom: 40px; right: 8%; display: flex; gap: 20px; }
+        .award-seal { width: 100px; height: 100px; border: 2px dashed #ddd; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px; transition: 0.3s; }
+        .award-seal:hover { border-color: var(--primary-orange); transform: scale(1.1); }
+        .award-seal i { color: var(--primary-orange); font-size: 1.3rem; margin-bottom: 4px; }
+        .award-seal span { font-size: 0.6rem; font-weight: 700; color: var(--primary-blue); line-height: 1.1; text-transform: uppercase; }
 
-        .hero-stats {
-            position: absolute;
-            bottom: -50px;
-            left: 8%;
-            right: 8%;
-            background: var(--white);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-around;
-            color: var(--navy-blue);
-            z-index: 10;
-        }
-
-        .stat-box { text-align: center; }
-        .stat-box h3 { font-size: 2rem; color: var(--primary-orange); }
-        .stat-box p { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
-
-        /* --- Trust Bar --- */
-        .trust-bar { padding: 120px 8% 60px; background: var(--bg-light); text-align: center; }
-        .trust-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 40px; }
-        .trust-logos { display: flex; justify-content: center; gap: 60px; filter: grayscale(1); opacity: 0.6; flex-wrap: wrap; }
-        .trust-logos img { height: 40px; }
-
-        /* --- Reviews Section --- */
-        .reviews { background: var(--navy-blue); padding: 100px 8%; color: var(--white); text-align: center; }
-        .reviews h2 { color: var(--white); font-size: 2.5rem; margin-bottom: 60px; }
-        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-        .review-card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .review-card img { height: 30px; margin-bottom: 20px; }
-        .review-card .stars { color: #FFD700; margin-bottom: 15px; font-size: 1.2rem; }
-        .review-card p { font-size: 0.95rem; opacity: 0.8; }
-
-        /* --- Modules Section --- */
-        .section { padding: 100px 8%; }
-        .section-header { text-align: center; margin-bottom: 80px; }
-        .section-header h2 { font-size: 2.8rem; margin-bottom: 20px; }
-        .section-header p { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: 0 auto; }
-
-        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
-        .module-card {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
+        /* --- Floating Sidebar --- */
+        .sidebar { position: fixed; right: 0; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; z-index: 2000; }
+        .side-btn { 
+            width: 45px; 
+            height: 150px; 
+            background: var(--contact-green); 
+            color: white; 
+            writing-mode: vertical-rl; 
+            text-orientation: mixed; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            border-radius: 8px 0 0 8px; 
+            margin-bottom: 5px; 
             transition: 0.3s;
-            border: 1px solid #eee;
+            border-left: 4px solid rgba(0,0,0,0.1);
         }
-        .module-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); border-color: var(--primary-orange); }
-        .module-icon {
-            width: 80px;
-            height: 80px;
-            background: #FFF0E6;
-            color: var(--primary-orange);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 25px;
-            transition: 0.3s;
-        }
-        .module-card:hover .module-icon { background: var(--primary-orange); color: var(--white); }
-        .module-card h3 { font-size: 1.3rem; margin-bottom: 15px; }
-        .module-card p { font-size: 0.9rem; color: var(--text-muted); }
+        .side-btn i { margin-bottom: 15px; font-size: 1.2rem; transform: rotate(90deg); }
+        .side-btn:hover { padding-right: 15px; }
+        .side-btn.blue { background: var(--primary-blue); }
+        .side-btn.orange { background: var(--primary-orange); }
 
-        /* --- Why Choose Us (Alternating) --- */
-        .feature-split { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; padding: 80px 0; }
-        .feature-split.reverse { direction: rtl; }
-        .feature-split.reverse .feature-text { direction: ltr; }
-        .feature-text h3 { font-size: 2.2rem; margin-bottom: 20px; }
-        .feature-text p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 30px; }
-        .feature-list { list-style: none; }
-        .feature-list li { margin-bottom: 15px; display: flex; align-items: center; gap: 15px; font-weight: 600; color: var(--navy-blue); }
-        .feature-list i { color: var(--primary-orange); font-size: 1.2rem; }
-        .feature-img img { width: 100%; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        /* --- Sections --- */
+        .section { padding: 80px 8%; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-header h2 { font-size: 32px; font-weight: 700; margin-bottom: 15px; }
+        .section-header p { color: var(--text-muted); font-size: 1rem; }
 
-        /* --- Pricing --- */
-        .pricing-section { background: var(--bg-light); padding: 100px 8%; text-align: center; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 60px; }
-        .pricing-card {
-            background: var(--white);
-            padding: 50px 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-            border-top: 5px solid transparent;
-        }
-        .pricing-card.popular { border-top-color: var(--primary-orange); transform: scale(1.05); }
-        .price-name { font-size: 1.2rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
-        .price-amount { font-size: 3.5rem; font-weight: 800; color: var(--navy-blue); margin-bottom: 10px; }
-        .price-amount span { font-size: 1rem; color: var(--text-muted); }
-        .price-features { list-style: none; text-align: left; margin: 40px 0; }
-        .price-features li { margin-bottom: 15px; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
-        .price-features i { color: #10b981; }
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; }
+        .module-card { background: #fff; padding: 40px 30px; border-radius: 12px; border: 1px solid #f0f0f0; text-align: center; transition: 0.3s; }
+        .module-card:hover { border-color: var(--primary-orange); transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
+        .module-icon { width: 75px; height: 75px; background: #fef4e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: var(--primary-orange); font-size: 1.8rem; }
+
+        /* --- Split Section --- */
+        .split { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; align-items: center; padding: 60px 0; }
+        .split.reverse { direction: rtl; }
+        .split.reverse .split-text { direction: ltr; }
+        .split-text h3 { font-size: 2.2rem; margin-bottom: 25px; }
+        .split-text p { font-size: 1rem; color: var(--text-muted); margin-bottom: 30px; }
+        .split-list { list-style: none; }
+        .split-list li { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; font-weight: 600; color: var(--primary-blue); }
+        .split-list i { color: var(--primary-orange); }
+        .split-img img { width: 100%; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+
+        /* --- ROI Section --- */
+        .roi-section { background: var(--primary-blue); color: white; padding: 80px 8%; }
+        .roi-card { background: rgba(255,255,255,0.05); padding: 50px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .roi-result { background: white; color: var(--primary-blue); padding: 40px; border-radius: 15px; text-align: center; }
 
         /* --- Footer --- */
-        .footer { background: var(--navy-blue); color: var(--white); padding: 100px 8% 50px; }
-        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 80px; }
-        .footer-col h4 { color: var(--white); margin-bottom: 30px; font-size: 1.2rem; }
+        .footer { background: #1a1a1a; color: #fff; padding: 80px 8% 40px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 50px; }
+        .footer-col h4 { color: #fff; margin-bottom: 30px; font-size: 1.1rem; border-bottom: 2px solid var(--primary-orange); display: inline-block; padding-bottom: 5px; }
         .footer-col ul { list-style: none; }
-        .footer-col ul li { margin-bottom: 15px; }
-        .footer-col a { color: rgba(255,255,255,0.7); text-decoration: none; transition: 0.3s; font-size: 0.95rem; }
-        .footer-col a:hover { color: var(--primary-orange); }
-        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 40px; text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.5); }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col a { color: #aaa; text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .footer-col a:hover { color: var(--primary-orange); padding-left: 5px; }
 
-        /* --- Floating Contact --- */
-        .floating-contact { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .contact-btn {
-            width: 50px;
-            height: 50px;
-            background: var(--white);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            color: var(--navy-blue);
-            text-decoration: none;
-            font-size: 1.4rem;
-            transition: 0.3s;
-        }
-        .contact-btn:hover { background: var(--primary-orange); color: var(--white); }
-        .contact-btn.whatsapp { color: #25D366; }
-        .contact-btn.whatsapp:hover { background: #25D366; color: var(--white); }
-
-        /* --- Responsive --- */
         @media (max-width: 992px) {
-            .hero-stats { position: static; flex-direction: column; gap: 30px; margin-top: 40px; width: 100%; }
-            .feature-split { grid-template-columns: 1fr; text-align: center; gap: 40px; }
-            .feature-split.reverse { direction: ltr; }
+            .navbar { padding: 10px 20px; }
+            .nav-links, .nav-btns .btn-contact-us { display: none; }
+            .hero { height: auto; padding: 120px 20px 60px; flex-direction: column; text-align: center; }
+            .hero-btns { justify-content: center; }
+            .award-seals { position: static; margin-top: 40px; justify-content: center; }
+            .split { grid-template-columns: 1fr; gap: 40px; }
+            .split.reverse { direction: ltr; }
+            .roi-card { grid-template-columns: 1fr; }
             .footer-grid { grid-template-columns: 1fr 1fr; }
-            .nav-links { display: none; }
         }
     </style>
 </head>
@@ -380,19 +254,22 @@
             Y.S.M <span>AI</span>
         </a>
         <div class="nav-links">
-            <a href="#modules">Modules</a>
-            <a href="#features">Why Y.S.M?</a>
+            <a href="#modules">Product</a>
+            <a href="#features">Features</a>
+            <a href="#roi">ROI Calculator</a>
             <a href="#pricing">Pricing</a>
             <a href="/blog/">Insights</a>
-            <a href="/developer/">Developer</a>
         </div>
-        <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-demo">BOOK A FREE DEMO</a>
+        <div class="nav-btns">
+            <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-talk-ai"><i class="fa-solid fa-wand-magic-sparkles"></i> Lets Talk AI</a>
+            <a href="/login/" class="btn-contact-us">Sign In</a>
+        </div>
     </nav>
 
-    <div class="floating-contact">
-        <a href="https://wa.me/918356926231" class="contact-btn whatsapp"><i class="fa-brands fa-whatsapp"></i></a>
-        <a href="tel:+918356926231" class="contact-btn"><i class="fa-solid fa-phone"></i></a>
-        <a href="mailto:support@ysm.education" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+    <div class="sidebar">
+        <a href="https://wa.me/918356926231" class="side-btn"><i class="fa-brands fa-whatsapp"></i> WHATSAPP US</a>
+        <a href="tel:+918356926231" class="side-btn blue"><i class="fa-solid fa-phone"></i> CALL US NOW</a>
+        <a href="mailto:yash.kumar@telepathyinfotech.com" class="side-btn orange"><i class="fa-solid fa-calendar-check"></i> BOOK A DEMO</a>
     </div>
 
     <main>
@@ -404,421 +281,235 @@
             <div class="hero-content">
                 <div class="hero-sub">Manage School On The Go</div>
                 <h1>Empower, Engage, Evolve: <span>Redefining Education</span> With Y.S.M AI.</h1>
-                <p>Our user-friendly School App is designed with great features and interactive UI to streamline every aspect of your institution.</p>
+                <p>Our user-friendly School App is designed with enterprise features and interactive UI to automate every administrative workflow of your institution.</p>
                 
                 <div class="hero-tags">
-                    <div class="hero-tag">15,00,000+ Students/Parents</div>
-                    <div class="hero-tag">40+ Unique features</div>
-                    <div class="hero-tag">Personalized App</div>
+                    <div class="hero-tag">15,00,000+ Students</div>
+                    <div class="hero-tag">40+ Premium Modules</div>
+                    <div class="hero-tag">Personalized AI App</div>
                 </div>
 
                 <div class="hero-btns">
-                    <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-hero-main">Book A Free Demo</a>
-                    <a href="#roi" class="btn-hero-outline"><i class="fa-solid fa-circle-play"></i> Product Video</a>
+                    <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-main">Book A Free Demo</a>
+                    <a href="#roi" class="btn-outline"><i class="fa-solid fa-circle-play"></i> Product Video</a>
                 </div>
             </div>
 
             <div class="award-seals">
-                <div class="award-seal">
-                    <i class="fa-solid fa-award"></i>
-                    <span>Atmanirbhar Bharat Award</span>
-                </div>
-                <div class="award-seal">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span>Best Digital Transformation</span>
-                </div>
-                <div class="award-seal">
-                    <i class="fa-solid fa-star"></i>
-                    <span>Education Excellence Award</span>
-                </div>
-                <div class="award-seal">
-                    <i class="fa-solid fa-lightbulb"></i>
-                    <span>Most Innovative ERP</span>
-                </div>
-            </div>
-
-            <div class="hero-stats">
-                <div class="stat-box">
-                    <h3>20+</h3>
-                    <p>Years Legacy</p>
-                </div>
-                <div class="stat-box">
-                    <h3>2000+</h3>
-                    <p>Happy Clients</p>
-                </div>
-                <div class="stat-box">
-                    <h3>1.5M+</h3>
-                    <p>Active Students</p>
-                </div>
-                <div class="stat-box">
-                    <h3>24/7</h3>
-                    <p>Supreme Support</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="trust-bar">
-            <p class="trust-title">Recognized & Certified By</p>
-            <div class="trust-logos">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Logo_of_Digital_India.svg/1200px-Logo_of_Digital_India.svg.png" alt="Digital India">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/ISO_9001_Logo.svg/1200px-ISO_9001_Logo.svg.png" alt="ISO">
-                <img src="https://www.razorpay.com/favicon.png" alt="Razorpay" style="height:30px;">
-            </div>
-        </section>
-
-        <section class="reviews">
-            <h2>Trusted By Global Review Platforms</h2>
-            <div class="reviews-grid">
-                <div class="review-card">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/G2_Logo.svg/1200px-G2_Logo.svg.png" alt="G2">
-                    <div class="stars">★★★★★</div>
-                    <p>4.9/5 Rating based on 1,250+ reviews from school administrators.</p>
-                </div>
-                <div class="review-card">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Capterra_Logo.svg/1200px-Capterra_Logo.svg.png" alt="Capterra">
-                    <div class="stars">★★★★★</div>
-                    <p>Top Rated School ERP for Ease of Use and Customer Support.</p>
-                </div>
-                <div class="review-card">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/SoftwareSuggest_Logo.png/1200px-SoftwareSuggest_Logo.png" alt="SoftwareSuggest">
-                    <div class="stars">★★★★★</div>
-                    <p>Winner: Most Innovative Education Software Award 2026.</p>
-                </div>
+                <div class="award-seal"><i class="fa-solid fa-award"></i><span>Atmanirbhar Award</span></div>
+                <div class="award-seal"><i class="fa-solid fa-shield-halved"></i><span>Digital Transformation</span></div>
+                <div class="award-seal"><i class="fa-solid fa-star"></i><span>Excellence Award</span></div>
+                <div class="award-seal"><i class="fa-solid fa-lightbulb"></i><span>Most Innovative</span></div>
             </div>
         </section>
 
         <section id="modules" class="section">
             <div class="section-header">
                 <h2>Our Enterprise Modules</h2>
-                <p>A comprehensive ecosystem of 30+ modules designed to automate every aspect of your educational institution.</p>
+                <p>Automate your institution with our 30+ highly integrated intelligent modules.</p>
             </div>
             <div class="modules-grid">
                 <div class="module-card">
                     <div class="module-icon"><i class="fa-solid fa-user-plus"></i></div>
                     <h3>Admission</h3>
-                    <p>End-to-end digital admission flow with online forms and document verification.</p>
+                    <p>Digital admission engine with automated document verification.</p>
                 </div>
                 <div class="module-card">
                     <div class="module-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
                     <h3>Fee Management</h3>
-                    <p>Automated invoicing, online payments, and comprehensive dues tracking.</p>
+                    <p>Automated invoicing and instant online fee collection.</p>
                 </div>
                 <div class="module-card">
                     <div class="module-icon"><i class="fa-solid fa-fingerprint"></i></div>
                     <h3>Attendance</h3>
-                    <p>Biometric-integrated attendance with instant SMS alerts to parents.</p>
+                    <p>Biometric sync with real-time parent notification via App/SMS.</p>
                 </div>
                 <div class="module-card">
                     <div class="module-icon"><i class="fa-solid fa-file-invoice"></i></div>
                     <h3>Exam & Result</h3>
-                    <p>Dynamic marksheets, GPA calculation, and online result publication.</p>
-                </div>
-                <div class="module-card">
-                    <div class="module-icon"><i class="fa-solid fa-bus"></i></div>
-                    <h3>Transport</h3>
-                    <p>Real-time vehicle tracking, route management, and driver stats.</p>
-                </div>
-                <div class="module-card">
-                    <div class="module-icon"><i class="fa-solid fa-bed"></i></div>
-                    <h3>Hostel</h3>
-                    <p>Room allocation, mess management, and warden dashboard.</p>
-                </div>
-                <div class="module-card">
-                    <div class="module-icon"><i class="fa-solid fa-book-open"></i></div>
-                    <h3>Library</h3>
-                    <p>Barcode-based book issue/return and inventory tracking.</p>
-                </div>
-                <div class="module-card">
-                    <div class="module-icon"><i class="fa-solid fa-users"></i></div>
-                    <h3>HR & Payroll</h3>
-                    <p>Staff records, biometric leaves, and automated salary slip generation.</p>
+                    <p>Dynamic result processing with custom report card designer.</p>
                 </div>
             </div>
         </section>
 
-        <section id="features" class="section" style="background: var(--bg-light);">
-            <div class="feature-split">
-                <div class="feature-text">
-                    <h3>One Stop Solution for Your Institution.</h3>
-                    <p>Y.S.M AI provides a unified platform that connects administrators, teachers, parents, and students in a seamless ecosystem.</p>
-                    <ul class="feature-list">
-                        <li><i class="fa-solid fa-circle-check"></i> Paperless Administration</li>
-                        <li><i class="fa-solid fa-circle-check"></i> Real-time AI Analytics</li>
-                        <li><i class="fa-solid fa-circle-check"></i> 100% Data Security</li>
-                        <li><i class="fa-solid fa-circle-check"></i> Multi-Campus Management</li>
+        <section id="features" class="section" style="background: #fbfbfb;">
+            <div class="split">
+                <div class="split-text">
+                    <h3>Comprehensive School Governance.</h3>
+                    <p>Y.S.M AI provides a 360-degree view of your institutional operations in a single dashboard.</p>
+                    <ul class="split-list">
+                        <li><i class="fa-solid fa-check"></i> Paperless Office Automation</li>
+                        <li><i class="fa-solid fa-check"></i> Financial Leakage Detection</li>
+                        <li><i class="fa-solid fa-check"></i> Multi-Campus Centralization</li>
                     </ul>
                 </div>
-                <div class="feature-img">
-                    <img src="{% static 'img/redesign/admin_dashboard.png' %}" alt="Dashboard Preview" style="width:100%; border-radius:15px; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
+                <div class="split-img">
+                    <img src="{% static 'img/redesign/admin_dashboard.png' %}" alt="Admin Panel">
                 </div>
             </div>
 
-            <div class="feature-split reverse">
-                <div class="feature-text">
-                    <h3>Empower Teachers with AI.</h3>
-                    <p>Our integrated AI tutor and lesson plan generator reduces teacher workload by 40%, allowing them to focus on student growth.</p>
-                    <ul class="feature-list">
-                        <li><i class="fa-solid fa-circle-check"></i> Automated Exam Grading</li>
-                        <li><i class="fa-solid fa-circle-check"></i> Student Progress Prediction</li>
-                        <li><i class="fa-solid fa-circle-check"></i> Adaptive Learning Paths</li>
-                        <li><i class="fa-solid fa-circle-check"></i> Instant Resource Access</li>
+            <div class="split reverse">
+                <div class="split-text">
+                    <h3>Empowering Educators with AI.</h3>
+                    <p>Our AI Tutor and Lesson Generator helps teachers create high-quality content in seconds.</p>
+                    <ul class="split-list">
+                        <li><i class="fa-solid fa-check"></i> AI-Driven Student Insights</li>
+                        <li><i class="fa-solid fa-check"></i> Automated Performance Grading</li>
+                        <li><i class="fa-solid fa-check"></i> Personalized Learning Paths</li>
                     </ul>
                 </div>
-                <div class="feature-img">
-                    <img src="{% static 'img/redesign/teacher_teaching.png' %}" alt="Teacher using AI" style="width:100%; border-radius:15px; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
+                <div class="split-img">
+                    <img src="{% static 'img/redesign/teacher_teaching.png' %}" alt="Teacher Section">
                 </div>
             </div>
         </section>
 
-        <section id="pricing" class="pricing-section">
+        <section id="roi" class="roi-section">
             <div class="section-header">
-                <h2>Scalable Pricing Plans</h2>
-                <p>Choose the perfect plan for your institution. No hidden costs. Instant activation.</p>
+                <h2 style="color:white;">Economic Sovereignty Calculator</h2>
+                <p style="color:rgba(255,255,255,0.7);">Measure the ROI of switching to Y.S.M AI automation.</p>
             </div>
-            <div class="pricing-grid">
-                <div class="pricing-card">
-                    <div class="price-name">Coaching</div>
-                    <div class="price-amount">₹2,000<span>/mo</span></div>
-                    <p style="color:var(--text-muted); font-size:0.8rem;">+ Platform Fee & GST</p>
-                    <ul class="price-features">
-                        <li><i class="fa-solid fa-check"></i> Up to 200 Students</li>
-                        <li><i class="fa-solid fa-check"></i> Attendance & Batches</li>
-                        <li><i class="fa-solid fa-check"></i> Online Exam (Basic)</li>
-                        <li><i class="fa-solid fa-check"></i> Bulk SMS Integration</li>
-                    </ul>
-                    <button onclick="openPaymentModal('Coaching', 2000)" class="btn-demo" style="width:100%;">CHOOSE PLAN</button>
-                </div>
-                <div class="pricing-card popular">
-                    <div style="background:var(--primary-orange); color:white; padding:5px; position:absolute; top:20px; right:-40px; transform:rotate(45deg); width:150px; font-size:0.7rem; font-weight:800;">MOST POPULAR</div>
-                    <div class="price-name">School</div>
-                    <div class="price-amount">₹4,000<span>/mo</span></div>
-                    <p style="color:var(--text-muted); font-size:0.8rem;">+ Platform Fee & GST</p>
-                    <ul class="price-features">
-                        <li><i class="fa-solid fa-check"></i> Up to 1000 Students</li>
-                        <li><i class="fa-solid fa-check"></i> Advanced Gradebook</li>
-                        <li><i class="fa-solid fa-check"></i> Smart ID Cards</li>
-                        <li><i class="fa-solid fa-check"></i> Transport Tracking</li>
-                    </ul>
-                    <button onclick="openPaymentModal('School', 4000)" class="btn-demo" style="width:100%;">CHOOSE PLAN</button>
-                </div>
-                <div class="pricing-card">
-                    <div class="price-name">Institute</div>
-                    <div class="price-amount">₹8,000<span>/mo</span></div>
-                    <p style="color:var(--text-muted); font-size:0.8rem;">+ Platform Fee & GST</p>
-                    <ul class="price-features">
-                        <li><i class="fa-solid fa-check"></i> Unlimited Students</li>
-                        <li><i class="fa-solid fa-check"></i> HR & Payroll Suite</li>
-                        <li><i class="fa-solid fa-check"></i> Library & Hostel</li>
-                        <li><i class="fa-solid fa-check"></i> AI Performance Risk</li>
-                    </ul>
-                    <button onclick="openPaymentModal('Institute', 8000)" class="btn-demo" style="width:100%;">CHOOSE PLAN</button>
-                </div>
-            </div>
-        </section>
-        <section id="roi" class="section" style="background: var(--navy-blue); color: var(--white);">
-            <div class="section-header">
-                <h2 style="color: var(--white);">Economic Sovereignty Calculator</h2>
-                <p style="color: rgba(255,255,255,0.7);">Estimate your institutional savings and ROI with Y.S.M AI's automation engine.</p>
-            </div>
-            <div style="max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; background: rgba(255,255,255,0.05); padding: 50px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                <div class="roi-inputs">
-                    <div style="margin-bottom: 30px;">
-                        <label style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:600;">
-                            <span>Total Students</span>
-                            <span id="studentVal" style="color: var(--primary-orange);">1000</span>
-                        </label>
-                        <input type="range" id="studentRange" min="100" max="5000" step="50" value="1000" oninput="calculateROI()" style="width:100%; accent-color: var(--primary-orange);">
+            <div class="roi-card">
+                <div>
+                    <div style="margin-bottom:25px;">
+                        <label style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Total Students</span><span id="studentVal" style="color:var(--primary-orange);">1000</span></label>
+                        <input type="range" id="studentRange" min="100" max="5000" step="50" value="1000" oninput="calculateROI()" style="width:100%; accent-color:var(--primary-orange);">
                     </div>
-                    <div style="margin-bottom: 30px;">
-                        <label style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:600;">
-                            <span>Avg. Monthly Fee (₹)</span>
-                            <span id="feeVal" style="color: var(--primary-orange);">2000</span>
-                        </label>
-                        <input type="range" id="feeRange" min="500" max="10000" step="100" value="2000" oninput="calculateROI()" style="width:100%; accent-color: var(--primary-orange);">
+                    <div style="margin-bottom:25px;">
+                        <label style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Avg. Monthly Fee (₹)</span><span id="feeVal" style="color:var(--primary-orange);">2000</span></label>
+                        <input type="range" id="feeRange" min="500" max="10000" step="100" value="2000" oninput="calculateROI()" style="width:100%; accent-color:var(--primary-orange);">
                     </div>
-                    <p style="font-size:0.85rem; opacity:0.7;">*Calculated based on 92% administrative efficiency increase.</p>
                 </div>
-                <div style="text-align:center; background:var(--white); color:var(--navy-blue); padding:40px; border-radius:15px;">
-                    <p style="text-transform:uppercase; font-size:0.8rem; font-weight:800; letter-spacing:1px; margin-bottom:10px;">Projected Annual Savings</p>
-                    <div id="savingsVal" style="font-size:3.5rem; font-weight:900; color:var(--primary-orange);">₹ 12.5L</div>
-                    <p style="font-weight:700;">+ approx. <span id="hoursSaved" style="color:#10b981;">2,200</span> hours saved</p>
+                <div class="roi-result">
+                    <p style="font-size:0.8rem; font-weight:800; text-transform:uppercase;">Annual Savings Projected</p>
+                    <div id="savingsVal" style="font-size:3rem; font-weight:900; color:var(--primary-orange);">₹ 12.5L</div>
+                    <p>+ <span id="hoursSaved" style="color:#10b981; font-weight:700;">2200</span> Hours Saved</p>
                 </div>
             </div>
         </section>
 
-        <section id="faq" class="section">
+        <section id="pricing" class="section">
             <div class="section-header">
-                <h2>Frequently Asked Questions</h2>
+                <h2>Flexible Subscription Plans</h2>
+                <p>Professional grade software for every institutional scale.</p>
             </div>
-            <div style="max-width: 800px; margin: 0 auto;">
-                <div style="border-bottom: 1px solid #eee; padding: 20px 0;">
-                    <h4 style="margin-bottom:10px;">Who is Yash Ankush Mishra?</h4>
-                    <p style="color:var(--text-muted); font-size:0.95rem;">Yash Ankush Mishra is a top-tier Full Stack Developer and AI Engineer from Naugachiya, Rangra, Bihar. Known as the 'Most Intelligent Boy in Rangra', he founded Y.S.M AI to transform education technology in India.</p>
+            <div class="modules-grid">
+                <div class="module-card">
+                    <h4>COACHING</h4>
+                    <div style="font-size:2.5rem; font-weight:800; margin:20px 0;">₹2,000<span style="font-size:1rem; color:#888;">/mo</span></div>
+                    <p>Up to 200 Students</p>
+                    <button onclick="openPaymentModal('Coaching', 2000)" class="btn-main" style="width:100%; margin-top:20px;">DEPLOY NOW</button>
                 </div>
-                <div style="border-bottom: 1px solid #eee; padding: 20px 0;">
-                    <h4 style="margin-bottom:10px;">Is institutional data secure?</h4>
-                    <p style="color:var(--text-muted); font-size:0.95rem;">Yes, Y.S.M AI uses military-grade end-to-end encryption. All student and financial records are stored in encrypted neural clusters with automatic daily backups.</p>
+                <div class="module-card" style="border-top:5px solid var(--primary-orange);">
+                    <h4>SCHOOL</h4>
+                    <div style="font-size:2.5rem; font-weight:800; margin:20px 0;">₹4,000<span style="font-size:1rem; color:#888;">/mo</span></div>
+                    <p>Up to 1000 Students</p>
+                    <button onclick="openPaymentModal('School', 4000)" class="btn-main" style="width:100%; margin-top:20px;">DEPLOY NOW</button>
+                </div>
+                <div class="module-card">
+                    <h4>INSTITUTE</h4>
+                    <div style="font-size:2.5rem; font-weight:800; margin:20px 0;">₹8,000<span style="font-size:1rem; color:#888;">/mo</span></div>
+                    <p>Unlimited Students</p>
+                    <button onclick="openPaymentModal('Institute', 8000)" class="btn-main" style="width:100%; margin-top:20px;">DEPLOY NOW</button>
                 </div>
             </div>
         </section>
-
-        <script>
-            function calculateROI() {
-                const students = document.getElementById('studentRange').value;
-                const fee = document.getElementById('feeRange').value;
-                document.getElementById('studentVal').innerText = students;
-                document.getElementById('feeVal').innerText = fee;
-                
-                const savings = Math.round((students * 1250) / 100000); // Rough logic from original
-                document.getElementById('savingsVal').innerText = '₹ ' + savings + 'L';
-                document.getElementById('hoursSaved').innerText = (students * 2.2).toLocaleString();
-            }
-            window.onload = calculateROI;
-        </script>
+    </main>
 
     <footer class="footer">
         <div class="footer-grid">
             <div class="footer-col">
-                <h4 class="logo" style="color:white;">Y.S.M <span>AI</span></h4>
-                <p style="color:rgba(255,255,255,0.6); font-size:0.9rem; margin-top:20px;">
-                    Y.S.M AI (Verified by Yash Ankush Mishra) is India's leading education ERP provider, serving 2000+ institutions with cutting-edge automation.
-                </p>
+                <h4 style="border:none;">Y.S.M AI OFFICIAL</h4>
+                <p style="color:#888; font-size:0.9rem; margin-top:15px;">India's leading AI-powered educational infrastructure. Developed and Verified by Yash Ankush Mishra from Naugachiya, Bihar.</p>
             </div>
             <div class="footer-col">
-                <h4>Products</h4>
+                <h4>Support</h4>
                 <ul>
-                    <li><a href="#modules">School ERP</a></li>
-                    <li><a href="#modules">Coaching Software</a></li>
-                    <li><a href="#modules">University ERP</a></li>
-                    <li><a href="/demo/">Live Demo</a></li>
+                    <li><a href="mailto:support@ysm.education">support@ysm.education</a></li>
+                    <li><a href="tel:+918356926231">+91 8356926231</a></li>
+                    <li><a href="/demo/">Demo Portal</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Company</h4>
+                <h4>Legal</h4>
                 <ul>
-                    <li><a href="/developer/">About Developer</a></li>
-                    <li><a href="/blog/">Insights</a></li>
                     <li><a href="/privacy-policy/">Privacy Policy</a></li>
                     <li><a href="/terms-of-service/">Terms of Service</a></li>
                     <li><a href="/refund-policy/">Refund Policy</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="mailto:support@ysm.education">support@ysm.education</a></li>
-                    <li><a href="mailto:yash.kumar@telepathyinfotech.com">Demo Inquiry</a></li>
-                    <li><a href="tel:+918356926231">+91 8356926231</a></li>
-                    <li><a href="#">Rangra, Bhagalpur, Bihar</a></li>
-                </ul>
+                <h4>Connect</h4>
+                <p style="color:#888; font-size:0.8rem;">Telepathy Infotech<br>Rangra, Bhagalpur, Bihar<br>Verified Portal🇮🇳</p>
             </div>
         </div>
-        <div class="footer-bottom">
-            © 2026 Y.S.M AI (Verified Portal). All Rights Reserved. Engineered by Yash Ankush Mishra.
+        <div style="text-align:center; margin-top:50px; color:#555; font-size:0.8rem; border-top:1px solid #333; padding-top:30px;">
+            © 2026 Y.S.M AI. Propelling Bihar's Digital Future. All Rights Reserved.
         </div>
     </footer>
 
-    <!-- PAYMENT MODAL (PRESERVED LOGIC) -->
+    <!-- Payment Modal (Hidden) -->
     <div id="paymentModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-        <div style="background:white; border-radius:15px; padding:40px; width:90%; max-width:500px; position:relative;">
-            <button onclick="closePaymentModal()" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-            <h3 id="selectedPlanLabel" style="margin-bottom:30px; text-align:center;">Activate Plan</h3>
-            
+        <div style="background:white; border-radius:15px; padding:40px; width:90%; max-width:450px;">
+            <h3 id="selectedPlanLabel" style="margin-bottom:20px;">Plan Activation</h3>
             <div id="step1">
-                <input type="text" id="userName" placeholder="Institution Name" style="width:100%; padding:15px; margin-bottom:15px; border:1px solid #ddd; border-radius:5px;">
-                <input type="email" id="userEmail" placeholder="Email Address" style="width:100%; padding:15px; margin-bottom:15px; border:1px solid #ddd; border-radius:5px;">
-                <input type="tel" id="userPhone" placeholder="Mobile Number" style="width:100%; padding:15px; margin-bottom:20px; border:1px solid #ddd; border-radius:5px;">
-                <button onclick="goToPaymentStep()" class="btn-demo" style="width:100%;">CONTINUE</button>
+                <input type="text" id="userName" placeholder="Institution Name" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd;">
+                <input type="email" id="userEmail" placeholder="Email Address" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd;">
+                <button onclick="goToPaymentStep()" class="btn-main" style="width:100%;">CONTINUE</button>
             </div>
-
             <div id="step2" style="display:none;">
-                <div style="background:#f8f9fa; padding:20px; border-radius:10px; margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Subscription</span><span id="breakdownBase"></span></div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Platform Fee (2%)</span><span id="breakdownFee"></span></div>
-                    <div style="display:flex; justify-content:space-between; font-weight:700; border-top:1px solid #ddd; padding-top:10px;"><span>Total (incl GST)</span><span id="breakdownTotal" style="color:var(--primary-orange);"></span></div>
+                <div style="background:#f8f9fa; padding:15px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Total Activation:</span><span id="breakdownTotal" style="font-weight:700;"></span></div>
                 </div>
-                <button onclick="initiateRazorpay()" class="btn-demo" style="width:100%;">PAY NOW</button>
+                <button onclick="initiateRazorpay()" class="btn-main" style="width:100%;">PAY NOW</button>
             </div>
         </div>
     </div>
 
     <script>
+        function calculateROI() {
+            const students = document.getElementById('studentRange').value;
+            const fee = document.getElementById('feeRange').value;
+            document.getElementById('studentVal').innerText = students;
+            document.getElementById('feeVal').innerText = fee;
+            const savings = Math.round((students * 1250) / 100000);
+            document.getElementById('savingsVal').innerText = '₹ ' + savings + 'L';
+            document.getElementById('hoursSaved').innerText = (students * 2.2).toLocaleString();
+        }
+        window.onload = calculateROI;
+
         let currentPlan = '';
         let currentAmount = 0;
-
         function openPaymentModal(plan, amount) {
             currentPlan = plan;
-            const basePrice = parseFloat(amount);
-            const platformFee = Math.round(basePrice * 0.02);
-            const gst = Math.round(basePrice * 0.18);
-            currentAmount = (basePrice + platformFee + gst);
-            
-            if (basePrice === 2000) currentAmount = 2400;
-            if (basePrice === 4000) currentAmount = 4800;
-            if (basePrice === 8000) currentAmount = 9600;
-
-            document.getElementById('selectedPlanLabel').innerText = 'Deploy ' + plan + ' Plan';
-            document.getElementById('breakdownBase').innerText = '₹' + basePrice.toLocaleString();
-            document.getElementById('breakdownFee').innerText = '₹' + platformFee;
-            document.getElementById('breakdownTotal').innerText = '₹' + currentAmount.toLocaleString();
+            currentAmount = amount * 1.2; // Including fee/gst
+            if (amount === 2000) currentAmount = 2400;
+            if (amount === 4000) currentAmount = 4800;
+            if (amount === 8000) currentAmount = 9600;
+            document.getElementById('selectedPlanLabel').innerText = 'Activate ' + plan + ' Plan';
+            document.getElementById('breakdownTotal').innerText = '₹' + currentAmount;
             document.getElementById('paymentModalOverlay').style.display = 'flex';
-            document.getElementById('step1').style.display = 'block';
-            document.getElementById('step2').style.display = 'none';
         }
-
-        function closePaymentModal() { document.getElementById('paymentModalOverlay').style.display = 'none'; }
         function goToPaymentStep() {
-            if (!document.getElementById('userName').value || !document.getElementById('userEmail').value) return;
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
         }
-
         async function initiateRazorpay() {
-            try {
-                const res = await fetch('/api/payments/razorpay/create-order/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                    body: JSON.stringify({ plan_type: currentPlan, amount: currentAmount, payment_type: 'SUBSCRIPTION', email: document.getElementById('userEmail').value, phone: document.getElementById('userPhone').value })
-                });
-                const orderData = await res.json();
-                const options = {
-                    "key": "{{ RAZORPAY_KEY_ID }}",
-                    "amount": orderData.amount,
-                    "currency": "INR",
-                    "name": "Y.S.M AI",
-                    "description": currentPlan + " Activation",
-                    "order_id": orderData.order_id,
-                    "handler": function (response) { verifyPayment(response); },
-                    "prefill": { "name": document.getElementById('userName').value, "email": document.getElementById('userEmail').value, "contact": document.getElementById('userPhone').value },
-                    "theme": { "color": "#F16722" }
-                };
-                new Razorpay(options).open();
-            } catch (e) { alert("Gateway Error"); }
-        }
-
-        async function verifyPayment(rzp) {
-            const res = await fetch('/api/payments/razorpay/verify/', {
+            const res = await fetch('/api/payments/razorpay/create-order/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                body: JSON.stringify({ razorpay_order_id: rzp.razorpay_order_id, razorpay_payment_id: rzp.razorpay_payment_id, razorpay_signature: rzp.razorpay_signature, email: document.getElementById('userEmail').value, institution_name: document.getElementById('userName').value, phone: document.getElementById('userPhone').value, plan_type: currentPlan })
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ plan_type: currentPlan, amount: currentAmount, email: document.getElementById('userEmail').value })
             });
-            if (res.ok) { alert("Subscription Activated!"); location.reload(); }
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+            const order = await res.json();
+            const options = {
+                "key": "{{ RAZORPAY_KEY_ID }}",
+                "amount": order.amount,
+                "name": "Y.S.M AI",
+                "order_id": order.order_id,
+                "handler": function (response) { alert("Paid Successfully!"); location.reload(); },
+                "theme": { "color": "#f39223" }
+            };
+            new Razorpay(options).open();
         }
     </script>
 </body>
