@@ -14,15 +14,80 @@
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <link rel="icon" type="image/jpeg" href="{% static 'images/yash_profile.jpg' %}">
 
-    <!-- JSON-LD Structured Data (PRESERVED) -->
+    <!-- ===================== HREFLANG – Multi Language SEO ===================== -->
+    <link rel="alternate" hreflang="en-in" href="https://yashamishra.pythonanywhere.com/">
+    <link rel="alternate" hreflang="hi" href="https://yashamishra.pythonanywhere.com/">
+    <link rel="alternate" hreflang="x-default" href="https://yashamishra.pythonanywhere.com/">
+
+    <!-- ===================== PERFORMANCE PRECONNECT ===================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://unpkg.com">
+
+    <!-- ===================== PWA & MOBILE META ===================== -->
+    <meta name="theme-color" content="#F16722">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Geo Targeting -->
+    <meta name="geo.region" content="IN-BR">
+    <meta name="geo.placename" content="Naugachiya, Rangra, Bhagalpur, Katihar, Bihar, India">
+
+    <!-- JSON-LD Structured Data (FULL RESTORE) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
         {
           "@type": "WebSite",
+          "@id": "https://yashamishra.pythonanywhere.com/#website",
           "url": "https://yashamishra.pythonanywhere.com/",
-          "name": "Y.S.M AI Education System"
+          "name": "Y.S.M AI Education System",
+          "description": "India's #1 AI-powered School, Coaching & Institute Management ERP",
+          "publisher": {"@id": "https://yashamishra.pythonanywhere.com/#org"},
+          "inLanguage": "en-IN"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://yashamishra.pythonanywhere.com/#app",
+          "name": "Y.S.M AI Education System",
+          "operatingSystem": "Web-based",
+          "applicationCategory": "EducationalApplication",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "1250"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "2000",
+            "priceCurrency": "INR"
+          },
+          "author": {"@id": "https://yashamishra.pythonanywhere.com/developer/#person"}
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://yashamishra.pythonanywhere.com/#org",
+          "name": "Telepathy Infotech",
+          "founder": {"@id": "https://yashamishra.pythonanywhere.com/developer/#person"}
+        },
+        {
+          "@type": "Person",
+          "@id": "https://yashamishra.pythonanywhere.com/developer/#person",
+          "name": "Yash Ankush Mishra",
+          "jobTitle": "Chief Software Architect & AI Engineer"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is Y.S.M AI School Management System?",
+              "acceptedAnswer": {"@type": "Answer", "text": "Y.S.M AI is India's most advanced AI-powered ERP software for schools, coaching institutes, and colleges."}
+            }
+          ]
         }
       ]
     }
@@ -411,7 +476,7 @@
                     </ul>
                 </div>
                 <div class="feature-img">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Dashboard Preview">
+                    <img src="{% static 'img/redesign/admin_dashboard.png' %}" alt="Dashboard Preview" style="width:100%; border-radius:15px; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
                 </div>
             </div>
 
@@ -427,7 +492,7 @@
                     </ul>
                 </div>
                 <div class="feature-img">
-                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Teacher using AI">
+                    <img src="{% static 'img/redesign/teacher_teaching.png' %}" alt="Teacher using AI" style="width:100%; border-radius:15px; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
                 </div>
             </div>
         </section>
