@@ -38,7 +38,7 @@ from .views import (
     MyReportCardView, MyResultsView,
     LegacyGenerateIDCardView, LegacyGenerateAdmitCardView, LegacyGenerateReportCardView,
     LegacyGenerateCertificateView, LegacyGenerateBulkIDCardView, LegacyGenerateBulkAdmitCardView,
-    LandingPageView, LoginPageView, DemoRequestView, DeveloperProfileView, ResumeView,
+    LandingPageView, LoginPageView, ChangePasswordPageView, DemoRequestView, DeveloperProfileView, ResumeView,
     
     # Subscription
     ClientSubscriptionView, SubscriptionRenewalView, PublicSubscriptionSubmitView,
@@ -101,6 +101,7 @@ urlpatterns = [
     # Frontend Pages (Legacy/Compatibility)
     path('', LandingPageView.as_view(), name='landing'),
     path('login/', LoginPageView.as_view(), name='login'),
+    path('change-password/', ChangePasswordPageView.as_view(), name='change-password-page'),
     
     # Resume Download (Public)
     path('resume/download/', DownloadResumeView.as_view(), name='resume-download'),

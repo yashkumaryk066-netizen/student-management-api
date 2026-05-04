@@ -208,6 +208,7 @@ class RazorpayVerifyView(APIView):
 
         try:
             is_new_user = False
+            temp_password = None
             with transaction.atomic():
                 # 1. Registration Flow (No User)
                 if not user:
@@ -217,6 +218,9 @@ class RazorpayVerifyView(APIView):
                     # Try to find user or create
                     user = User.objects.filter(email__iexact=email).first()
                     if not user:
+                        import secrets
+                        import string
+                        
                         # Generate unique username
                         base = (email.split('@')[0] or 'client').lower()
                         username = base
@@ -225,9 +229,11 @@ class RazorpayVerifyView(APIView):
                             username = f"{base}{counter}"
                             counter += 1
                         
-                        user = User.objects.create_user(username=username, email=email)
-                        user.set_unusable_password()
-                        user.save()
+                        # Generate temporary password
+                        alphabet = string.ascii_letters + string.digits
+                        temp_password = ''.join(secrets.choice(alphabet) for _ in range(10))
+                        
+                        user = User.objects.create_user(username=username, email=email, password=temp_password)
                         is_new_user = True
 
                 # 2. Profile Setup
@@ -241,6 +247,8 @@ class RazorpayVerifyView(APIView):
                     profile.phone = phone
                 if plan_type:
                     profile.institution_type = plan_type
+                if is_new_user:
+                    profile.force_password_change = True
                 profile.save()
 
                 # 3. Create/Update Payment record (IDEMPOTENCY CHECK)
@@ -279,7 +287,12 @@ class RazorpayVerifyView(APIView):
             return Response({
                 "status": "success",
                 "message": "Subscription activated successfully",
-                "is_new_user": is_new_user
+                "is_new_user": is_new_user,
+                "credentials": {
+                    "username": user.username,
+                    "password": temp_password if is_new_user else None,
+                    "must_change_password": True if is_new_user else False
+                }
             })
         except Exception as e:
             logger.error(f"Subscription Gateway Processing Failed: {str(e)}")

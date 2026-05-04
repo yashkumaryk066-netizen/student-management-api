@@ -72,42 +72,27 @@ class PremiumSidebarManager {
     async fetchUserPlanFromAPI() {
         try {
             let data;
-            // Use api.js wrapper if available, otherwise raw fetch
-            if (typeof apiCall === 'function') {
-                try {
-                    data = await apiCall('/plan/features/');
-                } catch (e) {
-                    // If apiCall fails (e.g. auth error), fallback logic or silent fail
-                    console.warn("Sidebar: API Call failed", e);
-                    return;
-                }
-            } else {
-                const token = localStorage.getItem('authToken');
-                if (!token) return; // Not logged in
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
 
-                const res = await fetch('/api/plan/features/', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) throw new Error('Failed to fetch plan');
-                data = await res.json();
+            const res = await fetch('/api/plan/features/', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) throw new Error('Failed to fetch plan');
+            data = await res.json();
+
+            if (data.plan) {
+                this.currentPlan = data.plan.toLowerCase();
+                localStorage.setItem('userPlan', this.currentPlan);
             }
 
-            const planValue = data.plan || data.plan_type;
-            if (planValue) {
-                // normalize plan type
-                let remotePlan = planValue.toLowerCase();
-
-                // Map SUPER_ADMIN to valid key
-                if (remotePlan === 'super_admin' || remotePlan === 'super_admin') remotePlan = 'super_admin';
-
-                // Only update if valid
-                if (PLAN_ACCESS[remotePlan]) {
-                    this.currentPlan = remotePlan;
-                    localStorage.setItem('userPlan', this.currentPlan);
-                    this.applyPlanAccess();
-                    console.log(`✅ Plan synced from API: ${this.currentPlan}`);
-                }
+            if (data.features) {
+                localStorage.setItem('userFeatures', JSON.stringify(data.features));
+                console.log(`✅ ${data.features.length} Features synced from API`);
             }
+
+            this.applyPlanAccess();
+            
         } catch (error) {
             console.warn('⚠️ Could not sync plan from API (using local default):', error.message);
         }
@@ -120,10 +105,9 @@ class PremiumSidebarManager {
     }
 
     applyPlanAccess() {
-        if (!this.currentPlan || !PLAN_ACCESS[this.currentPlan]) {
-            console.warn('Invalid plan, showing all modules');
-            return;
-        }
+        // If we have dynamic features from API, use them
+        const dynamicFeatures = JSON.parse(localStorage.getItem('userFeatures') || '[]');
+        const isSuperAdmin = (this.currentPlan === 'super_admin');
 
         // --- DYNAMIC TERMINOLOGY UPDATE ---
         if (window.DashboardApp && window.DashboardApp.getTerm) {
@@ -137,7 +121,7 @@ class PremiumSidebarManager {
         }
 
         // GOD MODE: Super Admin Bypass
-        if (this.currentPlan === 'super_admin') {
+        if (isSuperAdmin) {
             console.log('👑 Super Admin Bypass: Showing all modules');
             this.navLinks.forEach(link => {
                 if (link.parentElement) link.parentElement.style.display = 'block';
@@ -150,36 +134,22 @@ class PremiumSidebarManager {
             return;
         }
 
-        const allowedModules = PLAN_ACCESS[this.currentPlan].modules;
-
-        // Toggle Super Admin Specific Items
-        const superAdminItems = document.querySelectorAll('.super-admin-only');
-        superAdminItems.forEach(item => {
-            if (this.currentPlan === 'super_admin') {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-
+        // Feature gating logic
         this.navLinks.forEach(link => {
             const module = link.getAttribute('data-module');
+            if (!module) return;
 
-            if (!module) return; // Skip category headers
+            // Check if feature is allowed in current plan
+            const isAllowed = dynamicFeatures.includes(module) || dynamicFeatures.includes(module.replace(/-/g, '_'));
 
-            // Remove legacy lock icons if they exist
-            const lockIcon = link.querySelector('.lock-icon');
-            if (lockIcon) lockIcon.remove();
-
-            if (allowedModules.includes(module)) {
-                // Module is accessible
+            if (isAllowed) {
                 link.classList.remove('locked');
                 link.style.pointerEvents = 'auto';
-                if (link.parentElement) link.parentElement.style.display = ''; // Show
+                if (link.parentElement) link.parentElement.style.display = ''; 
             } else {
-                // Module is locked - hide it completely for clients
+                // Feature is locked - hide it completely for a cleaner UI
                 link.classList.add('locked');
-                if (link.parentElement) link.parentElement.style.display = 'none'; // Hide
+                if (link.parentElement) link.parentElement.style.display = 'none';
             }
         });
 
@@ -203,21 +173,25 @@ class PremiumSidebarManager {
 
         // Also hide dashboard cards for locked modules
         document.querySelectorAll('.module-card').forEach(card => {
-            const onclickAttr = card.getAttribute('onclick');
-            if (onclickAttr && onclickAttr.includes('navigateTo(')) {
-                const match = onclickAttr.match(/navigateTo\(['"]([^'"]+)['"]\)/);
-                if (match && match[1]) {
-                    const module = match[1];
-                    if (allowedModules.includes(module)) {
-                        card.style.display = ''; // Show
-                    } else {
-                        card.style.display = 'none'; // Hide completely instead of locking
+            const module = card.getAttribute('data-module');
+            if (module) {
+                const isAllowed = dynamicFeatures.includes(module) || dynamicFeatures.includes(module.replace(/-/g, '_'));
+                card.style.display = isAllowed ? '' : 'none';
+            } else {
+                // Fallback for cards with onclick but no data-module
+                const onclickAttr = card.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes('navigateTo(')) {
+                    const match = onclickAttr.match(/navigateTo\(['"]([^'"]+)['"]\)/);
+                    if (match && match[1]) {
+                        const m = match[1];
+                        const isAllowed = dynamicFeatures.includes(m) || dynamicFeatures.includes(m.replace(/-/g, '_'));
+                        card.style.display = isAllowed ? '' : 'none';
                     }
                 }
             }
         });
 
-        console.log(`✅ Applied ${this.currentPlan} plan access`);
+        console.log(`✅ Applied dynamic feature access for ${this.currentPlan}`);
     }
 
     navigateToModule(module) {

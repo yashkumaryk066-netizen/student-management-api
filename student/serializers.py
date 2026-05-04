@@ -541,6 +541,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add extra response data (optional, for frontend convenience)
         data['username'] = self.user.username
         data['role'] = getattr(self.user.profile, 'role', 'STUDENT') if hasattr(self.user, 'profile') else 'ADMIN'
+        data['must_change_password'] = getattr(self.user.profile, 'force_password_change', False) if hasattr(self.user, 'profile') else False
         
         # Update Last Login IP and Log Attempt
         request = self.context.get('request')

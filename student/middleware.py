@@ -62,15 +62,10 @@ class SubscriptionMiddleware:
     def __call__(self, request):
         user = getattr(request, 'user', None)
 
-        # --------------------------------------------------
         # 1. FAST EXIT – unauthenticated / superuser
-        # --------------------------------------------------
-        user = getattr(request, 'user', None)
-
         if not user or not user.is_authenticated:
             return self.get_response(request)
 
-        # CRITICAL: Superuser bypass - MUST be checked AFTER authentication
         # Superadmins have UNRESTRICTED access to ALL features
         if user.is_superuser:
             return self.get_response(request)
@@ -80,17 +75,12 @@ class SubscriptionMiddleware:
             return self.get_response(request)
 
         # Normalize
-        plan_type = (getattr(profile, 'institution_type', '') or '').upper()
         path = request.path.lower()
-
-        # --------------------------------------------------
-        # 2. SUBSCRIPTION EXPIRY CHECK
-        # --------------------------------------------------
-        expiry_date = getattr(profile, 'subscription_expiry', None)
-        is_safe_method = request.method in self.SAFE_METHODS
         is_exempt_url = any(url in path for url in self.EXEMPT_URLS)
 
-        if expiry_date and expiry_date < timezone.now().date():
+        # 2. SUBSCRIPTION EXPIRY CHECK (Neural Lock Protocol)
+        # Using the sophisticated check from UserProfile model
+        if profile.is_plan_expired():
             # Expired Protocol: Block everything except exempt URLs (Renewal/Auth)
             if not is_exempt_url:
                 if request.headers.get('Accept') == 'application/json' or path.startswith('/api/'):
@@ -98,30 +88,39 @@ class SubscriptionMiddleware:
                         "code": "SUBSCRIPTION_EXPIRED",
                         "status": "locked",
                         "message": "Protocol Terminated. Renewal Required for Data Access.",
-                        "expiry_date": str(expiry_date),
-                        "action_url": "/api/student/payments/razorpay/create-order/"
+                        "expiry_date": str(profile.subscription_expiry),
+                        "action_url": "/api/payments/razorpay/create-order/"
                     }, status=403)
                 
-                # For non-exempt HTML pages, we could redirect, but showing the dash with a popup is better.
-                # We'll just flag it in the response for the frontend to handle.
+                # For non-exempt HTML pages, we'll let the dashboard load but the frontend
+                # (via profile sync) will trigger the Neural Lock modal.
+                # However, we still return the response to allow the JS to run.
                 response = self.get_response(request)
                 response['X-Subscription-Status'] = 'EXPIRED'
                 return response
-            
-            return self.get_response(request)
 
-        # --------------------------------------------------
-        # 3. PLAN-BASED FEATURE GATING (ACTIVE SUBS ONLY)
-        # --------------------------------------------------
-        restricted_paths = self.PLAN_RESTRICTIONS.get(plan_type, ())
+        # 3. DYNAMIC FEATURE GATING (Centralized Matrix)
+        # Identify the "module" or "feature" being accessed from the URL
+        # e.g., /api/students/ -> feature: 'students'
+        # e.g., /api/transport/ -> feature: 'transport'
+        
+        feature_name = None
+        parts = [p for p in path.split('/') if p]
+        if parts:
+            if parts[0] == 'api':
+                if len(parts) > 1:
+                    feature_name = parts[1]
+            else:
+                feature_name = parts[0]
 
-        for keyword in restricted_paths:
-            if keyword in path:
+        if feature_name and not is_exempt_url:
+            from student.plan_permissions import has_feature_access
+            if not has_feature_access(user, feature_name):
                 return JsonResponse({
                     "success": False,
                     "error": {
                         "code": "PLAN_RESTRICTED",
-                        "message": f"This feature is not available in your {plan_type} plan.",
+                        "message": f"This feature is not available in your current plan context.",
                         "upgrade_required": True
                     }
                 }, status=403)

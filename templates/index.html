@@ -964,21 +964,130 @@
             document.getElementById('step2').style.display = 'block';
         }
         async function initiateRazorpay() {
+            const institutionName = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+
+            if (!institutionName || !email) {
+                alert("Please fill in your institution name and email.");
+                return;
+            }
+
             const res = await fetch('/api/payments/razorpay/create-order/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-                body: JSON.stringify({ plan_type: currentPlan, amount: currentAmount, email: document.getElementById('userEmail').value })
+                body: JSON.stringify({ 
+                    plan_type: currentPlan, 
+                    amount: currentAmount, 
+                    email: email,
+                    institution_name: institutionName,
+                    payment_type: 'SUBSCRIPTION'
+                })
             });
             const order = await res.json();
+            
+            if (order.error) {
+                alert(order.error);
+                return;
+            }
+
             const options = {
-                "key": "{{ RAZORPAY_KEY_ID }}",
+                "key": order.key_id,
                 "amount": order.amount,
-                "name": "Y.S.M AI",
+                "currency": order.currency,
+                "name": "Y.S.M EduCore",
+                "description": "Subscription for " + currentPlan,
                 "order_id": order.order_id,
-                "handler": function (response) { alert("Paid Successfully!"); location.reload(); },
-                "theme": { "color": "#f39223" }
+                "handler": async function (response) {
+                    // Show Loading
+                    document.getElementById('step2').innerHTML = '<div class="spinner" style="margin: 20px auto;"></div><p style="text-align:center;">Activating your account...</p>';
+                    
+                    try {
+                        const verifyRes = await fetch('/api/payments/razorpay/verify/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                plan_type: currentPlan.toUpperCase(),
+                                amount: currentAmount,
+                                email: email,
+                                institution_name: institutionName,
+                                payment_type: 'SUBSCRIPTION'
+                            })
+                        });
+                        
+                        const result = await verifyRes.json();
+                        if (result.status === 'success') {
+                            showSuccessModal(result.credentials);
+                        } else {
+                            alert("Verification failed: " + (result.error || "Unknown error"));
+                            location.reload();
+                        }
+                    } catch (err) {
+                        alert("An error occurred during verification. Please contact support.");
+                        location.reload();
+                    }
+                },
+                "prefill": {
+                    "email": email,
+                    "contact": ""
+                },
+                "theme": { "color": "#223d8f" }
             };
             new Razorpay(options).open();
+        }
+
+        function showSuccessModal(creds) {
+            const modal = document.getElementById('paymentModalOverlay');
+            modal.innerHTML = `
+                <div style="background:white; border-radius:20px; padding:40px; width:95%; max-width:500px; text-align:center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #f0f0f0; position:relative; overflow:hidden;">
+                    <div style="position:absolute; top:0; left:0; width:100%; height:8px; background:linear-gradient(90deg, var(--primary-blue), var(--primary-orange));"></div>
+                    <div style="width:80px; height:80px; background:#f0fdf4; color:#10b981; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 25px; font-size:2.5rem;">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h2 style="color:var(--primary-blue); margin-bottom:10px;">Payment Successful!</h2>
+                    <p style="color:var(--text-muted); margin-bottom:30px;">Your ${currentPlan} plan has been activated. Please use the credentials below to login.</p>
+                    
+                    <div style="background:#f8fafc; border-radius:12px; padding:25px; margin-bottom:30px; text-align:left; border: 1px solid #e2e8f0;">
+                        <div style="margin-bottom:15px;">
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--primary-orange); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px;">Username</label>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="font-size:1.1rem; color:var(--primary-blue);">${creds.username}</strong>
+                                <i class="fa-regular fa-copy" style="cursor:pointer; color:var(--text-muted);" onclick="copyToClipboard('${creds.username}', this)"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--primary-orange); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px;">Temporary Password</label>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="font-size:1.1rem; color:var(--primary-blue);">${creds.password || '********'}</strong>
+                                <i class="fa-regular fa-copy" style="cursor:pointer; color:var(--text-muted);" onclick="copyToClipboard('${creds.password}', this)"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(243, 146, 35, 0.1); padding:12px; border-radius:8px; margin-bottom:25px; display:flex; align-items:center; gap:10px; text-align:left;">
+                        <i class="fa-solid fa-circle-info" style="color:var(--primary-orange);"></i>
+                        <span style="font-size:0.85rem; color:var(--primary-blue); font-weight:500;">You will be asked to set a new password on your first login.</span>
+                    </div>
+
+                    <a href="/login/" class="btn-main" style="width:100%; display:inline-block; text-decoration:none;">GO TO LOGIN →</a>
+                    
+                    <p style="margin-top:20px; font-size:0.8rem; color:var(--text-muted);">Please save these credentials before closing this window.</p>
+                </div>
+            `;
+        }
+
+        function copyToClipboard(text, el) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalClass = el.className;
+                el.className = 'fa-solid fa-check';
+                el.style.color = '#10b981';
+                setTimeout(() => {
+                    el.className = originalClass;
+                    el.style.color = '';
+                }, 2000);
+            });
         }
     </script>
 </body>

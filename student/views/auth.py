@@ -46,6 +46,7 @@ class ProfileView(APIView):
                     "address": "System Root",
                     "institution_type": "EDUCATION SYSTEM",  # FIX L-3: consistent value
                     "subscription_plan": "ENTERPRISE",
+                    "must_change_password": False
                 })
             
             # Check profile and role
@@ -66,7 +67,8 @@ class ProfileView(APIView):
                 "user_full_name": user.get_full_name(),
                 "available_features": features,
                 "upgrade_options": upgrade_options, # NEW: Dynamic Upgrade Path
-                "subscription_plan": profile.subscription_plan if profile else "BASIC" # Return tier info
+                "subscription_plan": profile.subscription_plan if profile else "BASIC", # Return tier info
+                "must_change_password": profile.force_password_change if profile else False
             }
             
             if profile:
@@ -177,9 +179,9 @@ class ChangePasswordView(APIView):
 
     def post(self, request):
         try:
-            current_password = request.data.get('current_password')
+            current_password = request.data.get('current_password') or request.data.get('old_password')
             new_password = request.data.get('new_password')
-            confirm_password = request.data.get('confirm_password')
+            confirm_password = request.data.get('confirm_password') or new_password # Default to new_password if not provided
 
             if not current_password or not new_password:
                 return Response({'error': 'Please provide current and new passwords.'}, status=400)
@@ -195,6 +197,11 @@ class ChangePasswordView(APIView):
 
             user.set_password(new_password)
             user.save()
+            
+            # Reset the force change flag if it exists
+            if hasattr(user, 'profile'):
+                user.profile.force_password_change = False
+                user.profile.save()
             
             # Optional: Refresh session/tokens if needed, or let frontend handle re-login
             

@@ -93,6 +93,12 @@ const AuthEngine = (() => {
 
     /* ---------- REDIRECT ---------- */
     function redirect(profile) {
+        // Force Password Change Check
+        if (profile.must_change_password === true || profile.must_change_password === 'true') {
+            location.href = '/change-password/';
+            return;
+        }
+
         // High Priority: Super Admin
         if (profile.is_superuser === true || profile.is_superuser === 'true') {
             location.href = '/dashboard/super-admin/';

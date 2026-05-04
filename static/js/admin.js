@@ -5983,9 +5983,17 @@ const DashboardApp = {
 
             // Format dates
             const formatDate = (dateStr) => {
+                if (!dateStr) return 'N/A';
                 const d = new Date(dateStr);
                 return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
             };
+
+            // Get Dynamic Features & Upgrades
+            const featuresRes = await fetch(`${this.apiBaseUrl}/user/plan/`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const featuresData = await featuresRes.json();
+            const upgradeOptions = featuresData.upgrade_options || [];
 
             container.innerHTML = `
                 <style>
@@ -6268,9 +6276,34 @@ const DashboardApp = {
                                 <span style="font-weight: 700; font-size: 1.1rem; color: #10b981;">₹${sub.amount_paid}</span>
                             </div>
                             
-                            <button class="renew-btn" onclick="DashboardApp.renewSubscription('${sub.plan_type}')">
-                                🔄 Renew for 30 Days
+                            <button class="renew-btn" onclick="DashboardApp.initiateSaaSPayment('${sub.plan_type}', 'RENEWAL')">
+                                ⚡ Instant Renewal via Razorpay
                             </button>
+
+                            ${upgradeOptions.length > 0 ? `
+                            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                                <h4 style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">Available Upgrades</h4>
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                                    ${upgradeOptions.map(opt => `
+                                        <div class="upgrade-path-card" style="
+                                            background: rgba(139, 92, 246, 0.1);
+                                            border: 1px solid rgba(139, 92, 246, 0.3);
+                                            padding: 15px; border-radius: 12px;
+                                            display: flex; justify-content: space-between; align-items: center;
+                                            transition: 0.3s;
+                                        ">
+                                            <div>
+                                                <div style="font-weight: 700; color: white;">${opt.label}</div>
+                                                <div style="font-size: 0.8rem; color: #a78bfa;">Unlock more modules</div>
+                                            </div>
+                                            <button class="btn-primary" onclick="DashboardApp.initiateSaaSPayment('${opt.plan}', 'SUBSCRIPTION')" style="padding: 8px 16px; font-size: 0.85rem; background: #8b5cf6;">
+                                                Upgrade ₹${opt.price}
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
                         </div>
 
                         <!-- Billing History -->
@@ -6287,7 +6320,7 @@ const DashboardApp = {
                             
                             <div style="padding: 16px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
                                 <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-                                    More transactions will appear here
+                                    Secure Payments powered by <b>Razorpay</b>
                                 </div>
                             </div>
                         </div>
@@ -6310,98 +6343,101 @@ const DashboardApp = {
         }
     },
 
-    renewSubscription(planType) {
-        const plans = {
-            'COACHING': { price: 1000, name: 'Coaching Plan' },
-            'SCHOOL': { price: 2000, name: 'School Plan' },
-            'INSTITUTE': { price: 3000, name: 'Institute/University Plan' }
-        };
-
-        const plan = plans[planType] || plans['INSTITUTE'];
-        const upiLink = `upi://pay?pa=yash-k05@ptyes&pn=Y.S.M%20Education&am=${plan.price}&cu=INR&tn=Plan%20Renewal`;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
-
-        const modal = `
-            <div class="modal-overlay" id="renewModal" style="z-index: 10001; background: rgba(0,0,0,0.95);">
-                <div class="modal-card" style="max-width: 500px; background: #1e293b; border: 1px solid #3b82f6;">
-                    <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <h2 style="color: white; margin: 0; font-size: 1.5rem;">🔄 Renew Subscription</h2>
-                        <button class="close-btn" onclick="document.getElementById('renewModal').remove()">×</button>
-                    </div>
-                    <div class="modal-body" style="padding: 24px; text-align: center;">
-                        <h3 style="color: #fbbf24; margin-bottom: 5px;">${plan.name}</h3>
-                        <div style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 20px;">₹${plan.price} <span style="font-size: 1rem; color: #94a3b8;">/ month</span></div>
-                        
-                        <div style="background: white; padding: 10px; display: inline-block; border-radius: 12px; margin-bottom: 20px;">
-                            <img src="${qrUrl}" alt="UPI QR" style="width: 200px; height: 200px; object-fit: contain;">
-                        </div>
-                        
-                        <p style="color: #cbd5e1; margin-bottom: 20px;">Scan & Pay <strong>₹${plan.price}</strong> using any UPI App</p>
-                        
-                        <div style="text-align: left;">
-                            <label style="display: block; color: #94a3b8; margin-bottom: 8px; font-size: 0.9rem;">Transaction ID / UTR Number</label>
-                            <input type="text" id="renewTxnId" class="form-input" placeholder="e.g. 123456789012" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 20px;">
-                        </div>
-                        
-                        <button class="btn-primary" onclick="DashboardApp.submitRenewal('${planType}', ${plan.price})" style="width: 100%; padding: 14px; font-size: 1.1rem;">
-                            ✅ Submit Payment Details
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modal);
-    },
-
-    submitRenewal(planType, amount) {
-        const txnId = document.getElementById('renewTxnId').value.trim();
-        if (!txnId) {
-            alert("Please enter Transaction ID");
-            return;
-        }
-
-        const btn = document.querySelector('#renewModal .btn-primary');
-        btn.innerHTML = 'Submitting...';
+    async initiateSaaSPayment(plan, type = 'RENEWAL') {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
         btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
 
-        fetch(this.apiBaseUrl + '/payment/manual/submit/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('authToken')
-            },
-            body: JSON.stringify({
-                amount: amount,
-                transaction_id: txnId,
-                description: `Subscription Renewal - ${planType}`,
-                payment_type: 'SUBSCRIPTION'
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'SUBMITTED' || data.transaction_id) {
-                    document.getElementById('renewModal').remove();
-                    // Use premium modal if available, else alert
-                    if (window.ModalSystem) {
-                        window.ModalSystem.show('Renewal Request Submitted. Waiting for Admin Approval.', 'Success', 'success');
-                    } else {
-                        alert('Renewal Request Submitted!');
-                    }
-                    // Refresh status
-                    setTimeout(() => this.loadSubscriptionManagement(), 2000);
-                } else {
-                    alert(data.error || 'Submission Failed');
-                    btn.innerHTML = 'Try Again';
-                    btn.disabled = false;
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Server Error');
-                btn.innerHTML = 'Try Again';
-                btn.disabled = false;
+        try {
+            // 1. Create Razorpay Order
+            const res = await fetch(`${this.apiBaseUrl}/payments/razorpay/create-order/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({
+                    plan_type: plan,
+                    payment_type: type
+                })
             });
-    },
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Payment Creation Failed");
+
+            // 2. Configure Razorpay
+            const options = {
+                "key": data.key_id,
+                "amount": data.amount,
+                "currency": "INR",
+                "name": "Y.S.M Universal AI",
+                "description": type === 'RENEWAL' ? "30-Day Plan Extension" : `Upgrade to ${plan}`,
+                "order_id": data.order_id,
+                "handler": async (response) => {
+                    this.showToast("Verifying payment...", "info");
+                    await this.verifySaaSPayment(response, plan, type);
+                },
+                "modal": {
+                    "ondismiss": () => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                        this.showToast("Payment Cancelled", "warning");
+                    }
+                },
+                "theme": { "color": "#8b5cf6" }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+
+        } catch (err) {
+            console.error(err);
+            this.showAlert("Payment Failed", err.message, "error");
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    async verifySaaSPayment(rzpResponse, plan, type) {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/payments/razorpay/verify/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({
+                    razorpay_order_id: rzpResponse.razorpay_order_id,
+                    razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                    razorpay_signature: rzpResponse.razorpay_signature,
+                    plan_type: plan,
+                    payment_type: type
+                })
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+                this.showAlert(
+                    type === 'RENEWAL' ? "Plan Renewed!" : "Upgrade Success!",
+                    "Your protocol has been updated. The system will now refresh to apply changes.",
+                    "success"
+                );
+                
+                // Clear local caches
+                localStorage.removeItem('userPlan');
+                localStorage.removeItem('userFeatures');
+                
+                setTimeout(() => window.location.reload(), 2500);
+            } else {
+                throw new Error(result.error || "Verification Failed");
+            }
+        } catch (err) {
+            this.showAlert("Verification Error", err.message, "error");
+        }
+    }
 
 
 

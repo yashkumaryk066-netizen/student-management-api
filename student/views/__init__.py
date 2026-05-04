@@ -50,6 +50,9 @@ class LoginPageView(TemplateView):
         context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
         return context
 
+class ChangePasswordPageView(TemplateView):
+    template_name = "change-password.html"
+
 class AdminDashboardTemplateView(TemplateView):
     template_name = "dashboard/admin.html"
 
