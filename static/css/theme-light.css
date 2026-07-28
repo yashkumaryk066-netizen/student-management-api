@@ -260,6 +260,33 @@ button[onclick="resetLoginStep()"] {
     filter: blur(40px) !important;
 }
 
+/* --- UNIVERSAL LIGHT THEME FIXES FOR INLINE STYLES --- */
+/* Fixes text colors injected via JS across all modules */
+:is(.neo-table, .dashboard-container, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="color: white"], [style*="color:white"], [style*="color: #fff"], [style*="color:#fff"], [style*="color: #ffffff"], [style*="color:#ffffff"], [style*="color: #e2e8f0"], [style*="color:#e2e8f0"], [style*="color: #cbd5e1"], [style*="color:#cbd5e1"], [style*="color: #f8fafc"], [style*="color:#f8fafc"]) {
+    color: var(--text-main) !important;
+}
+
+:is(.neo-table, .dashboard-container, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="color: #94a3b8"], [style*="color:#94a3b8"]) {
+    color: var(--text-muted) !important;
+}
+
+/* Fixes transparent white backgrounds injected via JS */
+:is(.neo-table, .dashboard-container, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="background: rgba(255,255,255,0.05)"], [style*="background:rgba(255,255,255,0.05)"], [style*="background: rgba(255, 255, 255, 0.05)"], [style*="background: rgba(255,255,255,0.1)"], [style*="background:rgba(255,255,255,0.1)"], [style*="background: rgba(255, 255, 255, 0.1)"]) {
+    background: rgba(34, 61, 143, 0.05) !important;
+    border-color: rgba(34, 61, 143, 0.1) !important;
+}
+
+/* Glass buttons fix */
+.glass-button {
+    background: rgba(34, 61, 143, 0.05) !important;
+    color: var(--text-main) !important;
+    border-color: rgba(34, 61, 143, 0.2) !important;
+}
+.glass-button:hover {
+    background: rgba(34, 61, 143, 0.1) !important;
+    color: var(--primary) !important;
+}
+
 /* Badge Light Theme Overrides */
 .badge-active { color: #059669 !important; border-color: rgba(5, 150, 105, 0.3) !important; background: rgba(5, 150, 105, 0.1) !important; }
 .badge-expired { color: #dc2626 !important; border-color: rgba(220, 38, 38, 0.3) !important; background: rgba(220, 38, 38, 0.1) !important; }
