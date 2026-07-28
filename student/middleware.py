@@ -166,7 +166,7 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
             "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; "
             "img-src 'self' data: https: blob:; "
             "media-src 'self' https: data: blob: https://www.vidyalayaschoolsoftware.com; "
-            "connect-src 'self' https://api.openai.com https://generativelanguage.googleapis.com https://api.anthropic.com https://api.groq.com https://api.deepseek.com https://api.mistral.ai wss: ws: https://unpkg.com https://cdn.jsdelivr.net https://*.razorpay.com; "
+            "connect-src 'self' https://images.unsplash.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://api.openai.com https://generativelanguage.googleapis.com https://api.anthropic.com https://api.groq.com https://api.deepseek.com https://api.mistral.ai wss: ws: https://unpkg.com https://cdn.jsdelivr.net https://*.razorpay.com; "
             "frame-src 'self' https://*.razorpay.com; "
             "object-src 'none';"
         )
