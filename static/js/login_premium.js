@@ -6,12 +6,10 @@
 let isIdentifying = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (!window.gsap) return;
-
     // --- 3D MOUSE PARALLAX ---
     const tiltBox = document.getElementById('tiltBox');
     const hero = document.querySelector('.hero-visual-layer');
-    if (window.innerWidth > 1024 && tiltBox) {
+    if (window.innerWidth > 1024 && tiltBox && window.gsap) {
         window.addEventListener('mousemove', (e) => {
             const { clientX, clientY } = e;
             const xVal = (clientX / window.innerWidth - 0.5) * 15;
@@ -52,7 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
             passInput.type = isPass ? 'text' : 'password';
             passToggle.classList.toggle('fa-eye');
             passToggle.classList.toggle('fa-eye-slash');
-            gsap.fromTo(passToggle, { scale: 1.3 }, { scale: 1, duration: 0.3 });
+            if (window.gsap) {
+                gsap.fromTo(passToggle, { scale: 1.3 }, { scale: 1, duration: 0.3 });
+            }
         });
     }
 });
@@ -117,12 +117,19 @@ function transitionToStep2(userData) {
     if (userData.avatar) document.getElementById('userAvatar').src = userData.avatar;
     if (userData.greeting) document.getElementById('userGreeting').innerText = userData.greeting;
 
-    // Animate
-    const tl = gsap.timeline();
-    tl.to(step1, { x: -50, opacity: 0, duration: 0.4, ease: "power2.in" })
-        .set(step1, { display: 'none' })
-        .set(step2, { display: 'block', x: 50, opacity: 0 })
-        .to(step2, { x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.2)" });
+    if (window.gsap) {
+        // Animate
+        const tl = gsap.timeline();
+        tl.to(step1, { x: -50, opacity: 0, duration: 0.4, ease: "power2.in" })
+            .set(step1, { display: 'none' })
+            .set(step2, { display: 'block', x: 50, opacity: 0 })
+            .to(step2, { x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.2)" });
+    } else {
+        step1.style.display = 'none';
+        step2.style.display = 'block';
+        step2.style.opacity = '1';
+        step2.style.transform = 'none';
+    }
 
     // Focus Password
     setTimeout(() => document.getElementById('password').focus(), 500);
@@ -135,17 +142,28 @@ function resetLoginStep() {
     // Clear Password
     document.getElementById('password').value = '';
 
-    const tl = gsap.timeline();
-    tl.to(step2, { x: 50, opacity: 0, duration: 0.4, ease: "power2.in" })
-        .set(step2, { display: 'none' })
-        .set(step1, { display: 'block', x: -50, opacity: 0 })
-        .to(step1, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
-        .add(() => {
-            document.getElementById('btnIdentify').disabled = false;
-            document.getElementById('btnIdentify').querySelector('.btn-text').innerText = "VERIFY IDENTITY";
-            document.getElementById('idLoader').style.display = 'none';
-            document.getElementById('usernameInput').focus();
-        });
+    if (window.gsap) {
+        const tl = gsap.timeline();
+        tl.to(step2, { x: 50, opacity: 0, duration: 0.4, ease: "power2.in" })
+            .set(step2, { display: 'none' })
+            .set(step1, { display: 'block', x: -50, opacity: 0 })
+            .to(step1, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
+            .add(() => {
+                document.getElementById('btnIdentify').disabled = false;
+                document.getElementById('btnIdentify').querySelector('.btn-text').innerText = "VERIFY IDENTITY";
+                document.getElementById('idLoader').style.display = 'none';
+                document.getElementById('usernameInput').focus();
+            });
+    } else {
+        step2.style.display = 'none';
+        step1.style.display = 'block';
+        step1.style.opacity = '1';
+        step1.style.transform = 'none';
+        document.getElementById('btnIdentify').disabled = false;
+        document.getElementById('btnIdentify').querySelector('.btn-text').innerText = "VERIFY IDENTITY";
+        document.getElementById('idLoader').style.display = 'none';
+        document.getElementById('usernameInput').focus();
+    }
 }
 
 /* ==============================================================

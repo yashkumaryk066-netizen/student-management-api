@@ -1,7 +1,7 @@
 /* SERVICE WORKER KILL SWITCH */
 /* This service worker effectively disables itself and clears caches to ensure fresh content. */
 
-const CACHE_NAME = 'ysm-ai-v1';
+const CACHE_NAME = 'ysm-ai-v2';
 
 self.addEventListener('install', (event) => {
     // Force this worker to activate immediately, skipping the 'waiting' state

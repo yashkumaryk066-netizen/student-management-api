@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sovereign-erp-v5.4.6'; // Incremented version
+const CACHE_NAME = 'sovereign-erp-v5.4.7'; // Incremented version
 const ASSETS_TO_CACHE = [
     '/',
     '/static/css/dashboard.css',
