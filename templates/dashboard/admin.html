@@ -1098,7 +1098,7 @@
     </script>
     <script>
         // --- AUTHENTICATION & PRIVILEGE ENGINE ---
-        window.userIsSuperuser = {% if user.is_superuser %}true{% else %}false{% endif %};
+        window.userIsSuperuser = '{% if user.is_superuser %}true{% else %}false{% endif %}' === 'true';
 
         // Branding Fetch Script
         document.addEventListener('DOMContentLoaded', async () => {

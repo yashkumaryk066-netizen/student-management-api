@@ -4272,7 +4272,7 @@ const DashboardApp = {
                 preview.style.background = `url(${e.target.result}) center/cover no-repeat`;
                 preview.style.border = '2px solid #6366f1';
                 preview.innerHTML = ''; // Remove icon/text
-            }
+            };
             reader.readAsDataURL(input.files[0]);
         }
     },
@@ -6398,7 +6398,7 @@ const DashboardApp = {
             btn.disabled = false;
             btn.innerHTML = originalText;
         }
-    }
+    },
 
     async verifySaaSPayment(rzpResponse, plan, type) {
         try {
@@ -6437,7 +6437,7 @@ const DashboardApp = {
         } catch (err) {
             this.showAlert("Verification Error", err.message, "error");
         }
-    }
+    },
 
 
 
