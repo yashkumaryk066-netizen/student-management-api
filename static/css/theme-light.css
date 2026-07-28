@@ -141,15 +141,39 @@ body, html {
 }
 
 /* Table Light Theme */
-.data-table th {
+.data-table th, .neo-table th {
     background: rgba(34, 61, 143, 0.05) !important;
     color: var(--primary) !important;
+    border-bottom: 1px solid rgba(34, 61, 143, 0.1) !important;
 }
-.data-table tr:hover {
+.data-table tr:hover, .neo-table tr:hover {
     background: rgba(34, 61, 143, 0.02) !important;
 }
-.data-table-container {
-    background: #fff !important;
+.data-table-container, .neo-table-container {
+    background: #ffffff !important;
+    border: 1px solid rgba(34, 61, 143, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+}
+.neo-table td {
+    color: var(--text-main) !important;
+    border-bottom: 1px solid rgba(34, 61, 143, 0.05) !important;
+}
+
+.action-btn {
+    background: rgba(34, 61, 143, 0.05) !important;
+    border: 1px solid rgba(34, 61, 143, 0.1) !important;
+    color: var(--text-main) !important;
+}
+.action-btn:hover {
+    background: rgba(34, 61, 143, 0.1) !important;
+    color: var(--primary) !important;
+}
+
+/* Fix Stat Card inline text */
+.stat-card > div[style*="font-size: 0.8rem"] {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
 }
 .pagination-btn {
     background: rgba(34, 61, 143, 0.05) !important;
@@ -235,3 +259,8 @@ button[onclick="resetLoginStep()"] {
     border-radius: 50% !important;
     filter: blur(40px) !important;
 }
+
+/* Badge Light Theme Overrides */
+.badge-active { color: #059669 !important; border-color: rgba(5, 150, 105, 0.3) !important; background: rgba(5, 150, 105, 0.1) !important; }
+.badge-expired { color: #dc2626 !important; border-color: rgba(220, 38, 38, 0.3) !important; background: rgba(220, 38, 38, 0.1) !important; }
+.badge-pending { color: #d97706 !important; border-color: rgba(217, 119, 6, 0.3) !important; background: rgba(217, 119, 6, 0.1) !important; }
