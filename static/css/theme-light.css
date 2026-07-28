@@ -1,0 +1,237 @@
+/* LIGHT THEME OVERRIDES FOR LOGIN & DASHBOARD (Matches Landing Page) */
+:root {
+    --primary: #223d8f;
+    --primary-neon: #3b82f6;
+    --secondary: #f39223;
+    --secondary-neon: #f9b25a;
+    --bg-dark: #f8fafc;
+    --bg-panel: rgba(255, 255, 255, 0.9);
+    --bg-card: rgba(255, 255, 255, 1);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --glass-border: rgba(34, 61, 143, 0.1);
+    --glass-shine: rgba(255, 255, 255, 0.5);
+    
+    /* Login specific */
+    --ysm-gold: #f39223;
+    --ysm-gold-glow: rgba(243, 146, 35, 0.4);
+    --ysm-royal-blue: #223d8f;
+    --ysm-deep: #f8fafc;
+    --ysm-glass: rgba(255, 255, 255, 0.85);
+    --ysm-border: rgba(34, 61, 143, 0.12);
+    --ysm-text: #1e293b;
+    --ysm-text-muted: #64748b;
+}
+
+body, html {
+    background-color: var(--bg-dark) !important;
+    color: var(--text-main) !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+
+/* Dashboard specific overrides */
+.sidebar, .dash-sidebar, .top-header, .dash-header {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(34, 61, 143, 0.1) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+.sidebar::before, .dash-sidebar::before {
+    display: none !important;
+}
+
+.module-card, .stat-card, .profile-card, .kpi-card, .data-table-container, .chart-card, .analytics-section, .quick-stats, .stat-item {
+    background: #ffffff !important;
+    border: 1px solid rgba(34, 61, 143, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+    color: var(--text-main) !important;
+}
+
+.card-value, .kpi-value, .stat-value, .module-stat-value, h1, h2, h3, h4, .sidebar-title, .dash-brand {
+    color: var(--primary) !important;
+    text-shadow: none !important;
+}
+
+.sidebar-subtitle {
+    color: var(--secondary) !important;
+}
+
+.nav-link, .dash-item, .nav-text, .card-title, .kpi-label, .data-table th, .data-table td, .module-title, .module-description, .stat-label {
+    color: var(--text-main) !important;
+}
+
+.nav-category {
+    color: var(--primary) !important;
+    border-left: 3px solid var(--secondary) !important;
+    background: rgba(243, 146, 35, 0.05) !important;
+}
+
+.nav-category::after {
+    background: linear-gradient(90deg, rgba(243, 146, 35, 0.4), transparent) !important;
+}
+
+.nav-link:hover, .dash-item:hover {
+    background: rgba(34, 61, 143, 0.05) !important;
+    color: var(--primary) !important;
+    border-color: transparent !important;
+}
+
+.nav-link.active, .dash-item.active {
+    background: rgba(34, 61, 143, 0.08) !important;
+    border-left: 4px solid var(--secondary) !important;
+    color: var(--primary) !important;
+    box-shadow: inset 4px 0 0 var(--secondary) !important;
+}
+
+.nav-link.active .nav-text, .dash-item.active .nav-text {
+    color: var(--primary) !important;
+}
+
+.nav-link.active .nav-icon, .dash-item.active .nav-icon {
+    filter: none !important;
+    color: var(--secondary) !important;
+}
+
+.dashboard-bg {
+    background: var(--bg-dark) !important;
+}
+
+.dashboard-bg::before, .dashboard-bg::after {
+    opacity: 0.05 !important;
+    filter: blur(150px) !important;
+}
+
+.form-input, .premium-input, input, select, textarea {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(34, 61, 143, 0.2) !important;
+    color: var(--text-main) !important;
+}
+
+.form-input:focus, .premium-input:focus, input:focus, select:focus, textarea:focus {
+    background: #ffffff !important;
+    border-color: var(--secondary) !important;
+    box-shadow: 0 0 10px rgba(243, 146, 35, 0.2) !important;
+}
+
+.btn-primary, .btn-main {
+    background: var(--secondary) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(243, 146, 35, 0.3) !important;
+    border: none !important;
+}
+
+.btn-secondary {
+    background: rgba(34, 61, 143, 0.05) !important;
+    color: var(--primary) !important;
+    border: 1px solid rgba(34, 61, 143, 0.2) !important;
+}
+
+.module-icon, .stat-icon, .chart-icon {
+    background: rgba(243, 146, 35, 0.1) !important;
+    color: var(--secondary) !important;
+}
+
+/* Scrollbar Light Theme */
+::-webkit-scrollbar-thumb {
+    background: rgba(34, 61, 143, 0.2) !important;
+    border: none !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 61, 143, 0.4) !important;
+}
+
+/* Table Light Theme */
+.data-table th {
+    background: rgba(34, 61, 143, 0.05) !important;
+    color: var(--primary) !important;
+}
+.data-table tr:hover {
+    background: rgba(34, 61, 143, 0.02) !important;
+}
+.data-table-container {
+    background: #fff !important;
+}
+.pagination-btn {
+    background: rgba(34, 61, 143, 0.05) !important;
+    color: var(--primary) !important;
+    border-color: rgba(34, 61, 143, 0.1) !important;
+}
+
+/* Modal Light Theme */
+.modal-content, .premium-modal-content {
+    background: #ffffff !important;
+    border: 1px solid rgba(34, 61, 143, 0.1) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1) !important;
+}
+.modal-header, .premium-modal-header {
+    background: rgba(34, 61, 143, 0.02) !important;
+    border-bottom: 1px solid rgba(34, 61, 143, 0.1) !important;
+    color: var(--primary) !important;
+}
+.modal-header h2, .premium-modal-header h2 {
+    color: var(--primary) !important;
+}
+
+/* Login specific overrides */
+.portal-inner {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(34, 61, 143, 0.1) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1) !important;
+}
+.brand-ysm {
+    background: var(--primary) !important;
+    -webkit-background-clip: text !important;
+    color: transparent !important;
+    filter: none !important;
+}
+.brand-advance {
+    color: var(--secondary) !important;
+    text-shadow: none !important;
+}
+.elite-input-group input {
+    background: rgba(34, 61, 143, 0.05) !important;
+    border-color: rgba(34, 61, 143, 0.1) !important;
+    color: var(--text-main) !important;
+}
+.elite-input-group label, .elite-input-group .icon, .pass-view-toggle, .portal-check, .recover-action, .credit-line {
+    color: var(--text-muted) !important;
+}
+.elite-input-group input:focus+label, .elite-input-group input:not(:placeholder-shown)+label {
+    background: #ffffff !important;
+    color: var(--secondary) !important;
+}
+.btn-elite-glow {
+    background: var(--secondary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 25px rgba(243, 146, 35, 0.3) !important;
+    text-shadow: none !important;
+}
+.overlay-gradient {
+    background: radial-gradient(circle at center, transparent 0%, rgba(255, 255, 255, 0.8) 100%) !important;
+}
+.kinetic-logo {
+    color: var(--primary) !important;
+    text-shadow: none !important;
+}
+.kinetic-status {
+    color: var(--secondary) !important;
+}
+.hero-visual-layer {
+    filter: brightness(0.9) saturate(1.1) !important;
+}
+
+/* Fixes for inline styles in login.html */
+#userGreeting {
+    color: var(--primary) !important;
+}
+button[onclick="resetLoginStep()"] {
+    color: var(--text-muted) !important;
+}
+.credit-line .yash {
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
+}
+.float-shape {
+    border-radius: 50% !important;
+    filter: blur(40px) !important;
+}

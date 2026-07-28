@@ -8,14 +8,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Sora:wght@300;400;600&family=Orbitron:wght@700;900&display=swap');
 
 :root {
-  --ysm-gold: #e2b036;
-  --ysm-gold-glow: rgba(226, 176, 54, 0.4);
-  --ysm-royal-blue: #0ea5e9;
-  --ysm-deep: #020617;
-  --ysm-glass: rgba(15, 23, 42, 0.65);
-  --ysm-border: rgba(255, 255, 255, 0.12);
-  --ysm-text: #f8fafc;
-  --ysm-text-muted: #94a3b8;
+  --ysm-gold: #f39223;
+  --ysm-gold-glow: rgba(243, 146, 35, 0.4);
+  --ysm-royal-blue: #223d8f;
+  --ysm-deep: #f8fafc;
+  --ysm-glass: rgba(255, 255, 255, 0.85);
+  --ysm-border: rgba(34, 61, 143, 0.12);
+  --ysm-text: #1e293b;
+  --ysm-text-muted: #64748b;
 }
 
 * {
@@ -26,7 +26,7 @@
 }
 
 body.ysm-advance-theme {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Poppins', sans-serif;
   background: var(--ysm-deep);
   min-height: 100vh;
   display: flex;
@@ -65,7 +65,7 @@ body.ysm-advance-theme {
   position: fixed;
   inset: 0;
   z-index: -9;
-  background: radial-gradient(circle at center, transparent 0%, rgba(2, 6, 23, 0.8) 100%);
+  background: radial-gradient(circle at center, transparent 0%, rgba(255, 255, 255, 0.7) 100%);
 }
 
 /* --- AMBIENCE --- */
@@ -112,8 +112,8 @@ body.ysm-advance-theme {
   border-radius: 40px;
   padding: 2px;
   /* For the gradient border */
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05) 50%, rgba(226, 176, 54, 0.3));
-  box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(135deg, rgba(34, 61, 143, 0.2), rgba(34, 61, 143, 0.05) 50%, rgba(243, 146, 35, 0.3));
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.15);
 }
 
 .portal-inner {
@@ -136,7 +136,7 @@ body.ysm-advance-theme {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(34, 61, 143, 0.05) 0%, transparent 100%);
   pointer-events: none;
 }
 
@@ -156,11 +156,11 @@ body.ysm-advance-theme {
   font-weight: 900;
   letter-spacing: -2px;
   line-height: 1;
-  background: linear-gradient(to bottom, #fff 0%, #cbd5e1 100%);
+  background: var(--ysm-royal-blue);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+  filter: drop-shadow(0 0 15px rgba(34, 61, 143, 0.1));
 }
 
 .brand-advance {
@@ -222,21 +222,21 @@ body.ysm-advance-theme {
 
 .elite-input-group input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(34, 61, 143, 0.02);
   border: 1px solid var(--ysm-border);
   border-radius: 18px;
   padding: 18px 20px 18px 54px;
-  color: #fff;
+  color: var(--ysm-text);
   font-size: 1rem;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Poppins', sans-serif;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
 }
 
 .elite-input-group input:focus {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(34, 61, 143, 0.05);
   border-color: var(--ysm-gold);
-  box-shadow: 0 0 25px rgba(226, 176, 54, 0.2);
+  box-shadow: 0 0 25px var(--ysm-gold-glow);
 }
 
 .elite-input-group label {
@@ -257,7 +257,7 @@ body.ysm-advance-theme {
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--ysm-gold);
-  background: #111827;
+  background: var(--ysm-deep);
   /* Dark matching bg */
   padding: 0 10px;
   border-radius: 4px;
@@ -291,31 +291,31 @@ body.ysm-advance-theme {
 }
 
 .pass-view-toggle:hover {
-  color: #fff;
+  color: var(--ysm-royal-blue);
 }
 
 /* --- BUTTON SHIMMER --- */
 .btn-elite-glow {
   width: 100%;
   padding: 20px;
-  background: linear-gradient(135deg, #e2b036 0%, #b48a21 100%);
+  background: var(--ysm-gold);
   border: none;
   border-radius: 18px;
-  color: #000;
-  font-family: 'Outfit', sans-serif;
-  font-weight: 900;
-  font-size: 1rem;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
   letter-spacing: 2px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  box-shadow: 0 20px 40px -10px rgba(226, 176, 54, 0.4);
+  box-shadow: 0 20px 40px -10px var(--ysm-gold-glow);
 }
 
 .btn-elite-glow:hover {
   transform: translateY(-5px);
-  box-shadow: 0 25px 50px -10px rgba(226, 176, 54, 0.6);
+  box-shadow: 0 25px 50px -10px var(--ysm-gold-glow);
 }
 
 .btn-elite-glow:active {
@@ -369,7 +369,7 @@ body.ysm-advance-theme {
   background: none;
   border: none;
   color: var(--ysm-text-muted);
-  font-family: 'Sora', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 600;
   font-size: 0.82rem;
   text-decoration: underline;
@@ -442,7 +442,7 @@ body.ysm-advance-theme {
 #portal-transition {
   position: fixed;
   inset: 0;
-  background: #020617;
+  background: var(--ysm-deep);
   z-index: 999999;
   display: none;
   flex-direction: column;
@@ -451,10 +451,10 @@ body.ysm-advance-theme {
 }
 
 .kinetic-logo {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 5rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--ysm-royal-blue);
   text-shadow: 0 0 50px var(--ysm-gold-glow);
   margin-bottom: 10px;
 }
@@ -487,9 +487,9 @@ body.ysm-advance-theme {
     width: 50px;
     height: 50px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--ysm-gold);
+    border: 1px solid rgba(34, 61, 143, 0.1);
+    background: rgba(34, 61, 143, 0.02);
+    color: var(--ysm-royal-blue);
     font-size: 1.2rem;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -499,10 +499,10 @@ body.ysm-advance-theme {
 }
 
 .bio-btn:hover {
-    background: rgba(226, 176, 54, 0.1);
-    border-color: var(--ysm-gold);
+    background: rgba(34, 61, 143, 0.1);
+    border-color: var(--ysm-royal-blue);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .bio-btn:active {
