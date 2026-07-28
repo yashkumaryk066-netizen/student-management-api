@@ -260,6 +260,23 @@ button[onclick="resetLoginStep()"] {
     filter: blur(40px) !important;
 }
 
+/* Dashboard Headers & Text Fixes */
+.module-header {
+    background: #ffffff !important;
+    border: 1px solid rgba(34, 61, 143, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+.page-title {
+    background: none !important;
+    -webkit-text-fill-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+.page-subtitle {
+    color: var(--text-muted) !important;
+}
+
 /* --- UNIVERSAL LIGHT THEME FIXES FOR INLINE STYLES --- */
 /* Fixes text colors injected via JS across all modules */
 :is(.neo-table, .dashboard-container, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="color: white"], [style*="color:white"], [style*="color: #fff"], [style*="color:#fff"], [style*="color: #ffffff"], [style*="color:#ffffff"], [style*="color: #e2e8f0"], [style*="color:#e2e8f0"], [style*="color: #cbd5e1"], [style*="color:#cbd5e1"], [style*="color: #f8fafc"], [style*="color:#f8fafc"]) {
