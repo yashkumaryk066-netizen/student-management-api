@@ -414,7 +414,7 @@
                 <a href="/login/" class="btn-talk-ai"><i class="fa-solid fa-right-to-bracket"></i> Portal Login</a>
             {% else %}
                 <a href="mailto:yash.kumar@telepathyinfotech.com" class="btn-talk-ai"><i class="fa-solid fa-wand-magic-sparkles"></i> Let's Talk AI</a>
-                <a href="/login/" class="btn-contact-us">Sign In</a>
+                <a href="/login/" class="btn-contact-us">Portal Login</a>
             {% endif %}
             <i class="fa-solid fa-bars mobile-menu-btn" onclick="toggleMobileMenu()"></i>
         </div>
@@ -430,7 +430,7 @@
         {% if user.is_authenticated %}
             <a href="/logout/" style="color: red;" onclick="toggleMobileMenu()">Logout</a>
         {% else %}
-            <a href="/login/" style="color: var(--primary-blue);" onclick="toggleMobileMenu()">Sign In</a>
+            <a href="/login/" style="color: var(--primary-blue);" onclick="toggleMobileMenu()">Portal Login</a>
         {% endif %}
     </div>
 

@@ -1,5 +1,3 @@
-WhatsApp service disabled. Configure TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to enable.
-SMS service disabled. Configure SMS variables in settings to enable.
 [
 {
   "model": "auth.user",
