@@ -509,7 +509,7 @@ const DashboardApp = {
                         <h2 style="font-family:'Orbitron'; font-size:1.1rem; color:#3b82f6; display:flex; align-items:center; gap:8px;">
                             <i class="fas fa-qrcode"></i> SMART GATEKEEPER
                         </h2>
-                        <button onclick="document.getElementById('${modalId}').remove(); if(window.qrScanner) window.qrScanner.stop()" style="background:transparent; border:none; color:#64748b; font-size:1.8rem; cursor:pointer; transition:0.3s;" onmouseenter="this.style.color='#ef4444'" onmouseleave="this.style.color='#64748b'">&times;</button>
+                        <button onclick="document.getElementById('${modalId}').remove(); if(window.qrScanner) { try { const p = window.qrScanner.stop(); if(p && p.catch) p.catch(()=>{}); } catch(e){} }" style="background:transparent; border:none; color:#64748b; font-size:1.8rem; cursor:pointer; transition:0.3s;" onmouseenter="this.style.color='#ef4444'" onmouseleave="this.style.color='#64748b'">&times;</button>
                     </div>
                     <div id="reader" style="width:100%; border-radius:12px; overflow:hidden; background:#1e293b; min-height:300px; position:relative;">
                         <div style="position:absolute; inset:50px; border: 2px dashed rgba(59, 130, 246, 0.4); pointer-events:none; z-index:1;"></div>

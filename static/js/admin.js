@@ -11186,10 +11186,21 @@ DashboardApp.closeScannerModal = function () {
     const modal = document.getElementById('scannerModal');
     if (modal) {
         if (this.currentScanner) {
-            this.currentScanner.stop().catch(() => { }).finally(() => {
+            try {
+                const stopPromise = this.currentScanner.stop();
+                if (stopPromise && typeof stopPromise.catch === 'function') {
+                    stopPromise.catch(() => { }).finally(() => {
+                        modal.remove();
+                        this.currentScanner = null;
+                    });
+                } else {
+                    modal.remove();
+                    this.currentScanner = null;
+                }
+            } catch (e) {
                 modal.remove();
                 this.currentScanner = null;
-            });
+            }
         } else {
             modal.remove();
         }
