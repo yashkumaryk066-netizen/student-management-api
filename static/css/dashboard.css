@@ -4079,3 +4079,40 @@ input:checked+.slider:before {
 .toggle-item:hover {
     background: rgba(255, 255, 255, 0.02);
 }
+
+/* ============================================
+   ULTIMATE LIGHT MODE OVERRIDES (INLINE DEFEATER)
+   Forces all dynamically injected dark-theme styles to conform
+   ============================================ */
+body.light-mode [style*="background"][style*="#1e293b"],
+body.light-mode [style*="background"][style*="#0f172a"],
+body.light-mode [style*="background"][style*="#020617"],
+body.light-mode [style*="background"][style*="rgba(15, 23, 42"],
+body.light-mode [style*="background"][style*="rgba(15,23,42"],
+body.light-mode [style*="background"][style*="rgba(30, 41, 59"],
+body.light-mode [style*="background"][style*="rgba(30,41,59"] {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.95) 100%) !important;
+    color: #0f172a !important;
+    border-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+body.light-mode input[style*="background"][style*="#1e293b"],
+body.light-mode input[style*="background"][style*="#0f172a"],
+body.light-mode input[style*="background"][style*="rgba(15, 23, 42"],
+body.light-mode select[style*="background"][style*="#1e293b"],
+body.light-mode select[style*="background"][style*="#0f172a"],
+body.light-mode select[style*="background"][style*="rgba(15, 23, 42"] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+body.light-mode [style*="color: white"],
+body.light-mode [style*="color:white"],
+body.light-mode [style*="color:#ffffff"],
+body.light-mode [style*="color: #ffffff"] {
+    /* Only override text color if it's explicitly set to white in light mode, except on buttons */
+}
+body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn)[style*="color: white"],
+body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn)[style*="color:white"] {
+    color: #0f172a !important;
+}
