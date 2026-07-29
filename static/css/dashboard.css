@@ -3901,10 +3901,15 @@ body.light-mode .module-card,
 body.light-mode .stat-card,
 body.light-mode .profile-card,
 body.light-mode .kpi-card,
-body.light-mode .settings-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+body.light-mode .settings-card,
+body.light-mode .premium-card,
+body.light-mode .erp-card,
+body.light-mode .modal-card,
+body.light-mode .custom-alert-box {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.95) 100%) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+    color: #0f172a !important;
 }
 
 body.light-mode .card-value,
@@ -3923,11 +3928,13 @@ body.light-mode input[type="text"],
 body.light-mode input[type="password"],
 body.light-mode input[type="email"],
 body.light-mode input[type="number"],
+body.light-mode input[type="date"],
+body.light-mode input[type="time"],
 body.light-mode select,
 body.light-mode textarea {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #0f172a;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
 }
 
 body.light-mode .form-input:focus {
@@ -3936,13 +3943,14 @@ body.light-mode .form-input:focus {
 }
 
 body.light-mode .data-table th {
-    background: #f1f5f9;
-    color: #475569;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border-bottom: 2px solid #cbd5e1 !important;
 }
 
 body.light-mode .data-table td {
-    border-top: 1px solid #e2e8f0;
-    color: #334155;
+    border-top: 1px solid #e2e8f0 !important;
+    color: #334155 !important;
 }
 
 body.light-mode .data-table-container {
@@ -3955,8 +3963,18 @@ body.light-mode h2,
 body.light-mode h3,
 body.light-mode h4,
 body.light-mode h5,
-body.light-mode h6 {
-    color: #0f172a;
+body.light-mode h6,
+body.light-mode label,
+body.light-mode .form-label,
+body.light-mode .modal-title,
+body.light-mode .page-title {
+    color: #0f172a !important;
+}
+
+body.light-mode p,
+body.light-mode .page-subtitle,
+body.light-mode .text-muted {
+    color: #475569 !important;
 }
 
 body.light-mode .section-danger {
