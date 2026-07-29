@@ -22,12 +22,12 @@
 
     <preference name="DisallowOverscroll" value="true" />
     <preference name="Orientation" value="portrait" />
-    <preference name="BackgroundColor" value="0xff0f172a" /> <!-- Matching our Dashboard Dark Mode -->
+
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="FadeSplashScreenDuration" value="300" />
     
     <platform name="android">
-        <resource-file src="../../static/img/icon-512.png" target="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" />
+
         <icon src="../../static/img/icon-512.png" />
         <preference name="AndroidPersistentFileLocation" value="Internal" />
     </platform>
