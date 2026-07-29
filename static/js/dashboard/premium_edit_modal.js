@@ -80,7 +80,6 @@ if (typeof DashboardApp !== 'undefined') {
             padding: 20px;
         ">
             <div class="modal-card" onclick="event.stopPropagation()" style="
-                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
                 border: 2px solid rgba(99, 102, 241, 0.5); 
                 box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 0 100px rgba(99, 102, 241, 0.2); 
                 max-width: 700px; 
@@ -100,7 +99,6 @@ if (typeof DashboardApp !== 'undefined') {
                         <div>
                             <h2 style="
                                 margin: 0; 
-                                color: white; 
                                 font-size: 2rem; 
                                 font-weight: 800;
                                 display: flex; 
@@ -113,7 +111,6 @@ if (typeof DashboardApp !== 'undefined') {
                             </h2>
                             <p style="
                                 margin: 10px 0 0 50px; 
-                                color: #94a3b8; 
                                 font-size: 1rem;
                             ">Update student information below</p>
                         </div>
@@ -143,7 +140,6 @@ if (typeof DashboardApp !== 'undefined') {
                     <div class="form-group" style="margin-bottom: 26px;">
                         <label style="
                             display: block; 
-                            color: #e2e8f0; 
                             font-weight: 700; 
                             margin-bottom: 12px; 
                             font-size: 1rem;
@@ -152,10 +148,8 @@ if (typeof DashboardApp !== 'undefined') {
                         <select name="institution_type" id="premiumEditInstitutionType" class="form-input premium-select" required onchange="DashboardApp.toggleStudentFields && DashboardApp.toggleStudentFields(this.value)" style="
                             width: 100%; 
                             padding: 16px 18px; 
-                            background: rgba(15, 23, 42, 0.8); 
                             border: 2px solid rgba(99, 102, 241, 0.35); 
                             border-radius: 12px; 
-                            color: white; 
                             font-size: 1.05rem;
                             transition: all 0.2s ease;
                             font-weight: 500;
@@ -169,7 +163,6 @@ if (typeof DashboardApp !== 'undefined') {
                     <div class="form-group" style="margin-bottom: 26px;">
                         <label style="
                             display: block; 
-                            color: #e2e8f0; 
                             font-weight: 700; 
                             margin-bottom: 12px; 
                             font-size: 1rem;
@@ -178,10 +171,8 @@ if (typeof DashboardApp !== 'undefined') {
                         <input type="text" name="name" class="form-input premium-input" required value="${sanitizedStudent.name}" style="
                             width: 100%; 
                             padding: 16px 18px; 
-                            background: rgba(15, 23, 42, 0.8); 
                             border: 2px solid rgba(99, 102, 241, 0.35); 
                             border-radius: 12px; 
-                            color: white; 
                             font-size: 1.05rem;
                             transition: all 0.2s ease;
                             font-weight: 500;
@@ -202,10 +193,8 @@ if (typeof DashboardApp !== 'undefined') {
                             <input type="number" name="age" class="form-input premium-input" required value="${sanitizedStudent.age}" min="1" max="100" style="
                                 width: 100%; 
                                 padding: 16px 18px; 
-                                background: rgba(15, 23, 42, 0.8); 
                                 border: 2px solid rgba(99, 102, 241, 0.35); 
                                 border-radius: 12px; 
-                                color: white; 
                                 font-size: 1.05rem;
                                 transition: all 0.2s ease;
                                 font-weight: 500;
@@ -214,7 +203,6 @@ if (typeof DashboardApp !== 'undefined') {
                         <div class="form-group" style="flex: 1;">
                             <label style="
                                 display: block; 
-                                color: #e2e8f0; 
                                 font-weight: 700; 
                                 margin-bottom: 12px; 
                                 font-size: 1rem;
@@ -223,10 +211,8 @@ if (typeof DashboardApp !== 'undefined') {
                             <input type="date" name="dob" class="form-input premium-input" required value="${sanitizedStudent.dob}" style="
                                 width: 100%; 
                                 padding: 16px 18px; 
-                                background: rgba(15, 23, 42, 0.8); 
                                 border: 2px solid rgba(99, 102, 241, 0.35); 
                                 border-radius: 12px; 
-                                color: white; 
                                 font-size: 1.05rem;
                                 transition: all 0.2s ease;
                                 font-weight: 500;
@@ -239,7 +225,6 @@ if (typeof DashboardApp !== 'undefined') {
                         <div class="form-group" style="flex: 1;">
                             <label style="
                                 display: block; 
-                                color: #e2e8f0; 
                                 font-weight: 700; 
                                 margin-bottom: 12px; 
                                 font-size: 1rem;
@@ -248,10 +233,8 @@ if (typeof DashboardApp !== 'undefined') {
                             <input type="number" name="grade" class="form-input premium-input" required value="${sanitizedStudent.grade}" min="0" max="12" style="
                                 width: 100%; 
                                 padding: 16px 18px; 
-                                background: rgba(15, 23, 42, 0.8); 
                                 border: 2px solid rgba(99, 102, 241, 0.35); 
                                 border-radius: 12px; 
-                                color: white; 
                                 font-size: 1.05rem;
                                 transition: all 0.2s ease;
                                 font-weight: 500;
@@ -260,7 +243,6 @@ if (typeof DashboardApp !== 'undefined') {
                         <div class="form-group" style="flex: 1;">
                             <label style="
                                 display: block; 
-                                color: #e2e8f0; 
                                 font-weight: 700; 
                                 margin-bottom: 12px; 
                                 font-size: 1rem;
@@ -269,10 +251,8 @@ if (typeof DashboardApp !== 'undefined') {
                             <select name="gender" class="form-input premium-select" required style="
                                 width: 100%; 
                                 padding: 16px 18px; 
-                                background: rgba(15, 23, 42, 0.8); 
                                 border: 2px solid rgba(99, 102, 241, 0.35); 
                                 border-radius: 12px; 
-                                color: white; 
                                 font-size: 1.05rem;
                                 transition: all 0.2s ease;
                                 font-weight: 500;
@@ -286,7 +266,6 @@ if (typeof DashboardApp !== 'undefined') {
                     <div class="form-group" style="margin-bottom: 26px;">
                         <label style="
                             display: block; 
-                            color: #e2e8f0; 
                             font-weight: 700; 
                             margin-bottom: 12px; 
                             font-size: 1rem;
@@ -295,10 +274,8 @@ if (typeof DashboardApp !== 'undefined') {
                         <input type="text" name="relation" class="form-input premium-input" required value="${sanitizedStudent.relation}" style="
                             width: 100%; 
                             padding: 16px 18px; 
-                            background: rgba(15, 23, 42, 0.8); 
                             border: 2px solid rgba(99, 102, 241, 0.35); 
                             border-radius: 12px; 
-                            color: white; 
                             font-size: 1.05rem;
                             transition: all 0.2s ease;
                             font-weight: 500;
@@ -309,7 +286,6 @@ if (typeof DashboardApp !== 'undefined') {
                     <div class="form-group" style="margin-bottom: 36px;">
                         <label style="
                             display: block; 
-                            color: #e2e8f0; 
                             font-weight: 700; 
                             margin-bottom: 12px; 
                             font-size: 1rem;
@@ -321,10 +297,9 @@ if (typeof DashboardApp !== 'undefined') {
                             text-align: center; 
                             border-radius: 16px; 
                             position: relative; 
-                            background: rgba(15, 23, 42, 0.5); 
                             transition: all 0.3s ease; 
                             cursor: pointer;
-                        " onmouseover="this.style.borderColor='rgba(99, 102, 241, 0.8)'; this.style.background='rgba(99, 102, 241, 0.12)'" onmouseout="this.style.borderColor='rgba(99, 102, 241, 0.45)'; this.style.background='rgba(15, 23, 42, 0.5)'">
+                        " onmouseover="this.style.borderColor='rgba(99, 102, 241, 0.8)'; " onmouseout="this.style.borderColor='rgba(99, 102, 241, 0.45)'; ">
                             <input type="file" name="photo" class="form-input" accept="image/*" style="
                                 opacity: 0; 
                                 position: absolute; 
