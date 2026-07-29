@@ -2,7 +2,7 @@
 <widget id="com.sovereign.academic.erp" version="2.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Sovereign ERP</name>
     <description>
-        Sovereign Academic & Institutional ERP - Enterprise Mobile Edition.
+        Sovereign Academic &amp; Institutional ERP - Enterprise Mobile Edition.
     </description>
     <author email="admin@sovereign-erp.com" href="https://sovereign-erp.com">
         Sovereign Tech Solutions
