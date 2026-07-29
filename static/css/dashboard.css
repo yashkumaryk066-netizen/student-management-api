@@ -4109,10 +4109,23 @@ body.light-mode select[style*="background"][style*="rgba(15, 23, 42"] {
 body.light-mode [style*="color: white"],
 body.light-mode [style*="color:white"],
 body.light-mode [style*="color:#ffffff"],
-body.light-mode [style*="color: #ffffff"] {
+body.light-mode [style*="color: #ffffff"],
+body.light-mode [style*="color: #fff"],
+body.light-mode [style*="color:#fff"] {
     /* Only override text color if it's explicitly set to white in light mode, except on buttons */
 }
-body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn)[style*="color: white"],
-body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn)[style*="color:white"] {
+body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn):not(.badge)[style*="color: white"],
+body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn):not(.badge)[style*="color:white"],
+body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn):not(.badge)[style*="color: #fff"],
+body.light-mode *:not(button):not(.btn):not(.btn-primary):not(.magnetic-btn):not(.badge)[style*="color:#fff"] {
     color: #0f172a !important;
+}
+
+body.light-mode button[style*="background: rgba(255,255,255"],
+body.light-mode button[style*="background:rgba(255,255,255"],
+body.light-mode .btn-secondary[style*="color: #fff"],
+body.light-mode .btn-secondary[style*="color:#fff"] {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
 }
