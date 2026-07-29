@@ -308,3 +308,15 @@ button[onclick="resetLoginStep()"] {
 .badge-active { color: #059669 !important; border-color: rgba(5, 150, 105, 0.3) !important; background: rgba(5, 150, 105, 0.1) !important; }
 .badge-expired { color: #dc2626 !important; border-color: rgba(220, 38, 38, 0.3) !important; background: rgba(220, 38, 38, 0.1) !important; }
 .badge-pending { color: #d97706 !important; border-color: rgba(217, 119, 6, 0.3) !important; background: rgba(217, 119, 6, 0.1) !important; }
+
+/* Report Generator Modal Light Theme Overrides */
+.report-btn:not([style*="background: linear-gradient"]) {
+    background: rgba(34, 61, 143, 0.05) !important;
+    border: 1px solid rgba(34, 61, 143, 0.1) !important;
+    color: var(--text-main) !important;
+}
+.report-btn:not([style*="background: linear-gradient"]):hover {
+    background: rgba(34, 61, 143, 0.1) !important;
+    border-color: var(--secondary) !important;
+    color: var(--primary) !important;
+}
