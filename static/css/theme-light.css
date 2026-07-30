@@ -279,18 +279,40 @@ button[onclick="resetLoginStep()"] {
 
 /* --- UNIVERSAL LIGHT THEME FIXES FOR INLINE STYLES --- */
 /* Fixes text colors injected via JS across all modules */
-:is(.neo-table, .dashboard-container, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table, .settings-card, .stat-mini-card, .add-student-modal-card, .modal-card, .custom-alert-box) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="color: white"], [style*="color:white"], [style*="color: #fff"], [style*="color:#fff"], [style*="color: #ffffff"], [style*="color:#ffffff"], [style*="color: #e2e8f0"], [style*="color:#e2e8f0"], [style*="color: #cbd5e1"], [style*="color:#cbd5e1"], [style*="color: #f8fafc"], [style*="color:#f8fafc"]) {
+:is(.neo-table, .dashboard-container, .dashboard-content, .top-header, .sidebar, #searchResults, .notif-dropdown, .profile-dropdown, #aiIntelligenceRadar, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table, .settings-card, .stat-mini-card, .add-student-modal-card, .modal-card, .custom-alert-box) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="color: white"], [style*="color:white"], [style*="color: #fff"], [style*="color:#fff"], [style*="color: #ffffff"], [style*="color:#ffffff"], [style*="color: #e2e8f0"], [style*="color:#e2e8f0"], [style*="color: #cbd5e1"], [style*="color:#cbd5e1"], [style*="color: #f8fafc"], [style*="color:#f8fafc"]) {
     color: var(--text-main) !important;
 }
 
-:is(.neo-table, .dashboard-container, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table, .settings-card, .stat-mini-card, .add-student-modal-card, .modal-card, .custom-alert-box) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="color: #94a3b8"], [style*="color:#94a3b8"]) {
+:is(.neo-table, .dashboard-container, .dashboard-content, .top-header, .sidebar, #searchResults, .notif-dropdown, .profile-dropdown, #aiIntelligenceRadar, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table, .settings-card, .stat-mini-card, .add-student-modal-card, .modal-card, .custom-alert-box) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="color: #94a3b8"], [style*="color:#94a3b8"]) {
     color: var(--text-muted) !important;
 }
 
-/* Fixes transparent white backgrounds injected via JS */
-:is(.neo-table, .dashboard-container, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table, .settings-card, .stat-mini-card, .add-student-modal-card, .modal-card, .custom-alert-box) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="background: rgba(255,255,255,0.05)"], [style*="background:rgba(255,255,255,0.05)"], [style*="background: rgba(255, 255, 255, 0.05)"], [style*="background: rgba(255,255,255,0.1)"], [style*="background:rgba(255,255,255,0.1)"], [style*="background: rgba(255, 255, 255, 0.1)"]) {
+/* Fixes transparent white and hardcoded dark backgrounds injected via JS */
+:is(.neo-table, .dashboard-container, .dashboard-content, .top-header, .sidebar, #searchResults, .notif-dropdown, .profile-dropdown, #aiIntelligenceRadar, .premium-modal-content, .modal-content, .module-card, .stat-card, .data-table, .settings-card, .stat-mini-card, .add-student-modal-card, .modal-card, .custom-alert-box) :is(*:not(button):not([class*="badge"]):not(.magnetic-btn):not(.btn-primary):not(.btn-secondary)):is([style*="background: rgba(255,255,255,0.05)"], [style*="background:rgba(255,255,255,0.05)"], [style*="background: rgba(255, 255, 255, 0.05)"], [style*="background: rgba(255,255,255,0.1)"], [style*="background:rgba(255,255,255,0.1)"], [style*="background: rgba(255, 255, 255, 0.1)"]) {
     background: rgba(34, 61, 143, 0.05) !important;
     border-color: rgba(34, 61, 143, 0.1) !important;
+}
+
+/* Brutal overrides for hardcoded dark inline components in the HTML */
+#searchResults,
+.notif-dropdown,
+#notifDropdown,
+.profile-dropdown,
+#profileDropdown,
+#aiIntelligenceRadar,
+[style*="rgba(30, 41, 59"],
+[style*="rgba(15, 23, 42"],
+[style*="rgba(2, 4, 10"] {
+    background: #ffffff !important;
+    background-image: none !important;
+    border-color: rgba(34, 61, 143, 0.1) !important;
+    color: var(--text-main) !important;
+}
+
+#aiIntelligenceRadar button {
+    background: rgba(34, 61, 143, 0.05) !important;
+    color: var(--primary) !important;
+    border: 1px solid rgba(34, 61, 143, 0.2) !important;
 }
 
 /* Glass buttons and Alert buttons fix */
